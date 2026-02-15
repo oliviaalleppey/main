@@ -25,7 +25,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
                 // @ts-ignore
                 session.user.role = dbUser?.role || 'user';
-                console.log("Auth Debug - Role set to:", session.user.role);
             }
             return session;
         }
