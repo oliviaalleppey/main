@@ -1,6 +1,6 @@
 import { db } from '../db';
-import { roomInventory, roomTypes, bookingItems } from '../db/schema';
-import { and, eq, gte, lte, sql } from 'drizzle-orm';
+import { roomInventory, roomTypes, bookingItems, rooms, bookings } from '../db/schema';
+import { and, eq, gte, lte, sql, inArray, lt, gt } from 'drizzle-orm';
 
 /**
  * Check room availability for a date range
@@ -26,10 +26,10 @@ export async function checkAvailability(
                 id: roomTypes.id,
                 name: roomTypes.name,
                 basePrice: roomTypes.basePrice,
-                totalRooms: sql<number>`count(distinct ${sql.identifier('rooms', 'id')})`,
+                totalRooms: sql<number>`count(distinct ${rooms.id})`,
             })
             .from(roomTypes)
-            .leftJoin(sql`rooms`, eq(sql.identifier('rooms', 'room_type_id'), roomTypes.id))
+            .leftJoin(rooms, eq(rooms.roomTypeId, roomTypes.id))
             .where(and(
                 roomTypeFilter,
                 eq(roomTypes.status, 'active')
@@ -45,12 +45,12 @@ export async function checkAvailability(
                         count: sql<number>`count(distinct ${bookingItems.roomTypeId})`,
                     })
                     .from(bookingItems)
-                    .innerJoin(sql`bookings`, eq(sql.identifier('bookings', 'id'), bookingItems.bookingId))
+                    .innerJoin(bookings, eq(bookings.id, bookingItems.bookingId))
                     .where(and(
                         eq(bookingItems.roomTypeId, type.id),
-                        sql`${sql.identifier('bookings', 'status')} IN ('confirmed', 'pending')`,
-                        sql`${sql.identifier('bookings', 'check_in')} < ${checkOutStr}`,
-                        sql`${sql.identifier('bookings', 'check_out')} > ${checkInStr}`
+                        inArray(bookings.status, ['confirmed', 'pending']),
+                        lt(bookings.checkIn, checkOutStr),
+                        gt(bookings.checkOut, checkInStr)
                     ));
 
                 const booked = Number(bookedRooms[0]?.count || 0);
