@@ -1,0 +1,1 @@
+ALTER TABLE "room_types" ADD COLUMN "min_occupancy" integer DEFAULT 1 NOT NULL;

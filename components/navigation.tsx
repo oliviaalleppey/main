@@ -23,12 +23,17 @@ export default function Navigation() {
 
     useEffect(() => {
         const handleScroll = () => {
-            setIsScrolled(window.scrollY > 50);
+            const scrollY = window.scrollY;
+            if (scrollY > 50 && !isScrolled) {
+                setIsScrolled(true);
+            } else if (scrollY < 40 && isScrolled) {
+                setIsScrolled(false);
+            }
         };
 
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
+    }, [isScrolled]);
 
     return (
         <nav
@@ -38,10 +43,14 @@ export default function Navigation() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-20">
                     {/* Logo */}
-                    <Link href="/" className="flex items-center">
-                        <span className={`font-serif text-2xl font-bold transition-luxury ${isScrolled ? 'text-teal-deep' : 'text-white'
+                    <Link href="/" className="flex flex-col items-start select-none">
+                        <span className={`font-sans text-xl font-bold tracking-[0.3em] uppercase leading-none transition-luxury ${isScrolled ? 'text-teal-deep' : 'text-white'
                             }`}>
-                            Olivia International
+                            Olivia
+                        </span>
+                        <span className={`font-sans text-[0.6rem] font-bold tracking-[0.35em] uppercase leading-none transition-luxury ml-[2px] mt-1 ${isScrolled ? 'text-teal-deep' : 'text-white'
+                            }`}>
+                            Alleppey
                         </span>
                     </Link>
 
@@ -52,12 +61,12 @@ export default function Navigation() {
                                 key={item.name}
                                 href={item.href}
                                 className={`text-sm font-medium transition-luxury ${pathname === item.href
-                                        ? isScrolled
-                                            ? 'text-teal-deep'
-                                            : 'text-white'
-                                        : isScrolled
-                                            ? 'text-charcoal/70 hover:text-teal-deep'
-                                            : 'text-white/80 hover:text-white'
+                                    ? isScrolled
+                                        ? 'text-teal-deep'
+                                        : 'text-white'
+                                    : isScrolled
+                                        ? 'text-charcoal/70 hover:text-teal-deep'
+                                        : 'text-white/80 hover:text-white'
                                     }`}
                             >
                                 {item.name}
@@ -113,8 +122,8 @@ export default function Navigation() {
                                 href={item.href}
                                 onClick={() => setIsMobileMenuOpen(false)}
                                 className={`block py-2 text-sm font-medium transition-luxury ${pathname === item.href
-                                        ? 'text-teal-deep'
-                                        : 'text-charcoal/70 hover:text-teal-deep'
+                                    ? 'text-teal-deep'
+                                    : 'text-charcoal/70 hover:text-teal-deep'
                                     }`}
                             >
                                 {item.name}

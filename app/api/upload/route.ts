@@ -16,28 +16,14 @@ export async function POST(request: Request): Promise<NextResponse> {
 
                 return {
                     allowedContentTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+                    addRandomSuffix: true,
                     tokenPayload: JSON.stringify({
                         // optional, sent to your server on upload completion
                         // you could pass a user id from auth, or a value from clientPayload
                     }),
                 };
             },
-            onUploadCompleted: async ({ blob, tokenPayload }) => {
-                // Get notified of client upload completion
-                // ⚠️ This will not work on `localhost` websites,
-                // Use ngrok or similar to get the full upload flow
-
-                console.log('blob upload completed', blob, tokenPayload);
-
-                try {
-                    // Run any logic after the file upload completed
-                    // const { userId } = JSON.parse(tokenPayload);
-                    // await db.update({ avatar: blob.url, userId });
-                } catch (error) {
-                    throw new Error('Could not update user');
-                }
-            },
-        });
+        }); // Close handleUpload call
 
         return NextResponse.json(jsonResponse);
     } catch (error) {

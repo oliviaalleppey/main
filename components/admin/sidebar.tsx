@@ -2,16 +2,32 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Image as ImageIcon, Calendar, Settings, LogOut } from 'lucide-react';
+import {
+    LayoutDashboard,
+    Calendar,
+    Settings,
+    LogOut,
+    BedDouble,
+    Clock,
+} from 'lucide-react';
 
 const NAV_ITEMS = [
     { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/admin/bookings', label: 'Bookings', icon: Calendar },
-    { href: '/admin/media', label: 'Media Library', icon: ImageIcon },
+    { href: '/admin/availability', label: 'Availability', icon: Clock },
+    // { href: '/admin/pricing', label: 'Pricing Rules', icon: DollarSign }, // Managed by AxisRooms
+    { href: '/admin/rooms/types', label: 'Room Types', icon: BedDouble },
+    // { href: '/admin/rooms/rate-plans', label: 'Rate Plans', icon: DollarSign }, // Managed by AxisRooms
+    // { href: '/admin/rooms/inventory', label: 'Room Inventory', icon: ImageIcon }, // Managed by AxisRooms
     { href: '/admin/settings', label: 'Site Appearance', icon: Settings },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+    pendingConfirmations?: number;
+    atRiskConfirmations?: number;
+}
+
+export function Sidebar({ pendingConfirmations = 0, atRiskConfirmations = 0 }: SidebarProps) {
     const pathname = usePathname();
 
     return (
@@ -28,12 +44,21 @@ export function Sidebar() {
                             key={item.href}
                             href={item.href}
                             className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${isActive
-                                    ? 'bg-gray-100 text-gray-900'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                ? 'bg-gray-100 text-gray-900'
+                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                                 }`}
                         >
                             <Icon className="h-5 w-5" />
-                            {item.label}
+                            <span className="flex-1">{item.label}</span>
+                            {item.href === '/admin/bookings' && pendingConfirmations > 0 && (
+                                <span
+                                    className={`min-w-6 rounded-full px-2 py-0.5 text-[11px] font-semibold text-white text-center ${
+                                        atRiskConfirmations > 0 ? 'bg-amber-600' : 'bg-blue-600'
+                                    }`}
+                                >
+                                    {pendingConfirmations}
+                                </span>
+                            )}
                         </Link>
                     );
                 })}

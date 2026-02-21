@@ -1,20 +1,19 @@
 'use client';
 
-import RosewoodHeader from '@/components/layout/rosewood-header';
 import HeroSection from '@/components/home/hero-section';
 import CompactIntro from '@/components/home/compact-intro';
-// import CompactFeatures from '@/components/home/compact-features'; // Removed in favor of detailed sections
 import AmenitiesGallery from '@/components/home/amenities-gallery';
 import RoomShowcase from '@/components/home/room-showcase';
 import DiningHighlight from '@/components/home/dining-highlight';
 import PhotoCarousel from '@/components/home/photo-carousel';
-import RosewoodFooter from '@/components/layout/rosewood-footer';
+import ExperiencesStrip from '@/components/home/experiences-strip';
+import BrandMarquee from '@/components/home/brand-marquee';
+import EditorialStory from '@/components/home/editorial-story';
+import Testimonials from '@/components/home/testimonials';
 
 export default function Home() {
   return (
     <main className="min-h-screen bg-[#FBFBF9] font-sans">
-      <RosewoodHeader />
-
       {/* Cinematic Hero with Floating Search */}
       <HeroSection />
 
@@ -24,11 +23,23 @@ export default function Home() {
       {/* Rooms Showcase */}
       <RoomShowcase />
 
+      {/* Kerala Experiences — horizontal scroll cards */}
+      <ExperiencesStrip />
+
       {/* Featured Amenities (Pool, Gym, Spa) */}
       <AmenitiesGallery />
 
+      {/* Brand Stats + Gold Ticker */}
+      <BrandMarquee />
+
       {/* Culinary Excellence */}
       <DiningHighlight />
+
+      {/* Editorial Story */}
+      <EditorialStory />
+
+      {/* Guest Testimonials */}
+      <Testimonials />
 
       {/* Photo Grid (Soho House Style) */}
       <section className="bg-white py-20">
@@ -37,9 +48,7 @@ export default function Home() {
         </div>
         <PhotoCarousel />
       </section>
-
-      {/* Footer */}
-      <RosewoodFooter />
     </main>
   );
 }
+

@@ -1,48 +1,86 @@
 import { signIn, signOut, useSession } from "next-auth/react"
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
+import { useEffect, useRef, useState } from 'react';
 
 export default function RosewoodHeader() {
     const { data: session } = useSession();
-    const [isScrolled, setIsScrolled] = useState(false);
+    const [isTopBarVisible, setIsTopBarVisible] = useState(true);
+    const lastScrollY = useRef(0);
     const googleSignIn = () => signIn("google");
-    // ... existing scroll effect ...
+    const isAdminUser =
+        !!session?.user &&
+        'role' in session.user &&
+        (session.user as { role?: string }).role === 'admin';
+
+    useEffect(() => {
+        let ticking = false;
+
+        const handleScroll = () => {
+            if (ticking) {
+                return;
+            }
+
+            ticking = true;
+            window.requestAnimationFrame(() => {
+                const currentScrollY = window.scrollY;
+                const delta = currentScrollY - lastScrollY.current;
+
+                if (currentScrollY <= 12) {
+                    setIsTopBarVisible(true);
+                } else if (delta > 8) {
+                    setIsTopBarVisible(false);
+                } else if (delta < -8) {
+                    setIsTopBarVisible(true);
+                }
+
+                lastScrollY.current = currentScrollY;
+                ticking = false;
+            });
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     return (
-        <header className="fixed top-0 left-0 right-0 z-50 bg-[#FBFBF9] shadow-sm transition-all duration-300">
-            {/* Top Bar - Minimalist with underlined links - Hides on Scroll */}
-            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isScrolled ? 'max-h-0 opacity-0' : 'max-h-12 opacity-100 border-b border-gray-200'}`}>
-                <div className="flex justify-between items-center px-6 md:px-12 py-3 text-[11px] font-medium font-sans">
+        <header className="sticky top-0 z-50 bg-[#FBFBF9] shadow-sm">
+            {/* Top Bar - Minimalist with underlined links */}
+            <div
+                className={`overflow-hidden border-gray-200/20 transition-[max-height,opacity] duration-200 ease-out ${isTopBarVisible
+                    ? 'max-h-12 border-b opacity-100'
+                    : 'max-h-0 border-b-0 opacity-0'
+                    }`}
+            >
+                <div className="flex justify-between items-center px-6 md:px-12 py-3 text-[11px] font-medium font-sans text-gray-900">
+                    {/* Kept text-gray-900 for safety unless requested otherwise */}
                     <div className="flex gap-6">
-                        <Link href="#" className="text-gray-900 hover:opacity-70 transition-opacity">
+                        <Link href="#" className="hover:opacity-70 transition-opacity">
                             Olivia International
                         </Link>
                     </div>
                     <div className="flex gap-6 items-center">
                         {session ? (
                             <div className="flex items-center gap-4">
-                                <span className="text-gray-900">Welcome, {session.user?.name}</span>
-                                <button onClick={() => signOut()} className="text-gray-900 hover:opacity-70 transition-opacity">
+                                <span>Welcome, {session.user?.name}</span>
+                                <button onClick={() => signOut()} className="hover:opacity-70 transition-opacity">
                                     Sign Out
                                 </button>
                             </div>
                         ) : (
-                            <button onClick={() => googleSignIn()} className="text-gray-900 hover:opacity-70 transition-opacity">
+                            <button onClick={() => googleSignIn()} className="hover:opacity-70 transition-opacity">
                                 Sign In
                             </button>
                         )}
                         {/* Admin Link */}
-                        {/* @ts-ignore */}
-                        {session?.user?.role === 'admin' && (
-                            <Link href="/admin" className="text-gray-900 hover:opacity-70 transition-opacity font-bold">
+                        {isAdminUser && (
+                            <Link href="/admin" className="hover:opacity-70 transition-opacity font-bold">
                                 Admin Panel
                             </Link>
                         )}
-                        <Link href="/membership" className="text-gray-900 hover:opacity-70 transition-opacity">
+                        <Link href="/membership" className="hover:opacity-70 transition-opacity">
                             Membership
                         </Link>
-                        <button className="text-gray-900 hover:opacity-70 transition-opacity">
+                        <button className="hover:opacity-70 transition-opacity">
                             English
                         </button>
                     </div>
@@ -50,33 +88,32 @@ export default function RosewoodHeader() {
             </div>
 
             {/* Main Bar - Rosewood Style */}
-            <div className={`flex justify-between items-center px-6 md:px-12 transition-all duration-300 ${isScrolled ? 'py-3' : 'py-5'}`}>
+            <div className="flex justify-between items-center px-6 md:px-12 py-4">
 
                 {/* Left: Brand Logo + Dropdown */}
                 <div className="flex items-center gap-2 w-1/4">
-                    <Link href="/" className="flex flex-col text-gray-900 group">
-                        <span className="text-sm font-bold tracking-[0.2em] uppercase leading-tight">Olivia</span>
-                        <span className="text-sm font-bold tracking-[0.2em] uppercase leading-tight">Alleppey</span>
+                    <Link href="/" className="flex items-center group">
+                        <span className="text-sm font-bold tracking-[0.2em] uppercase leading-tight text-gray-900">Olivia</span>
+                        <span className="text-sm font-bold tracking-[0.2em] uppercase leading-tight text-gray-900 ml-2">Alleppey</span>
                     </Link>
-                    <button className="text-gray-500 mt-1 hover:text-gray-900 transition-colors">
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </button>
+
                 </div>
 
                 {/* Center: Navigation Links (Serif, Elegant) */}
-                <nav className="hidden xl:flex justify-center items-center gap-8 w-2/4">
-                    {['Discover', 'Overview', 'Offers', 'Accommodation', 'Residences', 'Dining', 'Wellness', 'Experiences', 'Events'].map((item) => (
+                <nav className="hidden xl:flex justify-center items-center gap-6 w-2/4">
+                    {['Discover', 'Offers', 'Accommodation', 'Wedding', 'Dining', 'Wellness', 'Experiences', 'Conference & Events'].map((item) => (
                         <Link
                             key={item}
-                            href={`/${item.toLowerCase()}`}
-                            className="text-gray-600 font-serif text-lg hover:text-gray-900 transition-colors"
+                            href={`/${item.toLowerCase().replace(/ & /g, '-').replace(/\s+/g, '-')}`}
+                            className={`font-serif hover:opacity-70 transition-colors text-gray-600 hover:text-gray-900 ${item === 'Conference & Events'
+                                ? 'text-base whitespace-nowrap'
+                                : 'text-lg'
+                                }`}
                         >
                             {item}
                         </Link>
                     ))}
-                    <Link href="/shop" className="text-gray-600 font-serif text-lg hover:text-gray-900 transition-colors flex items-start gap-0.5">
+                    <Link href="/shop" className="font-serif text-lg hover:opacity-70 transition-colors flex items-start gap-0.5 text-gray-600 hover:text-gray-900">
                         Shop
                         <span className="text-[10px] leading-none mt-1">↗</span>
                     </Link>

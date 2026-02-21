@@ -18,7 +18,11 @@ export async function seedDatabase() {
             description: 'Experience luxury with a view. Our Balcony Rooms feature a private balcony overlooking the serene landscapes of Alappuzha, perfect for your morning coffee or evening relaxation.',
             shortDescription: 'Entry-level luxury with private balcony and stunning views',
             basePrice: 1500000, // ₹15,000 in paise
+            minOccupancy: 1,
+            baseOccupancy: 2,
             maxGuests: 2,
+            maxAdults: 2,
+            maxChildren: 1,
             size: 325,
             bedType: 'King or Queen Bed',
             amenities: [
@@ -42,7 +46,11 @@ export async function seedDatabase() {
             description: 'Indulge in spacious comfort. Our Deluxe Rooms offer enhanced amenities and a more generous layout, designed for guests who appreciate the finer details of luxury hospitality.',
             shortDescription: 'Enhanced amenities with spacious layout and premium bedding',
             basePrice: 2000000, // ₹20,000 in paise
+            minOccupancy: 1,
+            baseOccupancy: 2,
             maxGuests: 3,
+            maxAdults: 3,
+            maxChildren: 2,
             size: 425,
             bedType: 'King Bed',
             amenities: [
@@ -69,7 +77,11 @@ export async function seedDatabase() {
             description: 'Elevate your stay with premium sophistication. Superior Deluxe Rooms feature upgraded furnishings, a dedicated sitting area, and exclusive amenities for the discerning traveler.',
             shortDescription: 'Premium category with upgraded furnishings and sitting area',
             basePrice: 2500000, // ₹25,000 in paise
+            minOccupancy: 1,
+            baseOccupancy: 2,
             maxGuests: 3,
+            maxAdults: 3,
+            maxChildren: 2,
             size: 525,
             bedType: 'King Bed',
             amenities: [
@@ -97,7 +109,11 @@ export async function seedDatabase() {
             description: 'The pinnacle of luxury living. Our Suite Rooms offer a separate living area, premium amenities, and unparalleled space for guests seeking the ultimate in comfort and elegance.',
             shortDescription: 'Ultimate luxury with separate living area and premium amenities',
             basePrice: 3500000, // ₹35,000 in paise
+            minOccupancy: 1,
+            baseOccupancy: 2,
             maxGuests: 4,
+            maxAdults: 3,
+            maxChildren: 3,
             size: 750,
             bedType: 'King Bed + Sofa Bed',
             amenities: [

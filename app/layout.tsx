@@ -35,19 +35,31 @@ export const metadata: Metadata = {
 
 import { auth } from "@/auth";
 import { SessionProvider } from "@/components/auth/session-provider";
+import FrontendLayout from "@/components/layout/frontend-layout";
+
+async function getSafeSession() {
+  try {
+    return await auth();
+  } catch (error) {
+    console.error("[auth] Failed to read session in RootLayout, falling back to anonymous session.", error);
+    return null;
+  }
+}
 
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await auth();
+  const session = await getSafeSession();
 
   return (
-    <html lang="en" className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
-      <body className="font-sans antialiased">
+    <html lang="en" className={`${inter.variable} ${playfair.variable} ${cinzel.variable}`} suppressHydrationWarning>
+      <body className="font-sans antialiased" suppressHydrationWarning>
         <SessionProvider session={session}>
-          {children}
+          <FrontendLayout>
+            {children}
+          </FrontendLayout>
         </SessionProvider>
       </body>
     </html>

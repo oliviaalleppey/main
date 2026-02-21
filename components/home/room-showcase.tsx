@@ -31,8 +31,15 @@ export default function RoomShowcase() {
             <div className="container mx-auto px-4 max-w-7xl">
 
                 {/* Header */}
-                <div className="mb-12">
+                <div className="flex justify-between items-end mb-12">
                     <h2 className="text-3xl md:text-4xl font-serif text-[#1C1C1C]">Rooms</h2>
+                    <Link
+                        href="/rooms"
+                        className="hidden md:inline-flex items-center gap-2 text-[#1C1C1C] hover:text-[#B8956A] transition-colors uppercase tracking-widest text-xs font-medium"
+                    >
+                        All Rooms
+                        <ArrowRight className="w-4 h-4" />
+                    </Link>
                 </div>
 
                 {/* Grid */}
