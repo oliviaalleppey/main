@@ -9,6 +9,8 @@ export const authConfig = {
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         }),
     ],
+    secret: process.env.AUTH_SECRET,
+    trustHost: true,
     session: { strategy: "jwt" },
     callbacks: {
         async jwt({ token, user, trigger, session }) {
