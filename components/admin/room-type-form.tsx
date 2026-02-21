@@ -23,13 +23,20 @@ export function RoomTypeForm({ initialData }: RoomTypeFormProps) {
 
     const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm<RoomTypeFormValues>({
         resolver: zodResolver(roomTypeSchema),
-        defaultValues: initialData ? {
+        defaultValues: initialData ? ({
             ...initialData,
+            description: initialData.description ?? undefined,
+            shortDescription: initialData.shortDescription ?? undefined,
+            bedType: initialData.bedType ?? undefined,
+            size: initialData.size ?? undefined,
+            sizeUnit: (initialData.sizeUnit as "sqft" | "sqm") ?? 'sqft',
+            amenities: initialData.amenities ?? [],
+            currency: 'INR',
             minOccupancy: initialData.minOccupancy ?? 1,
             basePrice: initialData.basePrice / 100, // Convert paise to rupees for display
             extraAdultPrice: (initialData.extraAdultPrice || 0) / 100,
             extraChildPrice: (initialData.extraChildPrice || 0) / 100,
-        } : {
+        } as unknown as RoomTypeFormValues) : {
             name: '',
             slug: '',
             description: '',
