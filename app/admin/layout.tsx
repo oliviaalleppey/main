@@ -26,7 +26,7 @@ export default function AdminLayout({
 async function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     const session = await auth();
     if (!session || session.user?.role !== 'admin') {
-        redirect('/api/auth/signin');
+        redirect('/api/auth/signin/google');
     }
 
     const [pendingRows, atRiskRows] = await Promise.all([
