@@ -1,26 +1,24 @@
-import NextAuth from "next-auth"
-import { authConfig } from "./auth.config"
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
-const { auth } = NextAuth(authConfig);
+export function middleware(request: NextRequest) {
+    // NextAuth edge incompatibility workaround
+    // We only protect /admin routes at the middleware level to prevent layout thrashing
+    // The actual secure authorization check happens in the layout.tsx via auth()
 
-export default async function middleware(req: any, ctx: any) {
-    try {
-        return await auth(req, ctx);
-    } catch (error: any) {
-        console.error("Middleware Init/Execution Error:", error);
-        return new Response(
-            JSON.stringify({
-                error: "Middleware Error",
-                message: error?.message || "Unknown error",
-                name: error?.name,
-                stack: error?.stack
-            }),
-            {
-                status: 500,
-                headers: { "Content-Type": "application/json" }
-            }
-        );
+    const isOnAdminPanel = request.nextUrl.pathname.startsWith('/admin')
+
+    if (isOnAdminPanel) {
+        // Simple check for existence of next-auth session cookie
+        const sessionToken = request.cookies.get('next-auth.session-token') ||
+            request.cookies.get('__Secure-next-auth.session-token')
+
+        if (!sessionToken) {
+            return NextResponse.redirect(new URL('/api/auth/signin', request.url))
+        }
     }
+
+    return NextResponse.next()
 }
 
 export const config = {
