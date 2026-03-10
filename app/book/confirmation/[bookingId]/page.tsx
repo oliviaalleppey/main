@@ -15,6 +15,8 @@ const formatCurrency = (amount: number) => {
     }).format(amount / 100);
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function ConfirmationPage({ params }: { params: Promise<{ bookingId: string }> }) {
     await ensureRoomTypeMinOccupancyColumn();
 
@@ -61,7 +63,12 @@ export default async function ConfirmationPage({ params }: { params: Promise<{ b
     let icon = <CheckCircle2 className="w-10 h-10 text-green-600" />;
     let iconBg = "bg-green-100";
 
-    if (booking.status === 'pending_payment' || booking.paymentStatus === 'pending') {
+    if (booking.status === 'confirmed') {
+        statusTitle = "Booking Confirmed!";
+        statusMsg = "Thank you for choosing Olivia International.";
+        icon = <CheckCircle2 className="w-10 h-10 text-green-600" />;
+        iconBg = "bg-green-100";
+    } else if (booking.status === 'pending_payment' || booking.paymentStatus === 'pending') {
         statusTitle = "Payment Pending";
         statusMsg = "We are waiting for your payment to be confirmed.";
         icon = <div className="w-10 h-10 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin" />;
