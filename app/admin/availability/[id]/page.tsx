@@ -61,7 +61,9 @@ export default async function RoomAvailabilityPage({ params }: PageProps) {
             if (result.status === 'success') {
                 const match = result.rooms.find(r =>
                     r.roomTypeId === roomType.id ||
-                    r.roomTypeId === roomType.slug
+                    r.roomTypeId === roomType.slug ||
+                    r.name === roomType.slug ||
+                    r.name === roomType.name
                 );
                 free = match?.availableCount ?? totalRooms;
             }
