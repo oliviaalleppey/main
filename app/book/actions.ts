@@ -735,7 +735,7 @@ export async function initiateOmniwarePaymentAction(): Promise<{
 
         if (!booking) return { success: false, error: 'Failed to create booking record.' };
 
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://yourdomain.com';
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://oliviaalleppey.com';
         const returnUrl = `${baseUrl}/api/payment/omniware`;
 
         const omniwarePayload = OmniwareService.buildPaymentPayload({
