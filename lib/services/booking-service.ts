@@ -572,8 +572,14 @@ export class BookingService {
         let bookingId: string | null = null;
 
         try {
-            // 4. Create Initial Booking Record (INITIATED)
-            const bookingRef = crypto.randomUUID();
+            // Generate unique booking reference number
+            // Format: OL-DDMM-XXXX (e.g., OL-1003-A1B2)
+            const date = new Date();
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+            const bookingRef = `OL-${day}${month}-${random}`;
+
             const nights = Math.ceil((new Date(checkOutStr).getTime() - new Date(checkInStr).getTime()) / (1000 * 60 * 60 * 24));
             const normalizedSelectedAddOns = Array.isArray(cartData.selectedAddOns)
                 ? cartData.selectedAddOns
