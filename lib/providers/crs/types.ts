@@ -10,6 +10,7 @@ export interface CRSAvailabilityRequest {
     checkOut: string; // YYYY-MM-DD
     adults: number;
     children: number;
+    roomTypeId?: string;
 }
 
 export interface CRSRatePlan {
@@ -80,7 +81,7 @@ export interface CRSReservationResponse {
 }
 
 export interface BookingProvider {
-    source: 'mock_crs' | 'crs';
+    source: 'mock_crs' | 'crs' | 'hotsoft_crs';
     checkAvailability(request: CRSAvailabilityRequest): Promise<CRSAvailabilityResponse>;
     createReservation(request: CRSCreateReservationRequest): Promise<CRSReservationResponse>;
 }

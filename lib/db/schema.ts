@@ -513,10 +513,10 @@ export const payments = pgTable('payments', {
     id: uuid('id').defaultRandom().primaryKey(),
     bookingId: uuid('booking_id').references(() => bookings.id).notNull(),
 
-    // Razorpay details
-    razorpayOrderId: varchar('razorpay_order_id', { length: 255 }),
-    razorpayPaymentId: varchar('razorpay_payment_id', { length: 255 }),
-    razorpaySignature: varchar('razorpay_signature', { length: 255 }),
+    // Omniware details
+    omniwareOrderId: varchar('omniware_order_id', { length: 255 }), // Our unique ID sent to Omniware
+    omniwareTransactionId: varchar('omniware_transaction_id', { length: 255 }), // Their returned unique identifier
+    omniwareHash: varchar('omniware_hash', { length: 255 }), // Stored hash for verification
 
     // Payment details
     amount: integer('amount').notNull(), // in paise

@@ -3,7 +3,6 @@
 import { useState } from 'react';
 
 import Link from 'next/link';
-import Image from 'next/image';
 
 const wellnessServices = [
     {
@@ -114,7 +113,7 @@ export default function WellnessPage() {
                         A Journey to Inner Peace
                     </h2>
                     <p className="text-[#1C1C1C]/70 text-lg leading-relaxed mb-8">
-                        At Olivia International, wellness is not merely a service—it is a philosophy deeply rooted in Kerala's
+                        At Olivia International, wellness is not merely a service; it is a philosophy deeply rooted in Kerala&apos;s
                         ancient healing traditions. Our wellness center draws inspiration from Ayurveda, the 5,000-year-old
                         science of life, while embracing modern therapeutic practices. Every treatment, every session,
                         every moment is designed to guide you toward optimal well-being.
@@ -137,7 +136,10 @@ export default function WellnessPage() {
             </section>
 
             {/* Services Navigation */}
-            <section className="bg-white py-8 border-y border-gray-200 sticky top-0 z-40">
+            <section
+                className="bg-white py-8 border-y border-gray-200 sticky z-40"
+                style={{ top: 'var(--site-header-height, 62px)' }}
+            >
                 <div className="max-w-6xl mx-auto px-6">
                     <div className="flex justify-center gap-4 md:gap-8 overflow-x-auto">
                         {wellnessServices.map((service) => (

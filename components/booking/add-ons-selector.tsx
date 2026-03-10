@@ -154,19 +154,48 @@ export function AddOnsSelector({ options, initialSelected }: AddOnsSelectorProps
                 })}
             </div>
 
-            <div className="rounded-xl border border-gray-200 bg-white p-2.5 md:p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 md:gap-3">
-                <p className={`text-xs ${message === 'Add-ons updated' ? 'text-emerald-700' : 'text-red-600'}`}>
-                    {message || 'Select add-ons and save to refresh pricing.'}
-                </p>
-                <button
-                    type="button"
-                    onClick={handleSave}
-                    disabled={isPending}
-                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#1C1C1C] px-3 md:px-4 py-2 text-[11px] md:text-xs font-semibold uppercase tracking-wider text-white hover:bg-[#333] disabled:opacity-60"
-                >
-                    {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
-                    Save Add-ons
-                </button>
+            <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-3 md:p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-4">
+                <div className="flex-1">
+                    {message ? (
+                        <p className={`text-xs font-medium ${message === 'Add-ons updated' ? 'text-emerald-700' : 'text-amber-700'}`}>
+                            {message}
+                        </p>
+                    ) : (
+                        <p className="text-xs text-gray-500 italic">
+                            {addOnsTotal > 0
+                                ? 'Review your selections and save to update your total.'
+                                : 'No enhancements selected. You can skip this and continue to payment.'}
+                        </p>
+                    )}
+                </div>
+                <div className="flex items-center gap-2 sm:self-end">
+                    {Object.entries(quantities).some(([id, q]) => {
+                        const initial = initialSelected.find(s => s.addOnId === id)?.quantity || 0;
+                        return q !== initial;
+                    }) && (
+                            <button
+                                type="button"
+                                onClick={handleSave}
+                                disabled={isPending}
+                                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#E95D20] px-4 py-2 text-[11px] md:text-xs font-semibold uppercase tracking-wider text-white hover:bg-[#D54D15] disabled:opacity-60 transition-colors shadow-sm"
+                            >
+                                {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+                                Save Enhancements
+                            </button>
+                        )}
+                    <button
+                        type="button"
+                        onClick={() => {
+                            const paymentSection = document.getElementById('payment-section');
+                            if (paymentSection) {
+                                paymentSection.scrollIntoView({ behavior: 'smooth' });
+                            }
+                        }}
+                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-white border border-gray-300 px-4 py-2 text-[11px] md:text-xs font-semibold uppercase tracking-wider text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                        Continue to Payment
+                    </button>
+                </div>
             </div>
         </div>
     );

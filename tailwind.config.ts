@@ -26,8 +26,9 @@ const config: Config = {
         'bg-light': 'rgb(var(--bg-light) / <alpha-value>)',
       },
       fontFamily: {
-        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
-        serif: ['var(--font-playfair)', 'Georgia', 'serif'],
+        sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
+        serif: ['var(--font-serif)', 'Georgia', 'serif'],
+        accent: ['var(--font-cinzel)', 'serif'],
       },
       borderRadius: {
         lg: 'var(--radius)',

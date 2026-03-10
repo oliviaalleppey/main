@@ -1,18 +1,38 @@
 import { signIn, signOut, useSession } from "next-auth/react"
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 
 export default function RosewoodHeader() {
     const { data: session } = useSession();
     const [isTopBarVisible, setIsTopBarVisible] = useState(true);
+    const [enableTopBarAnimation, setEnableTopBarAnimation] = useState(false);
     const lastScrollY = useRef(0);
+    const topBarVisibleRef = useRef(true);
+    const headerRef = useRef<HTMLElement | null>(null);
     const googleSignIn = () => signIn("google");
     const isAdminUser =
         !!session?.user &&
         'role' in session.user &&
         (session.user as { role?: string }).role === 'admin';
 
-    useEffect(() => {
+    useLayoutEffect(() => {
+        const setTopBarVisible = (visible: boolean) => {
+            if (topBarVisibleRef.current === visible) {
+                return;
+            }
+
+            topBarVisibleRef.current = visible;
+            setIsTopBarVisible(visible);
+        };
+
+        const initialScrollY = window.scrollY;
+        lastScrollY.current = initialScrollY;
+        setTopBarVisible(initialScrollY <= 120);
+
+        const transitionFrame = window.requestAnimationFrame(() => {
+            setEnableTopBarAnimation(true);
+        });
+
         let ticking = false;
 
         const handleScroll = () => {
@@ -25,12 +45,12 @@ export default function RosewoodHeader() {
                 const currentScrollY = window.scrollY;
                 const delta = currentScrollY - lastScrollY.current;
 
-                if (currentScrollY <= 12) {
-                    setIsTopBarVisible(true);
-                } else if (delta > 8) {
-                    setIsTopBarVisible(false);
-                } else if (delta < -8) {
-                    setIsTopBarVisible(true);
+                if (currentScrollY <= 24) {
+                    setTopBarVisible(true);
+                } else if (delta > 12 && currentScrollY > 120) {
+                    setTopBarVisible(false);
+                } else if (delta < -14) {
+                    setTopBarVisible(true);
                 }
 
                 lastScrollY.current = currentScrollY;
@@ -39,16 +59,47 @@ export default function RosewoodHeader() {
         };
 
         window.addEventListener('scroll', handleScroll, { passive: true });
-        return () => window.removeEventListener('scroll', handleScroll);
+        return () => {
+            window.cancelAnimationFrame(transitionFrame);
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, []);
+
+    useLayoutEffect(() => {
+        const updateHeaderHeight = () => {
+            if (!headerRef.current) {
+                return;
+            }
+
+            const headerHeight = Math.round(headerRef.current.getBoundingClientRect().height);
+            document.documentElement.style.setProperty('--site-header-height', `${headerHeight}px`);
+        };
+
+        updateHeaderHeight();
+
+        const resizeObserver = new ResizeObserver(() => {
+            updateHeaderHeight();
+        });
+
+        if (headerRef.current) {
+            resizeObserver.observe(headerRef.current);
+        }
+
+        window.addEventListener('resize', updateHeaderHeight);
+
+        return () => {
+            resizeObserver.disconnect();
+            window.removeEventListener('resize', updateHeaderHeight);
+        };
     }, []);
 
     return (
-        <header className="sticky top-0 z-50 bg-[#FBFBF9] shadow-sm">
+        <header ref={headerRef} className="sticky top-0 z-50 bg-[#FBFBF9] shadow-sm">
             {/* Top Bar - Minimalist with underlined links */}
             <div
-                className={`overflow-hidden border-gray-200/20 transition-[max-height,opacity] duration-200 ease-out ${isTopBarVisible
-                    ? 'max-h-12 border-b opacity-100'
-                    : 'max-h-0 border-b-0 opacity-0'
+                className={`overflow-hidden border-gray-200/20 duration-200 ease-out ${enableTopBarAnimation ? 'transition-[height,opacity,border-color]' : ''} ${isTopBarVisible
+                    ? 'h-12 border-b opacity-100'
+                    : 'h-0 border-b-0 opacity-0 pointer-events-none'
                     }`}
             >
                 <div className="flex justify-between items-center px-6 md:px-12 py-3 text-[11px] font-medium font-sans text-gray-900">

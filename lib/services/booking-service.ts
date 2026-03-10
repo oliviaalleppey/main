@@ -701,7 +701,7 @@ export class BookingService {
                 amount: subtotal,
                 status: 'pending',
                 paymentMethod: paymentDetails.method,
-                razorpayOrderId: paymentDetails.orderId || `order_${crypto.randomUUID()}`
+                omniwareOrderId: paymentDetails.orderId || `txn_${crypto.randomUUID()}`
             }).returning();
 
             // 5. Lock Inventory (Internal)

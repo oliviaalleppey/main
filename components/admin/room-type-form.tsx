@@ -31,7 +31,6 @@ export function RoomTypeForm({ initialData }: RoomTypeFormProps) {
             size: initialData.size ?? undefined,
             sizeUnit: (initialData.sizeUnit as "sqft" | "sqm") ?? 'sqft',
             amenities: initialData.amenities ?? [],
-            currency: 'INR',
             minOccupancy: initialData.minOccupancy ?? 1,
             basePrice: initialData.basePrice / 100, // Convert paise to rupees for display
             extraAdultPrice: (initialData.extraAdultPrice || 0) / 100,
@@ -44,7 +43,6 @@ export function RoomTypeForm({ initialData }: RoomTypeFormProps) {
             basePrice: 0,
             minOccupancy: 1,
             baseOccupancy: 2,
-            currency: 'INR',
             maxGuests: 2,
             maxAdults: 2,
             maxChildren: 0,
@@ -83,7 +81,7 @@ export function RoomTypeForm({ initialData }: RoomTypeFormProps) {
                 router.refresh();
             } else {
                 const error = await response.json();
-                alert(error.message || 'Failed to save room type');
+                alert(error.error || error.message || 'Failed to save room type');
             }
         } catch (error) {
             console.error('Error saving room type:', error);

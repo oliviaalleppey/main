@@ -4,21 +4,21 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
     LayoutDashboard,
-    Calendar,
+    CalendarCheck,
     Settings,
     LogOut,
     BedDouble,
     Clock,
+    DollarSign,
+    ChevronRight,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
-    { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/admin/bookings', label: 'Bookings', icon: Calendar },
+    { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
+    { href: '/admin/bookings', label: 'Bookings', icon: CalendarCheck },
     { href: '/admin/availability', label: 'Availability', icon: Clock },
-    // { href: '/admin/pricing', label: 'Pricing Rules', icon: DollarSign }, // Managed by AxisRooms
+    { href: '/admin/pricing', label: 'Pricing', icon: DollarSign },
     { href: '/admin/rooms/types', label: 'Room Types', icon: BedDouble },
-    // { href: '/admin/rooms/rate-plans', label: 'Rate Plans', icon: DollarSign }, // Managed by AxisRooms
-    // { href: '/admin/rooms/inventory', label: 'Room Inventory', icon: ImageIcon }, // Managed by AxisRooms
     { href: '/admin/settings', label: 'Site Appearance', icon: Settings },
 ];
 
@@ -31,41 +31,53 @@ export function Sidebar({ pendingConfirmations = 0, atRiskConfirmations = 0 }: S
     const pathname = usePathname();
 
     return (
-        <div className="flex w-64 flex-col bg-white border-r">
-            <div className="flex h-16 items-center justify-center border-b px-6">
-                <h1 className="text-xl font-bold text-gray-900">Olivia Admin</h1>
+        <div className="flex w-64 flex-col bg-[#0A1628] min-h-screen">
+            {/* Logo / Brand */}
+            <div className="flex h-16 items-center gap-3 px-6 border-b border-white/10">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">O</span>
+                </div>
+                <div>
+                    <p className="text-white font-semibold text-sm leading-tight">Olivia</p>
+                    <p className="text-white/40 text-[10px] uppercase tracking-widest">Admin Panel</p>
+                </div>
             </div>
-            <nav className="flex-1 space-y-1 p-4">
+
+            {/* Navigation */}
+            <nav className="flex-1 p-3 space-y-0.5">
+                <p className="text-white/30 text-[10px] uppercase tracking-widest px-3 py-2 font-semibold">Main Menu</p>
                 {NAV_ITEMS.map((item) => {
                     const Icon = item.icon;
-                    const isActive = pathname === item.href;
+                    const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href);
                     return (
                         <Link
                             key={item.href}
                             href={item.href}
-                            className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${isActive
-                                ? 'bg-gray-100 text-gray-900'
-                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                            className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all group ${isActive
+                                    ? 'bg-white/10 text-white'
+                                    : 'text-white/50 hover:bg-white/5 hover:text-white'
                                 }`}
                         >
-                            <Icon className="h-5 w-5" />
+                            <Icon className={`h-4 w-4 flex-shrink-0 ${isActive ? 'text-amber-400' : 'text-white/40 group-hover:text-white/70'}`} />
                             <span className="flex-1">{item.label}</span>
                             {item.href === '/admin/bookings' && pendingConfirmations > 0 && (
                                 <span
-                                    className={`min-w-6 rounded-full px-2 py-0.5 text-[11px] font-semibold text-white text-center ${
-                                        atRiskConfirmations > 0 ? 'bg-amber-600' : 'bg-blue-600'
-                                    }`}
+                                    className={`min-w-5 h-5 rounded-full px-1.5 text-[10px] font-bold text-white text-center flex items-center justify-center ${atRiskConfirmations > 0 ? 'bg-red-500' : 'bg-blue-500'
+                                        }`}
                                 >
                                     {pendingConfirmations}
                                 </span>
                             )}
+                            {isActive && <ChevronRight className="h-3 w-3 text-white/30" />}
                         </Link>
                     );
                 })}
             </nav>
-            <div className="p-4 border-t">
-                <button className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50">
-                    <LogOut className="h-5 w-5" />
+
+            {/* Footer */}
+            <div className="p-3 border-t border-white/10">
+                <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/40 hover:bg-red-500/10 hover:text-red-400 transition-all">
+                    <LogOut className="h-4 w-4" />
                     Sign Out
                 </button>
             </div>

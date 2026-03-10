@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { getAvailableRoomsForSearch, type SearchResult } from '@/lib/services/search';
 import { BookingButton } from '@/components/booking/booking-button';
+import { SearchStayEditor } from '@/components/booking/search-stay-editor';
 
 type SortKey = 'recommended' | 'price-asc' | 'size-desc' | 'guests-desc';
 
@@ -123,53 +124,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             <div className="border-b border-[#E4E8DD] bg-gradient-to-b from-[#FAFAF5] via-[#F7F8F2] to-[#F4F5F0]">
                 <div className="max-w-[1400px] mx-auto px-3 md:px-6 py-4 md:py-10">
                     <div className="rounded-2xl md:rounded-3xl border border-[#D8DEC9] bg-white/95 p-3 md:p-8 shadow-[0_20px_45px_-32px_rgba(15,23,42,0.5)]">
-                        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-3 md:gap-6">
-                            <div>
-                                <p className="text-[11px] uppercase tracking-[0.24em] md:tracking-[0.3em] text-gray-500 mb-1 md:mb-2">Stay Summary</p>
-                                <h1 className="text-2xl md:text-4xl font-serif text-[#1D2B25] leading-tight">
-                                    {isValidDates ? (
-                                        <>
-                                            {formatDate(checkInDate)}
-                                            <span className="text-[#8A968A] font-sans text-xl md:text-2xl mx-2 md:mx-3">to</span>
-                                            {formatDate(checkOutDate)}
-                                        </>
-                                    ) : (
-                                        'Select valid travel dates'
-                                    )}
-                                </h1>
-                                {isValidDates && (
-                                    <p className="mt-1.5 md:mt-3 text-xs md:text-sm text-gray-600">
-                                        {nights} night{nights > 1 ? 's' : ''} • {formatDateWithWeekday(checkInDate)} to {formatDateWithWeekday(checkOutDate)}
-                                    </p>
-                                )}
-                                <div className="mt-2 md:mt-4 flex flex-wrap items-center gap-1.5 md:gap-2">
-                                    <span className="inline-flex items-center rounded-full border border-[#CFD7C3] bg-[#F6F8EF] px-2.5 py-0.5 md:px-3 md:py-1 text-[11px] md:text-xs font-medium text-[#2D3D34]">
-                                        {safeAdults} adult{safeAdults > 1 ? 's' : ''}, {safeChildren} child{safeChildren !== 1 ? 'ren' : ''}
-                                    </span>
-                                    <span className="inline-flex items-center rounded-full border border-[#CFD7C3] bg-[#F6F8EF] px-2.5 py-0.5 md:px-3 md:py-1 text-[11px] md:text-xs font-medium text-[#2D3D34]">
-                                        {safeRooms} room{safeRooms > 1 ? 's' : ''} selected
-                                    </span>
-                                    <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 md:px-3 md:py-1 text-[11px] md:text-xs font-medium text-emerald-800">
-                                        <ShieldCheck className="h-3.5 w-3.5" />
-                                        Live rates enabled
-                                    </span>
-                                </div>
-                            </div>
-                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 md:gap-3">
-                                <Link
-                                    href="/"
-                                    className="inline-flex items-center justify-center rounded-xl border border-[#CDD5C1] bg-white px-4 py-2.5 text-sm font-medium text-[#223128] hover:bg-[#F6F8F1] transition-colors"
-                                >
-                                    Change Dates
-                                </Link>
-                                <Link
-                                    href="/rooms"
-                                    className="inline-flex items-center justify-center rounded-xl bg-[#1F2A24] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#2A362F] transition-colors"
-                                >
-                                    View All Room Types
-                                </Link>
-                            </div>
-                        </div>
+                        <SearchStayEditor
+                            initialCheckIn={checkInDate}
+                            initialCheckOut={checkOutDate}
+                            initialAdults={safeAdults}
+                            initialChildren={safeChildren}
+                            initialRooms={safeRooms}
+                        />
                     </div>
                 </div>
             </div>

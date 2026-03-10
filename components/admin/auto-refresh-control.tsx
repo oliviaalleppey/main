@@ -17,16 +17,22 @@ export function AutoRefreshControl({ intervalSeconds = 30 }: AutoRefreshControlP
 
         const timer = window.setInterval(() => {
             setCountdown((previous) => {
-                if (previous <= 1) {
-                    router.refresh();
-                    return intervalSeconds;
-                }
+                if (previous <= 1) return intervalSeconds;
                 return previous - 1;
             });
         }, 1000);
 
         return () => window.clearInterval(timer);
-    }, [enabled, intervalSeconds, router]);
+    }, [enabled, intervalSeconds]);
+
+    // Trigger refresh separately when countdown resets
+    useEffect(() => {
+        if (!enabled) return;
+        if (countdown === intervalSeconds) {
+            router.refresh();
+        }
+    }, [countdown, enabled, intervalSeconds, router]);
+
 
     const handleToggle = () => {
         setEnabled((previous) => !previous);
@@ -58,9 +64,8 @@ export function AutoRefreshControl({ intervalSeconds = 30 }: AutoRefreshControlP
                 </button>
                 <button
                     onClick={handleToggle}
-                    className={`rounded-md px-3 py-2 text-xs font-semibold text-white ${
-                        enabled ? 'bg-amber-600 hover:bg-amber-500' : 'bg-emerald-700 hover:bg-emerald-600'
-                    }`}
+                    className={`rounded-md px-3 py-2 text-xs font-semibold text-white ${enabled ? 'bg-amber-600 hover:bg-amber-500' : 'bg-emerald-700 hover:bg-emerald-600'
+                        }`}
                 >
                     {enabled ? 'Pause Auto-Refresh' : 'Resume Auto-Refresh'}
                 </button>

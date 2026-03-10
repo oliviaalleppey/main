@@ -1,299 +1,428 @@
-
 import StickyBookButton from '@/components/sticky-book-button';
 import WhatsAppWidget from '@/components/whatsapp-widget';
 import Link from 'next/link';
-import NextImage from 'next/image';
-import { Heart, Camera, Wine, Flower2, Music, Sparkles } from 'lucide-react';
+import Image from 'next/image';
+import { CalendarDays, Flower2, Sparkles, Users, type LucideIcon } from 'lucide-react';
 
-const weddingFeatures = [
+interface CelebrationStyle {
+    title: string;
+    capacity: string;
+    investment: string;
+    idealFor: string;
+    highlights: string[];
+    icon: LucideIcon;
+}
+
+interface VenueInfo {
+    name: string;
+    image: string;
+    capacity: string;
+    area: string;
+    description: string;
+    bestFor: string;
+}
+
+const celebrationStyles: CelebrationStyle[] = [
     {
-        icon: Heart,
-        title: 'Romantic Venues',
-        description: 'Choose from our stunning indoor and outdoor venues with breathtaking backdrops for your ceremony and reception.',
-    },
-    {
-        icon: Camera,
-        title: 'Photography Locations',
-        description: 'Picturesque spots throughout our property for capturing your most precious moments.',
-    },
-    {
-        icon: Wine,
-        title: 'Customized Catering',
-        description: 'Our expert culinary team creates bespoke menus tailored to your preferences and dietary requirements.',
-    },
-    {
+        title: 'Intimate Wedding',
+        capacity: '40 to 80 guests',
+        investment: 'From INR 6.5 lakh',
+        idealFor: 'Families preferring private, highly personal ceremonies',
+        highlights: ['Poolside vows', 'Curated plated dinner', 'One-night couple suite stay'],
         icon: Flower2,
-        title: 'Floral Arrangements',
-        description: 'Beautiful floral designs by our partner florists to match your wedding theme and colors.',
     },
     {
-        icon: Music,
-        title: 'Entertainment',
-        description: 'Live bands, DJs, and traditional performances to keep your guests entertained.',
-    },
-    {
+        title: 'Classic Destination Wedding',
+        capacity: '120 to 220 guests',
+        investment: 'From INR 15 lakh',
+        idealFor: 'Multi-function celebrations with room blocks',
+        highlights: ['Two event venues', 'Sangeet + wedding day flow', 'On-site wedding manager'],
         icon: Sparkles,
-        title: 'Bridal Suite',
-        description: 'Luxurious accommodation for the wedding couple with special amenities and services.',
+    },
+    {
+        title: 'Full Wedding Weekend',
+        capacity: '250 to 400 guests',
+        investment: 'From INR 28 lakh',
+        idealFor: 'Large-format weddings with receptions and hospitality desks',
+        highlights: ['Three day itinerary', 'Large banquet setup', 'Guest movement coordination'],
+        icon: Users,
     },
 ];
 
-const weddingPackages = [
+const venueList: VenueInfo[] = [
     {
-        name: 'Intimate Affair',
-        description: 'Perfect for small gatherings',
-        guests: 'Up to 50 guests',
-        price: 'Starting from ₹5,00,000',
-        features: ['Venue decoration', '3-course dinner', 'Wedding cake', 'Bridal suite (1 night)', 'Basic photography'],
+        name: 'Backwater Lawn',
+        image: '/images/rooms/balcony-room-5.jpg',
+        capacity: 'Up to 180',
+        area: '6,000 sq ft',
+        description: 'Sunset-facing ceremony lawn with soft ambient lighting and open-sky aisle setup.',
+        bestFor: 'Varmala, cocktail evening, phera mandap',
     },
     {
-        name: 'Grand Celebration',
-        description: 'Our most popular package',
-        guests: 'Up to 200 guests',
-        price: 'Starting from ₹15,00,000',
-        features: ['Premium venue decoration', '5-course dinner', 'Designer wedding cake', 'Bridal suite (2 nights)', 'Professional photography', 'Live music', 'Pre-wedding events'],
-        featured: true,
+        name: 'Olivia Grand Hall',
+        image: '/images/conference/hero.png',
+        capacity: 'Up to 400',
+        area: '8,500 sq ft',
+        description: 'An elegant indoor venue for formal receptions, stage events, and weather-safe celebrations.',
+        bestFor: 'Reception, sangeet, large guest dining',
     },
     {
-        name: 'Royal Wedding',
-        description: 'The ultimate experience',
-        guests: 'Up to 500 guests',
-        price: 'Custom pricing',
-        features: ['Luxury venue decoration', 'Gourmet dining experience', 'Custom wedding cake', 'Presidential suite (3 nights)', 'Cinematic photography & videography', 'Celebrity entertainment', 'Multiple events', 'Guest accommodations'],
+        name: 'Canal Terrace',
+        image: '/images/dining/hero.jpg',
+        capacity: 'Up to 120',
+        area: '3,200 sq ft',
+        description: 'A refined semi-outdoor venue with water views, ideal for welcome dinners and brunches.',
+        bestFor: 'Mehendi, welcome dinner, farewell brunch',
+    },
+];
+
+const planningTimeline = [
+    {
+        label: 'Step 01',
+        title: 'Consultation & Budget Match',
+        detail: 'We map your guest count, style and budget range into a venue and function plan within 48 hours.',
+    },
+    {
+        label: 'Step 02',
+        title: 'Menu, Decor & Rooming',
+        detail: 'Finalise cuisine style, decor direction, room blocks and movement flow for each function.',
+    },
+    {
+        label: 'Step 03',
+        title: 'Execution Blueprint',
+        detail: 'Shared timeline with vendor slots, setup windows, rehearsal timing, and function wise checklists.',
+    },
+    {
+        label: 'Step 04',
+        title: 'On-Ground Wedding Management',
+        detail: 'Dedicated operations lead and hospitality desk ensure guest handling and event transitions run smoothly.',
+    },
+];
+
+const includedServices = [
+    'Dedicated wedding planning lead',
+    'Function wise setup and dismantle coordination',
+    'Chef-led menu tasting for final shortlist',
+    'Guest room allocation support',
+    'Vendor docking and service corridor logistics',
+    'Power backup and technical readiness',
+    'Valet and arrival management',
+    'Rain backup options for outdoor functions',
+];
+
+const faqs = [
+    {
+        question: 'Do you support outside decorators and photographers?',
+        answer: 'Yes. You can bring your own vendors, or use our curated partner network. We coordinate both models.',
+    },
+    {
+        question: 'Can we reserve room blocks for families?',
+        answer: 'Yes. Room blocks with release dates and category-wise allocations can be configured based on event size.',
+    },
+    {
+        question: 'How early should we confirm dates?',
+        answer: 'For prime wedding months, we recommend 4 to 8 months in advance for best venue and room availability.',
+    },
+    {
+        question: 'Do you offer fully custom packages?',
+        answer: 'Yes. Every proposal is customizable. You can choose per-event menu, decor level, and venue allocation.',
     },
 ];
 
 export default function WeddingPage() {
     return (
         <>
-
-            <main className="min-h-screen bg-white">
-                {/* Hero Section */}
-                {/* Hero Section */}
-                <section className="relative h-[90vh] flex items-center justify-center overflow-hidden">
-                    {/* Background Image */}
-                    <div className="absolute inset-0 z-0">
-                        {/* Placeholder until image generation completes - utilizing the likely path or a fallback */}
-                        <div className="absolute inset-0 bg-teal-900" />
-                        {/* We will update this src once the image is generated */}
-                        <NextImage
+            <main className="min-h-screen bg-[#FAF8F3] text-[#26322D]">
+                <section className="relative overflow-hidden border-b border-[#E8E0D2]">
+                    <div className="relative h-[72vh] md:h-[78vh]">
+                        <Image
                             src="/images/dining/hero.jpg"
-                            alt="Dream Wedding Destination"
+                            alt="Wedding venue by the backwaters at Olivia Alleppey"
                             fill
-                            className="object-cover opacity-60"
                             priority
+                            className="object-cover"
                         />
-                        <div className="absolute inset-0 bg-black/40" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-[#1F2623]/55 via-[#1F2623]/20 to-transparent" />
                     </div>
 
-                    <div className="relative z-10 text-center text-white px-4 max-w-5xl mx-auto">
-                        <div className="mb-6 animate-fade-in-up">
-                            <span className="inline-block py-1 px-3 border border-white/30 rounded-full bg-white/10 backdrop-blur-sm text-xs md:text-sm uppercase tracking-[0.3em] text-white/90">
-                                Olivia International
-                            </span>
+                    <div className="absolute inset-0 flex items-center">
+                        <div className="max-w-6xl mx-auto px-6 md:px-10 w-full">
+                            <div className="max-w-3xl">
+                                <p className="text-[#E2CC9E] text-[11px] tracking-[0.35em] uppercase mb-5">
+                                    Wedding Experiences At Olivia Alleppey
+                                </p>
+                                <h1 className="font-serif text-4xl md:text-6xl lg:text-7xl text-[#F8F5EE] leading-[1.05] mb-5">
+                                    A Wedding Program That Feels Personal, Not Packaged
+                                </h1>
+                                <p className="text-[#F3EFE4]/90 text-base md:text-lg max-w-2xl leading-relaxed mb-8">
+                                    From intimate vow ceremonies to multi-day family celebrations, our team builds a realistic wedding plan
+                                    around guest comfort, timing, and elegant execution.
+                                </p>
+                                <div className="flex flex-col sm:flex-row gap-3">
+                                    <Link
+                                        href="/contact?type=wedding"
+                                        className="inline-flex items-center justify-center bg-[#E7D4AD] text-[#2A332F] px-7 py-3 text-xs tracking-[0.2em] uppercase hover:bg-[#E1CB9C] transition-colors"
+                                    >
+                                        Plan A Consultation
+                                    </Link>
+                                    <Link
+                                        href="#wedding-venues"
+                                        className="inline-flex items-center justify-center border border-[#F3EADB]/60 text-[#F8F5EE] px-7 py-3 text-xs tracking-[0.2em] uppercase hover:bg-white/10 transition-colors"
+                                    >
+                                        Explore Venues
+                                    </Link>
+                                </div>
+                            </div>
                         </div>
-
-                        <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl mb-6 tracking-tight leading-tight text-white drop-shadow-lg">
-                            Begin Your <span className="italic text-[#B8956A]">Forever</span>
-                        </h1>
-
-                        <p className="text-lg md:text-2xl text-white/90 max-w-2xl mx-auto mb-10 font-light leading-relaxed drop-shadow-md">
-                            Celebrate your love story in the heart of Alappuzha, where timeless elegance meets the serene backwaters.
-                        </p>
-
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                            <Link
-                                href="/contact?type=wedding"
-                                className="group relative px-8 py-4 bg-[#B8956A] text-white font-medium tracking-wider uppercase text-sm transition-all hover:bg-[#a38258] overflow-hidden"
-                            >
-                                <span className="relative z-10">Inquire Now</span>
-                            </Link>
-                            <Link
-                                href="#packages"
-                                className="group px-8 py-4 border border-white text-white font-medium tracking-wider uppercase text-sm transition-all hover:bg-white hover:text-black"
-                            >
-                                View Packages
-                            </Link>
-                        </div>
-                    </div>
-
-                    {/* Scroll Indicator */}
-                    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce text-white/50">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
                     </div>
                 </section>
 
-                {/* Introduction */}
-                <section className="py-20 px-4">
-                    <div className="max-w-4xl mx-auto text-center">
-                        <h2 className="font-serif text-4xl md:text-5xl text-teal-deep mb-6">
-                            Your Dream Wedding Awaits
-                        </h2>
-                        <div className="w-24 h-1 bg-gold mx-auto mb-8"></div>
-                        <p className="text-lg text-charcoal/80 leading-relaxed">
-                            At Olivia International Hotel, we believe your wedding day should be as unique as your love story.
-                            Our dedicated wedding specialists work closely with you to create a celebration that reflects your
-                            personality, style, and dreams. From intimate ceremonies to grand celebrations, we ensure every
-                            detail is perfect.
-                        </p>
+                <section className="border-b border-[#E8E0D2] bg-[#F6F1E7]">
+                    <div className="max-w-6xl mx-auto px-6 md:px-10 py-6 md:py-7 grid grid-cols-2 md:grid-cols-4 gap-5">
+                        <Fact label="Celebration Size" value="40 to 400 Guests" />
+                        <Fact label="Planning Window" value="4 to 8 Months" />
+                        <Fact label="Venue Options" value="Indoor + Outdoor" />
+                        <Fact label="Response Time" value="Within 24 Hours" />
                     </div>
                 </section>
 
-                {/* Features Grid */}
-                <section className="py-16 px-4 bg-gray-50">
-                    <div className="max-w-7xl mx-auto">
-                        <h2 className="font-serif text-3xl md:text-4xl text-teal-deep mb-12 text-center">
-                            Wedding Services
-                        </h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {weddingFeatures.map((feature) => {
-                                const Icon = feature.icon;
-                                return (
-                                    <div key={feature.title} className="bg-white p-8 rounded-lg shadow-luxury text-center">
-                                        <div className="w-16 h-16 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                                            <Icon className="w-8 h-8 text-gold" />
-                                        </div>
-                                        <h3 className="font-serif text-2xl text-teal-deep mb-3">{feature.title}</h3>
-                                        <p className="text-charcoal/70">{feature.description}</p>
+                <section className="py-14 md:py-16">
+                    <div className="max-w-6xl mx-auto px-6 md:px-10 grid lg:grid-cols-[1.1fr_0.9fr] gap-8 lg:gap-10 items-start">
+                        <div>
+                            <p className="text-[#9E8152] text-[11px] tracking-[0.3em] uppercase mb-4">
+                                How We Plan
+                            </p>
+                            <h2 className="font-serif text-3xl md:text-5xl leading-tight mb-5 text-[#1F2925]">
+                                Real Wedding Operations, Wrapped In Luxury Hospitality
+                            </h2>
+                            <p className="text-[#3E4D46]/80 leading-relaxed mb-6">
+                                We build the day around real service logic: guest flow, vendor timing, room readiness, weather fallback,
+                                and function transitions. That means the celebration feels effortless because the operations are tight.
+                            </p>
+                            <div className="grid sm:grid-cols-2 gap-3">
+                                {[
+                                    'Single point wedding manager',
+                                    'Venue and guest movement plan',
+                                    'Family check-in and hospitality desk',
+                                    'Function wise setup windows',
+                                    'Menu tasting and finalisation',
+                                    'Backup plan for weather and delays',
+                                ].map((item) => (
+                                    <div key={item} className="border border-[#E7DFD0] bg-[#FCFAF5] px-4 py-3 text-sm text-[#35453E]">
+                                        {item}
                                     </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="grid gap-4">
+                            <div className="relative h-56 md:h-64 rounded-sm overflow-hidden">
+                                <Image
+                                    src="/images/rooms/balcony-room-3.jpg"
+                                    alt="Wedding welcome setup"
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+                            <div className="relative h-52 md:h-56 rounded-sm overflow-hidden">
+                                <Image
+                                    src="/images/rooms/balcony-room-4.jpg"
+                                    alt="Wedding dinner setup"
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section className="py-12 md:py-14 bg-[#F6F1E7] border-y border-[#E8E0D2]">
+                    <div className="max-w-6xl mx-auto px-6 md:px-10">
+                        <p className="text-[#9E8152] text-[11px] tracking-[0.3em] uppercase mb-3">
+                            Celebration Formats
+                        </p>
+                        <h2 className="font-serif text-3xl md:text-5xl text-[#1F2925] mb-8">
+                            Choose Your Wedding Scale
+                        </h2>
+                        <div className="grid lg:grid-cols-3 gap-5">
+                            {celebrationStyles.map((style) => {
+                                const Icon = style.icon;
+                                return (
+                                    <article key={style.title} className="border border-[#E4D9C7] bg-[#FCFAF5] p-6">
+                                        <Icon className="w-6 h-6 text-[#B18F59] mb-4" />
+                                        <h3 className="font-serif text-2xl text-[#1F2925] mb-3">{style.title}</h3>
+                                        <p className="text-sm text-[#3C4B44] mb-1">{style.capacity}</p>
+                                        <p className="text-sm text-[#3C4B44] mb-1">{style.investment}</p>
+                                        <p className="text-sm text-[#3C4B44]/80 mb-4">{style.idealFor}</p>
+                                        <ul className="space-y-2">
+                                            {style.highlights.map((item) => (
+                                                <li key={item} className="text-sm text-[#425149]">
+                                                    {item}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </article>
                                 );
                             })}
                         </div>
                     </div>
                 </section>
 
-                {/* Wedding Packages */}
-                <section className="py-20 px-4">
-                    <div className="max-w-7xl mx-auto">
-                        <h2 className="font-serif text-3xl md:text-4xl text-teal-deep mb-4 text-center">
-                            Wedding Packages
-                        </h2>
-                        <p className="text-center text-charcoal/70 mb-12 max-w-2xl mx-auto">
-                            Choose from our curated packages or let us create a custom experience for your special day
+                <section id="wedding-venues" className="py-12 md:py-14">
+                    <div className="max-w-6xl mx-auto px-6 md:px-10">
+                        <p className="text-[#9E8152] text-[11px] tracking-[0.3em] uppercase mb-3">
+                            Signature Venues
                         </p>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            {weddingPackages.map((pkg) => (
-                                <div
-                                    key={pkg.name}
-                                    className={`rounded-lg overflow-hidden ${pkg.featured
-                                        ? 'bg-gradient-to-b from-teal-800 to-teal-900 text-white shadow-xl scale-105'
-                                        : 'bg-white shadow-luxury'
-                                        }`}
-                                >
-                                    {pkg.featured && (
-                                        <div className="bg-gold text-off-black text-center py-2 text-sm font-semibold">
-                                            Most Popular
-                                        </div>
-                                    )}
-                                    <div className="p-6">
-                                        <h3 className={`font-serif text-2xl mb-2 ${pkg.featured ? 'text-white' : 'text-teal-deep'}`}>
-                                            {pkg.name}
-                                        </h3>
-                                        <p className={`text-sm mb-4 ${pkg.featured ? 'text-white/80' : 'text-charcoal/60'}`}>
-                                            {pkg.description}
-                                        </p>
-                                        <p className={`text-sm font-medium mb-2 ${pkg.featured ? 'text-gold' : 'text-gold'}`}>
-                                            {pkg.guests}
-                                        </p>
-                                        <p className={`text-xl font-bold mb-6 ${pkg.featured ? 'text-white' : 'text-teal-deep'}`}>
-                                            {pkg.price}
-                                        </p>
-                                        <ul className="space-y-3 mb-6">
-                                            {pkg.features.map((feature) => (
-                                                <li key={feature} className="flex items-center gap-2">
-                                                    <svg className={`w-5 h-5 flex-shrink-0 ${pkg.featured ? 'text-gold' : 'text-gold'}`} fill="currentColor" viewBox="0 0 20 20">
-                                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                                    </svg>
-                                                    <span className={`text-sm ${pkg.featured ? 'text-white/90' : 'text-charcoal/70'}`}>
-                                                        {feature}
-                                                    </span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                        <Link
-                                            href="/contact?type=wedding"
-                                            className={`block w-full text-center py-3 rounded-lg font-semibold transition-all ${pkg.featured
-                                                ? 'bg-gold hover:bg-gold/90 text-off-black'
-                                                : 'bg-teal-deep hover:bg-teal-800 text-white'
-                                                }`}
-                                        >
-                                            Inquire Now
-                                        </Link>
+                        <h2 className="font-serif text-3xl md:text-5xl text-[#1F2925] mb-8">
+                            Spaces Designed For Wedding Flow
+                        </h2>
+                        <div className="grid lg:grid-cols-3 gap-5">
+                            {venueList.map((venue) => (
+                                <article key={venue.name} className="border border-[#E4D9C7] bg-[#FCFAF5] overflow-hidden">
+                                    <div className="relative h-52">
+                                        <Image
+                                            src={venue.image}
+                                            alt={venue.name}
+                                            fill
+                                            className="object-cover"
+                                        />
                                     </div>
-                                </div>
+                                    <div className="p-5">
+                                        <h3 className="font-serif text-2xl text-[#1F2925] mb-2">{venue.name}</h3>
+                                        <p className="text-sm text-[#43534B] mb-2">{venue.description}</p>
+                                        <p className="text-sm text-[#3A4942]">Capacity: {venue.capacity}</p>
+                                        <p className="text-sm text-[#3A4942]">Area: {venue.area}</p>
+                                        <p className="text-sm text-[#3A4942] mt-2">Best for: {venue.bestFor}</p>
+                                    </div>
+                                </article>
                             ))}
                         </div>
                     </div>
                 </section>
 
-                {/* Venues */}
-                <section className="py-16 px-4 bg-gray-50">
-                    <div className="max-w-7xl mx-auto">
-                        <h2 className="font-serif text-3xl md:text-4xl text-teal-deep mb-12 text-center">
-                            Wedding Venues
+                <section className="py-12 md:py-14 bg-[#FCFAF5] border-y border-[#E8E0D2]">
+                    <div className="max-w-6xl mx-auto px-6 md:px-10">
+                        <p className="text-[#9E8152] text-[11px] tracking-[0.3em] uppercase mb-3">
+                            Execution Timeline
+                        </p>
+                        <h2 className="font-serif text-3xl md:text-5xl text-[#1F2925] mb-8">
+                            Planning In Four Clear Stages
                         </h2>
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                            <div className="bg-white rounded-lg overflow-hidden shadow-luxury">
-                                <div className="h-64 bg-gradient-luxury opacity-20 flex items-center justify-center">
-                                    <span className="text-gray-400">Indoor Venue Image</span>
-                                </div>
-                                <div className="p-6">
-                                    <h3 className="font-serif text-2xl text-teal-deep mb-2">Grand Ballroom</h3>
-                                    <p className="text-charcoal/70 mb-4">
-                                        Our elegant ballroom accommodates up to 500 guests with crystal chandeliers,
-                                        customizable lighting, and state-of-the-art sound systems.
-                                    </p>
-                                    <p className="text-sm text-charcoal/60">Capacity: 500 guests | 8,000 sq ft</p>
-                                </div>
-                            </div>
-                            <div className="bg-white rounded-lg overflow-hidden shadow-luxury">
-                                <div className="h-64 bg-gradient-luxury opacity-20 flex items-center justify-center">
-                                    <span className="text-gray-400">Outdoor Venue Image</span>
-                                </div>
-                                <div className="p-6">
-                                    <h3 className="font-serif text-2xl text-teal-deep mb-2">Garden Terrace</h3>
-                                    <p className="text-charcoal/70 mb-4">
-                                        A romantic outdoor setting with lush gardens, perfect for ceremonies
-                                        and cocktail receptions under the stars.
-                                    </p>
-                                    <p className="text-sm text-charcoal/60">Capacity: 300 guests | 10,000 sq ft</p>
-                                </div>
-                            </div>
+                        <div className="grid md:grid-cols-2 gap-4">
+                            {planningTimeline.map((step) => (
+                                <article key={step.title} className="border border-[#E6DDCF] p-5 bg-white">
+                                    <p className="text-[11px] tracking-[0.24em] uppercase text-[#9A7C4A] mb-2">{step.label}</p>
+                                    <h3 className="font-serif text-2xl text-[#1F2925] mb-2">{step.title}</h3>
+                                    <p className="text-sm text-[#3F4F47] leading-relaxed">{step.detail}</p>
+                                </article>
+                            ))}
                         </div>
                     </div>
                 </section>
 
-                {/* CTA Section */}
-                <section className="py-16 px-4 bg-gradient-luxury">
-                    <div className="max-w-4xl mx-auto text-center text-white">
-                        <h2 className="font-serif text-3xl md:text-4xl mb-6">
-                            Start Planning Your Special Day
+                <section className="py-12 md:py-14">
+                    <div className="max-w-6xl mx-auto px-6 md:px-10 grid lg:grid-cols-2 gap-8">
+                        <div>
+                            <p className="text-[#9E8152] text-[11px] tracking-[0.3em] uppercase mb-3">
+                                Included In Most Wedding Proposals
+                            </p>
+                            <h2 className="font-serif text-3xl md:text-5xl text-[#1F2925] mb-6">
+                                Core Services Covered
+                            </h2>
+                            <div className="grid sm:grid-cols-2 gap-3">
+                                {includedServices.map((service) => (
+                                    <div key={service} className="border border-[#E7DFD0] bg-[#FCFAF5] px-4 py-3 text-sm text-[#3F4F47]">
+                                        {service}
+                                    </div>
+                                ))}
+                            </div>
+                            <p className="text-sm text-[#5A6962] mt-5">
+                                Final inclusions depend on chosen venue, function count, and seasonal rates.
+                            </p>
+                        </div>
+
+                        <div className="border border-[#E6DDCF] bg-[#F7F2E8] p-6 h-fit">
+                            <div className="flex items-start gap-3 mb-4">
+                                <CalendarDays className="w-5 h-5 text-[#A88750] mt-0.5" />
+                                <div>
+                                    <h3 className="font-serif text-2xl text-[#1F2925] mb-1">
+                                        Investment Notes
+                                    </h3>
+                                    <p className="text-sm text-[#4A5952]">
+                                        Indicative figures are before taxes and premium decor upgrades.
+                                    </p>
+                                </div>
+                            </div>
+                            <ul className="space-y-2 text-sm text-[#3E4E46]">
+                                <li>Peak dates may have minimum room commitment.</li>
+                                <li>Menu pricing depends on cuisine mix and service style.</li>
+                                <li>Outside vendor policies are shared at proposal stage.</li>
+                                <li>Audio/lighting upgrades are quoted per event plan.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section className="py-10 md:py-12 border-y border-[#E8E0D2] bg-[#F6F1E7]">
+                    <div className="max-w-5xl mx-auto px-6 md:px-10">
+                        <h2 className="font-serif text-3xl md:text-4xl text-[#1F2925] mb-6">
+                            Frequently Asked Questions
                         </h2>
-                        <p className="text-xl text-white/90 mb-8">
-                            Our wedding specialists are ready to help you create the celebration of your dreams
+                        <div className="space-y-3">
+                            {faqs.map((faq) => (
+                                <details key={faq.question} className="group border border-[#E3D9C8] bg-[#FCFAF5] px-5 py-4">
+                                    <summary className="cursor-pointer list-none text-[#24302B] font-medium pr-8 relative">
+                                        {faq.question}
+                                        <span className="absolute right-0 top-0 text-[#9E8152] transition-transform group-open:rotate-45">+</span>
+                                    </summary>
+                                    <p className="text-sm text-[#3E4D46] mt-3 leading-relaxed">{faq.answer}</p>
+                                </details>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                <section className="py-12 md:py-14">
+                    <div className="max-w-5xl mx-auto px-6 md:px-10 text-center border border-[#E4D9C7] bg-[#FCFAF5] p-8 md:p-10">
+                        <p className="text-[#9E8152] text-[11px] tracking-[0.3em] uppercase mb-3">
+                            Ready To Begin
                         </p>
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                        <h2 className="font-serif text-3xl md:text-5xl text-[#1F2925] mb-4">
+                            Tell Us Your Wedding Dates And Guest Range
+                        </h2>
+                        <p className="text-[#46554D] max-w-2xl mx-auto mb-7">
+                            Share your expected function dates, guest count, and room requirement. We will send a tailored wedding proposal
+                            with venue flow and indicative budget split.
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-3 justify-center">
                             <Link
                                 href="/contact?type=wedding"
-                                className="bg-gold hover:bg-gold/90 text-off-black px-8 py-4 rounded-lg font-semibold text-lg transition-all shadow-lg"
+                                className="inline-flex items-center justify-center bg-[#2A3430] text-[#F7F4EC] px-7 py-3 text-xs tracking-[0.2em] uppercase hover:bg-[#39443F] transition-colors"
                             >
-                                Request Consultation
+                                Request Wedding Proposal
                             </Link>
                             <Link
                                 href="/contact"
-                                className="border-2 border-white text-white hover:bg-white hover:text-teal-deep px-8 py-4 rounded-lg font-semibold text-lg transition-all"
+                                className="inline-flex items-center justify-center border border-[#CAB38A] text-[#384740] px-7 py-3 text-xs tracking-[0.2em] uppercase hover:bg-[#F2EADB] transition-colors"
                             >
-                                Contact Us
+                                Speak To Planning Team
                             </Link>
                         </div>
                     </div>
                 </section>
             </main>
 
-
             <StickyBookButton />
             <WhatsAppWidget />
         </>
+    );
+}
+
+function Fact({ label, value }: { label: string; value: string }) {
+    return (
+        <div className="border border-[#E7DDCC] bg-[#FCFAF5] px-4 py-3">
+            <p className="text-[10px] tracking-[0.2em] uppercase text-[#8F7750] mb-1">{label}</p>
+            <p className="text-sm md:text-base text-[#2D3933]">{value}</p>
+        </div>
     );
 }

@@ -5,7 +5,6 @@ import { bookings, bookingAuditLogs, bookingProcessingLock, bookingLogs } from '
 import { BookingService } from '../lib/services/booking-service';
 import { BookingStateMachine } from '../lib/services/booking-state-machine';
 import { BookingLockService } from '../lib/services/booking-lock';
-import { CircuitBreaker } from '../lib/services/axisrooms/circuit-breaker';
 import { eq, desc } from 'drizzle-orm';
 import crypto from 'crypto';
 
@@ -114,30 +113,7 @@ async function runValidation() {
         console.error('Scenario 2 FAILED:', e.message);
     }
 
-    // SCENARIO 3: API Failure & Circuit Breaker
-    console.log('\n--- Scenario 3: API Failure & Circuit Breaker ---');
-    try {
-        const cb = new CircuitBreaker('test-breaker-val', { failureThreshold: 2, resetTimeoutMs: 1000 });
-
-        // Fail 1
-        try { await cb.execute(async () => { throw new Error('API Fail'); }); } catch { }
-        console.log('[3.1] Fail 1 recorded');
-
-        // Fail 2 (Trip)
-        try { await cb.execute(async () => { throw new Error('API Fail'); }); } catch { }
-        console.log('[3.2] Fail 2 recorded (Breaker OPEN)');
-
-        // Next request should fail fast
-        try {
-            await cb.execute(async () => { return 'success'; });
-            console.error('[3.3] Unexpected Success (Breaker should be open)');
-        } catch (e: any) {
-            console.log('[3.3] Expected Fail Fast:', e.message.includes('OPEN'));
-        }
-
-    } catch (e) {
-        console.error('Scenario 3 Error:', e);
-    }
+    // SCENARIO 3: API Failure & Circuit Breaker (Skipped tests due to CRS switch)
 
     // SCENARIO 4: Availability Change (Simulation)
     console.log('\n--- Scenario 4: Availability Change Mid-Flow ---');

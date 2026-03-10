@@ -7,7 +7,6 @@ export const roomTypeSchema = z
         description: z.string().optional(),
         shortDescription: z.string().optional(),
         basePrice: z.coerce.number().min(0, 'Price must be positive'),
-        currency: z.string().default('INR'),
         maxGuests: z.coerce.number().min(1, 'Must accommodate at least 1 guest'),
         maxAdults: z.coerce.number().min(1, 'Must accommodate at least 1 adult'),
         maxChildren: z.coerce.number().default(0),

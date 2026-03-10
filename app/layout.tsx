@@ -1,17 +1,20 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display, Cinzel } from "next/font/google";
+import { Outfit, Cormorant_Garamond, Cinzel } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
+export const dynamic = "force-dynamic";
+
+const sans = Outfit({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-sans",
   display: "swap",
 });
 
-const playfair = Playfair_Display({
+const serif = Cormorant_Garamond({
   subsets: ["latin"],
-  variable: "--font-playfair",
+  variable: "--font-serif",
   display: "swap",
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 const cinzel = Cinzel({
@@ -54,7 +57,7 @@ export default async function RootLayout({
   const session = await getSafeSession();
 
   return (
-    <html lang="en" className={`${inter.variable} ${playfair.variable} ${cinzel.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${sans.variable} ${serif.variable} ${cinzel.variable}`} suppressHydrationWarning>
       <body className="font-sans antialiased" suppressHydrationWarning>
         <SessionProvider session={session}>
           <FrontendLayout>

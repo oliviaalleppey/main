@@ -1,6 +1,7 @@
 'use server';
 
 import { BookingService } from '@/lib/services/booking-service';
+import { OmniwareService } from '@/lib/services/omniware';
 import { redirect } from 'next/navigation';
 import { cookies, headers } from 'next/headers';
 import { RateLimiter } from '@/lib/rate-limit';
@@ -670,31 +671,6 @@ export async function finalizeBookingAction(paymentDetails: {
         throw new Error('Too many attempts. Please try again later.');
     }
 
-    // Retrieve session for guest details (since we need to pass them to finalize)
-    // Actually BookingService.finalizeBooking needs guestDetails passed in explicitly 
-    // OR it should read from session snapshot.
-    // My BookingService implementation accepts `guestDetails` as arg.
-    // I should fetch them from session first.
-
-    // WORKAROUND: In a real app, I'd expose a method to get session data.
-    // Here I'll instantiate BookingService's db calls or add a getter.
-    // I'll assume valid session and let BookingService handle it? 
-    // No, finalizeBooking(sessionId, guestDetails, paymentDetails).
-
-    // Let's refactor BookingService.finalizeBooking to read guestDetails from session.cartData?
-    // Or simpler: fetch it here.
-
-    /* 
-    const session = await db.query.bookingSessions.findFirst({ where: eq(bookingSessions.id, sessionId) });
-    const guestDetails = session?.cartData?.guestDetails;
-    */
-
-    // But I can't import `db` here easily without circular deps or just cleaner code.
-    // I'll update `BookingService` to `getGuestDetails(sessionId)` or just `finalizeBooking` reads from cart.
-
-    // I will call a new wrapper method in BookingService: `finalizeSession(sessionId, paymentDetails)`
-    // which internally reads everything.
-
     try {
         const expectedAmount = await calculateSessionPayableAmount(sessionId);
         const booking = await bookingService.finalizeSession(sessionId, {
@@ -714,7 +690,70 @@ export async function finalizeBookingAction(paymentDetails: {
         // Handle error (availability changed, price mismatch)
         const message = error instanceof Error ? error.message : 'Booking finalization failed';
         console.error('Booking Finalization Failed:', message);
-        // We should redirect to an error page or back to checkout with error query param
         redirect(`/book/checkout?error=${encodeURIComponent(message)}`);
+    }
+}
+
+/**
+ * Step 1 of Omniware payment:
+ * Creates a pending booking and returns Omniware form params so the frontend
+ * can POST them directly to the Omniware payment URL.
+ */
+export async function initiateOmniwarePaymentAction(): Promise<{
+    success: boolean;
+    error?: string;
+    omniwarePayload?: ReturnType<typeof OmniwareService.buildPaymentPayload>;
+}> {
+    const sessionId = (await cookies()).get('booking_session')?.value;
+    if (!sessionId) return { success: false, error: 'Session expired. Please search again.' };
+
+    const ip = (await headers()).get('x-forwarded-for') || 'unknown';
+    const limit = await RateLimiter.check(ip, 'initiateOmniwarePaymentAction');
+    if (!limit.allowed) return { success: false, error: 'Too many attempts. Please try again.' };
+
+    try {
+        const expectedAmount = await calculateSessionPayableAmount(sessionId);
+
+        // Retrieve session guest details
+        const session = await db.query.bookingSessions.findFirst({ where: eq(bookingSessions.id, sessionId) });
+        if (!session) return { success: false, error: 'Session not found.' };
+
+        const cartData = session.cartData as Record<string, any> | null;
+        const guestDetails = cartData?.guestDetails as { firstName?: string; lastName?: string; email?: string; phone?: string } | undefined;
+
+        if (!guestDetails?.firstName || !guestDetails?.email || !guestDetails?.phone) {
+            return { success: false, error: 'Guest details are incomplete. Please fill in the guest form again.' };
+        }
+
+        // Create the pending booking record in DB
+        const txnId = `OL-${Date.now()}`;
+        const booking = await bookingService.finalizeSession(sessionId, {
+            method: 'omniware',
+            amount: expectedAmount,
+            orderId: txnId,
+        });
+
+        if (!booking) return { success: false, error: 'Failed to create booking record.' };
+
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://yourdomain.com';
+        const returnUrl = `${baseUrl}/api/payment/omniware`;
+
+        const omniwarePayload = OmniwareService.buildPaymentPayload({
+            orderId: txnId,
+            amount: expectedAmount,
+            name: `${guestDetails.firstName} ${guestDetails.lastName || ''}`.trim(),
+            email: guestDetails.email,
+            phone: guestDetails.phone,
+            returnUrl: returnUrl,
+        });
+
+        // Clean up session cookie (booking is now pending Omniware confirmation)
+        (await cookies()).delete('booking_session');
+
+        return { success: true, omniwarePayload };
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Payment initiation failed.';
+        console.error('Omniware payment initiation failed:', message);
+        return { success: false, error: message };
     }
 }

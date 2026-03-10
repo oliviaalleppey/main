@@ -292,19 +292,17 @@ export default async function CheckoutPage({
                                 <CircleCheck className="w-4 h-4" />
                                 <span>1. Select Room</span>
                             </div>
-                            <div className={`rounded-lg md:rounded-xl px-2 md:px-3 py-1.5 md:py-2 inline-flex items-center gap-1.5 md:gap-2 font-medium border ${
-                                hasRequiredGuestDetails
+                            <div className={`rounded-lg md:rounded-xl px-2 md:px-3 py-1.5 md:py-2 inline-flex items-center gap-1.5 md:gap-2 font-medium border ${hasRequiredGuestDetails
                                     ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
                                     : 'border-[#1C1C1C]/20 bg-white text-[#1C1C1C]'
-                            }`}>
+                                }`}>
                                 {hasRequiredGuestDetails ? <CircleCheck className="w-4 h-4" /> : <CircleDot className="w-4 h-4" />}
                                 <span>2. Guest Details</span>
                             </div>
-                            <div className={`rounded-lg md:rounded-xl px-2 md:px-3 py-1.5 md:py-2 inline-flex items-center gap-1.5 md:gap-2 border ${
-                                showPaymentSection
+                            <div className={`rounded-lg md:rounded-xl px-2 md:px-3 py-1.5 md:py-2 inline-flex items-center gap-1.5 md:gap-2 border ${showPaymentSection
                                     ? 'border-[#1C1C1C]/20 bg-white text-[#1C1C1C] font-semibold'
                                     : 'border-gray-200 bg-gray-50 text-gray-400 font-medium'
-                            }`}>
+                                }`}>
                                 <CircleDot className="w-4 h-4" />
                                 <span>3. Payment</span>
                             </div>
@@ -393,7 +391,7 @@ export default async function CheckoutPage({
                         </div>
                     )}
 
-                    <div className="bg-white p-4 md:p-8 rounded-xl md:rounded-2xl shadow-sm border border-gray-100">
+                    <div id="payment-section" className="bg-white p-4 md:p-8 rounded-xl md:rounded-2xl shadow-sm border border-gray-100">
                         <div className="mb-4 md:mb-6">
                             <h3 className="text-xl md:text-2xl font-semibold text-[#1C1C1C]">Payment</h3>
                             <p className="text-xs text-gray-500 mt-1">Final step to confirm your reservation</p>

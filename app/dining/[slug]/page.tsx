@@ -157,7 +157,10 @@ export default async function OutletPage({ params }: Props) {
 
                         {/* Sidebar */}
                         <div className="lg:col-span-1">
-                            <div className="bg-cream-50 rounded-lg p-8 sticky top-24">
+                            <div
+                                className="bg-cream-50 rounded-lg p-8 sticky"
+                                style={{ top: 'calc(var(--site-header-height, 96px) + 1rem)' }}
+                            >
                                 <h3 className="font-display text-2xl text-cream-900 mb-6">
                                     Visit Us
                                 </h3>

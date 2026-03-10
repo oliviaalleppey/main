@@ -44,7 +44,10 @@ export default function GalleryPage() {
             </section>
 
             {/* Category Filter */}
-            <section className="py-8 px-6 md:px-12 bg-white border-b border-gray-200 sticky top-0 z-40">
+            <section
+                className="py-8 px-6 md:px-12 bg-white border-b border-gray-200 sticky z-40"
+                style={{ top: 'var(--site-header-height, 62px)' }}
+            >
                 <div className="max-w-6xl mx-auto">
                     <div className="flex flex-wrap justify-center gap-4">
                         {categories.map((category) => (

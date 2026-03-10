@@ -1,10 +1,26 @@
 import { Resend } from 'resend';
 
-if (!process.env.RESEND_API_KEY) {
-    throw new Error('RESEND_API_KEY is not configured');
-}
+let resendClient: Resend | null | undefined;
+let warnedMissingResendKey = false;
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResendClient() {
+    if (resendClient !== undefined) {
+        return resendClient;
+    }
+
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+        if (!warnedMissingResendKey) {
+            console.warn('[email] RESEND_API_KEY is not configured. Email delivery is disabled.');
+            warnedMissingResendKey = true;
+        }
+        resendClient = null;
+        return resendClient;
+    }
+
+    resendClient = new Resend(apiKey);
+    return resendClient;
+}
 
 const FROM_EMAIL = process.env.HOTEL_EMAIL || 'reservations@oliviahotel.com';
 const HOTEL_NAME = process.env.HOTEL_NAME || 'Olivia International Hotel';
@@ -22,6 +38,11 @@ export async function sendBookingConfirmation(params: {
     totalAmount: number;
 }) {
     try {
+        const resend = getResendClient();
+        if (!resend) {
+            return { skipped: true };
+        }
+
         const { to, guestName, bookingNumber, checkIn, checkOut, roomType, totalAmount } = params;
 
         const { data, error } = await resend.emails.send({
@@ -112,6 +133,11 @@ export async function sendInquiryAcknowledgment(params: {
     type: string;
 }) {
     try {
+        const resend = getResendClient();
+        if (!resend) {
+            return { skipped: true };
+        }
+
         const { to, name, type } = params;
 
         const { data, error } = await resend.emails.send({

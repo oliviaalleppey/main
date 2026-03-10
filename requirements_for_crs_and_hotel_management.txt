@@ -1,0 +1,43 @@
+Website Launch Checklist: Pending Requirements from Hotel & CRS Teams
+
+--------------------------------------------------------------------------------
+1. REQUIREMENTS FROM THE CRS TEAM (AXISROOMS / BOOKING ENGINE)
+--------------------------------------------------------------------------------
+To move the booking flow from test mode to live production, we need the following:
+
+A. Production API Credentials
+   - Exact CRS_BASE_URL
+   - CRS_API_KEY
+   - CRS_HOTEL_ID
+
+B. Room & Rate Plan Mappings
+   Our system needs to map the website's URLs to the exact CRS IDs. We require an exact JSON breakdown of:
+   - Room Type Mappings (e.g., "deluxe-suite": "CRS_ID_101")
+   - Rate Plan Mappings (e.g., "breakfast-included": "CRS_RATE_BB")
+
+C. Live Configuration
+   - Confirmation that the test/live rooms in the CRS are synchronized and able to accept test payloads.
+
+D. Quote Endpoint Details
+   - We need the endpoint specifications to fetch exact real-time prices before redirecting users to the payment gateway to avoid price mismatches during checkout.
+
+--------------------------------------------------------------------------------
+2. REQUIREMENTS FROM THE HOTEL TEAM (CONTENT & OPERATIONS)
+--------------------------------------------------------------------------------
+
+A. Venue & Event Data (For Conference & Events Pages)
+   - High-Resolution Images: Featured hero images for each venue.
+   - Exact Dimensions & Capacities: Length, width, height, and area size in sqft. Guest capacities for all seating styles (Theatre, Classroom, Cluster, U-Shape, Boardroom, Banquet, Cocktail).
+   - Downloadable Assets: Actual PDF floor plans for each venue.
+   - Lists: A finalized list of equipment (e.g., Projectors, Mics) and amenities (e.g., Coffee stations) available per venue.
+
+B. Room Data & Aesthetics
+   - Photography: High-quality, professional photos for all room types (we are currently utilizing fallback placeholders).
+   - Final Copywriting: Approved marketing descriptions, short summaries, and exact bed configurations for each room.
+
+C. Business Operations & Policies
+   - Production Gateways & Keys:
+     * Live Razorpay API Keys (Key ID & Secret).
+     * Resend (or preferred provider) API keys for transactional emails (booking confirmations).
+   - Legal Copy: The finalized text for your Terms and Conditions, Privacy Policy, and the Cancellation Policy.
+   - Official Contacts: The exact designated phone numbers, WhatsApp numbers, and email addresses (e.g., events@oliviaalleppey.com, reservations@oliviahotel.com) where automated booking and inquiry emails should be routed.

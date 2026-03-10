@@ -17,8 +17,7 @@ export async function PUT(
         const body = await request.json();
         // Remove id from body if present to avoid validation error or schema conflicts
         const { id: _bodyId, ...data } = body;
-
-        const validated = roomTypeSchema.partial().parse(data);
+        const validated = roomTypeSchema.parse(data);
 
         const updated = await updateRoomType(roomTypeId, validated);
 

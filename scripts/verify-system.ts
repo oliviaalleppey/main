@@ -3,8 +3,6 @@ import { db } from '../lib/db';
 import { bookingAuditLogs, bookingProcessingLock, rateLimits, bookings } from '../lib/db/schema';
 import { BookingLockService } from '../lib/services/booking-lock';
 import { RateLimiter } from '../lib/rate-limit';
-import { RetryManager } from '../lib/services/axisrooms/retry-manager';
-import { CircuitBreaker } from '../lib/services/axisrooms/circuit-breaker';
 import { BookingService } from '../lib/services/booking-service';
 import { eq, sql } from 'drizzle-orm';
 import crypto from 'crypto';
@@ -86,51 +84,7 @@ async function runTests() {
     const blockedRate = await RateLimiter.check(ip, endpoint);
     expect('Request 6 used up limit', !blockedRate.allowed);
 
-    // 4. Retry Logic (Unit Test)
-    console.log('\n--- 4. Retry Logic Test ---');
-    const retryManager = new RetryManager({ maxRetries: 2, baseDelay: 10, maxDelay: 100, timeout: 500 });
-    let attempts = 0;
-
-    // Scenario 1: Success after fails
-    attempts = 0;
-    await retryManager.execute(async () => {
-        attempts++;
-        if (attempts <= 2) throw new Error('Simulated timed out'); // Retryable error
-        return 'success';
-    }, 'TestOp');
-    expect('Retried and succeeded', attempts === 3);
-
-    // Scenario 2: Max retries exceeded
-    attempts = 0;
-    try {
-        await retryManager.execute(async () => {
-            attempts++;
-            throw new Error('Persistent timed out'); // Retryable error
-        }, 'TestOpMax');
-        expect('Should have thrown', false);
-    } catch (e) {
-        expect('Max retries exceeded threw error', attempts === 3); // 1 initial + 2 retries = 3 attempts.
-        // Wait, maxRetries=2. Try 1 (fail), Retry 1 (fail), Retry 2 (fail). Total 3.
-        // If it throws after retry 2, attempts is 3. Correct.
-    }
-
-    // 5. Circuit Breaker (Unit Test)
-    console.log('\n--- 5. Circuit Breaker Test ---');
-    const cb = new CircuitBreaker('test-service', { failureThreshold: 2, resetTimeoutMs: 1000 });
-
-    try {
-        await cb.execute(async () => { throw new Error('Fail 1'); });
-    } catch (e) { }
-    try {
-        await cb.execute(async () => { throw new Error('Fail 2'); }); // OPEN
-    } catch (e) { }
-
-    try {
-        await cb.execute(async () => { return 'success'; }); // Should fail fast
-        expect('Should fail fast when OPEN', false);
-    } catch (e: any) {
-        expect('Circuit open failure message', e.message.includes('CircuitBreaker: Service test-service is OPEN') || e.message.includes('Simulated Fail') ? true : false);
-    }
+    // Test cases for obsolete retry & circuit breakers removed
 
     // 6. Availability Recheck (Integration Simulation)
     console.log('\n--- 6. Availability Recheck Test ---');

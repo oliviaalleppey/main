@@ -220,7 +220,10 @@ export default async function VenuePage({ params }: Props) {
 
                         {/* Sidebar */}
                         <div className="lg:col-span-1">
-                            <div className="bg-cream-50 rounded-lg p-8 sticky top-24 space-y-6">
+                            <div
+                                className="bg-cream-50 rounded-lg p-8 sticky space-y-6"
+                                style={{ top: 'calc(var(--site-header-height, 96px) + 1rem)' }}
+                            >
                                 <h3 className="font-display text-2xl text-cream-900">
                                     Plan Your Event
                                 </h3>
