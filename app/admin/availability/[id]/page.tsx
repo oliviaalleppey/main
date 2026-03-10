@@ -54,7 +54,7 @@ export default async function RoomAvailabilityPage({ params }: PageProps) {
                 checkOut,
                 adults: 1,
                 children: 0,
-                roomTypeId: roomType.id,
+                roomTypeId: roomType.slug, // Must pass slug, not UUID, since HOTSOFT_ROOM_MAPPING expects slugs
             });
 
             let free = 0;

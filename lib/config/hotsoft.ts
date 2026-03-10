@@ -14,7 +14,7 @@ export const HOTSOFT_ROOM_MAPPING: Record<string, string> = {
     'canal-view-superior-family': '80013',
     'lake-view-balcony': '80014',
     'lake-view-balcony-suite': '80015',
-    'lake-view-twin-room': '80016',
+    'lake-view-twin': '80016',
 };
 
 // Mapping from Olivia Internal Rate Plans to Hotsoft Rate Plan Codes
