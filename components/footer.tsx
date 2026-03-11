@@ -16,7 +16,6 @@ const footerLinks = {
     information: [
         { name: 'Contact Us', href: '/contact' },
         { name: 'Gallery', href: '/gallery' },
-        { name: 'Offers', href: '/offers' },
         { name: 'Careers', href: '/careers' },
     ],
     legal: [

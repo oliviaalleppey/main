@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, useScroll, useTransform } from 'framer-motion';
+import { formatRoomName } from '@/lib/utils';
 // import { roomTypes } from '@/lib/data/rooms';
 
 interface RoomInput {
@@ -63,9 +64,11 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
         'Mini Bar',
         'Safe Deposit',
     ];
-    const roomTypes: RoomViewModel[] = initialRooms.map((room) => ({
+    const roomTypes: RoomViewModel[] = initialRooms.map((room) => {
+        const displayName = formatRoomName(room.name);
+        return ({
         id: room.id,
-        name: room.name,
+        name: displayName,
         slug: room.slug,
         images: room.images && room.images.length > 0 ? room.images : ['/images/placeholder.jpg'],
         // Ensure image property exists for compatibility
@@ -73,7 +76,7 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
         // Ensure features exists (map from amenities if needed)
         features: room.amenities || [],
         // Ensure shortName exists
-        shortName: room.name.replace(' Room', '').replace(' Suite', ''),
+        shortName: displayName,
         // Ensure view exists (default if missing)
         view: room.view || 'Lake View',
         shortDescription: (room.shortDescription || room.description || 'Refined accommodation with tailored comforts.').replace('watero', 'waterfront'),
@@ -81,7 +84,8 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
         size: room.size || '—',
         maxGuests: Number(room.maxGuests || 2),
         bedType: room.bedType || 'King Bed',
-    }));
+    });
+    });
     const containerRef = useRef(null);
     const [activeRoom, setActiveRoom] = useState(0);
 
@@ -249,7 +253,7 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
                         >
                             <Image
                                 src="/images/rooms/balcony-room-5.jpg"
-                                alt="Lake View Balcony Suite"
+                                alt="Lake View Balcony Suite Room"
                                 fill
                                 className="object-cover"
                             />
@@ -267,7 +271,7 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
                         >
                             <span className="text-[#8D7858] text-[10px] tracking-[0.3em] uppercase mb-3 block">Signature Experience</span>
                             <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-[#2D3732] mb-4 leading-tight">
-                                Lake View Balcony Suite
+                                Lake View Balcony Suite Room
                             </h2>
                             <p className="text-[#3E4C45]/75 text-base md:text-lg leading-relaxed mb-6">
                                 Our most exclusive accommodation offers an unparalleled lakeside experience.
@@ -426,7 +430,7 @@ function RoomCard({ room, index }: { room: RoomViewModel; index: number }) {
                     <div className="backdrop-blur-xl bg-white/85 border border-white/50 shadow-[0_12px_40px_-15px_rgba(0,0,0,0.2)] px-5 py-3.5 rounded-2xl flex flex-col items-end">
                         <span className="text-[#BCA06F] text-[9px] font-accent tracking-[0.35em] uppercase mb-1">Room From</span>
                         <div className="flex items-baseline gap-1">
-                            <span className="text-[#1C1C1C] text-[1.45rem] font-serif font-medium leading-none">₹{room.basePrice.toLocaleString()}</span>
+                            <span className="text-[#1C1C1C] text-[1.45rem] font-serif font-medium leading-none">₹{(room.basePrice / 100).toLocaleString('en-IN')}</span>
                             <span className="text-[#1C1C1C]/40 text-[10px] font-medium tracking-widest uppercase">/ Night</span>
                         </div>
                     </div>

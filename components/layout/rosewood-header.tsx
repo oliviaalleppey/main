@@ -7,7 +7,6 @@ import { usePathname } from 'next/navigation';
 
 const NAV_ITEMS = [
     'Discover',
-    'Offers',
     'Accommodation',
     'Wedding',
     'Dining',
@@ -118,11 +117,9 @@ export default function RosewoodHeader() {
     return (
         <header ref={headerRef} className="sticky top-0 z-50 bg-[#FBFBF9] shadow-sm">
             <div
-                className={`hidden md:block overflow-hidden border-gray-200/20 duration-200 ease-out ${
-                    enableTopBarAnimation ? 'transition-[height,opacity,border-color]' : ''
-                } ${
-                    isTopBarVisible ? 'h-12 border-b opacity-100' : 'h-0 border-b-0 opacity-0 pointer-events-none'
-                }`}
+                className={`hidden md:block overflow-hidden border-gray-200/20 duration-200 ease-out ${enableTopBarAnimation ? 'transition-[height,opacity,border-color]' : ''
+                    } ${isTopBarVisible ? 'h-12 border-b opacity-100' : 'h-0 border-b-0 opacity-0 pointer-events-none'
+                    }`}
             >
                 <div className="flex justify-between items-center px-6 md:px-12 py-3 text-[11px] font-medium font-sans text-gray-900">
                     <div className="flex gap-6">
@@ -169,9 +166,8 @@ export default function RosewoodHeader() {
                         <Link
                             key={item}
                             href={toNavHref(item)}
-                            className={`font-serif hover:opacity-70 transition-colors text-gray-600 hover:text-gray-900 ${
-                                item === 'Conference & Events' ? 'text-base whitespace-nowrap' : 'text-lg'
-                            }`}
+                            className={`font-serif hover:opacity-70 transition-colors text-gray-600 hover:text-gray-900 ${item === 'Conference & Events' ? 'text-base whitespace-nowrap' : 'text-lg'
+                                }`}
                         >
                             {item}
                         </Link>

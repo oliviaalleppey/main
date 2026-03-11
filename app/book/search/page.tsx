@@ -16,6 +16,7 @@ import {
 import { getAvailableRoomsForSearch, type SearchResult } from '@/lib/services/search';
 import { BookingButton } from '@/components/booking/booking-button';
 import { SearchStayEditor } from '@/components/booking/search-stay-editor';
+import { formatRoomName } from '@/lib/utils';
 
 type SortKey = 'recommended' | 'price-asc' | 'size-desc' | 'guests-desc';
 
@@ -189,6 +190,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
                 <div className="grid grid-cols-1 gap-4 md:gap-7">
                     {sortedRooms.map((result, index) => {
+                        const roomName = formatRoomName(result.roomType.name);
                         const bestRatePlan = result.ratePlans.length
                             ? [...result.ratePlans].sort((a, b) => a.amount - b.amount)[0]
                             : undefined;
@@ -213,7 +215,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                                         {result.roomType.images && result.roomType.images.length > 0 ? (
                                             <Image
                                                 src={result.roomType.images[0]}
-                                                alt={result.roomType.name}
+                                                alt={roomName}
                                                 fill
                                                 className="object-cover transition-transform duration-700 group-hover:scale-105"
                                             />
@@ -246,7 +248,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                                         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 md:gap-5">
                                             <div className="min-w-0 flex-1">
                                                 <div className="mb-2 md:mb-3 flex items-start justify-between gap-3 md:gap-4">
-                                                    <h3 className="text-[30px] md:text-[38px] leading-none font-serif text-[#1F2A24]">{result.roomType.name}</h3>
+                                                    <h3 className="text-[30px] md:text-[38px] leading-none font-serif text-[#1F2A24]">{roomName}</h3>
                                                     <div className="inline-flex items-center gap-1 rounded-full border border-orange-200 bg-orange-50 px-2 py-0.5 md:px-2.5 md:py-1 text-[#E95D20]">
                                                         <Star className="h-3.5 w-3.5 fill-current" />
                                                         <span className="text-xs font-bold">5.0</span>

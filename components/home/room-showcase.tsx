@@ -4,6 +4,7 @@ import { Share2, ArrowRight } from 'lucide-react';
 import { db } from '@/lib/db';
 import { roomTypes } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+import { formatRoomName } from '@/lib/utils';
 
 type RoomCard = {
     title: string;
@@ -31,7 +32,7 @@ async function getShowcaseRooms(): Promise<RoomCard[]> {
     return rows.map((row) => {
         const images = Array.isArray(row.images) ? row.images : [];
         return {
-            title: row.name,
+            title: formatRoomName(row.name),
             description: row.shortDescription || row.description || 'Experience a thoughtfully designed stay with signature Olivia comforts.',
             image: row.featuredImage || images[0] || null,
             link: `/rooms/${row.slug}`,

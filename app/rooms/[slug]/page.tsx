@@ -15,6 +15,7 @@ import { db } from '@/lib/db';
 import { roomTypes } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { ensureRoomTypeMinOccupancyColumn } from '@/lib/db/schema-guard';
+import { formatRoomName } from '@/lib/utils';
 
 export const revalidate = 0;
 
@@ -28,9 +29,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
     if (!room) return { title: 'Room Not Found' };
 
+    const roomName = formatRoomName(room.name);
+
     return {
-        title: `${room.name} | Olivia Hotel`,
-        description: room.description || `Experience luxury in our ${room.name}.`,
+        title: `${roomName} | Olivia Hotel`,
+        description: room.description || `Experience luxury in our ${roomName}.`,
     };
 }
 
@@ -47,9 +50,11 @@ export default async function RoomDetailPage({ params }: { params: Promise<{ slu
         notFound();
     }
 
+    const roomName = formatRoomName(room.name);
+
     // Dynamic images from DB
     const roomImages = room.images && room.images.length > 0
-        ? room.images.map((src, index) => ({ id: index + 1, alt: `${room.name} view ${index + 1}`, src }))
+        ? room.images.map((src, index) => ({ id: index + 1, alt: `${roomName} view ${index + 1}`, src }))
         : [
             { id: 1, alt: 'Main room view', src: `/images/rooms/${slug}-1.jpg` },
             { id: 2, alt: 'Bathroom', src: `/images/rooms/${slug}-2.jpg` },
@@ -83,7 +88,7 @@ export default async function RoomDetailPage({ params }: { params: Promise<{ slu
             {/* Title Section (Above Grid) */}
             <section className="pt-2 pb-1 px-6 md:px-12 max-w-[1400px] mx-auto">
                 <h1 className="font-serif text-4xl md:text-5xl tracking-tight text-[#1C1C1C] mb-1">
-                    {room.name}
+                    {roomName}
                 </h1>
                 <p className="text-lg text-[#1C1C1C]/60 font-light">
                     {room.shortDescription || 'Experience luxury in the heart of Alappuzha'}
@@ -103,7 +108,7 @@ export default async function RoomDetailPage({ params }: { params: Promise<{ slu
             />
 
             {/* Room Features Showcase */}
-            <RoomFeatures roomType={room.name} />
+            <RoomFeatures roomType={roomName} />
 
             {/* Offers Carousel */}
             <OffersCarousel />
@@ -113,7 +118,7 @@ export default async function RoomDetailPage({ params }: { params: Promise<{ slu
 
             {/* Final Booking CTA */}
             <BookingCTA
-                roomName={room.name}
+                roomName={roomName}
                 basePrice={room.basePrice}
                 roomSlug={slug}
             />
