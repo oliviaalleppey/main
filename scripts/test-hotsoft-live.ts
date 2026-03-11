@@ -51,7 +51,9 @@ async function runHotsoftLiveTest() {
             },
             payment: {
                 method: 'online',
-                amount: 15000
+                amount: 500000,
+                subtotal: 423729,
+                taxAmount: 76271,
             }
         });
 

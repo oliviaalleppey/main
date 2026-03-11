@@ -1,7 +1,7 @@
-import { HOTSOFT_CONFIG, getHotsoftRoomId, getHotsoftRatePlanId, HOTSOFT_ROOM_MAPPING } from '@/lib/config/hotsoft';
+import { HOTSOFT_CONFIG, getHotsoftRoomId, getHotsoftRatePlanId, HOTSOFT_ROOM_MAPPING } from '../../config/hotsoft';
 import { XMLBuilder, XMLParser } from 'fast-xml-parser';
-import { db } from '@/lib/db';
-import { roomTypes } from '@/lib/db/schema';
+import { db } from '../../db';
+import { roomTypes } from '../../db/schema';
 import { eq } from 'drizzle-orm';
 import type {
     BookingProvider,
@@ -47,6 +47,14 @@ export class HotsoftCrsProvider implements BookingProvider {
     });
 
     async checkAvailability(request: CRSAvailabilityRequest): Promise<CRSAvailabilityResponse> {
+        if (!HOTSOFT_CONFIG.availabilityUrl || !HOTSOFT_CONFIG.appKey || !HOTSOFT_CONFIG.hotelId) {
+            return {
+                status: 'failure',
+                rooms: [],
+                message: 'Hotsoft configuration incomplete for availability lookup.',
+            };
+        }
+
         const roomTypesToCheck = request.roomTypeId
             ? [request.roomTypeId]
             : Object.keys(HOTSOFT_ROOM_MAPPING);
@@ -138,14 +146,14 @@ export class HotsoftCrsProvider implements BookingProvider {
     }
 
     async createReservation(request: CRSCreateReservationRequest): Promise<CRSReservationResponse> {
-        if (!HOTSOFT_CONFIG.bookingUrl) {
-            console.error('[Hotsoft] Booking URL not configured (Pending from Hotsoft Team). Failing silently for now.');
-            // During dev, we mock success if URL is missing so we don't break the user flow randomly
+        if (!HOTSOFT_CONFIG.bookingUrl || !HOTSOFT_CONFIG.appKey || !HOTSOFT_CONFIG.hotelId) {
+            console.error('[Hotsoft] Configuration incomplete. Failing push reservation securely.');
             return {
-                status: 'confirmed',
-                reservationId: `PENDING-HOTSOFT-${request.reservationRef}`,
-                confirmationNumber: `OL-${request.reservationRef}`,
-                message: 'Pending Hotsoft API Endpoint Configuration.',
+                status: 'failed',
+                reservationId: '',
+                confirmationNumber: '',
+                message: 'Hotsoft API configuration incomplete.',
+                errors: ['Missing booking URL/app key/hotel id']
             };
         }
 
@@ -191,9 +199,9 @@ export class HotsoftCrsProvider implements BookingProvider {
                     '@_CheckOutDateTime': formatDateTimeToHotsoft(request.checkOut),
                     '@_TotalPax': (request.rooms.reduce((sum, r) => sum + r.adults + r.children, 0)).toString(),
                     '@_Children': (request.rooms.reduce((sum, r) => sum + r.children, 0)).toString(),
-                    '@_Amount': request.payment?.amount ? (request.payment.amount / 1.18).toFixed(2) : '0', // Math depends on how tax is applied
-                    '@_Taxes': request.payment?.amount ? (request.payment.amount - (request.payment.amount / 1.18)).toFixed(2) : '0',
-                    '@_TotalAmount': request.payment?.amount?.toString() || '0',
+                    '@_Amount': typeof request.payment?.subtotal === 'number' ? (request.payment.subtotal / 100).toFixed(2) : '0.00',
+                    '@_Taxes': typeof request.payment?.taxAmount === 'number' ? (request.payment.taxAmount / 100).toFixed(2) : '0.00',
+                    '@_TotalAmount': typeof request.payment?.amount === 'number' ? (request.payment.amount / 100).toFixed(2) : '0.00',
                 },
                 BookingDetails: {
                     '@_HotelID': HOTSOFT_CONFIG.hotelId,
@@ -211,7 +219,7 @@ export class HotsoftCrsProvider implements BookingProvider {
             }
         });
 
-        const fullXml = `<?xml version="1.0" encoding="utf-16"?>\n${xmlPayload}`;
+        const fullXml = `<?xml version="1.0" encoding="UTF-8"?>\n${xmlPayload}`;
 
         try {
             console.log(`[Hotsoft] Pushing Reservation to ${HOTSOFT_CONFIG.bookingUrl}`);
@@ -226,10 +234,23 @@ export class HotsoftCrsProvider implements BookingProvider {
 
             if (bookingResponse) {
                 if (bookingResponse.Status === "Success") {
+                    const reservationId = bookingResponse.CrsReff?.toString()?.trim();
+                    const confirmationNumber = bookingResponse.CrsBookingId?.toString()?.trim();
+
+                    if (!reservationId || !confirmationNumber) {
+                        return {
+                            status: 'failed',
+                            reservationId: '',
+                            confirmationNumber: '',
+                            message: 'Hotsoft returned Success without reservation identifiers.',
+                            errors: ['Missing CrsReff/CrsBookingId in success response'],
+                        };
+                    }
+
                     return {
                         status: 'confirmed',
-                        reservationId: bookingResponse.CrsReff?.toString() || `HS-${request.reservationRef}`,
-                        confirmationNumber: bookingResponse.CrsBookingId?.toString() || `OL-${request.reservationRef}`,
+                        reservationId,
+                        confirmationNumber,
                         message: bookingResponse.Remarks || 'Reservation pushed to Hotsoft successfully.',
                     };
                 } else {
@@ -243,12 +264,13 @@ export class HotsoftCrsProvider implements BookingProvider {
                 }
             }
 
-            // Fallback mock success response if response structure is not matched but no HTTP error
+            // Fallback mock failed response if response structure is not matched but no HTTP error
             return {
-                status: 'confirmed',
-                reservationId: `HS-${request.reservationRef}`,
-                confirmationNumber: `OL-${request.reservationRef}`,
-                message: 'Reservation pushed to Hotsoft successfully (Unrecognized response structure).',
+                status: 'failed',
+                reservationId: '',
+                confirmationNumber: '',
+                message: 'Hotsoft API returned an unrecognized response structure.',
+                errors: ['Unrecognized response structure']
             };
 
         } catch (error) {
@@ -274,7 +296,7 @@ export class HotsoftCrsProvider implements BookingProvider {
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'text/xml', // Assuming standard text/xml
+                    'Content-Type': 'text/xml; charset=utf-8',
                     'Accept': 'text/xml, application/xml',
                 },
                 body: xmlPayload,

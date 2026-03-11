@@ -1,8 +1,8 @@
 export const HOTSOFT_CONFIG = {
-    appKey: process.env.HOTSOFT_APP_KEY || 'DM20022026OLIVIAUAT8001WI',
-    hotelId: process.env.HOTSOFT_HOTEL_ID || '8001',
-    availabilityUrl: process.env.HOTSOFT_AVAILABILITY_URL || 'https://purplekeys.co.in/OliviaUAT/GetLiveAvailability.aspx',
-    bookingUrl: process.env.HOTSOFT_BOOKING_URL || 'https://purplekeys.co.in/OliviaUAT/OTAbookingsUpdate.aspx',
+    appKey: process.env.HOTSOFT_APP_KEY || '',
+    hotelId: process.env.HOTSOFT_HOTEL_ID || '',
+    availabilityUrl: process.env.HOTSOFT_AVAILABILITY_URL || '',
+    bookingUrl: process.env.HOTSOFT_BOOKING_URL || '',
     timeoutMs: process.env.HOTSOFT_TIMEOUT_MS ? parseInt(process.env.HOTSOFT_TIMEOUT_MS, 10) : 15000,
 };
 

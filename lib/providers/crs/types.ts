@@ -66,6 +66,8 @@ export interface CRSCreateReservationRequest {
     payment?: {
         method: string;
         amount: number;
+        subtotal?: number;
+        taxAmount?: number;
         transactionId?: string;
     };
     comments?: string;

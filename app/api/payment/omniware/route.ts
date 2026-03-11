@@ -3,7 +3,7 @@ import { db } from '@/lib/db';
 import { payments, bookingLogs } from '@/lib/db/schema';
 import { BookingService } from '@/lib/services/booking-service';
 import { OmniwareService } from '@/lib/services/omniware';
-import { eq } from 'drizzle-orm';
+import { and, eq, ne } from 'drizzle-orm';
 
 const bookingService = new BookingService();
 
@@ -54,18 +54,30 @@ export async function POST(req: NextRequest) {
         }
 
         if (status === 'success') {
-            if (parseFloat(postData.amount) !== (paymentRecord.amount / 100)) {
+            const parsedAmount = Number.parseFloat(postData.amount || '');
+            if (!Number.isFinite(parsedAmount)) {
+                await db.insert(bookingLogs).values({
+                    action: 'omniware_amount_invalid',
+                    requestPayload: postData,
+                    level: 'error',
+                    errorMessage: `Invalid amount received: "${postData.amount}"`
+                });
+                return new NextResponse('Invalid Amount', { status: 400 });
+            }
+
+            const receivedAmountPaise = Math.round(parsedAmount * 100);
+            if (receivedAmountPaise !== paymentRecord.amount) {
                 await db.insert(bookingLogs).values({
                     action: 'omniware_amount_mismatch',
                     requestPayload: postData,
                     level: 'error',
-                    errorMessage: `Expected ${(paymentRecord.amount / 100).toFixed(2)}, got ${postData.amount}`
+                    errorMessage: `Expected ${paymentRecord.amount} paise, got ${receivedAmountPaise} paise`
                 });
                 return new NextResponse('Amount Mismatch', { status: 400 });
             }
 
-            // Update Payment Record
-            await db.update(payments)
+            // Race-safe: do not overwrite an already failed payment with a late success callback.
+            const successUpdates = await db.update(payments)
                 .set({
                     status: 'success',
                     omniwareTransactionId: postData.transaction_id,
@@ -74,27 +86,82 @@ export async function POST(req: NextRequest) {
                     paymentMethod: postData.payment_channel || 'omniware',
                     updatedAt: new Date(),
                 })
-                .where(eq(payments.omniwareOrderId, txnid));
+                .where(and(
+                    eq(payments.omniwareOrderId, txnid),
+                    ne(payments.status, 'failed'),
+                ))
+                .returning({
+                    bookingId: payments.bookingId,
+                });
+
+            if (!successUpdates.length) {
+                await db.insert(bookingLogs).values({
+                    action: 'omniware_late_success_ignored',
+                    requestPayload: postData,
+                    level: 'warning',
+                    errorMessage: 'Received a success webhook after payment was already marked failed. Ignoring auto-confirmation.',
+                });
+                return new NextResponse('Ignored late success', { status: 200 });
+            }
 
             // Mark Booking as Confirmed
-            await bookingService.finalizeFromWebhook(paymentRecord.bookingId);
+            const bookingId = successUpdates[0]?.bookingId || paymentRecord.bookingId;
+            const finalizeResult = await bookingService.finalizeFromWebhook(bookingId);
+
+            if (!finalizeResult?.success && finalizeResult?.status !== 'already_confirmed') {
+                await db.insert(bookingLogs).values({
+                    bookingId,
+                    action: 'omniware_success_finalize_pending',
+                    level: 'warning',
+                    requestPayload: { finalizeResult, postData },
+                    errorMessage: 'Payment marked successful but CRS confirmation is pending or failed.',
+                });
+            }
 
             // Redirect user to success
             const origin = req.nextUrl.origin;
-            return NextResponse.redirect(`${origin}/book/confirmation/${paymentRecord.bookingId}?status=success`);
+            return NextResponse.redirect(`${origin}/book/confirmation/${bookingId}`);
         } else {
-            // Failure
-            await db.update(payments)
+            // Failure webhook received
+            // Race-safe: only update to failed if this payment has not already been marked success.
+            const updatedRows = await db.update(payments)
                 .set({
                     status: 'failed',
                     omniwareTransactionId: postData.transaction_id,
                     omniwareHash: postData.hash,
                     updatedAt: new Date(),
                 })
-                .where(eq(payments.omniwareOrderId, txnid));
+                .where(and(
+                    eq(payments.omniwareOrderId, txnid),
+                    ne(payments.status, 'success'),
+                ))
+                .returning({
+                    bookingId: payments.bookingId,
+                });
 
-            const origin = req.nextUrl.origin;
-            return NextResponse.redirect(`${origin}/book/checkout?error=${encodeURIComponent(postData.error_desc || postData.response_message || 'Payment Failed')}`);
+            if (!updatedRows.length) {
+                await db.insert(bookingLogs).values({
+                    action: 'omniware_late_failure_ignored',
+                    requestPayload: postData,
+                    level: 'warning',
+                    errorMessage: 'Received a failure webhook but payment was already marked successful. Ignoring.'
+                });
+                // Return success so gateway stops retrying, but don't fail the booking
+                return new NextResponse('Ignored late failure', { status: 200 });
+            }
+
+            // Mark Booking as Failed securely
+            try {
+                const bookingId = updatedRows[0]?.bookingId;
+                if (bookingId) {
+                    await bookingService.markAsFailed(bookingId, postData.error_desc || postData.response_message || 'Payment failed at gateway');
+                }
+            } catch (failErr) {
+                console.error('[Omniware Webhook] Failed to update booking state to failed:', failErr);
+            }
+
+            const failOrigin = req.nextUrl.origin;
+            return NextResponse.redirect(`${failOrigin}/book/checkout?error=${encodeURIComponent(postData.error_desc || postData.response_message || 'Payment Failed')}`);
         }
 
     } catch (error) {

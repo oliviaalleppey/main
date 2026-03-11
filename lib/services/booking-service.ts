@@ -644,9 +644,10 @@ export class BookingService {
                 };
             });
 
-            const roomSubtotal = roomLineItems.reduce((sum, line) => sum + line.subtotal, 0);
-            const subtotal = roomSubtotal + addOnSubtotal;
-            const taxAmount = Math.round(subtotal * 0.18);
+            const payableTotal = roomLineItems.reduce((sum, line) => sum + line.subtotal, 0) + addOnSubtotal;
+            // Prices presented in checkout are treated as payable totals; derive a consistent tax split for CRS reporting.
+            const taxAmount = Math.round((payableTotal * 18) / 118);
+            const subtotal = payableTotal - taxAmount;
 
             const [newBooking] = await db.insert(bookings).values({
                 bookingNumber: bookingRef,
@@ -658,7 +659,7 @@ export class BookingService {
                 checkOut: checkOutStr,
                 adults: session.adults || 1,
                 children: session.children || 0,
-                totalAmount: subtotal,
+                totalAmount: payableTotal,
                 subtotal: subtotal,
                 taxAmount: taxAmount,
                 status: 'initiated',
@@ -704,7 +705,7 @@ export class BookingService {
             // Create Payment Record
             const [paymentRecord] = await db.insert(payments).values({
                 bookingId: newBooking.id,
-                amount: subtotal,
+                amount: payableTotal,
                 status: 'pending',
                 paymentMethod: paymentDetails.method,
                 omniwareOrderId: paymentDetails.orderId || `txn_${crypto.randomUUID()}`
@@ -920,6 +921,8 @@ export class BookingService {
                 payment: {
                     method: 'online',
                     amount: booking.totalAmount,
+                    subtotal: booking.subtotal ?? undefined,
+                    taxAmount: booking.taxAmount ?? undefined,
                 },
                 comments: booking.specialRequests || undefined,
             };
@@ -1029,6 +1032,29 @@ export class BookingService {
         } finally {
             // 8. RELEASE LOCK (Mandatory)
             await BookingLockService.releaseLock(bookingId);
+        }
+    }
+
+    /**
+     * Mark a booking as failed, usually initiated by a payment gateway failure webhook
+     */
+    async markAsFailed(bookingId: string, reason: string) {
+        const booking = await db.query.bookings.findFirst({
+            where: eq(bookings.id, bookingId),
+        });
+
+        if (!booking) {
+            throw new Error(`Booking ${bookingId} not found`);
+        }
+
+        if (booking.status === 'confirmed') {
+            throw new Error(`Booking ${bookingId} is already confirmed. Cannot mark as failed.`);
+        }
+
+        if (booking.status !== 'failed' && booking.status !== 'refunded') {
+            await bookingStateMachine.transition(bookingId, 'failed', {
+                reason: `Payment Failure: ${reason}`
+            });
         }
     }
 }
