@@ -63,7 +63,12 @@ export default async function ConfirmationPage({ params }: { params: Promise<{ b
     let icon = <CheckCircle2 className="w-10 h-10 text-green-600" />;
     let iconBg = "bg-green-100";
 
-    if (booking.status === 'confirmed') {
+    if (booking.status === 'failed') {
+        statusTitle = "Booking Failed";
+        statusMsg = "There was an issue completing your reservation. Please contact support.";
+        icon = <div className="text-red-600 text-4xl">!</div>; // Icon placeholder
+        iconBg = "bg-red-100";
+    } else if (booking.status === 'confirmed') {
         statusTitle = "Booking Confirmed!";
         statusMsg = "Thank you for choosing Olivia International.";
         icon = <CheckCircle2 className="w-10 h-10 text-green-600" />;
@@ -78,11 +83,6 @@ export default async function ConfirmationPage({ params }: { params: Promise<{ b
         statusMsg = "Your payment is successful. We are finalizing reservation confirmation with the hotel system. You will receive confirmation shortly.";
         icon = <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />;
         iconBg = "bg-blue-50";
-    } else if (booking.status === 'failed') {
-        statusTitle = "Booking Failed";
-        statusMsg = "There was an issue completing your reservation. Please contact support.";
-        icon = <div className="text-red-600 text-4xl">!</div>; // Icon placeholder
-        iconBg = "bg-red-100";
     }
 
     return (
