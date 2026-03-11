@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { CheckCircle2, Copy } from 'lucide-react';
 import { ensureRoomTypeMinOccupancyColumn } from '@/lib/db/schema-guard';
+import { formatRoomName } from '@/lib/utils';
 
 // Format helper
 const formatCurrency = (amount: number) => {
@@ -46,7 +47,7 @@ export default async function ConfirmationPage({ params }: { params: Promise<{ b
 
             const quantity = Math.max(1, item.quantity || 1);
             return {
-                name: roomType?.name || 'Room',
+                name: formatRoomName(roomType?.name),
                 quantity,
             };
         }));

@@ -66,25 +66,25 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
     ];
     const roomTypes: RoomViewModel[] = initialRooms.map((room) => {
         const displayName = formatRoomName(room.name);
-        return ({
-        id: room.id,
-        name: displayName,
-        slug: room.slug,
-        images: room.images && room.images.length > 0 ? room.images : ['/images/placeholder.jpg'],
-        // Ensure image property exists for compatibility
-        image: room.images && room.images.length > 0 ? room.images[0] : '/images/placeholder.jpg',
-        // Ensure features exists (map from amenities if needed)
-        features: room.amenities || [],
-        // Ensure shortName exists
-        shortName: displayName,
-        // Ensure view exists (default if missing)
-        view: room.view || 'Lake View',
-        shortDescription: (room.shortDescription || room.description || 'Refined accommodation with tailored comforts.').replace('watero', 'waterfront'),
-        basePrice: Number(room.basePrice || 0),
-        size: room.size || '—',
-        maxGuests: Number(room.maxGuests || 2),
-        bedType: room.bedType || 'King Bed',
-    });
+        return {
+            id: room.id,
+            name: displayName,
+            slug: room.slug,
+            images: room.images && room.images.length > 0 ? room.images : ['/images/placeholder.jpg'],
+            // Ensure image property exists for compatibility
+            image: room.images && room.images.length > 0 ? room.images[0] : '/images/placeholder.jpg',
+            // Ensure features exists (map from amenities if needed)
+            features: room.amenities || [],
+            // Ensure shortName exists
+            shortName: displayName,
+            // Ensure view exists (default if missing)
+            view: room.view || 'Lake View',
+            shortDescription: (room.shortDescription || room.description || 'Refined accommodation with tailored comforts.').replace('watero', 'waterfront'),
+            basePrice: Number(room.basePrice || 0),
+            size: room.size || '—',
+            maxGuests: Number(room.maxGuests || 2),
+            bedType: room.bedType || 'King Bed',
+        };
     });
     const containerRef = useRef(null);
     const [activeRoom, setActiveRoom] = useState(0);
@@ -169,23 +169,25 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
                 className="sticky z-40 bg-[#FBF9F3] border-b border-[#E8E0D1] py-2.5 transition-all duration-300"
                 style={{ top: 'var(--site-header-height, 62px)' }}
             >
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="flex justify-center gap-1.5 md:gap-5 overflow-x-auto no-scrollbar">
-                        {roomTypes.map((room, index) => (
-                            <button
-                                key={room.id}
-                                onClick={() => {
-                                    setActiveRoom(index);
-                                    document.getElementById(`room-${index}`)?.scrollIntoView({ behavior: 'smooth' });
-                                }}
-                                className={`px-3 py-1.5 text-[11px] md:text-xs tracking-[0.12em] whitespace-nowrap transition-all duration-300 ${activeRoom === index
-                                    ? 'text-[#8A7351] border-b border-[#BCA06F]'
-                                    : 'text-[#45524B]/70 hover:text-[#2E3934]'
-                                    }`}
-                            >
-                                {room.shortName}
-                            </button>
-                        ))}
+                <div className="mx-auto w-full max-w-[1600px] px-3 md:px-6">
+                    <div className="-mx-1 overflow-x-auto no-scrollbar">
+                        <div className="flex min-w-max items-center gap-2 md:gap-4 px-1 md:px-2">
+                            {roomTypes.map((room, index) => (
+                                <button
+                                    key={room.id}
+                                    onClick={() => {
+                                        setActiveRoom(index);
+                                        document.getElementById(`room-${index}`)?.scrollIntoView({ behavior: 'smooth' });
+                                    }}
+                                    className={`px-3 py-1.5 text-[11px] md:text-xs tracking-[0.08em] whitespace-nowrap transition-all duration-300 ${activeRoom === index
+                                        ? 'text-[#8A7351] border-b border-[#BCA06F]'
+                                        : 'text-[#45524B]/70 hover:text-[#2E3934]'
+                                        }`}
+                                >
+                                    {room.shortName}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </section>

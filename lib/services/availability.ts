@@ -6,6 +6,7 @@ import { getBookingProvider } from '@/lib/providers/crs/factory';
 import { db } from '../db';
 import { bookingItems, bookings, rooms, roomTypes } from '../db/schema';
 import { ensureRoomTypeMinOccupancyColumn } from '@/lib/db/schema-guard';
+import { formatRoomName } from '@/lib/utils';
 
 export interface AvailabilityDay {
     date: string;
@@ -136,7 +137,7 @@ export async function getAvailabilityCalendar(params: {
 
     return {
         roomTypeId,
-        roomTypeName: roomType.name,
+        roomTypeName: formatRoomName(roomType.name),
         month: startDate.getMonth() + 1,
         year: startDate.getFullYear(),
         days,

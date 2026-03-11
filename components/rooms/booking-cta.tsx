@@ -3,6 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { formatRoomName } from '@/lib/utils';
 
 interface BookingCTAProps {
     roomName: string;
@@ -11,6 +12,8 @@ interface BookingCTAProps {
 }
 
 export default function BookingCTA({ roomName, basePrice, roomSlug }: BookingCTAProps) {
+    const displayRoomName = formatRoomName(roomName);
+
     return (
         <section className="relative py-16 px-6 md:px-12 bg-[#07221D] overflow-hidden">
             {/* Background Image with sophisticated overlay */}
@@ -41,7 +44,7 @@ export default function BookingCTA({ roomName, basePrice, roomSlug }: BookingCTA
                             Your Perfect <span className="italic text-[#B8956A]">Kerala Escape</span>
                         </h2>
                         <p className="text-white/70 text-base md:text-lg font-light leading-relaxed max-w-xl">
-                            Indulge in the serenity of {roomName}. A sanctuary designed for those who seek the extraordinary.
+                            Indulge in the serenity of {displayRoomName}. A sanctuary designed for those who seek the extraordinary.
                         </p>
 
                         {/* Refined Trust Badges */}

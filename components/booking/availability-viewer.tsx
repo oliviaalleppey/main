@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { AvailabilityCalendar } from './availability-calendar';
 import { formatCurrency } from '@/lib/services/payment';
 import { differenceInDays } from 'date-fns';
+import { formatRoomName } from '@/lib/utils';
 
 interface RoomType {
     id: string;
@@ -37,7 +38,7 @@ export function AvailabilityViewer({ roomType }: AvailabilityViewerProps) {
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
             {/* Room Type Header */}
             <div className="bg-gradient-to-r from-teal-800 to-teal-600 text-white p-6">
-                <h2 className="text-2xl font-semibold">{roomType.name}</h2>
+                <h2 className="text-2xl font-semibold">{formatRoomName(roomType.name)}</h2>
                 {roomType.shortDescription && (
                     <p className="text-teal-100 mt-1">{roomType.shortDescription}</p>
                 )}

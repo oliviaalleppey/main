@@ -20,6 +20,7 @@ import { AddOnsSelector } from '@/components/booking/add-ons-selector';
 import { MiniStayEditor } from '@/components/booking/mini-stay-editor';
 import { RoomSelectionsEditor } from '@/components/booking/room-selections-editor';
 import { ensureRoomTypeMinOccupancyColumn } from '@/lib/db/schema-guard';
+import { formatRoomName } from '@/lib/utils';
 
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -215,6 +216,7 @@ export default async function CheckoutPage({
     if (!roomLineItems.length) return <div>Selected room types are no longer available.</div>;
 
     const primaryRoom = roomLineItems[0].room;
+    const primaryRoomName = formatRoomName(primaryRoom.name);
     const totalRoomCount = roomLineItems.reduce((sum, entry) => sum + entry.quantity, 0);
     const selectedRoomTypeCount = roomLineItems.length;
     const roomSubtotal = roomLineItems.reduce((sum, entry) => sum + entry.subtotal, 0);
@@ -438,12 +440,12 @@ export default async function CheckoutPage({
                         <div className="flex gap-3">
                             {primaryRoom.images && primaryRoom.images[0] && (
                                 <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden flex-shrink-0">
-                                    <Image src={primaryRoom.images[0]} alt={primaryRoom.name} fill className="object-cover" />
+                                    <Image src={primaryRoom.images[0]} alt={primaryRoomName} fill className="object-cover" />
                                 </div>
                             )}
                             <div className="min-w-0">
                                 <h3 className="font-serif text-lg md:text-xl leading-tight text-[#1C1C1C]">
-                                    {primaryRoom.name}
+                                    {primaryRoomName}
                                     {selectedRoomTypeCount > 1 ? ` + ${selectedRoomTypeCount - 1} more type${selectedRoomTypeCount - 1 > 1 ? 's' : ''}` : ''}
                                 </h3>
                                 <div className="mt-2 flex flex-wrap gap-1.5">
@@ -503,7 +505,7 @@ export default async function CheckoutPage({
                         <RoomSelectionsEditor
                             items={roomLineItems.map((entry) => ({
                                 roomTypeId: entry.room.id,
-                                roomName: entry.room.name,
+                                roomName: formatRoomName(entry.room.name),
                                 quantity: entry.quantity,
                                 quotedPricePerNight: entry.quotedPricePerNight,
                                 nights,
@@ -521,7 +523,7 @@ export default async function CheckoutPage({
                         {roomLineItems.map((entry) => (
                             <div key={entry.room.id} className="flex justify-between">
                                 <span className="max-w-[70%]">
-                                    {entry.room.name} ({formatCurrency(entry.quotedPricePerNight)} x {nights}N x {entry.quantity}R)
+                                    {formatRoomName(entry.room.name)} ({formatCurrency(entry.quotedPricePerNight)} x {nights}N x {entry.quantity}R)
                                 </span>
                                 <span className="font-medium text-black">{formatCurrency(entry.subtotal)}</span>
                             </div>

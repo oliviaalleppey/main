@@ -26,6 +26,7 @@ import { getBookingProvider } from '@/lib/providers/crs/factory';
 import type { BookingProvider, CRSCreateReservationRequest } from '@/lib/providers/crs/types';
 import { resolveMaxChildren, validateGuestMixForRoomType } from './occupancy';
 import { ensureRoomTypeMinOccupancyColumn } from '@/lib/db/schema-guard';
+import { formatRoomName } from '@/lib/utils';
 
 type CreateSessionInput = {
     checkIn: Date | string;
@@ -366,7 +367,7 @@ export class BookingService {
 
         if (!matchedAvailability || matchedAvailability.availableCount < safeRoomCount) {
             throw new Error(
-                `Only ${matchedAvailability?.availableCount || 0} room(s) available for ${roomType.name}.`
+                `Only ${matchedAvailability?.availableCount || 0} room(s) available for ${formatRoomName(roomType.name)}.`
             );
         }
 
@@ -553,7 +554,7 @@ export class BookingService {
 
             if (!roomAvail || roomAvail.availableCount < selection.quantity) {
                 throw new Error(
-                    `Only ${roomAvail?.availableCount || 0} room(s) available for ${roomType.name}.`
+                    `Only ${roomAvail?.availableCount || 0} room(s) available for ${formatRoomName(roomType.name)}.`
                 );
             }
         }

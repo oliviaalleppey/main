@@ -1,4 +1,5 @@
 import type { roomTypes } from '@/lib/db/schema';
+import { formatRoomName } from '@/lib/utils';
 
 type RoomTypeOccupancyShape = Pick<
     typeof roomTypes.$inferSelect,
@@ -27,6 +28,7 @@ export function validateGuestMixForRoomType(
     guests: GuestMix,
     roomCount = 1,
 ): { valid: boolean; reason?: string } {
+    const roomName = formatRoomName(roomType.name);
     const safeRoomCount = Math.max(1, Math.floor(roomCount || 1));
     const adults = Math.max(0, guests.adults || 0);
     const children = Math.max(0, guests.children || 0);
@@ -46,28 +48,28 @@ export function validateGuestMixForRoomType(
     if (totalGuests < minGuests) {
         return {
             valid: false,
-            reason: `${roomType.name} requires at least ${minGuests} guest${minGuests === 1 ? '' : 's'}.`,
+            reason: `${roomName} requires at least ${minGuests} guest${minGuests === 1 ? '' : 's'}.`,
         };
     }
 
     if (totalGuests > maxGuests) {
         return {
             valid: false,
-            reason: `${roomType.name} allows up to ${maxGuests} guest${maxGuests === 1 ? '' : 's'} for ${safeRoomCount} room${safeRoomCount === 1 ? '' : 's'}.`,
+            reason: `${roomName} allows up to ${maxGuests} guest${maxGuests === 1 ? '' : 's'} for ${safeRoomCount} room${safeRoomCount === 1 ? '' : 's'}.`,
         };
     }
 
     if (adults > maxAdults) {
         return {
             valid: false,
-            reason: `${roomType.name} allows up to ${maxAdults} adult${maxAdults === 1 ? '' : 's'} for ${safeRoomCount} room${safeRoomCount === 1 ? '' : 's'}.`,
+            reason: `${roomName} allows up to ${maxAdults} adult${maxAdults === 1 ? '' : 's'} for ${safeRoomCount} room${safeRoomCount === 1 ? '' : 's'}.`,
         };
     }
 
     if (children > maxChildren) {
         return {
             valid: false,
-            reason: `${roomType.name} allows up to ${maxChildren} child${maxChildren === 1 ? '' : 'ren'}.`,
+            reason: `${roomName} allows up to ${maxChildren} child${maxChildren === 1 ? '' : 'ren'}.`,
         };
     }
 

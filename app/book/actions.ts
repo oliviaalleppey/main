@@ -15,6 +15,7 @@ import { and, eq, inArray } from 'drizzle-orm';
 import { ensureRoomTypeMinOccupancyColumn } from '@/lib/db/schema-guard';
 import { mapCrsRoomTypeMatchesInternal } from '@/lib/config/crs';
 import { getBookingProvider } from '@/lib/providers/crs/factory';
+import { formatRoomName } from '@/lib/utils';
 
 type SelectedAddOnInput = {
     addOnId: string;
@@ -256,7 +257,7 @@ async function persistSessionRoomSelections(
         if (!matchedAvailability || matchedAvailability.availableCount < sanitizeRoomCount(selection.quantity)) {
             return {
                 success: false,
-                message: `Only ${matchedAvailability?.availableCount || 0} room(s) available for ${roomType.name}.`,
+                message: `Only ${matchedAvailability?.availableCount || 0} room(s) available for ${formatRoomName(roomType.name)}.`,
             };
         }
     }
@@ -442,7 +443,7 @@ export async function startBookingSession(
         }));
 
         if (!matchedAvailability || matchedAvailability.availableCount < safeRoomCount) {
-            throw new Error(`Only ${matchedAvailability?.availableCount || 0} room(s) available for ${roomType.name}.`);
+            throw new Error(`Only ${matchedAvailability?.availableCount || 0} room(s) available for ${formatRoomName(roomType.name)}.`);
         }
 
         const cartData = (session.cartData as SessionCartData | null) || {};

@@ -4,6 +4,7 @@ import { bookings, bookingConfirmations, bookingItems } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { notFound } from 'next/navigation';
 import { PrintButton } from '@/components/invoice/print-button';
+import { formatRoomName } from '@/lib/utils';
 
 // Hotel Details
 const HOTEL_DETAILS = {
@@ -39,7 +40,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ bookin
     const totalNights = Math.max(...items.map((item) => Math.max(1, item.nights || 1)), 1);
     const roomTypeLabel = items.length > 1
         ? 'Multiple Room Types'
-        : (primaryItem?.roomType?.name || 'Room');
+        : formatRoomName(primaryItem?.roomType?.name);
 
     // Helper: Calculate Tax
     const pricePerNight = primaryItem?.pricePerNight || 0;
