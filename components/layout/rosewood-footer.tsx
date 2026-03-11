@@ -36,18 +36,20 @@ export default function RosewoodFooter() {
                         <h4 className="text-xs uppercase tracking-[0.2em] text-[#8C7A5C] mb-6">Contact Us</h4>
                         <p className="text-sm font-light text-[#1C1C1C]/70">
                             Olivia International,<br />
-                            Olivia Alleppey,<br />
-                            Nehru Trophy Boat Race View Point,<br />
-                            Finishing Point,<br />
-                            Punnamada, Alappuzha,<br />
-                            Kerala, India
+                            Finishing Point, Punnamada,<br />
+                            Alappuzha, Kerala - 688013,<br />
+                            India
                         </p>
                         <p className="text-sm font-light text-[#1C1C1C]/70 mt-4">
-                            Front Reservation: <a href="tel:+918075416514" className="underline decoration-[#1C1C1C]/20 hover:text-[#C5A572] transition-colors">+91 8075 416 514</a><br />
-                            WhatsApp: <a href="https://wa.me/918075416514" className="underline decoration-[#1C1C1C]/20 hover:text-[#C5A572] transition-colors">+91 80754 16514</a><br />
+                            Primary (Landline): +91/0 477225088, +91/0 4772250800<br />
+                            Primary: <a href="tel:+918075416514" className="underline decoration-[#1C1C1C]/20 hover:text-[#C5A572] transition-colors">+91 8075 416 514</a><br />
+                            Reservations: <a href="tel:+918075416514" className="underline decoration-[#1C1C1C]/20 hover:text-[#C5A572] transition-colors">+91 8075 416 514</a><br />
+                            WhatsApp: <a href="https://wa.me/918075416514" className="underline decoration-[#1C1C1C]/20 hover:text-[#C5A572] transition-colors">+91 8075 416 514</a><br />
+                            Main: <a href="mailto:reservation@oliviaalleppey.com" className="underline decoration-[#1C1C1C]/20 hover:text-[#C5A572] transition-colors">reservation@oliviaalleppey.com</a><br />
                             Reservations: <a href="mailto:reservation@oliviaalleppey.com" className="underline decoration-[#1C1C1C]/20 hover:text-[#C5A572] transition-colors">reservation@oliviaalleppey.com</a><br />
                             Support: <a href="mailto:mail@oliviaalleppey.com" className="underline decoration-[#1C1C1C]/20 hover:text-[#C5A572] transition-colors">mail@oliviaalleppey.com</a><br />
-                            Working Hours: Round the clock (24 hours)
+                            Code: Outside India +91 | India 0<br />
+                            Reservations: 09:00 - 18:00 | Front Desk: 24/7 hrs
                         </p>
                     </div>
 

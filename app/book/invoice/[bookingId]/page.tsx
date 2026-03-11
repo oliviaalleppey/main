@@ -9,9 +9,9 @@ import { formatRoomName } from '@/lib/utils';
 // Hotel Details
 const HOTEL_DETAILS = {
     name: 'Olivia International',
-    address: 'Finishing Point, Punnamada, Alappuzha - 13',
-    phone: '+914772250888, +914772250800',
-    email: 'mail@oliviaalleppey.com',
+    address: 'Finishing Point, Punnamada, Alappuzha, Kerala - 688013, India',
+    phone: '+91/0 477225088, +91/0 4772250800, +91 8075 416 514',
+    email: 'reservation@oliviaalleppey.com',
     gstin: '32AABCO1416E1Z6'
 };
 

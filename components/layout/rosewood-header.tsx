@@ -2,6 +2,7 @@
 
 import { signIn, signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
@@ -121,12 +122,7 @@ export default function RosewoodHeader() {
                     } ${isTopBarVisible ? 'h-12 border-b opacity-100' : 'h-0 border-b-0 opacity-0 pointer-events-none'
                     }`}
             >
-                <div className="flex justify-between items-center px-6 md:px-12 py-3 text-[11px] font-medium font-sans text-gray-900">
-                    <div className="flex gap-6">
-                        <Link href="/" className="hover:opacity-70 transition-opacity">
-                            Olivia International
-                        </Link>
-                    </div>
+                <div className="flex justify-end items-center px-6 md:px-12 py-3 text-[11px] font-medium font-sans text-gray-900">
                     <div className="flex gap-6 items-center">
                         {session ? (
                             <div className="flex items-center gap-4">
@@ -153,11 +149,17 @@ export default function RosewoodHeader() {
                 </div>
             </div>
 
-            <div className="flex items-center justify-between px-6 md:px-12 py-4">
+            <div className="flex items-center justify-between px-6 md:px-12 h-[74px] md:h-[88px]">
                 <div className="flex items-center flex-1 xl:w-1/4">
-                    <Link href="/" className="inline-flex items-center group whitespace-nowrap">
-                        <span className="text-sm font-bold tracking-[0.2em] uppercase leading-tight text-gray-900">Olivia</span>
-                        <span className="text-sm font-bold tracking-[0.2em] uppercase leading-tight text-gray-900 ml-2">Alleppey</span>
+                    <Link href="/" className="inline-flex h-full items-center group whitespace-nowrap" aria-label="Olivia Alleppey">
+                        <Image
+                            src="/images/olivia-logo.svg"
+                            alt="Olivia Alleppey"
+                            width={420}
+                            height={400}
+                            className="h-[58px] md:h-[70px] w-auto max-w-none"
+                            priority
+                        />
                     </Link>
                 </div>
 

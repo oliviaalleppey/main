@@ -64,11 +64,9 @@ export default function ContactPage() {
                                         <h3 className="font-medium text-[#1C1C1C] mb-1">Address</h3>
                                         <p className="text-[#1C1C1C]/60">
                                             Olivia International<br />
-                                            Olivia Alleppey<br />
-                                            Nehru Trophy Boat Race View Point<br />
-                                            Finishing Point<br />
-                                            Punnamada, Alappuzha<br />
-                                            Kerala - India
+                                            Finishing Point, Punnamada<br />
+                                            Alappuzha, Kerala - 688013<br />
+                                            India
                                         </p>
                                     </div>
                                 </div>
@@ -81,10 +79,13 @@ export default function ContactPage() {
                                         </svg>
                                     </div>
                                     <div>
-                                        <h3 className="font-medium text-[#1C1C1C] mb-1">Front Reservation</h3>
-                                        <a href="tel:+918075416514" className="text-[#1C1C1C]/60 hover:text-[#C9A961] transition-colors">
-                                            +91 8075 416 514
-                                        </a>
+                                        <h3 className="font-medium text-[#1C1C1C] mb-1">Phone</h3>
+                                        <p className="text-[#1C1C1C]/60">
+                                            Primary (Landline): +91/0 477225088, +91/0 4772250800<br />
+                                            Primary: <a href="tel:+918075416514" className="hover:text-[#C9A961] transition-colors">+91 8075 416 514</a><br />
+                                            Reservations: <a href="tel:+918075416514" className="hover:text-[#C9A961] transition-colors">+91 8075 416 514</a><br />
+                                            Code: Outside India +91 | India 0
+                                        </p>
                                     </div>
                                 </div>
 
@@ -98,10 +99,17 @@ export default function ContactPage() {
                                     <div>
                                         <h3 className="font-medium text-[#1C1C1C] mb-1">Email</h3>
                                         <p className="text-[#1C1C1C]/60">
+                                            Main: {' '}
                                             <a href="mailto:reservation@oliviaalleppey.com" className="hover:text-[#C9A961] transition-colors">
                                                 reservation@oliviaalleppey.com
                                             </a>
                                             <br />
+                                            Reservations: {' '}
+                                            <a href="mailto:reservation@oliviaalleppey.com" className="hover:text-[#C9A961] transition-colors">
+                                                reservation@oliviaalleppey.com
+                                            </a>
+                                            <br />
+                                            Support: {' '}
                                             <a href="mailto:mail@oliviaalleppey.com" className="hover:text-[#C9A961] transition-colors">
                                                 mail@oliviaalleppey.com
                                             </a>
@@ -119,7 +127,7 @@ export default function ContactPage() {
                                     <div>
                                         <h3 className="font-medium text-[#1C1C1C] mb-1">WhatsApp</h3>
                                         <a href="https://wa.me/918075416514" className="text-[#1C1C1C]/60 hover:text-[#C9A961] transition-colors">
-                                            +91 80754 16514
+                                            +91 8075 416 514
                                         </a>
                                     </div>
                                 </div>
@@ -134,7 +142,8 @@ export default function ContactPage() {
                                     <div>
                                         <h3 className="font-medium text-[#1C1C1C] mb-1">Working Hours</h3>
                                         <p className="text-[#1C1C1C]/60">
-                                            Round the clock - 24 hours
+                                            Reservations: 09:00 - 18:00<br />
+                                            Front Desk: 24/7 hrs
                                         </p>
                                     </div>
                                 </div>
@@ -145,7 +154,7 @@ export default function ContactPage() {
                                 <div className="absolute inset-0 flex items-center justify-center px-6">
                                     <div className="text-center">
                                         <p className="text-[#1C1C1C]/60 text-sm mb-4">
-                                            Nehru Trophy Boat Race View Point, Finishing Point, Punnamada, Alappuzha
+                                            Finishing Point, Punnamada, Alappuzha, Kerala - 688013, India
                                         </p>
                                         <a
                                             href="https://maps.app.goo.gl/yZ4xyGBqp8i8uo1Z9"

@@ -137,16 +137,16 @@ export default function DiscoverPage() {
                             </h2>
                             <div className="space-y-4 text-gray-600 leading-relaxed">
                                 <p>
-                                    Nestled along the tranquil backwaters of Alappuzha, Olivia International was born from a vision
-                                    to create a sanctuary where Kerala's rich heritage meets contemporary luxury.
+                                    Nestled along the tranquil backwaters of Alappuzha, Olivia Alleppey, a 5 Star Classified Hotel, was born from a vision to create a sanctuary where Kerala&apos;s rich heritage meets contemporary luxury.
                                 </p>
                                 <p>
-                                    Since our inception, we have been dedicated to crafting experiences that honor the timeless
-                                    beauty of God's Own Country while providing the refined comforts expected by discerning travelers.
+                                    Inspired by the timeless charm of God&apos;s Own Country, Olivia was designed to be more than just a destination. It is an experience where elegance, comfort, and nature exist in perfect harmony. From the gentle rhythm of the backwaters to the warm hospitality that welcomes every guest, each moment at Olivia reflects the spirit of Kerala.
                                 </p>
                                 <p>
-                                    Every detail, from our architecture to our service philosophy, reflects our commitment to
-                                    preserving Kerala's cultural essence while embracing modern elegance.
+                                    Since our inception, we have been dedicated to crafting meaningful experiences for discerning travelers who seek both serenity and sophistication. Every detail, from our thoughtfully designed architecture to our personalized service philosophy, celebrates the cultural essence of Kerala while embracing modern refinement.
+                                </p>
+                                <p>
+                                    At Olivia Alleppey, tradition flows gracefully into luxury, creating a place where every stay becomes a story of comfort, beauty, and unforgettable memories.
                                 </p>
                             </div>
                         </div>

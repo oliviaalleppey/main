@@ -22,8 +22,9 @@ function getResendClient() {
     return resendClient;
 }
 
-const FROM_EMAIL = process.env.HOTEL_EMAIL || 'reservations@oliviahotel.com';
-const HOTEL_NAME = process.env.HOTEL_NAME || 'Olivia International Hotel';
+const FROM_EMAIL = process.env.HOTEL_EMAIL || 'reservation@oliviaalleppey.com';
+const HOTEL_NAME = process.env.HOTEL_NAME || 'Olivia International';
+const RESERVATION_TEAM_EMAIL = process.env.HOTEL_RESERVATION_EMAIL || 'reservation@oliviaalleppey.com';
 
 /**
  * Send booking confirmation email to guest
@@ -104,7 +105,7 @@ export async function sendBookingConfirmation(params: {
               </div>
               <div class="footer">
                 <p>${HOTEL_NAME}<br>Alappuzha, Kerala, India</p>
-                <p>Email: ${FROM_EMAIL} | Phone: ${process.env.HOTEL_PHONE || '+91-XXXXXXXXXX'}</p>
+                <p>Email: ${FROM_EMAIL} | Phone: ${process.env.HOTEL_PHONE || '+91 8075 416 514'}</p>
               </div>
             </div>
           </body>
@@ -170,7 +171,7 @@ export async function sendInquiryAcknowledgment(params: {
               </div>
               <div class="footer">
                 <p>${HOTEL_NAME}<br>Alappuzha, Kerala, India</p>
-                <p>Email: ${FROM_EMAIL} | Phone: ${process.env.HOTEL_PHONE || '+91-XXXXXXXXXX'}</p>
+                <p>Email: ${FROM_EMAIL} | Phone: ${process.env.HOTEL_PHONE || '+91 8075 416 514'}</p>
               </div>
             </div>
           </body>
@@ -187,5 +188,94 @@ export async function sendInquiryAcknowledgment(params: {
     } catch (error) {
         console.error('Failed to send inquiry acknowledgment:', error);
         throw new Error('Failed to send acknowledgment email');
+    }
+}
+
+/**
+ * Send event inquiry details to reservations team
+ */
+export async function sendEventInquiryToReservations(params: {
+    name: string;
+    company?: string;
+    email?: string;
+    phone: string;
+    eventType: string;
+    guestCount?: string;
+    preferredDate?: string;
+    message?: string;
+}) {
+    try {
+        const resend = getResendClient();
+        if (!resend) {
+            return { skipped: true };
+        }
+
+        const {
+            name,
+            company,
+            email,
+            phone,
+            eventType,
+            guestCount,
+            preferredDate,
+            message,
+        } = params;
+
+        const { data, error } = await resend.emails.send({
+            from: `${HOTEL_NAME} <${FROM_EMAIL}>`,
+            to: [RESERVATION_TEAM_EMAIL],
+            replyTo: email ? [email] : undefined,
+            subject: `New Event Inquiry - ${eventType}`,
+            html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <style>
+              body { font-family: 'Inter', Arial, sans-serif; line-height: 1.6; color: #1A1A1A; }
+              .container { max-width: 680px; margin: 0 auto; padding: 20px; }
+              .header { background: #0A332B; color: #FFFEF9; padding: 24px 28px; }
+              .content { background: #F8F6F4; padding: 24px 28px; }
+              .card { background: #FFFFFF; border: 1px solid #ECE5D8; border-radius: 8px; padding: 18px; }
+              .row { display: flex; justify-content: space-between; gap: 20px; padding: 8px 0; border-bottom: 1px solid #F2EDE4; }
+              .row:last-child { border-bottom: 0; }
+              .label { color: #5F5A4F; min-width: 180px; }
+              .value { color: #1C1C1C; text-align: right; font-weight: 500; }
+              .message { margin-top: 16px; padding: 14px; border-radius: 6px; background: #FAF8F2; border: 1px solid #ECE5D8; white-space: pre-wrap; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h2 style="margin:0;">New Event Inquiry</h2>
+                <p style="margin:6px 0 0 0; opacity:0.9;">Submitted from Conference & Events page</p>
+              </div>
+              <div class="content">
+                <div class="card">
+                  <div class="row"><span class="label">Name</span><span class="value">${name}</span></div>
+                  <div class="row"><span class="label">Company</span><span class="value">${company || '—'}</span></div>
+                  <div class="row"><span class="label">Email</span><span class="value">${email || '—'}</span></div>
+                  <div class="row"><span class="label">Phone</span><span class="value">${phone}</span></div>
+                  <div class="row"><span class="label">Event Type</span><span class="value">${eventType}</span></div>
+                  <div class="row"><span class="label">Guests</span><span class="value">${guestCount || '—'}</span></div>
+                  <div class="row"><span class="label">Preferred Date</span><span class="value">${preferredDate || '—'}</span></div>
+                </div>
+                <div class="message"><strong>Message:</strong><br/>${message || '—'}</div>
+              </div>
+            </div>
+          </body>
+        </html>
+      `,
+        });
+
+        if (error) {
+            console.error('Error sending event inquiry email:', error);
+            throw error;
+        }
+
+        return data;
+    } catch (error) {
+        console.error('Failed to send event inquiry email:', error);
+        throw new Error('Failed to send event inquiry');
     }
 }
