@@ -155,7 +155,7 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
                             Explore Rooms
                         </Link>
                         <Link
-                            href="/availability"
+                            href="#booking-search"
                             className="border border-white/70 bg-transparent text-white px-5 py-2 text-[10px] tracking-[0.2em] uppercase hover:bg-white/12 transition-colors duration-300"
                         >
                             Check Availability
@@ -366,7 +366,7 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
                                 <span className="relative z-10">Contact Concierge</span>
                             </Link>
                             <Link
-                                href="/availability"
+                                href="#booking-search"
                                 className="border border-[#D3C2A4] text-[#2E3934] bg-[#F7F2E8]/85 px-8 py-3 text-xs tracking-[0.24em] uppercase hover:bg-[#EFE6D5] transition-colors"
                             >
                                 Check Availability
@@ -383,7 +383,7 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
                         <span className="text-[#A68A5A]">✦</span> Best rate guarantee when you book directly
                     </p>
                     <Link
-                        href="/availability"
+                        href="#booking-search"
                         className="border border-[#D3C3A7] bg-[#FCFAF5] text-[#31403A] px-6 py-2.5 text-xs tracking-[0.18em] uppercase hover:bg-[#F1E9D9] transition-colors duration-300"
                     >
                         Book Your Stay

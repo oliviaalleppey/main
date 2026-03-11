@@ -58,53 +58,69 @@ export default function DiscoverPage() {
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-[#f5f5f0] via-white to-[#fafaf8]">
-            {/* Hero Section - Compact */}
-            <section className="relative h-[85vh] flex items-center justify-center overflow-hidden">
-                {/* Subtle Background Pattern */}
-                <div className="absolute inset-0 opacity-[0.03]">
-                    <div className="absolute inset-0" style={{
-                        backgroundImage: 'radial-gradient(circle, #B8956A 1px, transparent 1px)',
-                        backgroundSize: '40px 40px'
-                    }} />
+            {/* Hero Section */}
+            <section className="relative overflow-hidden border-b border-[#ece5d8]">
+                <div className="absolute inset-0">
+                    <NextImage
+                        src="/images/discover/heritage-hotel.png"
+                        alt="Discover Olivia background"
+                        fill
+                        priority
+                        className="object-cover object-center opacity-25"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-b from-[#f6f2e8]/94 via-[#f8f5ee]/95 to-[#fafaf8]" />
                 </div>
 
-                <div className="relative z-10 text-center px-6 max-w-5xl mx-auto">
-                    {/* Decorative Line */}
-                    <div className="w-16 h-[1px] bg-gradient-to-r from-transparent via-[#B8956A] to-transparent mx-auto mb-6" />
+                <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-10 py-12 md:py-16 lg:py-20">
+                    <div className="grid lg:grid-cols-[1.05fr_0.95fr] gap-7 md:gap-10 items-center">
+                        <div className="rounded-2xl border border-[#e7decd] bg-white/88 backdrop-blur-sm p-6 md:p-9 shadow-[0_26px_70px_-48px_rgba(30,29,26,0.7)]">
+                            <div className="w-16 h-[1px] bg-gradient-to-r from-[#B8956A] to-transparent mb-6" />
+                            <p className="text-[#B8956A] text-xs md:text-sm tracking-[0.28em] uppercase mb-4 font-light">
+                                Where Luxury Meets Legacy
+                            </p>
 
-                    <p className="text-[#B8956A] text-sm tracking-[0.3em] uppercase mb-4 font-light">
-                        Where Luxury Meets Legacy
-                    </p>
+                            <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl mb-5 text-[#2c2c2c] tracking-tight leading-[0.9]">
+                                Discover
+                                <span className="block">Olivia</span>
+                            </h1>
 
-                    <h1 className="font-serif text-6xl md:text-7xl lg:text-8xl mb-6 text-[#2c2c2c] tracking-tight leading-[0.9]">
-                        Discover<br />Olivia
-                    </h1>
+                            <p className="text-base md:text-xl text-gray-600 max-w-2xl leading-relaxed font-light">
+                                A sanctuary where Kerala&apos;s timeless beauty converges with contemporary elegance, creating moments that transcend the ordinary.
+                            </p>
 
-                    <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-10 leading-relaxed font-light">
-                        A sanctuary where Kerala's timeless beauty converges with contemporary elegance,
-                        creating moments that transcend the ordinary
-                    </p>
+                            <div className="mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4">
+                                <button
+                                    onClick={() => document.getElementById('heritage')?.scrollIntoView({ behavior: 'smooth' })}
+                                    className="px-8 py-3 bg-[#B8956A] text-white text-sm tracking-wider uppercase hover:bg-[#a07d54] transition-all duration-300"
+                                >
+                                    Our Story →
+                                </button>
+                                <button
+                                    onClick={() => document.getElementById('philosophy')?.scrollIntoView({ behavior: 'smooth' })}
+                                    className="px-8 py-3 border border-[#B8956A] text-[#B8956A] text-sm tracking-wider uppercase hover:bg-[#B8956A] hover:text-white transition-all duration-300"
+                                >
+                                    Our Philosophy →
+                                </button>
+                            </div>
+                        </div>
 
-                    <div className="flex gap-4 justify-center">
-                        <button
-                            onClick={() => document.getElementById('heritage')?.scrollIntoView({ behavior: 'smooth' })}
-                            className="px-8 py-3 bg-[#B8956A] text-white text-sm tracking-wider uppercase hover:bg-[#a07d54] transition-all duration-300"
-                        >
-                            Our Story →
-                        </button>
-                        <button
-                            onClick={() => document.getElementById('philosophy')?.scrollIntoView({ behavior: 'smooth' })}
-                            className="px-8 py-3 border border-[#B8956A] text-[#B8956A] text-sm tracking-wider uppercase hover:bg-[#B8956A] hover:text-white transition-all duration-300"
-                        >
-                            Our Philosophy →
-                        </button>
+                        <div className="relative">
+                            <div className="relative h-[320px] sm:h-[420px] md:h-[500px] rounded-2xl overflow-hidden border border-[#e3dac9] shadow-[0_30px_70px_-50px_rgba(30,29,26,0.9)]">
+                                <NextImage
+                                    src="/images/discover/backwater-serenity.png"
+                                    alt="Backwater view at Olivia Alleppey"
+                                    fill
+                                    className="object-cover"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/10 to-transparent" />
+                            </div>
+
+                            <div className="hidden sm:block absolute -bottom-5 md:-bottom-6 -left-4 md:-left-6 rounded-xl border border-[#dec8a4]/60 bg-[#0A332B] text-white px-4 md:px-5 py-3 md:py-4 shadow-[0_20px_45px_-28px_rgba(10,51,43,0.95)]">
+                                <p className="text-[10px] md:text-[11px] tracking-[0.2em] uppercase text-[#e6cfa8]">Olivia Alleppey</p>
+                                <p className="font-serif text-lg md:text-xl leading-tight">Backwater Luxury</p>
+                            </div>
+                        </div>
                     </div>
-                </div>
-
-                {/* Scroll Indicator */}
-                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce">
-                    <p className="text-xs tracking-[0.2em] uppercase text-gray-400">Scroll</p>
-                    <div className="w-[1px] h-10 bg-gradient-to-b from-gray-300 to-transparent" />
                 </div>
             </section>
 
