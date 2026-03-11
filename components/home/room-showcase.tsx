@@ -1,31 +1,48 @@
-'use client';
-
 import Image from 'next/image';
 import Link from 'next/link';
 import { Share2, ArrowRight } from 'lucide-react';
+import { db } from '@/lib/db';
+import { roomTypes } from '@/lib/db/schema';
+import { eq } from 'drizzle-orm';
 
-const ROOMS = [
-    {
-        title: "Sunrise Studio",
-        description: "A studio with views of Seminyak featuring a king size bed and all Olivia amenities.",
-        image: "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=2874&auto=format&fit=crop",
-        link: "/rooms/sunrise-studio"
-    },
-    {
-        title: "Desa Studio",
-        description: "A studio overlooking the Desa featuring a king size bed and all Olivia amenities.",
-        image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=2940&auto=format&fit=crop",
-        link: "/rooms/desa-studio"
-    },
-    {
-        title: "Bamboo Studio",
-        description: "A studio with views of our bamboo courtyard featuring a king size bed and all Olivia amenities.",
-        image: "https://images.unsplash.com/photo-1616594039964-40891a90c3d9?q=80&w=2940&auto=format&fit=crop",
-        link: "/rooms/bamboo-studio"
-    }
-];
+type RoomCard = {
+    title: string;
+    description: string;
+    image: string | null;
+    link: string;
+};
 
-export default function RoomShowcase() {
+async function getShowcaseRooms(): Promise<RoomCard[]> {
+    const rows = await db.query.roomTypes.findMany({
+        where: eq(roomTypes.status, 'active'),
+        columns: {
+            name: true,
+            slug: true,
+            shortDescription: true,
+            description: true,
+            featuredImage: true,
+            images: true,
+            sortOrder: true,
+        },
+        orderBy: (table, { asc }) => [asc(table.sortOrder), asc(table.name)],
+        limit: 3,
+    });
+
+    return rows.map((row) => {
+        const images = Array.isArray(row.images) ? row.images : [];
+        return {
+            title: row.name,
+            description: row.shortDescription || row.description || 'Experience a thoughtfully designed stay with signature Olivia comforts.',
+            image: row.featuredImage || images[0] || null,
+            link: `/rooms/${row.slug}`,
+        };
+    });
+}
+
+export default async function RoomShowcase() {
+    const rooms = await getShowcaseRooms();
+    if (!rooms.length) return null;
+
     return (
         <section className="py-24 bg-[#F5F5F0]">
             <div className="container mx-auto px-4 max-w-7xl">
@@ -44,17 +61,21 @@ export default function RoomShowcase() {
 
                 {/* Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {ROOMS.map((room, index) => (
+                    {rooms.map((room, index) => (
                         <div key={index} className="flex flex-col group">
 
                             {/* Image Container */}
                             <div className="relative aspect-[4/3] overflow-hidden rounded-lg mb-6 bg-[#E5E5E5]">
-                                <Image
-                                    src={room.image}
-                                    alt={room.title}
-                                    fill
-                                    className="object-cover transition-transform duration-700 group-hover:scale-105"
-                                />
+                                {room.image ? (
+                                    <Image
+                                        src={room.image}
+                                        alt={room.title}
+                                        fill
+                                        className="object-cover transition-transform duration-700 group-hover:scale-105"
+                                    />
+                                ) : (
+                                    <div className="absolute inset-0 bg-gradient-to-br from-[#E8E8E4] to-[#DADAD3]" />
+                                )}
                                 {/* Share Button Overlay */}
                                 <button className="absolute top-4 right-4 p-2 bg-black/20 hover:bg-black/40 backdrop-blur-sm rounded-full text-white transition-colors">
                                     <Share2 className="w-4 h-4" />

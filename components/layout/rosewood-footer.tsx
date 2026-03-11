@@ -36,12 +36,18 @@ export default function RosewoodFooter() {
                         <h4 className="text-xs uppercase tracking-[0.2em] text-[#8C7A5C] mb-6">Contact Us</h4>
                         <p className="text-sm font-light text-[#1C1C1C]/70">
                             Olivia International,<br />
-                            Alappuzha,<br />
+                            Olivia Alleppey,<br />
+                            Nehru Trophy Boat Race View Point,<br />
+                            Finishing Point,<br />
+                            Punnamada, Alappuzha,<br />
                             Kerala, India
                         </p>
                         <p className="text-sm font-light text-[#1C1C1C]/70 mt-4">
-                            +91 1234 567890<br />
-                            info@olivia-alappuzha.com
+                            Front Reservation: <a href="tel:+918075416514" className="underline decoration-[#1C1C1C]/20 hover:text-[#C5A572] transition-colors">+91 8075 416 514</a><br />
+                            WhatsApp: <a href="https://wa.me/918075416514" className="underline decoration-[#1C1C1C]/20 hover:text-[#C5A572] transition-colors">+91 80754 16514</a><br />
+                            Reservations: <a href="mailto:reservation@oliviaalleppey.com" className="underline decoration-[#1C1C1C]/20 hover:text-[#C5A572] transition-colors">reservation@oliviaalleppey.com</a><br />
+                            Support: <a href="mailto:mail@oliviaalleppey.com" className="underline decoration-[#1C1C1C]/20 hover:text-[#C5A572] transition-colors">mail@oliviaalleppey.com</a><br />
+                            Working Hours: Round the clock (24 hours)
                         </p>
                     </div>
 
@@ -88,7 +94,7 @@ export default function RosewoodFooter() {
                         <p>© 2026 Olivia Hotel Group. All Rights Reserved.</p>
                         <div className="flex gap-6 mt-4 md:mt-0">
                             <Link href="#" className="hover:text-[#C5A572] transition-colors">Facebook</Link>
-                            <Link href="#" className="hover:text-[#C5A572] transition-colors">Instagram</Link>
+                            <Link href="https://instagram.com/oliviaalleppey" target="_blank" rel="noopener noreferrer" className="hover:text-[#C5A572] transition-colors">Instagram</Link>
                             <Link href="#" className="hover:text-[#C5A572] transition-colors">WeChat</Link>
                         </div>
                     </div>

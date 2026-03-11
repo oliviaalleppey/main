@@ -1,5 +1,3 @@
-'use client';
-
 import HeroSection from '@/components/home/hero-section';
 import CompactIntro from '@/components/home/compact-intro';
 import AmenitiesGallery from '@/components/home/amenities-gallery';
@@ -10,6 +8,8 @@ import ExperiencesStrip from '@/components/home/experiences-strip';
 import BrandMarquee from '@/components/home/brand-marquee';
 import EditorialStory from '@/components/home/editorial-story';
 import Testimonials from '@/components/home/testimonials';
+
+export const revalidate = 60;
 
 export default function Home() {
   return (
@@ -51,4 +51,3 @@ export default function Home() {
     </main>
   );
 }
-

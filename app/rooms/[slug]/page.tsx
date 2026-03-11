@@ -78,7 +78,7 @@ export default async function RoomDetailPage({ params }: { params: Promise<{ slu
         <main className="min-h-screen bg-[#FBFBF9] font-sans selection:bg-[#1C1C1C] selection:text-white pb-40 pt-8">
 
             {/* Sticky Booking Search Bar */}
-            <StickyBookingBar basePrice={room.basePrice} />
+            <StickyBookingBar basePrice={room.basePrice} roomSlug={slug} />
 
             {/* Title Section (Above Grid) */}
             <section className="pt-2 pb-1 px-6 md:px-12 max-w-[1400px] mx-auto">

@@ -8,7 +8,7 @@ const AMENITIES = [
         title: "Infinity Pool",
         description: "A seamless merge of azure waters and the horizon.",
         image: "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?q=80&w=2940&auto=format&fit=crop", // Pool
-        link: "/experiences#pool",
+        link: "/wellness#pool",
         colSpan: "md:col-span-2",
         height: "h-[400px] md:h-[500px]"
     },
@@ -16,7 +16,7 @@ const AMENITIES = [
         title: "State-of-the-Art Gym",
         description: "maintain your wellness routine with premium Technogym equipment.",
         image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2940&auto=format&fit=crop", // Gym
-        link: "/experiences#gym",
+        link: "/wellness#fitness",
         colSpan: "md:col-span-1",
         height: "h-[400px] md:h-[500px]"
     },
@@ -24,15 +24,15 @@ const AMENITIES = [
         title: "The Spa",
         description: "Rejuvenate with holistic treatments inspired by ancient traditions.",
         image: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=2940&auto=format&fit=crop", // Spa
-        link: "/experiences#spa",
+        link: "/wellness#spa",
         colSpan: "md:col-span-1",
         height: "h-[400px] md:h-[500px]"
     },
     {
-        title: "Concierge Services",
-        description: "Tailored experiences curated by our dedicated team.",
-        image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2940&auto=format&fit=crop", // Concierge/Lobby
-        link: "/experiences#concierge",
+        title: "Yoga & Meditation",
+        description: "Breathe, stretch, and reset with guided sessions in a serene setting.",
+        image: "https://images.unsplash.com/photo-1545389336-cf090694435e?q=80&w=2940&auto=format&fit=crop",
+        link: "/wellness#yoga",
         colSpan: "md:col-span-2",
         height: "h-[400px] md:h-[500px]"
     }

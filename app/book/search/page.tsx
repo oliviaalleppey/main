@@ -58,6 +58,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     const adultsParam = getParam('adults') || '1';
     const childrenParam = getParam('children') || '0';
     const roomsParam = getParam('rooms') || '1';
+    const roomParam = getParam('room');
     const requestedSort = getParam('sort');
     const sortKey = SORT_OPTIONS.some((option) => option.key === requestedSort)
         ? (requestedSort as SortKey)
@@ -88,10 +89,14 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         }
     }
 
+    const roomFiltered = roomParam
+        ? rooms.filter((result) => result.roomType.slug === roomParam)
+        : rooms;
+
     const formatDate = (date: Date) => date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
     const formatDateWithWeekday = (date: Date) => date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', weekday: 'short' });
-    const providerUnavailable = isValidDates && rooms.length > 0 && rooms.every((room) => !room.bookable);
-    const sortedRooms = [...rooms].sort((a, b) => {
+    const providerUnavailable = isValidDates && roomFiltered.length > 0 && roomFiltered.every((room) => !room.bookable);
+    const sortedRooms = [...roomFiltered].sort((a, b) => {
         switch (sortKey) {
             case 'price-asc':
                 return a.price - b.price;
@@ -115,6 +120,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         params.set('adults', safeAdults.toString());
         params.set('children', safeChildren.toString());
         params.set('rooms', safeRooms.toString());
+        if (roomParam) params.set('room', roomParam);
         params.set('sort', nextSort);
         return `/book/search?${params.toString()}`;
     };
@@ -139,7 +145,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 <div className="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-3 md:gap-5 mb-4 md:mb-7">
                     <div>
                         <h2 className="text-[24px] md:text-[30px] leading-tight font-serif text-[#1C2822]">
-                            {isValidDates ? `${rooms.length} Room Types Available` : 'Please select valid dates'}
+                            {isValidDates ? `${sortedRooms.length} Room Types Available` : 'Please select valid dates'}
                         </h2>
                         <p className="text-xs md:text-sm text-gray-600 mt-1 md:mt-2">
                             Compare room size, occupancy, meal plan, cancellation and live pricing before you continue.
@@ -360,7 +366,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                         );
                     })}
 
-                    {isValidDates && rooms.length === 0 && (
+                {isValidDates && sortedRooms.length === 0 && (
                         <div className="rounded-2xl md:rounded-3xl border border-[#DCE2D2] bg-white p-5 md:p-10 text-center">
                             <h3 className="mb-2 text-xl md:text-2xl font-serif text-[#1C1C1C]">No rooms available for selected dates</h3>
                             <p className="mb-4 md:mb-6 text-sm text-gray-500">Try shifting your stay by 1-2 days or reducing guest count for better availability.</p>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import Link from 'next/link';
 
@@ -90,6 +90,26 @@ const wellnessPackages = [
 export default function WellnessPage() {
     const [activeService, setActiveService] = useState('spa');
 
+    useEffect(() => {
+        const validServiceIds = new Set(wellnessServices.map((service) => service.id));
+
+        const applyHashSelection = () => {
+            const hash = window.location.hash.replace('#', '').trim();
+            if (hash && validServiceIds.has(hash)) {
+                setActiveService(hash);
+            }
+        };
+
+        applyHashSelection();
+        window.addEventListener('hashchange', applyHashSelection);
+        return () => window.removeEventListener('hashchange', applyHashSelection);
+    }, []);
+
+    const handleServiceSelect = (serviceId: string) => {
+        setActiveService(serviceId);
+        window.history.replaceState(null, '', `#${serviceId}`);
+    };
+
     return (
         <main className="min-h-screen bg-[#FBFBF9] font-sans">
 
@@ -145,7 +165,7 @@ export default function WellnessPage() {
                         {wellnessServices.map((service) => (
                             <button
                                 key={service.id}
-                                onClick={() => setActiveService(service.id)}
+                                onClick={() => handleServiceSelect(service.id)}
                                 className={`px-4 py-2 text-sm uppercase tracking-wider whitespace-nowrap transition-all ${activeService === service.id
                                     ? 'text-[#0A4D4E] border-b-2 border-[#0A4D4E]'
                                     : 'text-[#1C1C1C]/60 hover:text-[#1C1C1C]'
@@ -162,6 +182,7 @@ export default function WellnessPage() {
             {wellnessServices.map((service) => (
                 <section
                     key={service.id}
+                    id={service.id}
                     className={`py-20 px-6 md:px-12 ${activeService === service.id ? 'block' : 'hidden'}`}
                 >
                     <div className="max-w-6xl mx-auto">

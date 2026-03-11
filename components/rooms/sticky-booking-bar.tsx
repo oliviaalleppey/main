@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { addDays, format, startOfDay } from 'date-fns';
 import { DateRange } from 'react-day-picker';
@@ -9,9 +8,10 @@ import { LuxuryDatePicker } from '@/components/ui/luxury-date-picker';
 
 interface StickyBookingBarProps {
     basePrice: number;
+    roomSlug?: string;
 }
 
-export default function StickyBookingBar({ basePrice }: StickyBookingBarProps) {
+export default function StickyBookingBar({ basePrice, roomSlug }: StickyBookingBarProps) {
     const router = useRouter();
 
     const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', {
@@ -62,6 +62,7 @@ export default function StickyBookingBar({ basePrice }: StickyBookingBarProps) {
             adults: guests.adults.toString(),
             children: guests.children.toString(),
         });
+        if (roomSlug) params.set('room', roomSlug);
 
         router.push(`/book/search?${params.toString()}`);
     };
@@ -89,7 +90,6 @@ export default function StickyBookingBar({ basePrice }: StickyBookingBarProps) {
             <div className="max-w-[1400px] mx-auto px-6 md:px-12 flex flex-col xl:flex-row items-center justify-between gap-6 relative">
                 <div className="flex flex-wrap items-center justify-center gap-6 md:gap-8">
                     <div className="flex items-center gap-3">
-                        <span className="text-[#1C1C1C] font-bold text-sm hidden md:inline">Stay period</span>
                         <button
                             type="button"
                             onClick={() => setIsDatePickerOpen(true)}
@@ -155,13 +155,6 @@ export default function StickyBookingBar({ basePrice }: StickyBookingBarProps) {
                         Search Availability
                     </button>
 
-                    <Link
-                        href="/contact"
-                        className="hidden lg:inline-flex items-center gap-1 text-[#1C1C1C] font-bold text-sm border-b border-[#1C1C1C] pb-0.5 hover:opacity-70 transition-opacity whitespace-nowrap"
-                    >
-                        Book hotel with flight instead
-                        <span>→</span>
-                    </Link>
                 </div>
 
             </div>

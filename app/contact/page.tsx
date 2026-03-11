@@ -63,9 +63,12 @@ export default function ContactPage() {
                                     <div>
                                         <h3 className="font-medium text-[#1C1C1C] mb-1">Address</h3>
                                         <p className="text-[#1C1C1C]/60">
-                                            Olivia International Hotel<br />
-                                            Alappuzha, Kerala<br />
-                                            India - 688001
+                                            Olivia International<br />
+                                            Olivia Alleppey<br />
+                                            Nehru Trophy Boat Race View Point<br />
+                                            Finishing Point<br />
+                                            Punnamada, Alappuzha<br />
+                                            Kerala - India
                                         </p>
                                     </div>
                                 </div>
@@ -78,9 +81,9 @@ export default function ContactPage() {
                                         </svg>
                                     </div>
                                     <div>
-                                        <h3 className="font-medium text-[#1C1C1C] mb-1">Phone</h3>
-                                        <a href="tel:+911234567890" className="text-[#1C1C1C]/60 hover:text-[#C9A961] transition-colors">
-                                            +91 1234 567890
+                                        <h3 className="font-medium text-[#1C1C1C] mb-1">Front Reservation</h3>
+                                        <a href="tel:+918075416514" className="text-[#1C1C1C]/60 hover:text-[#C9A961] transition-colors">
+                                            +91 8075 416 514
                                         </a>
                                     </div>
                                 </div>
@@ -94,9 +97,15 @@ export default function ContactPage() {
                                     </div>
                                     <div>
                                         <h3 className="font-medium text-[#1C1C1C] mb-1">Email</h3>
-                                        <a href="mailto:info@olivia-alappuzha.com" className="text-[#1C1C1C]/60 hover:text-[#C9A961] transition-colors">
-                                            info@olivia-alappuzha.com
-                                        </a>
+                                        <p className="text-[#1C1C1C]/60">
+                                            <a href="mailto:reservation@oliviaalleppey.com" className="hover:text-[#C9A961] transition-colors">
+                                                reservation@oliviaalleppey.com
+                                            </a>
+                                            <br />
+                                            <a href="mailto:mail@oliviaalleppey.com" className="hover:text-[#C9A961] transition-colors">
+                                                mail@oliviaalleppey.com
+                                            </a>
+                                        </p>
                                     </div>
                                 </div>
 
@@ -109,21 +118,43 @@ export default function ContactPage() {
                                     </div>
                                     <div>
                                         <h3 className="font-medium text-[#1C1C1C] mb-1">WhatsApp</h3>
-                                        <a href="https://wa.me/911234567890" className="text-[#1C1C1C]/60 hover:text-[#C9A961] transition-colors">
-                                            Chat with us
+                                        <a href="https://wa.me/918075416514" className="text-[#1C1C1C]/60 hover:text-[#C9A961] transition-colors">
+                                            +91 80754 16514
                                         </a>
+                                    </div>
+                                </div>
+
+                                {/* Working Hours */}
+                                <div className="flex items-start gap-4">
+                                    <div className="w-12 h-12 bg-[#C9A961]/10 flex items-center justify-center shrink-0">
+                                        <svg className="w-6 h-6 text-[#C9A961]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-medium text-[#1C1C1C] mb-1">Working Hours</h3>
+                                        <p className="text-[#1C1C1C]/60">
+                                            Round the clock - 24 hours
+                                        </p>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Map Placeholder */}
                             <div className="relative h-64 bg-white border border-gray-200">
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="text-center text-[#1C1C1C]/30">
-                                        <svg className="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                                        </svg>
-                                        <p className="text-sm">Google Maps Integration</p>
+                                <div className="absolute inset-0 flex items-center justify-center px-6">
+                                    <div className="text-center">
+                                        <p className="text-[#1C1C1C]/60 text-sm mb-4">
+                                            Nehru Trophy Boat Race View Point, Finishing Point, Punnamada, Alappuzha
+                                        </p>
+                                        <a
+                                            href="https://maps.app.goo.gl/yZ4xyGBqp8i8uo1Z9"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-block bg-[#0A4D4E] text-white px-5 py-2.5 text-xs uppercase tracking-[0.2em] hover:bg-[#15443B] transition-colors"
+                                        >
+                                            Open in Google Maps
+                                        </a>
                                     </div>
                                 </div>
                             </div>
