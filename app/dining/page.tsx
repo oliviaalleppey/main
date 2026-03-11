@@ -1,360 +1,347 @@
-import { db } from '@/lib/db';
-import { diningOutlets } from '@/lib/db/schema';
-import { asc, eq } from 'drizzle-orm';
-import { Metadata } from 'next';
-import { ArrowRight, Clock, MapPin, Sparkles, Users, Utensils } from 'lucide-react';
-import Link from 'next/link';
+import type { Metadata } from 'next';
 import Image from 'next/image';
+import Link from 'next/link';
+import {
+    ArrowRight,
+    CalendarDays,
+    ChevronDown,
+    Clock3,
+    MapPin,
+    Users,
+    UtensilsCrossed,
+    Clock
+} from 'lucide-react';
 import StickyBookButton from '@/components/sticky-book-button';
 import WhatsAppWidget from '@/components/whatsapp-widget';
 
+type OutletStatus = 'operational' | 'upcoming';
+
+type DiningOutlet = {
+    name: string;
+    description: string;
+    slug: string;
+    image: string;
+    capacity: string;
+    location: string;
+    operatingHours: string;
+    cuisine: string;
+    status: OutletStatus;
+};
+
 export const metadata: Metadata = {
     title: 'Dining | Olivia Alleppey',
-    description: 'Discover refined culinary experiences at Olivia Alleppey, from all-day dining to our signature Brew & Bite culture.',
+    description: 'Dining at Olivia Alleppey. A culinary journey of global flavors and Kerala heritage.',
 };
 
-async function getDiningOutlets() {
-    const outlets = await db
-        .select()
-        .from(diningOutlets)
-        .where(eq(diningOutlets.isActive, true))
-        .orderBy(asc(diningOutlets.sortOrder));
+const outlets: DiningOutlet[] = [
+    {
+        name: 'Finishing Point',
+        description: 'Immerse yourself in a culinary journey at our signature restaurant. Experience the finest local delicacies alongside a curated selection of global cuisine in an elegant setting.',
+        slug: 'finishing-point',
+        image: '/images/dining/finishing-point.png',
+        capacity: '94 Guests',
+        location: 'Lobby Level',
+        operatingHours: '07:00 HRS to 23:00 HRS',
+        cuisine: 'Local & Global',
+        status: 'operational',
+    },
+    {
+        name: 'Brew & Bite',
+        description: 'Your tranquil 24-hour sanctuary for artisanal coffee, premium teas, and delectable short bites. Perfect for casual meetings or a quiet moment of reflection.',
+        slug: 'brew-bar',
+        image: '/images/dining/brew-bar.png',
+        capacity: '24 Guests',
+        location: 'Lobby Level',
+        operatingHours: '24 Hours',
+        cuisine: 'Short Bites and Refreshments',
+        status: 'operational',
+    },
+    {
+        name: 'In-Room Dining',
+        description: 'Experience our exceptional culinary offerings in the privacy and comfort of your own room or suite, available around the clock to satisfy your cravings.',
+        slug: 'in-room-dining',
+        image: '/images/rooms/balcony-room-5.jpg',
+        capacity: '88 Rooms and Suites',
+        location: 'Lobby Level',
+        operatingHours: '24 Hours',
+        cuisine: 'Local & Global',
+        status: 'operational',
+    },
+    {
+        name: 'Aqua Pool Lounge',
+        description: 'Relax by the shimmering waters with refreshing beverages and light bites. The perfect oasis to unwind under the Kerala sun.',
+        slug: 'aqua-pool-lounge',
+        image: '/images/rooms/balcony-room-2.jpg',
+        capacity: '24 Guests',
+        location: '3rd Floor',
+        operatingHours: '07:00 HRS to 19:00 HRS',
+        cuisine: 'Short Bites and Refreshments',
+        status: 'operational',
+    },
+    {
+        name: 'Kaayal',
+        description: 'Anticipate a transcendent seafood experience. Kaayal will showcase the freshest local catches prepared with both traditional and international techniques.',
+        slug: 'kaayal',
+        image: '/images/dining/kaayal.png',
+        capacity: '72 Guests',
+        location: '3rd Floor',
+        operatingHours: '19:00 HRS to 23:00 HRS (as per Local Govt regs)',
+        cuisine: 'Live Seafood - Global & Local (Bar & Beverages)',
+        status: 'upcoming',
+    },
+    {
+        name: 'Club 9',
+        description: 'Soon to be Alappuzha\'s premier destination for evening sophistication, offering a curated selection of premium beverages and craft cocktails.',
+        slug: 'club-9',
+        image: '/images/rooms/balcony-room-4.jpg',
+        capacity: '44 Guests',
+        location: '1st Floor',
+        operatingHours: '11:00 HRS to 23:00 HRS (as per Local Govt regs)',
+        cuisine: 'Bar & beverage',
+        status: 'upcoming',
+    },
+];
 
-    return outlets;
-}
-
-const imageBySlug: Record<string, string> = {
-    'finishing-point': '/images/dining/finishing-point.png',
-    'brew-bar': '/images/dining/brew-bar.png',
-    'kaayal': '/images/dining/kaayal.png',
-    'in-room-dining': '/images/rooms/balcony-room-3.jpg',
-    'aqua-pool-lounge': '/images/rooms/balcony-room-2.jpg',
-    'club-9': '/images/rooms/balcony-room-4.jpg',
-    'the-oak-room': '/images/rooms/balcony-room-1.jpg',
-};
-
-function getOutletImage(featuredImage: string | null, slug: string): string {
-    return featuredImage || imageBySlug[slug] || '/images/dining/hero.jpg';
-}
-
-export default async function DiningPage() {
-    const outlets = await getDiningOutlets();
-    const operational = outlets.filter(o => o.status === 'operational');
-    const upcoming = outlets.filter(o => o.status === 'upcoming');
-    const brewAndBite = operational.find(o => o.slug === 'brew-bar');
-    const signatureOutlet = operational.find(o => o.slug === 'finishing-point') || operational[0];
+export default function DiningPage() {
+    const operationalOutlets = outlets.filter(o => o.status === 'operational');
+    const upcomingOutlets = outlets.filter(o => o.status === 'upcoming');
 
     return (
-        <main className="min-h-screen bg-[#FAF8F3] text-[#25332D]">
+        <main className="min-h-screen bg-[#FBF9F6] text-[#2C2A27]">
             <StickyBookButton />
             <WhatsAppWidget />
 
-            <section className="relative overflow-hidden border-b border-[#E7DFD0]">
-                <div className="relative h-[68vh] md:h-[74vh]">
-                    <Image
-                        src="/images/dining/hero.jpg"
-                        alt="Dining by the backwaters at Olivia Alleppey"
-                        fill
-                        priority
-                        className="object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#1D2622]/60 via-[#1D2622]/25 to-transparent" />
-                </div>
+            {/* Hero Section */}
+            <section className="relative h-[65vh] md:h-[80vh] w-full overflow-hidden">
+                <Image
+                    src="/images/dining/hero.jpg"
+                    alt="Dining at Olivia"
+                    fill
+                    priority
+                    className="object-cover"
+                />
+                <div className="absolute inset-0 bg-[#1A1814]/40" />
 
-                <div className="absolute inset-0 flex items-center">
-                    <div className="max-w-6xl mx-auto px-6 md:px-10 w-full">
-                        <div className="max-w-3xl">
-                            <p className="text-[#E6CF9E] text-[11px] tracking-[0.35em] uppercase mb-4">
-                                Culinary Program
-                            </p>
-                            <h1 className="font-serif text-4xl md:text-6xl lg:text-7xl text-[#F8F5EE] leading-[1.06] mb-4">
-                                Dining That Feels Warm, Refined, and Unmistakably Local
-                            </h1>
-                            <p className="text-[#F3EEE2]/90 text-base md:text-lg leading-relaxed mb-7 max-w-2xl">
-                                From sunrise coffee rituals to late evening plates, our kitchens are built around thoughtful service,
-                                regional produce, and a relaxed luxury approach to hospitality.
-                            </p>
-                            <div className="flex flex-col sm:flex-row gap-3">
-                                <a
-                                    href="#brew-and-bite"
-                                    className="inline-flex items-center justify-center bg-[#E7D4AD] text-[#2A332F] px-7 py-3 text-xs tracking-[0.2em] uppercase hover:bg-[#E0C894] transition-colors"
-                                >
-                                    Explore Brew &amp; Bite
-                                </a>
-                                <a
-                                    href="#dining-collection"
-                                    className="inline-flex items-center justify-center border border-[#F2E9D8]/70 text-[#F8F5EE] px-7 py-3 text-xs tracking-[0.2em] uppercase hover:bg-white/10 transition-colors"
-                                >
-                                    View All Outlets
-                                </a>
-                            </div>
-                        </div>
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+                    <span className="text-[#E5D5B5] text-[10px] sm:text-xs tracking-[0.3em] uppercase mb-6 drop-shadow-md">
+                        Culinary Excellence
+                    </span>
+                    <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl text-white mb-6 drop-shadow-xl tracking-tight">
+                        Taste of Olivia
+                    </h1>
+                    <p className="text-white/90 text-sm md:text-lg max-w-2xl font-light leading-relaxed drop-shadow-md">
+                        A curated journey of global flavors and Kerala heritage, meticulously crafted
+                        to elevate your dining experience by the backwaters.
+                    </p>
+                    <div className="mt-10">
+                        <a
+                            href="#reserve-table"
+                            className="inline-flex items-center justify-center border border-white/50 bg-white/10 backdrop-blur-sm px-8 py-3 text-white text-[11px] tracking-[0.2em] uppercase hover:bg-white hover:text-[#1A1814] transition-all duration-300"
+                        >
+                            Reserve a Table
+                        </a>
                     </div>
                 </div>
             </section>
 
-            <section className="border-b border-[#E7DFD0] bg-[#F6F1E7]">
-                <div className="max-w-6xl mx-auto px-6 md:px-10 py-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <StatCard label="Operational Outlets" value={`${operational.length}`} />
-                    <StatCard label="Signature Program" value="Brew & Bite" />
-                    <StatCard label="Opening Cadence" value="Sunrise to Late Night" />
-                    <StatCard label="Cuisine Direction" value="Kerala + Global" />
+            {/* Operational Outlets - Alternating Layout */}
+            <section className="py-20 md:py-32 px-6 lg:px-12 max-w-[1600px] mx-auto">
+                <div className="text-center mb-20 md:mb-32">
+                    <h2 className="font-serif text-4xl md:text-5xl text-[#2C2A27]">Our Restaurants</h2>
+                    <div className="w-12 h-px bg-[#B68845] mx-auto mt-6" />
                 </div>
-            </section>
 
-            {brewAndBite && (
-                <section id="brew-and-bite" className="py-12 md:py-14">
-                    <div className="max-w-6xl mx-auto px-6 md:px-10 grid lg:grid-cols-[1.05fr_0.95fr] gap-7 lg:gap-10 items-stretch">
-                        <div className="relative min-h-[340px] md:min-h-[430px] overflow-hidden">
-                            <Image
-                                src={getOutletImage(brewAndBite.featuredImage, brewAndBite.slug)}
-                                alt={brewAndBite.name}
-                                fill
-                                className="object-cover"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-[#121815]/50 via-transparent to-transparent" />
-                            <div className="absolute bottom-4 left-4 border border-[#E8D7B7]/55 bg-[#FCF8EF]/92 px-4 py-2">
-                                <p className="text-[10px] tracking-[0.22em] uppercase text-[#8D7141]">
-                                    Signature Concept
-                                </p>
-                                <p className="font-serif text-xl text-[#26322D]">Brew &amp; Bite</p>
-                            </div>
-                        </div>
-
-                        <div className="border border-[#E4D9C7] bg-[#FCFAF5] p-6 md:p-7 flex flex-col justify-between">
-                            <div>
-                                <p className="text-[#9E8152] text-[11px] tracking-[0.3em] uppercase mb-3">
-                                    Featured At Olivia
-                                </p>
-                                <h2 className="font-serif text-3xl md:text-4xl text-[#1F2925] leading-tight mb-4">
-                                    {brewAndBite.name}: The House Brew &amp; Bite Experience
-                                </h2>
-                                <p className="text-[#3E4D46]/85 leading-relaxed mb-5">
-                                    {brewAndBite.description || brewAndBite.shortDescription}
-                                </p>
-
-                                <div className="grid sm:grid-cols-2 gap-3 mb-5">
-                                    <InfoPill icon={<Clock className="w-4 h-4" />} value={brewAndBite.operatingHours || 'All day service'} />
-                                    <InfoPill icon={<MapPin className="w-4 h-4" />} value={brewAndBite.location || 'Lobby level'} />
-                                    <InfoPill icon={<Utensils className="w-4 h-4" />} value={brewAndBite.cuisineType || 'Coffee and short bites'} />
-                                    <InfoPill icon={<Users className="w-4 h-4" />} value={brewAndBite.capacity ? `${brewAndBite.capacity} seats` : 'Comfort seating'} />
-                                </div>
-
-                                <div className="flex flex-wrap gap-2">
-                                    {(brewAndBite.specialFeatures || []).slice(0, 5).map((feature) => (
-                                        <span
-                                            key={feature}
-                                            className="border border-[#E5DCCB] bg-[#FAF6ED] px-3 py-1.5 text-xs text-[#405149]"
-                                        >
-                                            {feature}
-                                        </span>
-                                    ))}
+                <div className="space-y-24 md:space-y-40">
+                    {operationalOutlets.map((outlet, index) => (
+                        <div
+                            key={outlet.slug}
+                            className={`flex flex-col ${index % 2 === 1 ? 'lg:flex-row-reverse' : 'lg:flex-row'} gap-10 lg:gap-20 items-center`}
+                        >
+                            {/* Image Side */}
+                            <div className="w-full lg:w-1/2">
+                                <div className="relative aspect-[4/3] md:aspect-[16/10] w-full overflow-hidden shadow-2xl">
+                                    <Image
+                                        src={outlet.image}
+                                        alt={outlet.name}
+                                        fill
+                                        className="object-cover hover:scale-105 transition-transform duration-1000"
+                                    />
                                 </div>
                             </div>
 
-                            <div className="pt-6">
-                                <Link
-                                    href={`/dining/${brewAndBite.slug}`}
-                                    className="inline-flex items-center gap-3 text-sm tracking-[0.2em] uppercase text-[#2A3732] hover:text-[#8D7141] transition-colors"
-                                >
-                                    View Brew &amp; Bite Details
-                                    <ArrowRight className="w-4 h-4" />
-                                </Link>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            )}
+                            {/* Content Side */}
+                            <div className="w-full lg:w-1/2 flex flex-col justify-center">
+                                <span className="text-[#B68845] text-[10px] tracking-[0.25em] uppercase mb-4">
+                                    {outlet.location}
+                                </span>
+                                <h3 className="font-serif text-4xl md:text-5xl lg:text-[3.5rem] leading-none text-[#1A1814] mb-6">
+                                    {outlet.name}
+                                </h3>
+                                <p className="text-[#4A453D] text-base md:text-lg leading-relaxed font-light mb-10">
+                                    {outlet.description}
+                                </p>
 
-            <section id="dining-collection" className="py-10 md:py-12 border-y border-[#E7DFD0] bg-[#FCFAF5]">
-                <div className="max-w-6xl mx-auto px-6 md:px-10">
-                    <div className="mb-8">
-                        <p className="text-[#9E8152] text-[11px] tracking-[0.3em] uppercase mb-2">
-                            Dining Collection
-                        </p>
-                        <h2 className="font-serif text-3xl md:text-5xl text-[#1F2925] mb-3">
-                            Every Outlet, One Cohesive Hospitality Standard
-                        </h2>
-                        <p className="text-[#415049]/80 max-w-3xl">
-                            Choose a full meal, a quick coffee, or private room dining. Each outlet follows the same promise:
-                            thoughtful food, clean execution, and service that stays personal.
-                        </p>
-                    </div>
-
-                    <div className="space-y-7 md:space-y-8">
-                        {operational.map((outlet, index) => (
-                            <Link
-                                key={outlet.id}
-                                href={`/dining/${outlet.slug}`}
-                                className="group block border border-[#E5DCCB] bg-white"
-                            >
-                                <article className={`grid lg:grid-cols-2 ${index % 2 === 1 ? 'lg:[&>*:first-child]:order-2' : ''}`}>
-                                    <div className="relative h-60 md:h-72 lg:h-[320px] overflow-hidden">
-                                        <Image
-                                            src={getOutletImage(outlet.featuredImage, outlet.slug)}
-                                            alt={outlet.name}
-                                            fill
-                                            className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-                                        />
-                                        <div className="absolute top-4 left-4 flex gap-2">
-                                            {outlet.isFeatured && (
-                                                <span className="bg-[#E7D4AD] text-[#3B3020] px-3 py-1 text-[10px] tracking-[0.16em] uppercase">
-                                                    Featured
-                                                </span>
-                                            )}
-                                            {signatureOutlet && outlet.slug === signatureOutlet.slug && (
-                                                <span className="bg-[#FAF6ED]/90 border border-[#DDCCAC] text-[#8A6C3C] px-3 py-1 text-[10px] tracking-[0.16em] uppercase">
-                                                    Signature
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <div className="p-5 md:p-6 lg:p-7 flex flex-col justify-between">
+                                <div className="grid grid-cols-2 gap-y-6 gap-x-4 mb-10 border-y border-[#E5DCCB] py-8">
+                                    <div className="flex items-start gap-3">
+                                        <UtensilsCrossed className="w-5 h-5 text-[#B68845] shrink-0 mt-0.5" />
                                         <div>
-                                            <p className="text-[10px] tracking-[0.24em] uppercase text-[#9A7C49] mb-2">
-                                                {outlet.outletType || 'dining outlet'}
-                                            </p>
-                                            <h3 className="font-serif text-3xl text-[#1F2925] mb-3">
-                                                {outlet.name}
-                                            </h3>
-                                            <p className="text-[#3F4F47]/85 mb-4 leading-relaxed">
-                                                {outlet.shortDescription || outlet.description}
-                                            </p>
-
-                                            <div className="grid sm:grid-cols-2 gap-2.5 text-sm text-[#3D4B44] mb-4">
-                                                <div className="flex items-center gap-2">
-                                                    <Utensils className="w-4 h-4 text-[#A78651]" />
-                                                    <span>{outlet.cuisineType || 'Chef curated menu'}</span>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <Clock className="w-4 h-4 text-[#A78651]" />
-                                                    <span>{outlet.operatingHours || 'As per service hours'}</span>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <MapPin className="w-4 h-4 text-[#A78651]" />
-                                                    <span>{outlet.location || 'Hotel premises'}</span>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <Users className="w-4 h-4 text-[#A78651]" />
-                                                    <span>{outlet.capacity ? `${outlet.capacity} seats` : 'Limited seating'}</span>
-                                                </div>
-                                            </div>
-
-                                            <div className="flex flex-wrap gap-2">
-                                                {(outlet.specialFeatures || []).slice(0, 4).map((feature) => (
-                                                    <span
-                                                        key={feature}
-                                                        className="border border-[#E6DDCD] bg-[#FBF8F1] px-2.5 py-1 text-xs text-[#425149]"
-                                                    >
-                                                        {feature}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </div>
-
-                                        <div className="pt-5">
-                                            <span className="inline-flex items-center gap-2 text-sm tracking-[0.2em] uppercase text-[#2A3632] group-hover:text-[#8B6F42] transition-colors">
-                                                Explore Outlet
-                                                <ArrowRight className="w-4 h-4" />
-                                            </span>
+                                            <p className="text-[10px] uppercase tracking-wider text-[#8A857D] mb-1">Cuisine</p>
+                                            <p className="text-sm font-medium text-[#2C2A27]">{outlet.cuisine}</p>
                                         </div>
                                     </div>
-                                </article>
-                            </Link>
+                                    <div className="flex items-start gap-3">
+                                        <Clock className="w-5 h-5 text-[#B68845] shrink-0 mt-0.5" />
+                                        <div>
+                                            <p className="text-[10px] uppercase tracking-wider text-[#8A857D] mb-1">Hours</p>
+                                            <p className="text-sm font-medium text-[#2C2A27]">{outlet.operatingHours}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start gap-3">
+                                        <Users className="w-5 h-5 text-[#B68845] shrink-0 mt-0.5" />
+                                        <div>
+                                            <p className="text-[10px] uppercase tracking-wider text-[#8A857D] mb-1">Capacity</p>
+                                            <p className="text-sm font-medium text-[#2C2A27]">{outlet.capacity}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start gap-3">
+                                        <MapPin className="w-5 h-5 text-[#B68845] shrink-0 mt-0.5" />
+                                        <div>
+                                            <p className="text-[10px] uppercase tracking-wider text-[#8A857D] mb-1">Location</p>
+                                            <p className="text-sm font-medium text-[#2C2A27]">{outlet.location}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <a
+                                        href="#reserve-table"
+                                        className="inline-flex items-center gap-3 text-[#B68845] text-[11px] tracking-[0.2em] uppercase font-semibold hover:text-[#8B6732] transition-colors group"
+                                    >
+                                        Reserve Experience
+                                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full border border-[#B68845]/30 group-hover:border-[#B68845] transition-colors">
+                                            <ArrowRight className="w-3.5 h-3.5" />
+                                        </span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            {/* Upcoming Outlets Selection */}
+            <section className="bg-[#1A1814] text-[#FBF9F6] py-20 md:py-32">
+                <div className="max-w-7xl mx-auto px-6 lg:px-12">
+                    <div className="text-center mb-16 md:mb-24">
+                        <span className="text-[#B68845] text-[10px] tracking-[0.3em] uppercase mb-4 block">The Future of Dining</span>
+                        <h2 className="font-serif text-4xl md:text-5xl text-white">Upcoming Experiences</h2>
+                        <div className="w-12 h-px bg-[#B68845] mx-auto mt-6" />
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-8 lg:gap-16">
+                        {upcomingOutlets.map((outlet) => (
+                            <div key={outlet.slug} className="group cursor-default relative border border-white/10 bg-white/5 hover:bg-white/10 p-6 md:p-10 transition-colors duration-500">
+                                <div className="absolute top-6 right-6">
+                                    <span className="inline-block border border-[#B68845] text-[#B68845] text-[9px] px-3 py-1 uppercase tracking-[0.2em]">
+                                        Opening Soon
+                                    </span>
+                                </div>
+
+                                <span className="text-white/50 text-[10px] tracking-[0.25em] uppercase mb-3 block">
+                                    {outlet.location}
+                                </span>
+                                <h3 className="font-serif text-3xl md:text-4xl text-white mb-4">
+                                    {outlet.name}
+                                </h3>
+                                <p className="text-white/60 text-sm md:text-base leading-relaxed font-light mb-8 max-w-sm">
+                                    {outlet.description}
+                                </p>
+
+                                <div className="space-y-4 pt-6 border-t border-white/10 text-sm text-white/80">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-white/40 uppercase tracking-wider text-[10px]">Cuisine</span>
+                                        <span className="text-right pl-4">{outlet.cuisine}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-white/40 uppercase tracking-wider text-[10px]">Hours</span>
+                                        <span className="text-right pl-4">{outlet.operatingHours}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-white/40 uppercase tracking-wider text-[10px]">Capacity</span>
+                                        <span className="text-right pl-4">{outlet.capacity}</span>
+                                    </div>
+                                </div>
+                            </div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {upcoming.length > 0 && (
-                <section className="py-10 md:py-12 bg-[#F6F1E7] border-y border-[#E7DFD0]">
-                    <div className="max-w-6xl mx-auto px-6 md:px-10">
-                        <div className="mb-6">
-                            <p className="text-[#9E8152] text-[11px] tracking-[0.3em] uppercase mb-2">
-                                Opening Soon
+            {/* Reservation Section */}
+            <section id="reserve-table" className="py-20 md:py-32 bg-[#FBF9F6]">
+                <div className="max-w-5xl mx-auto px-6 lg:px-12">
+                    <div className="relative overflow-hidden rounded-2xl md:rounded-[2rem] border border-[#E0D6C6] shadow-2xl">
+                        <Image
+                            src="/images/dining/hero.jpg"
+                            alt="Reserve your table at Olivia"
+                            fill
+                            className="object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-r from-[#1B1612]/95 via-[#1B1612]/80 to-[#1B1612]/40" />
+
+                        <div className="relative z-10 p-8 md:p-14 lg:p-20 text-white">
+                            <span className="text-[#B68845] text-[10px] tracking-[0.3em] uppercase mb-4 block">Secure Your Seat</span>
+                            <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl leading-[1.1] mb-4">Reserve Your<br />Table</h2>
+                            <p className="text-white/80 text-base md:text-lg max-w-md font-light mb-10">
+                                Experience flavors crafted with passion, inspired by Kerala & the world. Let us prepare a place for you.
                             </p>
-                            <h2 className="font-serif text-3xl md:text-4xl text-[#1F2925]">
-                                Upcoming Culinary Concepts
-                            </h2>
-                        </div>
 
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {upcoming.map((outlet) => (
-                                <article key={outlet.id} className="border border-[#E4D9C7] bg-[#FCFAF5] overflow-hidden">
-                                    <div className="relative h-48">
-                                        <Image
-                                            src={getOutletImage(outlet.featuredImage, outlet.slug)}
-                                            alt={outlet.name}
-                                            fill
-                                            className="object-cover grayscale-[0.25]"
-                                        />
-                                        <div className="absolute top-3 right-3 bg-[#2F3B35]/90 text-[#F6F1E7] px-2.5 py-1 text-[10px] tracking-[0.15em] uppercase">
-                                            Soon
-                                        </div>
-                                    </div>
-                                    <div className="p-5">
-                                        <h3 className="font-serif text-2xl text-[#1F2925] mb-2">{outlet.name}</h3>
-                                        <p className="text-sm text-[#43534B] mb-3">
-                                            {outlet.shortDescription || outlet.description}
-                                        </p>
-                                        <p className="text-sm text-[#405148] mb-1">{outlet.cuisineType || 'New concept'}</p>
-                                        <p className="text-sm text-[#405148]">{outlet.location || 'Olivia Alleppey'}</p>
-                                    </div>
-                                </article>
-                            ))}
-                        </div>
-                    </div>
-                </section>
-            )}
+                            <div className="grid lg:grid-cols-[1.5fr_1fr_1fr_auto] gap-4 md:gap-3">
+                                <div className="relative rounded-lg border border-white/20 bg-white/10 backdrop-blur-md px-4 py-3 min-h-[50px] flex items-center">
+                                    <label htmlFor="restaurant" className="sr-only">Restaurant</label>
+                                    <select
+                                        id="restaurant"
+                                        name="restaurant"
+                                        className="w-full appearance-none bg-transparent text-sm md:text-base outline-none text-white cursor-pointer"
+                                        defaultValue=""
+                                    >
+                                        <option value="" disabled className="text-black">Select Restaurant</option>
+                                        {operationalOutlets.map((outlet) => (
+                                            <option key={`select-${outlet.slug}`} value={outlet.name} className="text-black">{outlet.name}</option>
+                                        ))}
+                                    </select>
+                                    <ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50" />
+                                </div>
 
-            <section className="py-12 md:py-14">
-                <div className="max-w-5xl mx-auto px-6 md:px-10 border border-[#E5DCCB] bg-[#FCFAF5] p-7 md:p-10 text-center">
-                    <p className="text-[#9E8152] text-[11px] tracking-[0.3em] uppercase mb-3">
-                        Reserve Your Table
-                    </p>
-                    <h2 className="font-serif text-3xl md:text-5xl text-[#1F2925] mb-4">
-                        Let Us Curate Your Next Meal At Olivia
-                    </h2>
-                    <p className="text-[#46544D] max-w-2xl mx-auto mb-7">
-                        Planning a long breakfast, an evening coffee meeting, or a family dinner by the water?
-                        Our team will help you choose the right outlet and timing.
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                        <Link
-                            href="/contact?type=dining"
-                            className="inline-flex items-center justify-center bg-[#2A3430] text-[#F7F4EC] px-7 py-3 text-xs tracking-[0.2em] uppercase hover:bg-[#39443F] transition-colors"
-                        >
-                            Request Dining Reservation
-                        </Link>
-                        <Link
-                            href={brewAndBite ? `/dining/${brewAndBite.slug}` : '/dining'}
-                            className="inline-flex items-center justify-center border border-[#CAB38A] text-[#384740] px-7 py-3 text-xs tracking-[0.2em] uppercase hover:bg-[#F2EADB] transition-colors"
-                        >
-                            <Sparkles className="w-4 h-4 mr-2" />
-                            View Brew &amp; Bite
-                        </Link>
+                                <label className="relative rounded-lg border border-white/20 bg-white/10 backdrop-blur-md px-4 py-3 min-h-[50px] flex items-center gap-3 cursor-pointer">
+                                    <CalendarDays className="w-4 h-4 text-white/50 shrink-0" />
+                                    <span className="sr-only">Date</span>
+                                    <input
+                                        type="date"
+                                        className="w-full bg-transparent text-sm md:text-base outline-none text-white [color-scheme:dark]"
+                                    />
+                                </label>
+
+                                <label className="relative rounded-lg border border-white/20 bg-white/10 backdrop-blur-md px-4 py-3 min-h-[50px] flex items-center gap-3 cursor-pointer">
+                                    <Clock3 className="w-4 h-4 text-white/50 shrink-0" />
+                                    <span className="sr-only">Time</span>
+                                    <input
+                                        type="time"
+                                        className="w-full bg-transparent text-sm md:text-base outline-none text-white [color-scheme:dark]"
+                                    />
+                                </label>
+
+                                <Link
+                                    href="/contact?type=dining"
+                                    className="inline-flex items-center justify-center rounded-lg bg-[#B68845] min-h-[50px] px-8 text-white text-[11px] tracking-[0.2em] font-semibold uppercase hover:bg-[#8B6732] transition-colors"
+                                >
+                                    Book Table
+                                </Link>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
         </main>
-    );
-}
-
-function StatCard({ label, value }: { label: string; value: string }) {
-    return (
-        <div className="border border-[#E7DDCC] bg-[#FCFAF5] px-4 py-3">
-            <p className="text-[10px] tracking-[0.2em] uppercase text-[#8F7750] mb-1">{label}</p>
-            <p className="text-sm md:text-base text-[#2D3933]">{value}</p>
-        </div>
-    );
-}
-
-function InfoPill({ icon, value }: { icon: React.ReactNode; value: string }) {
-    return (
-        <div className="flex items-center gap-2 border border-[#E5DCCB] bg-[#FAF6ED] px-3 py-2 text-sm text-[#3C4C44]">
-            <span className="text-[#A78651]">{icon}</span>
-            <span>{value}</span>
-        </div>
     );
 }
