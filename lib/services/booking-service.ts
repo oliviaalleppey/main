@@ -1028,7 +1028,11 @@ export class BookingService {
                 }
             } catch { /* ignore secondary failure */ }
 
-            throw error;
+            return {
+                success: false,
+                status: 'failed',
+                message,
+            };
         } finally {
             // 8. RELEASE LOCK (Mandatory)
             await BookingLockService.releaseLock(bookingId);

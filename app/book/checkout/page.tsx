@@ -268,8 +268,24 @@ export default async function CheckoutPage({
         weekday: 'short',
     })}`;
     const sessionExpiresAt = session.expiresAt ? new Date(session.expiresAt) : null;
+    if (sessionExpiresAt && sessionExpiresAt.getTime() <= Date.now()) {
+        redirect('/book/search?error=session_expired');
+    }
+    const sessionRemainingMs = sessionExpiresAt
+        ? Math.max(0, sessionExpiresAt.getTime() - Date.now())
+        : 0;
+    const sessionRemainingMinutes = Math.ceil(sessionRemainingMs / (1000 * 60));
+    const sessionHoldLabel = sessionExpiresAt
+        ? sessionRemainingMinutes <= 1
+            ? 'Less than 1 minute left'
+            : `${sessionRemainingMinutes} minutes left`
+        : 'Expires soon';
     const sessionExpiryLabel = sessionExpiresAt
-        ? sessionExpiresAt.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
+        ? sessionExpiresAt.toLocaleTimeString('en-IN', {
+            hour: '2-digit',
+            minute: '2-digit',
+            timeZone: 'Asia/Kolkata',
+        })
         : 'soon';
     const selectedAddOnsCount = selectedAddOnRows.reduce((sum, entry) => sum + entry.quantity, 0);
     const addMoreRoomsParams = new URLSearchParams({
@@ -457,9 +473,11 @@ export default async function CheckoutPage({
                             <Clock3 className="w-4 h-4 mt-0.5 text-amber-700 flex-shrink-0" />
                             <div>
                                 <p className="text-xs font-semibold text-amber-900">
-                                    Session hold until: {sessionExpiryLabel}
+                                    Session hold: {sessionHoldLabel}
                                 </p>
-                                <p className="text-[11px] text-amber-800">Complete payment to secure this selection.</p>
+                                <p className="text-[11px] text-amber-800">
+                                    Until {sessionExpiryLabel} IST. Complete payment to secure this selection.
+                                </p>
                             </div>
                         </div>
                         <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-2.5 flex items-start gap-2">
