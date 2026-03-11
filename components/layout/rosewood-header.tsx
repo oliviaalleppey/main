@@ -1,26 +1,54 @@
-import { signIn, signOut, useSession } from "next-auth/react"
+'use client';
+
+import { signIn, signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
+
+const NAV_ITEMS = [
+    'Discover',
+    'Offers',
+    'Accommodation',
+    'Wedding',
+    'Dining',
+    'Wellness',
+    'Experiences',
+    'Conference & Events',
+];
+
+const toNavHref = (item: string) => `/${item.toLowerCase().replace(/ & /g, '-').replace(/\s+/g, '-')}`;
 
 export default function RosewoodHeader() {
     const { data: session } = useSession();
+    const pathname = usePathname();
     const [isTopBarVisible, setIsTopBarVisible] = useState(true);
     const [enableTopBarAnimation, setEnableTopBarAnimation] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const lastScrollY = useRef(0);
     const topBarVisibleRef = useRef(true);
     const headerRef = useRef<HTMLElement | null>(null);
-    const googleSignIn = () => signIn("google");
+    const googleSignIn = () => signIn('google');
     const isAdminUser =
         !!session?.user &&
         'role' in session.user &&
         (session.user as { role?: string }).role === 'admin';
 
+    useEffect(() => {
+        setIsMobileMenuOpen(false);
+    }, [pathname]);
+
+    useEffect(() => {
+        if (!isMobileMenuOpen) return;
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = previousOverflow;
+        };
+    }, [isMobileMenuOpen]);
+
     useLayoutEffect(() => {
         const setTopBarVisible = (visible: boolean) => {
-            if (topBarVisibleRef.current === visible) {
-                return;
-            }
-
+            if (topBarVisibleRef.current === visible) return;
             topBarVisibleRef.current = visible;
             setIsTopBarVisible(visible);
         };
@@ -36,9 +64,7 @@ export default function RosewoodHeader() {
         let ticking = false;
 
         const handleScroll = () => {
-            if (ticking) {
-                return;
-            }
+            if (ticking) return;
 
             ticking = true;
             window.requestAnimationFrame(() => {
@@ -67,10 +93,7 @@ export default function RosewoodHeader() {
 
     useLayoutEffect(() => {
         const updateHeaderHeight = () => {
-            if (!headerRef.current) {
-                return;
-            }
-
+            if (!headerRef.current) return;
             const headerHeight = Math.round(headerRef.current.getBoundingClientRect().height);
             document.documentElement.style.setProperty('--site-header-height', `${headerHeight}px`);
         };
@@ -86,7 +109,6 @@ export default function RosewoodHeader() {
         }
 
         window.addEventListener('resize', updateHeaderHeight);
-
         return () => {
             resizeObserver.disconnect();
             window.removeEventListener('resize', updateHeaderHeight);
@@ -95,17 +117,16 @@ export default function RosewoodHeader() {
 
     return (
         <header ref={headerRef} className="sticky top-0 z-50 bg-[#FBFBF9] shadow-sm">
-            {/* Top Bar - Minimalist with underlined links */}
             <div
-                className={`overflow-hidden border-gray-200/20 duration-200 ease-out ${enableTopBarAnimation ? 'transition-[height,opacity,border-color]' : ''} ${isTopBarVisible
-                    ? 'h-12 border-b opacity-100'
-                    : 'h-0 border-b-0 opacity-0 pointer-events-none'
-                    }`}
+                className={`hidden md:block overflow-hidden border-gray-200/20 duration-200 ease-out ${
+                    enableTopBarAnimation ? 'transition-[height,opacity,border-color]' : ''
+                } ${
+                    isTopBarVisible ? 'h-12 border-b opacity-100' : 'h-0 border-b-0 opacity-0 pointer-events-none'
+                }`}
             >
                 <div className="flex justify-between items-center px-6 md:px-12 py-3 text-[11px] font-medium font-sans text-gray-900">
-                    {/* Kept text-gray-900 for safety unless requested otherwise */}
                     <div className="flex gap-6">
-                        <Link href="#" className="hover:opacity-70 transition-opacity">
+                        <Link href="/" className="hover:opacity-70 transition-opacity">
                             Olivia International
                         </Link>
                     </div>
@@ -122,7 +143,6 @@ export default function RosewoodHeader() {
                                 Sign In
                             </button>
                         )}
-                        {/* Admin Link */}
                         {isAdminUser && (
                             <Link href="/admin" className="hover:opacity-70 transition-opacity font-bold">
                                 Admin Panel
@@ -131,35 +151,27 @@ export default function RosewoodHeader() {
                         <Link href="/membership" className="hover:opacity-70 transition-opacity">
                             Membership
                         </Link>
-                        <button className="hover:opacity-70 transition-opacity">
-                            English
-                        </button>
+                        <button className="hover:opacity-70 transition-opacity">English</button>
                     </div>
                 </div>
             </div>
 
-            {/* Main Bar - Rosewood Style */}
-            <div className="flex justify-between items-center px-6 md:px-12 py-4">
-
-                {/* Left: Brand Logo + Dropdown */}
-                <div className="flex items-center gap-2 w-1/4">
-                    <Link href="/" className="flex items-center group">
+            <div className="flex items-center justify-between px-6 md:px-12 py-4">
+                <div className="flex items-center flex-1 xl:w-1/4">
+                    <Link href="/" className="inline-flex items-center group whitespace-nowrap">
                         <span className="text-sm font-bold tracking-[0.2em] uppercase leading-tight text-gray-900">Olivia</span>
                         <span className="text-sm font-bold tracking-[0.2em] uppercase leading-tight text-gray-900 ml-2">Alleppey</span>
                     </Link>
-
                 </div>
 
-                {/* Center: Navigation Links (Serif, Elegant) */}
                 <nav className="hidden xl:flex justify-center items-center gap-6 w-2/4">
-                    {['Discover', 'Offers', 'Accommodation', 'Wedding', 'Dining', 'Wellness', 'Experiences', 'Conference & Events'].map((item) => (
+                    {NAV_ITEMS.map((item) => (
                         <Link
                             key={item}
-                            href={`/${item.toLowerCase().replace(/ & /g, '-').replace(/\s+/g, '-')}`}
-                            className={`font-serif hover:opacity-70 transition-colors text-gray-600 hover:text-gray-900 ${item === 'Conference & Events'
-                                ? 'text-base whitespace-nowrap'
-                                : 'text-lg'
-                                }`}
+                            href={toNavHref(item)}
+                            className={`font-serif hover:opacity-70 transition-colors text-gray-600 hover:text-gray-900 ${
+                                item === 'Conference & Events' ? 'text-base whitespace-nowrap' : 'text-lg'
+                            }`}
                         >
                             {item}
                         </Link>
@@ -170,8 +182,7 @@ export default function RosewoodHeader() {
                     </Link>
                 </nav>
 
-                {/* Right: Solid Reserve Button */}
-                <div className="flex justify-end items-center w-1/4">
+                <div className="flex justify-end items-center gap-1 xl:w-1/4">
                     <Link
                         href="#booking-search"
                         className="hidden md:inline-block bg-[#0A332B] text-white text-[11px] font-bold uppercase tracking-[0.2em] px-8 py-4 hover:bg-[#15443B] transition-colors"
@@ -179,15 +190,99 @@ export default function RosewoodHeader() {
                         Reserve
                     </Link>
 
-                    {/* Mobile Menu Toggle */}
-                    <button className="xl:hidden p-2 text-gray-900">
-                        <span className="sr-only">Menu</span>
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 6h16M4 12h16M4 18h16" />
+                    <button
+                        type="button"
+                        onClick={() => setIsMobileMenuOpen(true)}
+                        aria-label="Open menu"
+                        aria-expanded={isMobileMenuOpen}
+                        className="xl:hidden p-2 text-gray-900"
+                    >
+                        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
                     </button>
                 </div>
             </div>
+
+            {isMobileMenuOpen && (
+                <>
+                    <button
+                        type="button"
+                        aria-label="Close menu overlay"
+                        className="fixed inset-0 z-[60] bg-black/35 xl:hidden"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                    />
+                    <aside className="fixed inset-y-0 right-0 z-[70] w-[86%] max-w-sm bg-[#FBFBF9] border-l border-gray-200 shadow-2xl xl:hidden overflow-y-auto">
+                        <div className="px-6 py-5 border-b border-gray-200 flex items-center justify-between">
+                            <p className="text-xs uppercase tracking-[0.2em] text-gray-500">Menu</p>
+                            <button
+                                type="button"
+                                aria-label="Close menu"
+                                className="text-gray-900 p-1"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M6 6l12 12M18 6L6 18" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div className="px-6 py-5">
+                            <Link
+                                href="#booking-search"
+                                className="block w-full text-center bg-[#0A332B] text-white text-[11px] font-bold uppercase tracking-[0.2em] px-6 py-3.5 hover:bg-[#15443B] transition-colors"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                Reserve
+                            </Link>
+                        </div>
+
+                        <nav className="px-6 pb-6 border-b border-gray-200 space-y-1">
+                            {NAV_ITEMS.map((item) => (
+                                <Link
+                                    key={item}
+                                    href={toNavHref(item)}
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="block py-3 text-[17px] font-serif text-[#1C1C1C] border-b border-gray-100 last:border-b-0"
+                                >
+                                    {item}
+                                </Link>
+                            ))}
+                            <Link
+                                href="/shop"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="block py-3 text-[17px] font-serif text-[#1C1C1C]"
+                            >
+                                Shop
+                            </Link>
+                        </nav>
+
+                        <div className="px-6 py-5 space-y-3 text-sm text-gray-700">
+                            {session ? (
+                                <>
+                                    <p className="text-gray-900">Welcome, {session.user?.name}</p>
+                                    <button onClick={() => signOut()} className="block hover:opacity-70 transition-opacity">
+                                        Sign Out
+                                    </button>
+                                </>
+                            ) : (
+                                <button onClick={() => googleSignIn()} className="block hover:opacity-70 transition-opacity">
+                                    Sign In
+                                </button>
+                            )}
+                            {isAdminUser && (
+                                <Link href="/admin" onClick={() => setIsMobileMenuOpen(false)} className="block font-semibold">
+                                    Admin Panel
+                                </Link>
+                            )}
+                            <Link href="/membership" onClick={() => setIsMobileMenuOpen(false)} className="block">
+                                Membership
+                            </Link>
+                            <button className="block hover:opacity-70 transition-opacity">English</button>
+                        </div>
+                    </aside>
+                </>
+            )}
         </header>
     );
 }

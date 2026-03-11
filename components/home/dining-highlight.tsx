@@ -6,14 +6,14 @@ import { ArrowRight } from 'lucide-react';
 
 export default function DiningHighlight() {
     return (
-        <section className="py-24 bg-[#F5F5F0]"> {/* Matches Rooms section bg */}
+        <section className="py-14 md:py-24 bg-[#F5F5F0]"> {/* Matches Rooms section bg */}
             <div className="container mx-auto px-4 max-w-7xl">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 items-center">
 
                     {/* Visual Side - Overlapping Images */}
-                    <div className="relative order-2 lg:order-1 h-[600px] w-full">
+                    <div className="relative order-2 lg:order-1 h-[460px] md:h-[600px] w-full">
                         {/* Main Image */}
-                        <div className="absolute top-0 left-0 w-[80%] h-[500px] overflow-hidden bg-gray-200">
+                        <div className="absolute top-0 left-0 w-[80%] h-[360px] md:h-[500px] overflow-hidden bg-gray-200">
                             <Image
                                 src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=1920&auto=format&fit=crop"
                                 alt="Fine Dining Experience"
@@ -22,7 +22,7 @@ export default function DiningHighlight() {
                             />
                         </div>
                         {/* Secondary Image - Overlapping */}
-                        <div className="absolute bottom-0 right-0 w-[60%] h-[350px] overflow-hidden border-8 border-[#F5F5F0] shadow-2xl">
+                        <div className="absolute bottom-0 right-0 w-[60%] h-[240px] md:h-[350px] overflow-hidden border-8 border-[#F5F5F0] shadow-2xl">
                             <Image
                                 src="https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=2874&auto=format&fit=crop"
                                 alt="Dining Atmosphere"

@@ -20,12 +20,12 @@ const PILLARS = [
 
 export default function EditorialStory() {
     return (
-        <section className="py-24 bg-white overflow-hidden">
+        <section className="py-14 md:py-24 bg-white overflow-hidden">
             <div className="max-w-7xl mx-auto px-6 md:px-12">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 items-stretch">
 
                     {/* Left — Large editorial photo */}
-                    <div className="relative w-full h-[500px] lg:h-auto min-h-[560px] overflow-hidden group">
+                    <div className="relative w-full h-[420px] md:h-[500px] lg:h-auto lg:min-h-[560px] overflow-hidden group">
                         <Image
                             src="https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?q=80&w=1600&auto=format&fit=crop"
                             alt="Alleppey Backwaters — Olivia Hotel"
@@ -41,7 +41,7 @@ export default function EditorialStory() {
                     </div>
 
                     {/* Right — Story + Pillars */}
-                    <div className="flex flex-col justify-center lg:pl-16 py-12 lg:py-0 border-t lg:border-t-0 lg:border-l border-[#1C1C1C]/10">
+                    <div className="flex flex-col justify-center lg:pl-16 py-8 md:py-12 lg:py-0 border-t lg:border-t-0 lg:border-l border-[#1C1C1C]/10">
                         <span className="text-[10px] uppercase tracking-[0.35em] text-[#8C7A5C] block mb-6 font-medium">
                             Est. 2006 · Alleppey, Kerala
                         </span>

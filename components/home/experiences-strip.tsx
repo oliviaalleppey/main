@@ -50,8 +50,8 @@ const EXPERIENCES = [
 
 export default function ExperiencesStrip() {
     return (
-        <section className="py-20 bg-[#FBFBF9] overflow-hidden">
-            <div className="max-w-7xl mx-auto px-6 md:px-12 mb-10">
+        <section className="py-14 md:py-20 bg-[#FBFBF9] overflow-hidden">
+            <div className="max-w-7xl mx-auto px-6 md:px-12 mb-6 md:mb-10">
                 <div className="flex items-end justify-between">
                     <div>
                         <span className="text-[10px] uppercase tracking-[0.35em] text-[#8C7A5C] block mb-3 font-medium">

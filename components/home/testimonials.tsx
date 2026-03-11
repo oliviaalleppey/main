@@ -51,11 +51,11 @@ export default function Testimonials() {
     const t = TESTIMONIALS[current];
 
     return (
-        <section className="py-24 bg-[#F5F5F0]">
+        <section className="py-14 md:py-24 bg-[#F5F5F0]">
             <div className="max-w-5xl mx-auto px-6 md:px-12 text-center">
 
                 {/* Header */}
-                <span className="text-[10px] uppercase tracking-[0.35em] text-[#8C7A5C] block mb-12 font-medium">
+                <span className="text-[10px] uppercase tracking-[0.35em] text-[#8C7A5C] block mb-8 md:mb-12 font-medium">
                     Voices of Olivia
                 </span>
 
@@ -80,7 +80,7 @@ export default function Testimonials() {
                 </div>
 
                 {/* Dot indicators */}
-                <div className="flex justify-center gap-3 mt-12">
+                <div className="flex justify-center gap-3 mt-8 md:mt-12">
                     {TESTIMONIALS.map((_, i) => (
                         <button
                             key={i}

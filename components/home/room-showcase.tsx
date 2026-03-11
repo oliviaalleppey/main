@@ -44,11 +44,11 @@ export default async function RoomShowcase() {
     if (!rooms.length) return null;
 
     return (
-        <section className="py-24 bg-[#F5F5F0]">
+        <section className="py-14 md:py-24 bg-[#F5F5F0]">
             <div className="container mx-auto px-4 max-w-7xl">
 
                 {/* Header */}
-                <div className="flex justify-between items-end mb-12">
+                <div className="flex justify-between items-end mb-7 md:mb-12">
                     <h2 className="text-3xl md:text-4xl font-serif text-[#1C1C1C]">Rooms</h2>
                     <Link
                         href="/rooms"

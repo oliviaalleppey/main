@@ -9,21 +9,21 @@ export default function OffersCarousel() {
         {
             title: "Early Bird Special",
             description: "Book 30 days in advance and save 20%",
-            link: "/offers",
+            link: "/rooms",
             image: "/Users/agt/.gemini/antigravity/brain/a259c4d7-874f-4ba5-82b8-e3035ab13fdd/early_bird_luxury_offer_1771148115304.png",
             discount: "20% OFF"
         },
         {
             title: "Long Stay Offer",
             description: "Stay 5 nights or more and get 25% off",
-            link: "/offers",
+            link: "/rooms",
             image: null,
             discount: "25% OFF"
         },
         {
             title: "Honeymoon Package",
             description: "Romantic getaway with spa and dinner",
-            link: "/offers",
+            link: "/rooms",
             image: null,
             discount: "SPECIAL"
         }
@@ -43,7 +43,7 @@ export default function OffersCarousel() {
                         </h2>
                     </div>
                     <Link
-                        href="/offers"
+                        href="/rooms"
                         className="group flex items-center gap-2 text-[#B8956A] hover:text-[#8B6F47] transition-colors duration-300"
                     >
                         <span className="text-[10px] font-medium uppercase tracking-widest">View All</span>

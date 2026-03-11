@@ -42,8 +42,8 @@ export default function Home() {
       <Testimonials />
 
       {/* Photo Grid (Soho House Style) */}
-      <section className="bg-white py-20">
-        <div className="text-center mb-12">
+      <section className="bg-white py-14 md:py-20">
+        <div className="text-center mb-8 md:mb-12">
           <h2 className="text-3xl font-serif text-gray-900 tracking-wide">VISUAL STORIES</h2>
         </div>
         <PhotoCarousel />
