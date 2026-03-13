@@ -42,7 +42,7 @@ export default function EditorialStory() {
 
                     {/* Right — Story + Pillars */}
                     <div className="flex flex-col justify-center lg:pl-16 py-8 md:py-12 lg:py-0 border-t lg:border-t-0 lg:border-l border-[#1C1C1C]/10">
-                        <span className="text-[10px] uppercase tracking-[0.35em] text-[#8C7A5C] block mb-6 font-medium">
+                        <span className="text-[10px] uppercase tracking-[0.35em] text-[#7A5E28] block mb-6 font-medium">
                             Est. 2006 · Alleppey, Kerala
                         </span>
 
@@ -50,11 +50,11 @@ export default function EditorialStory() {
                             Born from the<br />Waters of Kerala
                         </h2>
 
-                        <p className="text-[#1C1C1C]/60 text-sm md:text-base font-light leading-relaxed mb-4">
+                        <p className="text-[#59544D] text-sm md:text-base font-light leading-relaxed mb-4">
                             Olivia Alleppey was conceived not as a hotel, but as a love letter to the backwaters —
                             a place where the slow rhythm of the canals teaches you to breathe again.
                         </p>
-                        <p className="text-[#1C1C1C]/60 text-sm md:text-base font-light leading-relaxed mb-10">
+                        <p className="text-[#59544D] text-sm md:text-base font-light leading-relaxed mb-10">
                             Over nearly two decades, we have welcomed guests from 78 countries, each leaving with
                             something they did not expect: a sense of belonging to a place they had never been before.
                         </p>
@@ -64,7 +64,7 @@ export default function EditorialStory() {
                             {PILLARS.map((pillar, i) => (
                                 <div key={i} className="flex gap-5 items-start group">
                                     <div className="flex-none">
-                                        <div className="w-8 h-[1px] bg-[#C5A572] mt-3 group-hover:w-12 transition-all duration-300" />
+                                        <div className="w-8 h-[1px] bg-[#C5A059] mt-3 group-hover:w-12 transition-all duration-300" />
                                     </div>
                                     <div>
                                         <h4 className="text-sm font-semibold text-[#1C1C1C] uppercase tracking-widest mb-1">
@@ -80,7 +80,7 @@ export default function EditorialStory() {
 
                         <Link
                             href="/about"
-                            className="inline-flex items-center gap-3 text-xs uppercase tracking-widest text-[#1C1C1C] hover:text-[#8C7A5C] transition-colors font-semibold group w-fit"
+                            className="inline-flex items-center gap-3 text-xs uppercase tracking-widest text-[#1C1C1C] hover:text-[#7A5E28] transition-colors font-semibold group w-fit"
                         >
                             Our Full Story
                             <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

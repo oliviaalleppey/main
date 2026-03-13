@@ -193,7 +193,7 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
             </section>
 
             {/* Rooms Collection */}
-            <section id="rooms-collection" className="py-8 md:py-10 px-6 md:px-10">
+            <section id="rooms-collection" className="py-8 md:py-10 px-6 md:px-10 scroll-mt-[130px] md:scroll-mt-[150px]">
                 <div className="max-w-[1600px] mx-auto">
                     <div className="text-center mb-10 md:mb-12">
                         <span className="inline-block w-12 h-[1px] bg-[#C6AF84] mb-5" />
@@ -413,7 +413,7 @@ function RoomCard({ room, index }: { room: RoomViewModel; index: number }) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8 }}
-            className={`flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} gap-6 lg:gap-8 items-stretch lg:min-h-[46vh] scroll-mt-36`}
+            className={`flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} gap-6 lg:gap-8 items-stretch lg:min-h-[46vh] scroll-mt-[200px] md:scroll-mt-[220px]`}
         >
             {/* Image Section */}
             <div className="w-full lg:w-1/2 relative h-[34vh] sm:h-[40vh] lg:h-[44vh] xl:h-[46vh] overflow-hidden group">
@@ -429,11 +429,13 @@ function RoomCard({ room, index }: { room: RoomViewModel; index: number }) {
 
                 {/* Price Tag - Floating Premium Style */}
                 <div className="absolute top-6 right-6 z-10">
-                    <div className="backdrop-blur-xl bg-white/85 border border-white/50 shadow-[0_12px_40px_-15px_rgba(0,0,0,0.2)] px-5 py-3.5 rounded-2xl flex flex-col items-end">
-                        <span className="text-[#BCA06F] text-[9px] font-accent tracking-[0.35em] uppercase mb-1">Room From</span>
-                        <div className="flex items-baseline gap-1">
-                            <span className="text-[#1C1C1C] text-[1.45rem] font-serif font-medium leading-none">₹{(room.basePrice / 100).toLocaleString('en-IN')}</span>
-                            <span className="text-[#1C1C1C]/40 text-[10px] font-medium tracking-widest uppercase">/ Night</span>
+                    <div className="bg-gradient-to-b from-[#FBF8F3] to-[#F3EEE5] border border-white/85 ring-1 ring-black/5 shadow-[0_18px_44px_-24px_rgba(0,0,0,0.28)] px-6 py-4 rounded-[30px] flex flex-col items-end">
+                        <span className="text-[#8A6B34] text-[10px] tracking-[0.42em] uppercase mb-2 font-medium">Room From</span>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-[#1C1C1C] text-[1.6rem] md:text-[1.8rem] font-serif font-[300] lining-nums proportional-nums tracking-[-0.02em] leading-none">
+                                ₹{(room.basePrice / 100).toLocaleString('en-IN')}
+                            </span>
+                            <span className="text-[#6B645C] text-[11px] font-medium tracking-[0.18em] uppercase">/ Night</span>
                         </div>
                     </div>
                 </div>
@@ -451,30 +453,36 @@ function RoomCard({ room, index }: { room: RoomViewModel; index: number }) {
             <div className={`w-full lg:w-1/2 flex flex-col justify-center py-2 lg:py-0 ${isEven ? 'lg:pl-8' : 'lg:items-end lg:pr-8 text-right'}`}>
                 <div className="max-w-lg">
                     <span className="text-[#BCA06F] text-[10px] md:text-[11px] font-accent tracking-[0.4em] uppercase mb-4 block">
-                        {String(index + 1).padStart(2, '0')} — {room.view}
+                        {String(index + 1).padStart(2, '0')} — {['Lake View', 'Canal View', 'Canal View', 'Boat Race View', 'Lake View', 'Lake View'][index] || room.view}
                     </span>
 
                     <h3 className="text-3xl md:text-4xl lg:text-[2.55rem] font-serif text-[#1C1C1C] mb-4 leading-tight">
                         {room.name}
                     </h3>
 
-                    <p className="text-[#1C1C1C]/70 text-base md:text-[1.05rem] leading-[1.7] tracking-wide mb-6 font-light">
+                    <p className="text-[#403A35] text-base md:text-[1.05rem] leading-[1.7] tracking-wide mb-6 font-light">
                         {room.shortDescription}
                     </p>
 
                     {/* Room Details Grid */}
-                    <div className="grid grid-cols-3 gap-4 mb-6 py-5 border-y border-gray-100">
+                    <div className="grid grid-cols-3 gap-4 mb-6 py-5 border-y border-[#E3DDD4]">
                         <div>
-                            <p className="text-[2.1rem] font-serif text-[#1C1C1C] leading-none mb-1">{room.size}</p>
-                            <p className="text-[9px] text-[#1C1C1C]/40 uppercase tracking-[0.25em] font-medium">Sq Ft</p>
+                            <p className="text-[1.92rem] md:text-[2.08rem] font-sans font-[300] tabular-nums text-[#181818] leading-none mb-1 tracking-[-0.02em]">
+                                {room.size}
+                            </p>
+                            <p className="text-[10px] text-[#655D55] uppercase tracking-[0.22em] font-medium">Sq Ft</p>
                         </div>
                         <div>
-                            <p className="text-[2.1rem] font-serif text-[#1C1C1C] leading-none mb-1">{room.maxGuests}</p>
-                            <p className="text-[9px] text-[#1C1C1C]/40 uppercase tracking-[0.25em] font-medium">Guests</p>
+                            <p className="text-[1.92rem] md:text-[2.08rem] font-sans font-[300] tabular-nums text-[#181818] leading-none mb-1 tracking-[-0.02em]">
+                                {room.maxGuests}
+                            </p>
+                            <p className="text-[10px] text-[#655D55] uppercase tracking-[0.22em] font-medium">Guests</p>
                         </div>
                         <div>
-                            <p className="text-[2.1rem] font-serif text-[#1C1C1C] leading-none mb-1">{room.bedType.split(' ')[0]}</p>
-                            <p className="text-[9px] text-[#1C1C1C]/40 uppercase tracking-[0.25em] font-medium">Bed Type</p>
+                            <p className="text-[1.62rem] md:text-[1.82rem] font-sans font-[300] text-[#181818] leading-none mb-1 tracking-[-0.01em]">
+                                {room.bedType.split(' ')[0]}
+                            </p>
+                            <p className="text-[10px] text-[#655D55] uppercase tracking-[0.22em] font-medium">Bed Type</p>
                         </div>
                     </div>
 
@@ -483,7 +491,7 @@ function RoomCard({ room, index }: { room: RoomViewModel; index: number }) {
                         {room.features.slice(0, 6).map((feature: string) => (
                             <span
                                 key={feature}
-                                className="text-xs text-[#1C1C1C]/70 border border-gray-200 px-2.5 py-1"
+                                className="text-xs text-[#403A35] border border-gray-200 px-2.5 py-1"
                             >
                                 {feature}
                             </span>
@@ -491,13 +499,16 @@ function RoomCard({ room, index }: { room: RoomViewModel; index: number }) {
                     </div>
 
                     {/* CTA */}
-                    <div className="flex items-center gap-8">
+                    <div className="flex items-center pt-2">
                         <Link
                             href={`/rooms/${room.slug}`}
-                            className="group relative inline-flex items-center gap-4"
+                            className="group relative inline-flex items-center justify-center px-8 py-3.5 border border-[#1C1C1C] text-[#1C1C1C] overflow-hidden transition-colors duration-300"
                         >
-                            <span className="text-[#1C1C1C] text-[11px] tracking-[0.24em] uppercase font-semibold">Explore Room</span>
-                            <span className="w-12 h-[1px] bg-[#BCA06F] group-hover:w-20 transition-all duration-300" />
+                            <span className="absolute inset-0 w-full h-full bg-[#1C1C1C] origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out z-0"></span>
+                            <span className="relative z-10 text-[11px] tracking-[0.24em] uppercase font-normal group-hover:text-white transition-colors duration-300">Explore Room</span>
+                            <svg className="relative z-10 w-3.5 h-3.5 ml-3 transform group-hover:translate-x-1 group-hover:text-white transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                            </svg>
                         </Link>
                     </div>
                 </div>

@@ -315,7 +315,7 @@ export function AvailabilityCalendar({
                                         <span
                                             className={cn(
                                                 'text-[9px]',
-                                                (isCheckIn || isCheckOut) && 'text-white/80'
+                                                (isCheckIn || isCheckOut) && 'text-white/95'
                                             )}
                                         >
                                             {/* Room count hidden as per user request */}

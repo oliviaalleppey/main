@@ -6,7 +6,7 @@ export default function CompactIntro() {
     return (
         <section className="py-10 md:py-16 px-4 text-center bg-white">
             <div className="max-w-2xl mx-auto">
-                <span className="text-[10px] md:text-xs uppercase tracking-[0.3em] text-[#8C7A5C] mb-4 block font-medium">
+                <span className="text-[10px] md:text-xs uppercase tracking-[0.3em] text-[#7A5E28] mb-4 block font-medium">
                     Welcome to Olivia Alleppey
                 </span>
 
@@ -14,7 +14,7 @@ export default function CompactIntro() {
                     Backwater calm,<br className="hidden md:block" /> contemporary comfort
                 </h2>
 
-                <p className="text-[#1C1C1C]/60 text-sm md:text-base font-light leading-relaxed mb-6 md:mb-8 max-w-lg mx-auto">
+                <p className="text-[#59544D] text-sm md:text-base font-light leading-relaxed mb-6 md:mb-8 max-w-lg mx-auto">
                     Slow down by the water, stay in thoughtfully designed rooms, and discover the experiences that make Alleppey unforgettable.
                 </p>
 

@@ -26,7 +26,7 @@ export default function CompactFeatures() {
     ];
 
     return (
-        <section className="py-20 bg-[#FBFBF9]">
+        <section className="py-20 bg-[#F6F1E8]">
             <div className="container mx-auto px-4 max-w-6xl">
                 <div className="text-center mb-16">
                     <h2 className="text-3xl md:text-4xl font-serif text-gray-900 mb-4 tracking-wide">CURATED EXPERIENCES</h2>
@@ -46,7 +46,7 @@ export default function CompactFeatures() {
                                     className="object-cover transition-transform duration-700 group-hover:scale-110"
                                 />
                             </div>
-                            <h3 className="text-xl font-serif text-gray-900 mb-2 group-hover:text-[#8C7A5C] transition-colors">
+                            <h3 className="text-xl font-serif text-gray-900 mb-2 group-hover:text-[#7A5E28] transition-colors">
                                 {feature.title}
                             </h3>
                             <p className="text-sm text-gray-500 leading-relaxed mb-4 font-light">

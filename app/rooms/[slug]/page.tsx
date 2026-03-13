@@ -80,7 +80,7 @@ export default async function RoomDetailPage({ params }: { params: Promise<{ slu
     }));
 
     return (
-        <main className="min-h-screen bg-[#FBFBF9] font-sans selection:bg-[#1C1C1C] selection:text-white pb-40 pt-8">
+        <main className="min-h-screen bg-[#F6F1E8] font-sans selection:bg-[#1C1C1C] selection:text-white pb-40 pt-8">
 
             {/* Sticky Booking Search Bar */}
             <StickyBookingBar basePrice={room.basePrice} roomSlug={slug} />
@@ -90,7 +90,7 @@ export default async function RoomDetailPage({ params }: { params: Promise<{ slu
                 <h1 className="font-serif text-4xl md:text-5xl tracking-tight text-[#1C1C1C] mb-1">
                     {roomName}
                 </h1>
-                <p className="text-lg text-[#1C1C1C]/60 font-light">
+                <p className="text-lg text-[#59544D] font-light">
                     {room.shortDescription || 'Experience luxury in the heart of Alappuzha'}
                 </p>
             </section>

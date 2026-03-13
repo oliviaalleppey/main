@@ -154,7 +154,7 @@ function getIconComponent(iconKey: string): React.JSX.Element {
 
 export default function RoomContent({ title, tagline, description, details, amenities }: RoomContentProps) {
     return (
-        <section className="bg-[#FBFBF9] text-[#1C1C1C] pt-0 pb-8 px-6 md:px-12">
+        <section className="bg-[#F6F1E8] text-[#1C1C1C] pt-0 pb-8 px-6 md:px-12">
             <div className="max-w-7xl mx-auto">
                 {/* Title Section */}
                 {title && (
@@ -172,7 +172,7 @@ export default function RoomContent({ title, tagline, description, details, amen
                         <p className="text-xl md:text-2xl text-[#1C1C1C]/90 font-light leading-relaxed mb-8">
                             {tagline}
                         </p>
-                        <p className="text-[#1C1C1C]/60 leading-relaxed text-lg mb-12">
+                        <p className="text-[#59544D] leading-relaxed text-lg mb-12">
                             {description}
                         </p>
 
@@ -237,7 +237,7 @@ export default function RoomContent({ title, tagline, description, details, amen
 
                     {/* Right: Details List */}
                     <div className="md:col-span-5">
-                        <h3 className="text-[#C9A961] text-xs font-bold uppercase tracking-widest mb-8">
+                        <h3 className="text-[#7A5E28] text-xs font-bold uppercase tracking-widest mb-8">
                             Details:
                         </h3>
                         <ul className="space-y-4">

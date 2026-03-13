@@ -15,7 +15,7 @@ export default async function RoomsPage() {
     }));
 
     return (
-        <main className="min-h-screen bg-[#FBFBF9] font-sans selection:bg-[#C9A961] selection:text-white">
+        <main className="min-h-screen bg-[#F6F1E8] font-sans selection:bg-[#C5A059] selection:text-white">
             <RoomsClient rooms={serializedRooms} />
         </main>
     );

@@ -28,16 +28,16 @@ export default function GalleryPage() {
         : galleryImages.filter(img => img.category === selectedCategory);
 
     return (
-        <main className="min-h-screen bg-[#FBFBF9] font-sans">
+        <main className="min-h-screen bg-[#F6F1E8] font-sans">
 
             {/* Hero Section */}
             <section className="relative h-[60vh] flex items-center justify-center overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-b from-[#0A4D4E]/30 to-[#0A4D4E]/70" />
                 <div className="absolute inset-0 bg-[url('/images/gallery/hero.jpg')] bg-cover bg-center" />
                 <div className="relative z-10 text-center px-6">
-                    <p className="text-[#C9A961] text-sm tracking-[0.3em] uppercase mb-4">Visual Stories</p>
+                    <p className="text-[#7A5E28] text-sm tracking-[0.3em] uppercase mb-4">Visual Stories</p>
                     <h1 className="text-5xl md:text-7xl font-serif text-white mb-6 tracking-wide">Gallery</h1>
-                    <p className="text-white/80 text-lg md:text-xl max-w-2xl mx-auto font-light">
+                    <p className="text-white/95 text-lg md:text-xl max-w-2xl mx-auto font-light">
                         Explore our luxury hotel through images
                     </p>
                 </div>
@@ -56,7 +56,7 @@ export default function GalleryPage() {
                                 onClick={() => setSelectedCategory(category)}
                                 className={`px-6 py-3 text-sm uppercase tracking-wider transition-all ${selectedCategory === category
                                     ? 'text-[#0A4D4E] border-b-2 border-[#0A4D4E]'
-                                    : 'text-[#1C1C1C]/60 hover:text-[#1C1C1C]'
+                                    : 'text-[#59544D] hover:text-[#1C1C1C]'
                                     }`}
                             >
                                 {category}
@@ -92,9 +92,9 @@ export default function GalleryPage() {
 
                                 {/* Image Info */}
                                 <div>
-                                    <p className="text-[#C9A961] text-xs tracking-[0.2em] uppercase mb-1">{image.category}</p>
+                                    <p className="text-[#7A5E28] text-xs tracking-[0.2em] uppercase mb-1">{image.category}</p>
                                     <h3 className="text-lg font-serif text-[#1C1C1C] mb-1">{image.title}</h3>
-                                    <p className="text-sm text-[#1C1C1C]/60">{image.description}</p>
+                                    <p className="text-sm text-[#59544D]">{image.description}</p>
                                 </div>
                             </div>
                         ))}
@@ -102,7 +102,7 @@ export default function GalleryPage() {
 
                     {filteredImages.length === 0 && (
                         <div className="text-center py-16">
-                            <p className="text-[#1C1C1C]/60">No images found in this category</p>
+                            <p className="text-[#59544D]">No images found in this category</p>
                         </div>
                     )}
                 </div>
@@ -114,12 +114,12 @@ export default function GalleryPage() {
                     <h2 className="text-3xl md:text-4xl font-serif text-white mb-6 tracking-wide">
                         Experience It Yourself
                     </h2>
-                    <p className="text-white/70 text-lg mb-8 max-w-2xl mx-auto">
+                    <p className="text-white/92 text-lg mb-8 max-w-2xl mx-auto">
                         Pictures can only tell part of the story. Book your stay and experience the luxury firsthand.
                     </p>
                     <a
                         href="#booking-search"
-                        className="inline-block bg-white text-[#0A4D4E] px-8 py-4 text-sm uppercase tracking-[0.2em] hover:bg-[#C9A961] hover:text-white transition-colors"
+                        className="inline-block bg-white text-[#0A4D4E] px-8 py-4 text-sm uppercase tracking-[0.2em] hover:bg-[#C5A059] hover:text-white transition-colors"
                     >
                         Book Your Stay
                     </a>

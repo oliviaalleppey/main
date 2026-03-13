@@ -87,7 +87,7 @@ export default async function ConfirmationPage({ params }: { params: Promise<{ b
     }
 
     return (
-        <div className="min-h-screen bg-[#FBFBF9] py-20 px-6 flex items-center justify-center">
+        <div className="min-h-screen bg-[#F6F1E8] py-20 px-6 flex items-center justify-center">
             <div className="bg-white max-w-2xl w-full p-12 rounded-2xl shadow-sm border border-gray-100 text-center">
                 <div className="flex justify-center mb-6">
                     <div className={`w-20 h-20 ${iconBg} rounded-full flex items-center justify-center`}>

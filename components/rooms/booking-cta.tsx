@@ -43,7 +43,7 @@ export default function BookingCTA({ roomName, basePrice, roomSlug }: BookingCTA
                         <h2 className="font-serif text-3xl md:text-5xl text-white font-light leading-tight mb-4">
                             Your Perfect <span className="italic text-[#B8956A]">Kerala Escape</span>
                         </h2>
-                        <p className="text-white/70 text-base md:text-lg font-light leading-relaxed max-w-xl">
+                        <p className="text-white/92 text-base md:text-lg font-light leading-relaxed max-w-xl">
                             Indulge in the serenity of {displayRoomName}. A sanctuary designed for those who seek the extraordinary.
                         </p>
 

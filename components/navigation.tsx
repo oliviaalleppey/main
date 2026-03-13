@@ -65,7 +65,7 @@ export default function Navigation() {
                                         : 'text-white'
                                     : isScrolled
                                         ? 'text-charcoal/70 hover:text-teal-deep'
-                                        : 'text-white/80 hover:text-white'
+                                        : 'text-white/95 hover:text-white'
                                     }`}
                             >
                                 {item.name}

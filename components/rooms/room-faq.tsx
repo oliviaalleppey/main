@@ -82,7 +82,7 @@ export default function RoomFAQ() {
                                     }`}
                             >
                                 <div className="px-6 pb-6 pt-2">
-                                    <p className="text-[#2c2c2c]/70 leading-relaxed">
+                                    <p className="text-[#403A35] leading-relaxed">
                                         {faq.answer}
                                     </p>
                                 </div>
@@ -93,7 +93,7 @@ export default function RoomFAQ() {
 
                 {/* Contact CTA */}
                 <div className="mt-12 text-center">
-                    <p className="text-[#2c2c2c]/60 mb-4">
+                    <p className="text-[#59544D] mb-4">
                         Have more questions?
                     </p>
                     <a

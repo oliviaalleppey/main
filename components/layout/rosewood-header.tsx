@@ -4,7 +4,6 @@ import { signIn, signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { usePathname } from 'next/navigation';
 
 const NAV_ITEMS = [
     'Discover',
@@ -20,7 +19,6 @@ const toNavHref = (item: string) => `/${item.toLowerCase().replace(/ & /g, '-').
 
 export default function RosewoodHeader() {
     const { data: session } = useSession();
-    const pathname = usePathname();
     const [isTopBarVisible, setIsTopBarVisible] = useState(true);
     const [enableTopBarAnimation, setEnableTopBarAnimation] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -32,10 +30,6 @@ export default function RosewoodHeader() {
         !!session?.user &&
         'role' in session.user &&
         (session.user as { role?: string }).role === 'admin';
-
-    useEffect(() => {
-        setIsMobileMenuOpen(false);
-    }, [pathname]);
 
     useEffect(() => {
         if (!isMobileMenuOpen) return;
@@ -116,13 +110,13 @@ export default function RosewoodHeader() {
     }, []);
 
     return (
-        <header ref={headerRef} className="sticky top-0 z-50 bg-[#FBFBF9] shadow-sm">
+        <header ref={headerRef} className="sticky top-0 z-50 bg-white shadow-sm">
             <div
                 className={`hidden md:block overflow-hidden border-gray-200/20 duration-200 ease-out ${enableTopBarAnimation ? 'transition-[height,opacity,border-color]' : ''
                     } ${isTopBarVisible ? 'h-12 border-b opacity-100' : 'h-0 border-b-0 opacity-0 pointer-events-none'
                     }`}
             >
-                <div className="flex justify-end items-center px-6 md:px-12 py-3 text-[11px] font-medium font-sans text-gray-900">
+                <div className="flex justify-end items-center px-6 md:px-12 py-3 text-xs font-medium font-sans text-[#23201C]">
                     <div className="flex gap-6 items-center">
                         {session ? (
                             <div className="flex items-center gap-4">
@@ -149,15 +143,15 @@ export default function RosewoodHeader() {
                 </div>
             </div>
 
-            <div className="flex items-center justify-between px-6 md:px-12 h-[74px] md:h-[88px]">
+            <div className="flex items-center justify-between px-6 md:px-12 h-[92px] md:h-[112px]">
                 <div className="flex items-center flex-1 xl:w-1/4">
                     <Link href="/" className="inline-flex h-full items-center group whitespace-nowrap" aria-label="Olivia Alleppey">
                         <Image
                             src="/images/olivia-logo.svg"
                             alt="Olivia Alleppey"
-                            width={420}
-                            height={400}
-                            className="h-[58px] md:h-[70px] w-auto max-w-none"
+                            width={500}
+                            height={120}
+                            className="h-[75px] md:h-[85px] lg:h-[95px] w-auto max-w-[400px] md:max-w-none origin-left object-contain scale-[1.3] md:scale-[1.45] translate-x-4 md:translate-x-8 transform"
                             priority
                         />
                     </Link>
@@ -168,13 +162,13 @@ export default function RosewoodHeader() {
                         <Link
                             key={item}
                             href={toNavHref(item)}
-                            className={`font-serif hover:opacity-70 transition-colors text-gray-600 hover:text-gray-900 ${item === 'Conference & Events' ? 'text-base whitespace-nowrap' : 'text-lg'
+                            className={`font-serif font-medium transition-colors text-[#3A342D] hover:text-[#121212] ${item === 'Conference & Events' ? 'text-base whitespace-nowrap' : 'text-lg'
                                 }`}
                         >
                             {item}
                         </Link>
                     ))}
-                    <Link href="/shop" className="font-serif text-lg hover:opacity-70 transition-colors flex items-start gap-0.5 text-gray-600 hover:text-gray-900">
+                    <Link href="/shop" className="font-serif font-medium text-lg transition-colors flex items-start gap-0.5 text-[#3A342D] hover:text-[#121212]">
                         Shop
                         <span className="text-[10px] leading-none mt-1">↗</span>
                     </Link>
@@ -210,7 +204,7 @@ export default function RosewoodHeader() {
                         className="fixed inset-0 z-[60] bg-black/35 xl:hidden"
                         onClick={() => setIsMobileMenuOpen(false)}
                     />
-                    <aside className="fixed inset-y-0 right-0 z-[70] w-[86%] max-w-sm bg-[#FBFBF9] border-l border-gray-200 shadow-2xl xl:hidden overflow-y-auto">
+                    <aside className="fixed inset-y-0 right-0 z-[70] w-[86%] max-w-sm bg-[#F6F1E8] border-l border-[#D9D0C4] shadow-2xl xl:hidden overflow-y-auto">
                         <div className="px-6 py-5 border-b border-gray-200 flex items-center justify-between">
                             <p className="text-xs uppercase tracking-[0.2em] text-gray-500">Menu</p>
                             <button

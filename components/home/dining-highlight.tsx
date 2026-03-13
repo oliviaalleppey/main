@@ -6,7 +6,7 @@ import { ArrowRight } from 'lucide-react';
 
 export default function DiningHighlight() {
     return (
-        <section className="py-14 md:py-24 bg-[#F5F5F0]"> {/* Matches Rooms section bg */}
+        <section className="py-14 md:py-24 bg-[#E8E2D9]"> {/* Matches Rooms section bg */}
             <div className="container mx-auto px-4 max-w-7xl">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 items-center">
 
@@ -33,13 +33,13 @@ export default function DiningHighlight() {
                         {/* Decorative Label */}
                         <div className="absolute top-10 right-4 bg-white/90 backdrop-blur px-6 py-4 shadow-lg hidden md:block">
                             <span className="block text-2xl font-serif text-[#1C1C1C]">4.9</span>
-                            <span className="text-[10px] uppercase tracking-widest text-[#8C7A5C]">Guest Rating</span>
+                            <span className="text-[10px] uppercase tracking-widest text-[#7A5E28]">Guest Rating</span>
                         </div>
                     </div>
 
                     {/* Content Side */}
                     <div className="order-1 lg:order-2 flex flex-col justify-center lg:pl-12">
-                        <span className="text-[#8C7A5C] text-xs uppercase tracking-[0.3em] font-medium mb-6">
+                        <span className="text-[#7A5E28] text-xs uppercase tracking-[0.3em] font-medium mb-6">
                             Culinary Excellence
                         </span>
 
@@ -47,26 +47,26 @@ export default function DiningHighlight() {
                             Flavors of the<br />Coast
                         </h2>
 
-                        <p className="text-[#1C1C1C]/70 text-base leading-relaxed mb-6 font-light">
+                        <p className="text-[#403A35] text-base leading-relaxed mb-6 font-light">
                             Experience a culinary journey that celebrates the rich heritage of Kerala through a modern lens.
                             Our chefs curate daily menus using the freshest catch from local fishermen and organic produce from our gardens.
                         </p>
 
-                        <p className="text-[#1C1C1C]/70 text-base leading-relaxed mb-10 font-light hidden md:block">
+                        <p className="text-[#403A35] text-base leading-relaxed mb-10 font-light hidden md:block">
                             From intimate candlelit dinners by the backwaters to vibrant family brunches, every meal at Olivia is a celebration of taste and tradition.
                         </p>
 
                         <div className="flex flex-col sm:flex-row gap-6">
                             <Link
                                 href="/dining"
-                                className="group flex items-center gap-4 text-sm uppercase tracking-widest text-[#1C1C1C] font-semibold hover:text-[#C5A572] transition-colors"
+                                className="group flex items-center gap-4 text-sm uppercase tracking-widest text-[#1C1C1C] font-semibold hover:text-[#7A5E28] transition-colors"
                             >
                                 View Menus
                                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                             </Link>
                             <Link
                                 href="/book"
-                                className="group flex items-center gap-4 text-sm uppercase tracking-widest text-[#1C1C1C] font-semibold hover:text-[#C5A572] transition-colors"
+                                className="group flex items-center gap-4 text-sm uppercase tracking-widest text-[#1C1C1C] font-semibold hover:text-[#7A5E28] transition-colors"
                             >
                                 Reserve a Table
                                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />

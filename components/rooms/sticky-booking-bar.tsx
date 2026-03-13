@@ -98,7 +98,7 @@ export default function StickyBookingBar({ basePrice, roomSlug }: StickyBookingB
                             <span className="text-sm font-medium text-[#1C1C1C]">
                                 {date?.from ? format(date.from, 'EEE, d MMM yyyy') : 'Select Date'}
                             </span>
-                            <span className="text-[#1C1C1C]/40 text-xs">→</span>
+                            <span className="text-[#7C746B] text-xs">→</span>
                             <span className="text-sm font-medium text-[#1C1C1C]">
                                 {date?.to ? format(date.to, 'EEE, d MMM yyyy') : 'Select Date'}
                             </span>
@@ -143,8 +143,8 @@ export default function StickyBookingBar({ basePrice, roomSlug }: StickyBookingB
 
                 <div className="flex items-center gap-6 justify-center">
                     <div className="hidden xl:block text-right">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-[#1C1C1C]/50">From</p>
-                        <p className="text-lg font-serif text-[#1C1C1C]">{formatCurrency(basePrice)}<span className="text-xs font-sans text-[#1C1C1C]/60"> / night</span></p>
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-[#6B645C]">From</p>
+                        <p className="text-lg font-serif text-[#1C1C1C]">{formatCurrency(basePrice)}<span className="text-xs font-sans text-[#59544D]"> / night</span></p>
                     </div>
 
                     <button

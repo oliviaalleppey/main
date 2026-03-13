@@ -188,7 +188,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                     </div>
                 )}
 
-                <div className="grid grid-cols-1 gap-4 md:gap-7">
+                <div className="grid grid-cols-1 gap-4 md:gap-4">
                     {sortedRooms.map((result, index) => {
                         const roomName = formatRoomName(result.roomType.name);
                         const bestRatePlan = result.ratePlans.length
@@ -208,10 +208,10 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                         return (
                             <div
                                 key={result.roomType.id}
-                                className="group overflow-hidden rounded-2xl md:rounded-3xl border border-[#DFE4D8] bg-white shadow-[0_16px_45px_-35px_rgba(15,23,42,0.6)] transition-all duration-300 hover:shadow-[0_20px_45px_-28px_rgba(15,23,42,0.55)]"
+                                className="group overflow-hidden rounded-2xl md:rounded-3xl border border-[#DFE4D8] bg-white shadow-[0_14px_34px_-30px_rgba(15,23,42,0.5)] transition-all duration-300 hover:shadow-[0_18px_34px_-24px_rgba(15,23,42,0.45)]"
                             >
                                 <div className="flex flex-col xl:flex-row">
-                                    <div className="relative h-[170px] md:h-[280px] w-full overflow-hidden bg-gray-100 xl:h-auto xl:w-[390px]">
+                                    <div className="relative h-[160px] md:h-[200px] w-full overflow-hidden bg-gray-100 xl:h-[260px] xl:w-[300px]">
                                         {result.roomType.images && result.roomType.images.length > 0 ? (
                                             <Image
                                                 src={result.roomType.images[0]}
@@ -244,44 +244,44 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                                         </div>
                                     </div>
 
-                                    <div className="flex-1 p-3 md:p-8">
-                                        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 md:gap-5">
+                                    <div className="flex-1 p-3 md:p-4">
+                                        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 md:gap-4">
                                             <div className="min-w-0 flex-1">
-                                                <div className="mb-2 md:mb-3 flex items-start justify-between gap-3 md:gap-4">
-                                                    <h3 className="text-[30px] md:text-[38px] leading-none font-serif text-[#1F2A24]">{roomName}</h3>
+                                                <div className="mb-2 md:mb-2 flex items-start justify-between gap-3 md:gap-4">
+                                                    <h3 className="text-[26px] md:text-[36px] leading-none font-serif text-[#1F2A24]">{roomName}</h3>
                                                     <div className="inline-flex items-center gap-1 rounded-full border border-orange-200 bg-orange-50 px-2 py-0.5 md:px-2.5 md:py-1 text-[#E95D20]">
                                                         <Star className="h-3.5 w-3.5 fill-current" />
                                                         <span className="text-xs font-bold">5.0</span>
                                                     </div>
                                                 </div>
 
-                                                <p className="max-w-3xl text-sm md:text-base text-gray-600 leading-relaxed mb-3 md:mb-5 line-clamp-2">
+                                                <p className="max-w-3xl text-sm md:text-base text-gray-600 leading-relaxed mb-3 md:mb-3 line-clamp-2">
                                                     {result.roomType.description}
                                                 </p>
 
-                                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3 mb-3 md:mb-5">
-                                                    <div className="rounded-lg md:rounded-xl border border-[#DEE4D8] bg-[#F7F8F3] px-2.5 md:px-3 py-2 md:py-2.5">
+                                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-2.5 mb-3 md:mb-4">
+                                                    <div className="rounded-lg md:rounded-xl border border-[#DEE4D8] bg-[#F7F8F3] px-2.5 md:px-3 py-2 md:py-2">
                                                         <p className="mb-1 text-[11px] uppercase tracking-wide text-gray-500">Guests</p>
                                                         <p className="inline-flex items-center gap-1.5 text-xs md:text-sm font-semibold text-gray-900">
                                                             <Users className="w-3.5 h-3.5 text-gray-500" />
                                                             Up to {result.roomType.maxGuests}
                                                         </p>
                                                     </div>
-                                                    <div className="rounded-lg md:rounded-xl border border-[#DEE4D8] bg-[#F7F8F3] px-2.5 md:px-3 py-2 md:py-2.5">
+                                                    <div className="rounded-lg md:rounded-xl border border-[#DEE4D8] bg-[#F7F8F3] px-2.5 md:px-3 py-2 md:py-2">
                                                         <p className="mb-1 text-[11px] uppercase tracking-wide text-gray-500">Room Size</p>
                                                         <p className="inline-flex items-center gap-1.5 text-xs md:text-sm font-semibold text-gray-900">
                                                             <BedDouble className="w-3.5 h-3.5 text-gray-500" />
                                                             {roomSizeLabel}
                                                         </p>
                                                     </div>
-                                                    <div className="rounded-lg md:rounded-xl border border-[#DEE4D8] bg-[#F7F8F3] px-2.5 md:px-3 py-2 md:py-2.5">
+                                                    <div className="rounded-lg md:rounded-xl border border-[#DEE4D8] bg-[#F7F8F3] px-2.5 md:px-3 py-2 md:py-2">
                                                         <p className="mb-1 text-[11px] uppercase tracking-wide text-gray-500">Meal Plan</p>
                                                         <p className="inline-flex items-center gap-1.5 text-xs md:text-sm font-semibold text-gray-900">
                                                             <Coffee className="w-3.5 h-3.5 text-gray-500" />
                                                             {mealPlan}
                                                         </p>
                                                     </div>
-                                                    <div className="rounded-lg md:rounded-xl border border-[#DEE4D8] bg-[#F7F8F3] px-2.5 md:px-3 py-2 md:py-2.5">
+                                                    <div className="rounded-lg md:rounded-xl border border-[#DEE4D8] bg-[#F7F8F3] px-2.5 md:px-3 py-2 md:py-2">
                                                         <p className="mb-1 text-[11px] uppercase tracking-wide text-gray-500">Cancellation</p>
                                                         <p className="inline-flex items-center gap-1.5 text-xs md:text-sm font-semibold text-gray-900 line-clamp-2">
                                                             <Calendar className="w-3.5 h-3.5 text-gray-500" />
@@ -297,7 +297,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                                                             {bestRatePlan.name}
                                                         </span>
                                                     )}
-                                                    {inclusions.map((item: string) => (
+                                                    {inclusions.slice(0, 2).map((item: string) => (
                                                         <span
                                                             key={item}
                                                             className="rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 md:px-2.5 md:py-1 text-[11px] md:text-xs font-medium text-gray-600"
@@ -305,7 +305,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                                                             {item}
                                                         </span>
                                                     ))}
-                                                    {result.roomType.amenities?.slice(0, 2).map((item: string) => (
+                                                    {result.roomType.amenities?.slice(0, 1).map((item: string) => (
                                                         <span
                                                             key={item}
                                                             className="rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 md:px-2.5 md:py-1 text-[11px] md:text-xs font-medium text-gray-500"
@@ -316,9 +316,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                                                 </div>
                                             </div>
 
-                                            <div className="w-full lg:w-[255px] shrink-0 rounded-xl lg:rounded-2xl border border-[#DCE2D2] bg-[#F9FAF6] p-3 md:p-4 lg:p-5">
+                                            <div className="w-full lg:w-[220px] shrink-0 rounded-xl lg:rounded-2xl border border-[#DCE2D2] bg-[#F9FAF6] p-3 md:p-3.5 lg:p-4">
                                                 <p className="text-[11px] uppercase tracking-[0.2em] text-gray-500 mb-1">Starting from</p>
-                                                <div className="text-2xl md:text-3xl font-serif text-[#1C2822]">
+                                                <div className="text-2xl md:text-[22px] font-serif text-[#1C2822]">
                                                     {formatCurrency(result.price)}
                                                     <span className="ml-1 text-sm font-sans font-normal text-gray-500">/ night</span>
                                                 </div>

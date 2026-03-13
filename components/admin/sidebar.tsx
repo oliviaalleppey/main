@@ -58,7 +58,7 @@ export function Sidebar({ pendingConfirmations = 0, atRiskConfirmations = 0 }: S
                                     : 'text-white/50 hover:bg-white/5 hover:text-white'
                                 }`}
                         >
-                            <Icon className={`h-4 w-4 flex-shrink-0 ${isActive ? 'text-amber-400' : 'text-white/40 group-hover:text-white/70'}`} />
+                            <Icon className={`h-4 w-4 flex-shrink-0 ${isActive ? 'text-amber-400' : 'text-white/40 group-hover:text-white/92'}`} />
                             <span className="flex-1">{item.label}</span>
                             {item.href === '/admin/bookings' && pendingConfirmations > 0 && (
                                 <span

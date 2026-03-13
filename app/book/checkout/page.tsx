@@ -300,7 +300,7 @@ export default async function CheckoutPage({
     const addMoreRoomsHref = `/book/search?${addMoreRoomsParams.toString()}`;
 
     return (
-        <div className="min-h-screen bg-[#FBFBF9] py-4 md:py-12 px-3 md:px-6">
+        <div className="min-h-screen bg-[#F6F1E8] py-4 md:py-12 px-3 md:px-6">
             <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-5 md:gap-12">
                 <div className="lg:col-span-2 order-2 lg:order-1">
                     <div className="mb-4 md:mb-8 rounded-xl md:rounded-2xl border border-gray-200 bg-gradient-to-r from-white to-gray-50 p-3 md:p-5">

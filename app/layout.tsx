@@ -58,7 +58,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en" className={`${sans.variable} ${serif.variable} ${cinzel.variable}`} suppressHydrationWarning>
-      <body className="font-sans antialiased" suppressHydrationWarning>
+      <body className="font-sans subpixel-antialiased" suppressHydrationWarning>
         <SessionProvider session={session}>
           <FrontendLayout>
             {children}

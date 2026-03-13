@@ -49,7 +49,7 @@ export default function VenueCard({ venue }: VenueCardProps) {
 
                     {/* Featured Badge */}
                     {venue.isFeatured && (
-                        <div className="absolute top-6 right-6 z-20 bg-[#C9A961] text-[#1C1C1C] px-4 py-2 shadow-xl">
+                        <div className="absolute top-6 right-6 z-20 bg-[#C5A059] text-[#1C1C1C] px-4 py-2 shadow-xl">
                             <div className="flex items-center gap-2">
                                 <Sparkles className="w-3 h-3" />
                                 <span className="text-xs font-medium tracking-[0.15em] uppercase">Featured</span>
@@ -66,10 +66,10 @@ export default function VenueCard({ venue }: VenueCardProps) {
 
                     {/* Bottom Content Overlay */}
                     <div className="absolute bottom-0 left-0 right-0 z-20 p-8">
-                        <h3 className="font-serif text-3xl text-white mb-3 tracking-tight group-hover:text-[#C9A961] transition-colors duration-300">
+                        <h3 className="font-serif text-3xl text-white mb-3 tracking-tight group-hover:text-[#7A5E28] transition-colors duration-300">
                             {venue.name}
                         </h3>
-                        <p className="text-white/80 text-sm mb-4 line-clamp-2 font-light">
+                        <p className="text-white/95 text-sm mb-4 line-clamp-2 font-light">
                             {venue.shortDescription}
                         </p>
 
@@ -77,19 +77,19 @@ export default function VenueCard({ venue }: VenueCardProps) {
                         <div className="flex flex-wrap gap-4 text-sm text-white/90">
                             {maxCapacity > 0 && (
                                 <div className="flex items-center gap-2">
-                                    <Users className="w-4 h-4 text-[#C9A961]" />
+                                    <Users className="w-4 h-4 text-[#7A5E28]" />
                                     <span className="font-light">Up to {maxCapacity}</span>
                                 </div>
                             )}
                             {venue.area && (
                                 <div className="flex items-center gap-2">
-                                    <Maximize2 className="w-4 h-4 text-[#C9A961]" />
+                                    <Maximize2 className="w-4 h-4 text-[#7A5E28]" />
                                     <span className="font-light">{venue.area} sqft</span>
                                 </div>
                             )}
                             {venue.location && (
                                 <div className="flex items-center gap-2">
-                                    <MapPin className="w-4 h-4 text-[#C9A961]" />
+                                    <MapPin className="w-4 h-4 text-[#7A5E28]" />
                                     <span className="font-light">{venue.location}</span>
                                 </div>
                             )}

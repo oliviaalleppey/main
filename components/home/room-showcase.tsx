@@ -45,7 +45,7 @@ export default async function RoomShowcase() {
     if (!rooms.length) return null;
 
     return (
-        <section className="py-14 md:py-24 bg-[#F5F5F0]">
+        <section className="py-14 md:py-24 bg-[#E8E2D9]">
             <div className="container mx-auto px-4 max-w-7xl">
 
                 {/* Header */}

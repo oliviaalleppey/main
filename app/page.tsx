@@ -13,7 +13,7 @@ export const revalidate = 60;
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#FBFBF9] font-sans">
+    <main className="min-h-screen bg-[#F6F1E8] font-sans">
       {/* Cinematic Hero with Floating Search */}
       <HeroSection />
 
