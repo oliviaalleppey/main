@@ -321,6 +321,74 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
                 </div>
             </section>
 
+            {/* Signature Room Highlight */}
+            <section className="py-12 md:py-16 px-6 md:px-10 bg-[#FAF8F3]">
+                <div className="max-w-7xl mx-auto">
+                    <div className="grid lg:grid-cols-2 gap-6 items-center">
+                        <motion.div
+                            initial={{ opacity: 0, x: -30 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 1 }}
+                            className="lg:pr-8"
+                        >
+                            <span className="text-[#8D7858] text-[10px] tracking-[0.3em] uppercase mb-3 block">Signature experiences</span>
+                            <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-[#2D3732] mb-4 leading-tight">
+                                Lake View Balcony Room
+                            </h2>
+                            <p className="text-[#3E4C45]/75 text-base md:text-lg leading-relaxed mb-6">
+                                A refined balcony room with sweeping lake views and a calmer pace throughout the day.
+                                Step outside for morning light, fresh air, and a sense of place that feels effortless.
+                            </p>
+
+                            <div className="grid grid-cols-2 gap-4 mb-6">
+                                <div className="border-l-2 border-[#BCA06F] pl-3">
+                                    <p className="text-2xl font-serif text-[#2D3732]">400</p>
+                                    <p className="text-sm text-[#4B5A53]/70">Square Feet</p>
+                                </div>
+                                <div className="border-l-2 border-[#BCA06F] pl-3">
+                                    <p className="text-2xl font-serif text-[#2D3732]">2</p>
+                                    <p className="text-sm text-[#4B5A53]/70">Max Guests</p>
+                                </div>
+                                <div className="border-l-2 border-[#BCA06F] pl-3">
+                                    <p className="text-2xl font-serif text-[#2D3732]">King</p>
+                                    <p className="text-sm text-[#4B5A53]/70">Bed Configuration</p>
+                                </div>
+                                <div className="border-l-2 border-[#BCA06F] pl-3">
+                                    <p className="text-2xl font-serif text-[#2D3732]">Private</p>
+                                    <p className="text-sm text-[#4B5A53]/70">Balcony</p>
+                                </div>
+                            </div>
+
+                            <Link href="/rooms/lake-view-balcony" className="inline-flex items-center gap-4 group">
+                                <span className="text-[#2D3732] text-sm tracking-[0.2em] uppercase font-medium">Discover the Room</span>
+                                <span className="w-8 h-[1px] bg-[#BCA06F] group-hover:w-14 transition-all duration-300" />
+                            </Link>
+                        </motion.div>
+
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 1 }}
+                            className="relative h-[44vh] md:h-[58vh] rounded-sm overflow-hidden"
+                        >
+                            <Image
+                                src="/images/rooms/balcony-room-4.jpg"
+                                alt="Lake View Balcony Room"
+                                fill
+                                className="object-cover"
+                            />
+                            <div className="absolute bottom-8 left-8 right-8">
+                                <span className="text-[#324038] text-xs tracking-[0.2em] uppercase bg-[#FCFAF5]/85 px-3 py-1.5 inline-block">
+                                    Starting from ₹22,000/night
+                                </span>
+                            </div>
+                        </motion.div>
+                    </div>
+                </div>
+            </section>
+
             {/* Features Grid */}
             <section className="py-10 md:py-14 px-6 md:px-10 bg-[#FCFAF5] border-t border-[#ECE5D7]">
                 <div className="max-w-6xl mx-auto">
