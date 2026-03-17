@@ -277,10 +277,13 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
                             transition={{ duration: 1 }}
                             className="order-1 lg:order-2 lg:pl-8"
                         >
-                            <span className="text-[#8D7858] text-[10px] tracking-[0.3em] uppercase mb-3 block">Signature Experience</span>
+                            <span className="text-[#8D7858] text-[10px] tracking-[0.3em] uppercase mb-3 block">Signature experiences</span>
                             <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-[#2D3732] mb-4 leading-tight">
                                 Lake View Balcony Suite Room
                             </h2>
+                            <p className="-mt-2 mb-5 font-serif text-xl md:text-2xl text-[#2D3732]/85 leading-tight">
+                                Lake View Balcony Room
+                            </p>
                             <p className="text-[#3E4C45]/75 text-base md:text-lg leading-relaxed mb-6">
                                 Our most exclusive accommodation offers an unparalleled lakeside experience.
                                 With 900 square feet of refined living space, a private balcony with panoramic views,
@@ -288,19 +291,19 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
                             </p>
 
                             <div className="grid grid-cols-2 gap-4 mb-6">
-                                <div className="border-l-2 border-[#C6AF84] pl-3">
+                                <div className="border-l-2 border-[#BCA06F] pl-3">
                                     <p className="text-2xl font-serif text-[#2D3732]">900</p>
                                     <p className="text-sm text-[#4B5A53]/70">Square Feet</p>
                                 </div>
-                                <div className="border-l-2 border-[#C6AF84] pl-3">
+                                <div className="border-l-2 border-[#BCA06F] pl-3">
                                     <p className="text-2xl font-serif text-[#2D3732]">4</p>
                                     <p className="text-sm text-[#4B5A53]/70">Max Guests</p>
                                 </div>
-                                <div className="border-l-2 border-[#C6AF84] pl-3">
+                                <div className="border-l-2 border-[#BCA06F] pl-3">
                                     <p className="text-2xl font-serif text-[#2D3732]">King</p>
                                     <p className="text-sm text-[#4B5A53]/70">Bed Configuration</p>
                                 </div>
-                                <div className="border-l-2 border-[#C6AF84] pl-3">
+                                <div className="border-l-2 border-[#BCA06F] pl-3">
                                     <p className="text-2xl font-serif text-[#2D3732]">Private</p>
                                     <p className="text-sm text-[#4B5A53]/70">Jacuzzi</p>
                                 </div>
@@ -510,7 +513,7 @@ function RoomCard({ room, index }: { room: RoomViewModel; index: number }) {
                         {room.features.map((feature: string) => (
                             <span
                                 key={feature}
-                                className="text-xs text-[#403A35] border border-gray-200 px-2.5 py-1"
+                                className="text-xs text-[#403A35] border border-[#BCA06F] bg-[#FCFAF5] px-2.5 py-1"
                             >
                                 {feature}
                             </span>
@@ -521,9 +524,9 @@ function RoomCard({ room, index }: { room: RoomViewModel; index: number }) {
                     <div className="flex items-center pt-2">
                         <Link
                             href={`/rooms/${room.slug}`}
-                            className="group relative inline-flex items-center justify-center px-8 py-3.5 border border-[#1C1C1C] text-[#1C1C1C] overflow-hidden transition-colors duration-300"
+                            className="group relative inline-flex items-center justify-center px-8 py-3.5 border border-[#BCA06F] text-[#1C1C1C] overflow-hidden transition-colors duration-300 hover:border-[#15443B]"
                         >
-                            <span className="absolute inset-0 w-full h-full bg-[#1C1C1C] origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out z-0"></span>
+                            <span className="absolute inset-0 w-full h-full bg-[#15443B] origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out z-0"></span>
                             <span className="relative z-10 text-[11px] tracking-[0.24em] uppercase font-normal group-hover:text-white transition-colors duration-300">Explore Room</span>
                             <svg className="relative z-10 w-3.5 h-3.5 ml-3 transform group-hover:translate-x-1 group-hover:text-white transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
