@@ -51,10 +51,8 @@ export async function getAvailableRoomsForSearch(
         const message = availability.message || 'Live inventory temporarily unavailable';
         console.error(`[${provider.source}] Availability failed`, message);
 
-        if (BOOKING_FLOW_MODE === 'strict') {
-            return [];
-        }
-
+        // Even in strict mode, return room types with a clear message (not bookable),
+        // so the UI can explain the situation instead of looking like "0 rooms exist".
         return allRoomTypes.map((type) => {
             const totalPrice = type.basePrice * nights;
             return {
