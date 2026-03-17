@@ -6,17 +6,21 @@ import Image from 'next/image';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
-const NAV_ITEMS = [
-    'Discover',
-    'Accommodation',
-    'Wedding',
-    'Dining',
-    'Wellness',
-    'Experiences',
-    'Conference & Events',
+const NAV_ITEMS: Array<{ label: string; href: string; activePrefixes?: string[] }> = [
+    { label: 'Discover', href: '/discover' },
+    // Your site uses `/rooms` for accommodations.
+    { label: 'Accommodation', href: '/rooms' },
+    { label: 'Wedding', href: '/wedding' },
+    { label: 'Dining', href: '/dining' },
+    { label: 'Wellness', href: '/wellness' },
+    { label: 'Experiences', href: '/experiences' },
+    { label: 'Conference & Events', href: '/conference-events' },
 ];
 
-const toNavHref = (item: string) => `/${item.toLowerCase().replace(/ & /g, '-').replace(/\s+/g, '-')}`;
+const isNavActive = (pathname: string, item: { href: string; activePrefixes?: string[] }) => {
+    const prefixes = item.activePrefixes?.length ? item.activePrefixes : [item.href];
+    return prefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+};
 
 export default function RosewoodHeader() {
     const { data: session } = useSession();
@@ -161,23 +165,20 @@ export default function RosewoodHeader() {
                 </div>
 
                 <nav className="hidden xl:flex justify-center items-center gap-6 w-2/4">
-                    {NAV_ITEMS.map((item) => (
-                        (() => {
-                            const href = toNavHref(item);
-                            const isActive = pathname === href || pathname.startsWith(`${href}/`);
-                            return (
-                        <Link
-                            key={item}
-                            href={href}
-                            className={`font-serif font-medium transition-colors text-[#3A342D] hover:text-[#121212] rounded-full px-3 py-1.5 ${isActive ? 'bg-[#F3EEE4] text-[#121212]' : ''
-                                } ${item === 'Conference & Events' ? 'text-base whitespace-nowrap' : 'text-lg'
-                                }`}
-                        >
-                            {item}
-                        </Link>
-                            );
-                        })()
-                    ))}
+                    {NAV_ITEMS.map((item) => {
+                        const isActive = isNavActive(pathname, item);
+                        return (
+                            <Link
+                                key={item.label}
+                                href={item.href}
+                                className={`font-serif font-medium transition-colors text-[#3A342D] hover:text-[#121212] rounded-full px-3 py-1.5 ${isActive ? 'bg-[#F3EEE4] text-[#121212]' : ''
+                                    } ${item.label === 'Conference & Events' ? 'text-base whitespace-nowrap' : 'text-lg'
+                                    }`}
+                            >
+                                {item.label}
+                            </Link>
+                        );
+                    })}
                     <Link href="/shop" className="font-serif font-medium text-lg transition-colors flex items-start gap-0.5 text-[#3A342D] hover:text-[#121212]">
                         Shop
                         <span className="text-[10px] leading-none mt-1">↗</span>
@@ -258,23 +259,20 @@ export default function RosewoodHeader() {
                         </div>
 
                         <nav className="px-6 pb-6 border-b border-gray-200 space-y-1">
-                            {NAV_ITEMS.map((item) => (
-                                (() => {
-                                    const href = toNavHref(item);
-                                    const isActive = pathname === href || pathname.startsWith(`${href}/`);
-                                    return (
-                                <Link
-                                    key={item}
-                                    href={href}
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                    className={`block py-3 px-3 -mx-3 rounded-lg text-[17px] font-serif border-b border-gray-100 last:border-b-0 ${isActive ? 'bg-white/60 text-[#0A332B]' : 'text-[#1C1C1C]'
-                                        }`}
-                                >
-                                    {item}
-                                </Link>
-                                    );
-                                })()
-                            ))}
+                            {NAV_ITEMS.map((item) => {
+                                const isActive = isNavActive(pathname, item);
+                                return (
+                                    <Link
+                                        key={item.label}
+                                        href={item.href}
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                        className={`block py-3 px-3 -mx-3 rounded-lg text-[17px] font-serif border-b border-gray-100 last:border-b-0 ${isActive ? 'bg-white/60 text-[#0A332B]' : 'text-[#1C1C1C]'
+                                            }`}
+                                    >
+                                        {item.label}
+                                    </Link>
+                                );
+                            })}
                             <Link
                                 href="/shop"
                                 onClick={() => setIsMobileMenuOpen(false)}
