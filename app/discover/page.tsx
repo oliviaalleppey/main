@@ -2,11 +2,8 @@
 
 import Link from 'next/link';
 import NextImage from 'next/image';
-import { useState } from 'react';
 
 export default function DiscoverPage() {
-    const [activeSection, setActiveSection] = useState(0);
-
     const experiences = [
         {
             title: 'Backwater Serenity',
@@ -34,323 +31,293 @@ export default function DiscoverPage() {
         },
     ];
 
-    const philosophy = [
-        {
-            icon: (
-                <svg className="w-12 h-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-            ),
-            title: 'Authenticity',
-            description: 'Every experience is rooted in genuine Kerala traditions and culture',
-        },
-        {
-            icon: (
-                <svg className="w-12 h-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5">
-                    <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M12 6v6l4 2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-            ),
-            description: 'Immerse yourself in Kerala\'s vibrant cultural tapestry through traditional art forms and local experiences',
-            image: '/images/placeholder.jpg',
-        },
-    ];
-
     return (
-        <div className="min-h-screen bg-gradient-to-b from-[#f5f5f0] via-white to-[#fafaf8]">
-            {/* Hero Section */}
-            <section className="relative overflow-hidden border-b border-[#ece5d8]">
-                <div className="absolute inset-0">
-                    <NextImage
-                        src="/images/discover/heritage-hotel.png"
-                        alt="Discover Olivia background"
-                        fill
-                        priority
-                        className="object-cover object-center opacity-25"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-b from-[#f6f2e8]/94 via-[#f8f5ee]/95 to-[#fafaf8]" />
-                </div>
+        <div className="min-h-screen bg-[#F3EEE4] text-[#1C1C1C] selection:bg-[#1C1C1C] selection:text-white">
+            {/* soft framing */}
+            <div className="h-8 md:h-12 bg-[linear-gradient(180deg,#F3EEE4_0%,#F7F2E9_100%)]" />
 
-                <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-10 py-12 md:py-16 lg:py-20">
-                    <div className="grid lg:grid-cols-[1.05fr_0.95fr] gap-7 md:gap-10 items-center">
-                        <div className="rounded-2xl border border-[#e7decd] bg-white/88 backdrop-blur-sm p-6 md:p-9 shadow-[0_26px_70px_-48px_rgba(30,29,26,0.7)]">
-                            <div className="w-16 h-[1px] bg-gradient-to-r from-[#B8956A] to-transparent mb-6" />
-                            <p className="text-[#B8956A] text-xs md:text-sm tracking-[0.28em] uppercase mb-4 font-light">
-                                Where Luxury Meets Legacy
-                            </p>
+            {/* HERO: centered editorial + muted image strip */}
+            <section className="px-4 md:px-6">
+                <div className="max-w-7xl mx-auto">
+                    <div className="rounded-[34px] border border-[#E2D7C7] bg-[#FBF8F2] shadow-[0_50px_140px_-110px_rgba(0,0,0,0.55)] overflow-hidden">
+                        <div className="p-8 md:p-12 lg:p-14">
+                            <div className="flex items-center justify-center gap-3">
+                                <span className="h-[1px] w-10 bg-[#BDB6AD]" aria-hidden />
+                                <p className="text-[10px] tracking-[0.38em] uppercase text-[#6B645C]">
+                                    Where luxury meets legacy
+                                </p>
+                                <span className="h-[1px] w-10 bg-[#BDB6AD]" aria-hidden />
+                            </div>
 
-                            <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl mb-5 text-[#2c2c2c] tracking-tight leading-[0.9]">
+                            <h1 className="mt-7 text-center font-serif text-[3rem] sm:text-[3.6rem] md:text-[5.2rem] leading-[0.94] tracking-[-0.03em]">
                                 Discover
                                 <span className="block">Olivia</span>
                             </h1>
 
-                            <p className="text-base md:text-xl text-gray-600 max-w-2xl leading-relaxed font-light">
-                                A sanctuary where Kerala&apos;s timeless beauty converges with contemporary elegance, creating moments that transcend the ordinary.
+                            <p className="mt-5 mx-auto max-w-2xl text-center text-[#59544D] text-base md:text-lg leading-relaxed">
+                                A sanctuary where Kerala&apos;s timeless beauty converges with contemporary elegance,
+                                creating moments that transcend the ordinary.
                             </p>
 
-                            <div className="mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4">
-                                <button
-                                    onClick={() => document.getElementById('heritage')?.scrollIntoView({ behavior: 'smooth' })}
-                                    className="px-8 py-3 bg-[#B8956A] text-white text-sm tracking-wider uppercase hover:bg-[#a07d54] transition-all duration-300"
+                            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+                                <Link
+                                    href="/rooms"
+                                    className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-[#1C1C1C] px-9 py-3.5 text-white text-[11px] font-semibold tracking-[0.18em] uppercase hover:bg-[#333333] transition-colors"
                                 >
-                                    Our Story →
-                                </button>
-                                <button
-                                    onClick={() => document.getElementById('philosophy')?.scrollIntoView({ behavior: 'smooth' })}
-                                    className="px-8 py-3 border border-[#B8956A] text-[#B8956A] text-sm tracking-wider uppercase hover:bg-[#B8956A] hover:text-white transition-all duration-300"
+                                    Explore accommodations
+                                </Link>
+                                <Link
+                                    href="/contact"
+                                    className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl border border-[#CFC6BA] bg-transparent px-9 py-3.5 text-[#1C1C1C] text-[11px] tracking-[0.18em] uppercase hover:bg-white/60 transition-colors"
                                 >
-                                    Our Philosophy →
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="relative">
-                            <div className="relative h-[320px] sm:h-[420px] md:h-[500px] rounded-2xl overflow-hidden border border-[#e3dac9] shadow-[0_30px_70px_-50px_rgba(30,29,26,0.9)]">
-                                <NextImage
-                                    src="/images/discover/backwater-serenity.png"
-                                    alt="Backwater view at Olivia Alleppey"
-                                    fill
-                                    className="object-cover"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/10 to-transparent" />
+                                    Contact us
+                                </Link>
                             </div>
 
-                            <div className="hidden sm:block absolute -bottom-5 md:-bottom-6 -left-4 md:-left-6 rounded-xl border border-[#dec8a4]/60 bg-[#0A332B] text-white px-4 md:px-5 py-3 md:py-4 shadow-[0_20px_45px_-28px_rgba(10,51,43,0.95)]">
-                                <p className="text-[10px] md:text-[11px] tracking-[0.2em] uppercase text-[#e6cfa8]">Olivia Alleppey</p>
-                                <p className="font-serif text-lg md:text-xl leading-tight">Backwater Luxury</p>
+                            <div className="mt-10 grid md:grid-cols-12 gap-4 md:gap-5">
+                                <a
+                                    href="#heritage"
+                                    className="md:col-span-3 rounded-2xl border border-[#E2D7C7] bg-[#FDFBF7] px-5 py-4 hover:bg-white transition-colors"
+                                >
+                                    <p className="text-[10px] tracking-[0.34em] uppercase text-[#6B645C]">Chapter 01</p>
+                                    <p className="mt-2 font-serif text-2xl leading-none">Our story</p>
+                                </a>
+                                <a
+                                    href="#philosophy"
+                                    className="md:col-span-3 rounded-2xl border border-[#E2D7C7] bg-[#FDFBF7] px-5 py-4 hover:bg-white transition-colors"
+                                >
+                                    <p className="text-[10px] tracking-[0.34em] uppercase text-[#6B645C]">Chapter 02</p>
+                                    <p className="mt-2 font-serif text-2xl leading-none">Our philosophy</p>
+                                </a>
+
+                                <div className="md:col-span-6 grid grid-cols-3 gap-3">
+                                    {[
+                                        { src: '/images/discover/backwater-serenity.png', alt: 'Backwaters' },
+                                        { src: '/images/discover/ayurvedic-wellness.png', alt: 'Wellness' },
+                                        { src: '/images/discover/culinary-journey.png', alt: 'Culinary' },
+                                    ].map((img) => (
+                                        <div
+                                            key={img.src}
+                                            className="relative h-24 md:h-28 rounded-2xl overflow-hidden border border-[#E2D7C7] bg-[#F7F2E9]"
+                                        >
+                                            <NextImage
+                                                src={img.src}
+                                                alt={img.alt}
+                                                fill
+                                                className="object-cover saturate-[0.78] contrast-[1.06]"
+                                            />
+                                            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.08)_0%,rgba(243,238,228,0.70)_100%)]" />
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* Our Heritage Section - Compact */}
-            <section id="heritage" className="py-20 px-6">
-                <div className="max-w-7xl mx-auto">
-                    <div className="grid md:grid-cols-2 gap-12 items-center">
-                        {/* Image with Decorative Frame */}
-                        <div className="relative">
-                            <div className="absolute -top-4 -left-4 w-20 h-20 border-l border-t border-[#B8956A] opacity-30" />
-                            <div className="absolute -bottom-4 -right-4 w-20 h-20 border-r border-b border-[#B8956A] opacity-30" />
-                            <div className="aspect-[4/5] bg-gray-200 relative overflow-hidden">
-                                <NextImage
-                                    src="/images/discover/heritage-hotel.png"
-                                    alt="Olivia International Heritage"
-                                    fill
-                                    className="object-cover"
-                                />
-                            </div>
-                        </div>
-
-                        {/* Content */}
-                        <div>
-                            <div className="w-12 h-[1px] bg-[#B8956A] mb-4" />
-                            <p className="text-[#B8956A] text-sm tracking-[0.3em] uppercase mb-3 font-light">
-                                Our Story
-                            </p>
-                            <h2 className="font-serif text-4xl md:text-5xl mb-6 text-[#2c2c2c] leading-tight">
-                                A Legacy of<br />Refined Hospitality
-                            </h2>
-                            <div className="space-y-4 text-gray-600 leading-relaxed">
-                                <p>
+            {/* CHAPTERS: clean rhythm, no split-template */}
+            <section id="heritage" className="pt-14 md:pt-18">
+                <div className="max-w-7xl mx-auto px-4 md:px-6">
+                    <div className="grid lg:grid-cols-12 gap-6 md:gap-8 items-start">
+                        <div className="lg:col-span-4">
+                            <div className="rounded-[28px] border border-[#E2D7C7] bg-[#FBF8F2] p-7 md:p-8">
+                                <p className="text-[10px] tracking-[0.36em] uppercase text-[#6B645C]">Chapter 01</p>
+                                <h2 className="mt-4 font-serif text-[2.1rem] md:text-[2.6rem] leading-[1.02]">
+                                    A legacy of refined hospitality.
+                                </h2>
+                                <p className="mt-4 text-[#59544D] leading-relaxed">
                                     Nestled along the tranquil backwaters of Alappuzha, Olivia Alleppey, a 5 Star Classified Hotel, was born from a vision to create a sanctuary where Kerala&apos;s rich heritage meets contemporary luxury.
                                 </p>
-                                <p>
-                                    Inspired by the timeless charm of God&apos;s Own Country, Olivia was designed to be more than just a destination. It is an experience where elegance, comfort, and nature exist in perfect harmony. From the gentle rhythm of the backwaters to the warm hospitality that welcomes every guest, each moment at Olivia reflects the spirit of Kerala.
+                            </div>
+
+                            <div className="mt-5 rounded-[28px] border border-[#E2D7C7] bg-[#FDFBF7] p-7 md:p-8">
+                                <p className="text-[10px] tracking-[0.36em] uppercase text-[#6B645C]">Setting</p>
+                                <p className="mt-3 font-medium">Alappuzha backwaters</p>
+                                <p className="mt-2 text-[#59544D] text-sm leading-relaxed">
+                                    Water, palms, and a slower rhythm — the backdrop to a more intentional stay.
                                 </p>
-                                <p>
-                                    Since our inception, we have been dedicated to crafting meaningful experiences for discerning travelers who seek both serenity and sophistication. Every detail, from our thoughtfully designed architecture to our personalized service philosophy, celebrates the cultural essence of Kerala while embracing modern refinement.
-                                </p>
-                                <p>
-                                    At Olivia Alleppey, tradition flows gracefully into luxury, creating a place where every stay becomes a story of comfort, beauty, and unforgettable memories.
-                                </p>
+                            </div>
+                        </div>
+
+                        <div className="lg:col-span-8">
+                            <div className="rounded-[34px] border border-[#E2D7C7] bg-[#FDFBF7] overflow-hidden">
+                                <div className="relative h-[320px] md:h-[420px] lg:h-[520px]">
+                                    <NextImage
+                                        src="/images/discover/heritage-hotel.png"
+                                        alt="Olivia International Heritage"
+                                        fill
+                                        className="object-cover saturate-[0.8] contrast-[1.03]"
+                                    />
+                                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.06)_0%,rgba(243,238,228,0.82)_100%)]" />
+                                </div>
+                                <div className="p-7 md:p-10 lg:p-12">
+                                    <div className="space-y-4 text-[#59544D] leading-relaxed">
+                                        <p>
+                                            Inspired by the timeless charm of God&apos;s Own Country, Olivia was designed to be more than just a destination. It is an experience where elegance, comfort, and nature exist in perfect harmony. From the gentle rhythm of the backwaters to the warm hospitality that welcomes every guest, each moment at Olivia reflects the spirit of Kerala.
+                                        </p>
+                                        <p>
+                                            Since our inception, we have been dedicated to crafting meaningful experiences for discerning travelers who seek both serenity and sophistication. Every detail, from our thoughtfully designed architecture to our personalized service philosophy, celebrates the cultural essence of Kerala while embracing modern refinement.
+                                        </p>
+                                        <p>
+                                            At Olivia Alleppey, tradition flows gracefully into luxury, creating a place where every stay becomes a story of comfort, beauty, and unforgettable memories.
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* Philosophy Section - Compact */}
-            <section id="philosophy" className="py-20 px-6 bg-white">
-                <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-16">
-                        <div className="w-16 h-[1px] bg-gradient-to-r from-transparent via-[#B8956A] to-transparent mx-auto mb-4" />
-                        <p className="text-[#B8956A] text-sm tracking-[0.3em] uppercase mb-3 font-light">
-                            Our Principles
-                        </p>
-                        <h2 className="font-serif text-4xl md:text-5xl text-[#2c2c2c]">
-                            The Olivia Philosophy
-                        </h2>
-                    </div>
-
-                    <div className="grid md:grid-cols-2 gap-6">
-                        {[
-                            {
-                                icon: (
-                                    <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.5} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
-                                    </svg>
-                                ),
-                                subtitle: 'Tranquil Escapes',
-                                title: 'Backwater Serenity',
-                                description: 'Experience the peaceful rhythm of life along Kerala\'s legendary waterways'
-                            },
-                            {
-                                icon: (
-                                    <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                    </svg>
-                                ),
-                                subtitle: 'Ancient Healing',
-                                title: 'Ayurvedic Wellness',
-                                description: 'Discover holistic rejuvenation through time-honored Ayurvedic practices'
-                            },
-                            {
-                                icon: (
-                                    <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                                    </svg>
-                                ),
-                                subtitle: 'Farm to Table',
-                                title: 'Culinary Journey',
-                                description: 'Savor authentic Kerala flavors crafted with locally-sourced ingredients'
-                            },
-                            {
-                                icon: (
-                                    <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.5} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                                    </svg>
-                                ),
-                                subtitle: 'Living Traditions',
-                                title: 'Cultural Heritage',
-                                description: 'Immerse yourself in Kerala\'s vibrant arts, dance, and traditions'
-                            }
-                        ].map((item, index) => (
-                            <div
-                                key={index}
-                                className="group bg-white border border-gray-200 p-8 hover:border-[#B8956A] transition-all duration-500 hover:shadow-lg"
-                            >
-                                <div className="text-[#B8956A] mb-4 group-hover:scale-110 transition-transform duration-500">
-                                    {item.icon}
-                                </div>
-                                <p className="text-xs tracking-[0.3em] uppercase text-[#B8956A] mb-2 font-light">
-                                    {item.subtitle}
-                                </p>
-                                <h3 className="font-serif text-2xl mb-3 text-[#2c2c2c]">
-                                    {item.title}
-                                </h3>
-                                <div className="w-12 h-[1px] bg-gray-300 mb-3" />
-                                <p className="text-gray-600 leading-relaxed text-sm">
-                                    {item.description}
+            <section id="philosophy" className="pt-14 md:pt-18">
+                <div className="max-w-7xl mx-auto px-4 md:px-6">
+                    <div className="rounded-[34px] border border-[#E2D7C7] bg-[#FBF8F2] p-7 md:p-10 lg:p-12">
+                        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+                            <div className="max-w-2xl">
+                                <p className="text-[10px] tracking-[0.36em] uppercase text-[#6B645C]">Chapter 02</p>
+                                <h2 className="mt-4 font-serif text-[2.25rem] md:text-[3.5rem] leading-[0.98]">
+                                    The Olivia philosophy.
+                                </h2>
+                                <p className="mt-4 text-[#59544D] text-base md:text-lg leading-relaxed">
+                                    A lighter pace, a clearer sense of place, and service that feels intuitive rather than performative.
                                 </p>
                             </div>
-                        ))}
+
+                            <div className="rounded-2xl border border-[#E2D7C7] bg-[#FDFBF7] px-6 py-5">
+                                <p className="text-[10px] tracking-[0.32em] uppercase text-[#6B645C]">In three words</p>
+                                <p className="mt-2 font-serif text-2xl leading-none">Quiet. Natural. Unhurried.</p>
+                            </div>
+                        </div>
+
+                        <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                            {[
+                                {
+                                    subtitle: 'Tranquil Escapes',
+                                    title: 'Backwater Serenity',
+                                    description: 'Experience the peaceful rhythm of life along Kerala\'s legendary waterways',
+                                },
+                                {
+                                    subtitle: 'Ancient Healing',
+                                    title: 'Ayurvedic Wellness',
+                                    description: 'Discover holistic rejuvenation through time-honored Ayurvedic practices',
+                                },
+                                {
+                                    subtitle: 'Farm to Table',
+                                    title: 'Culinary Journey',
+                                    description: 'Savor authentic Kerala flavors crafted with locally-sourced ingredients',
+                                },
+                                {
+                                    subtitle: 'Living Traditions',
+                                    title: 'Cultural Heritage',
+                                    description: 'Immerse yourself in Kerala\'s vibrant arts, dance, and traditions',
+                                },
+                            ].map((item) => (
+                                <div
+                                    key={item.title}
+                                    className="rounded-[22px] border border-[#E2D7C7] bg-[#FDFBF7] p-6"
+                                >
+                                    <p className="text-[10px] tracking-[0.28em] uppercase text-[#6B645C]">
+                                        {item.subtitle}
+                                    </p>
+                                    <h3 className="mt-3 font-serif font-semibold text-[1.65rem] leading-tight">
+                                        {item.title}
+                                    </h3>
+                                    <p className="mt-3 text-sm text-[#59544D] leading-relaxed">
+                                        {item.description}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </section>
 
-            {/* Discover Kerala Experiences - Compact */}
-            <section className="py-20 px-6 bg-[#fafaf8]">
-                <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-16">
-                        <div className="w-16 h-[1px] bg-gradient-to-r from-transparent via-[#B8956A] to-transparent mx-auto mb-4" />
-                        <p className="text-[#B8956A] text-sm tracking-[0.3em] uppercase mb-3 font-light">
-                            Experiences
-                        </p>
-                        <h2 className="font-serif text-4xl md:text-5xl text-[#2c2c2c] mb-3">
-                            Discover Kerala
-                        </h2>
-                        <p className="text-gray-600 max-w-2xl mx-auto">
-                            Immerse yourself in the essence of God's Own Country
-                        </p>
-                    </div>
-
-                    <div className="grid md:grid-cols-2 gap-6 mb-10">
-                        {experiences.map((exp, index) => (
-                            <div
-                                key={index}
-                                className="group relative aspect-[4/3] overflow-hidden cursor-pointer"
-                            >
-                                <NextImage
-                                    src={exp.image}
-                                    alt={exp.title}
-                                    fill
-                                    className="object-cover transition-transform duration-700 group-hover:scale-110"
-                                />
-
-                                {/* Gradient Overlay */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-90 transition-opacity duration-500" />
-
-                                {/* Content */}
-                                <div className="absolute inset-0 p-6 flex flex-col justify-end text-white">
-                                    <p className="text-xs tracking-[0.3em] uppercase mb-1 opacity-90">
-                                        {exp.subtitle}
-                                    </p>
-                                    <h3 className="font-serif text-3xl mb-2">
-                                        {exp.title}
-                                    </h3>
-                                    <p className="text-sm leading-relaxed mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-500 transform translate-y-4 group-hover:translate-y-0">
-                                        {exp.description}
-                                    </p>
-                                    <button className="text-sm tracking-wider uppercase opacity-0 group-hover:opacity-100 transition-opacity duration-500 text-left text-[#B8956A]">
-                                        Explore →
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="text-center">
+            {/* EXPERIENCES */}
+            <section className="pt-14 md:pt-18 pb-14 md:pb-18">
+                <div className="max-w-7xl mx-auto px-4 md:px-6">
+                    <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+                        <div className="max-w-3xl">
+                            <p className="text-[10px] tracking-[0.36em] uppercase text-[#6B645C]">Discover Kerala</p>
+                            <h2 className="mt-4 font-serif text-[2.25rem] md:text-[3.6rem] leading-[0.98]">
+                                Moments, curated with restraint.
+                            </h2>
+                            <p className="mt-3 text-[#59544D] text-base md:text-lg leading-relaxed">
+                                Immerse yourself in the essence of God&apos;s Own Country.
+                            </p>
+                        </div>
                         <Link
                             href="/experiences"
-                            className="inline-block px-8 py-3 border border-[#B8956A] text-[#B8956A] text-sm tracking-wider uppercase hover:bg-[#B8956A] hover:text-white transition-all duration-300"
+                            className="inline-flex items-center gap-3 text-[#1C1C1C] hover:opacity-80 transition-opacity"
                         >
-                            View All Experiences →
+                            <span className="text-[11px] tracking-[0.36em] uppercase border-b border-[#BDB6AD] pb-1 hover:border-[#1C1C1C] transition-colors">
+                                View all experiences
+                            </span>
+                            <span aria-hidden className="text-lg leading-none">→</span>
                         </Link>
                     </div>
-                </div>
-            </section>
 
-            {/* Quote Section - Compact */}
-            <section className="py-20 px-6 bg-white">
-                <div className="max-w-4xl mx-auto text-center">
-                    <div className="w-16 h-[1px] bg-gradient-to-r from-transparent via-[#B8956A] to-transparent mx-auto mb-8" />
+                    <div className="mt-8 grid lg:grid-cols-12 gap-4 md:gap-5">
+                        {experiences.map((exp, idx) => (
+                            <article
+                                key={exp.title}
+                                className={[
+                                    'group overflow-hidden rounded-[34px] border border-[#E2D7C7] bg-[#FBF8F2] hover:bg-[#FDFBF7] transition-colors',
+                                    idx === 0 ? 'lg:col-span-7' : 'lg:col-span-5',
+                                ].join(' ')}
+                            >
+                                <div className="relative h-[240px] md:h-[290px] lg:h-[320px]">
+                                    <NextImage
+                                        src={exp.image}
+                                        alt={exp.title}
+                                        fill
+                                        className="object-cover transition-transform duration-700 group-hover:scale-[1.03] saturate-[0.82] contrast-[1.06]"
+                                    />
+                                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.06)_0%,rgba(243,238,228,0.84)_100%)]" />
+                                </div>
+                                <div className="p-7 md:p-8 lg:p-10">
+                                    <p className="text-[10px] tracking-[0.32em] uppercase text-[#6B645C]">{exp.subtitle}</p>
+                                    <h3 className="mt-3 font-serif font-semibold text-[2.1rem] leading-tight">
+                                        {exp.title}
+                                    </h3>
+                                    <p className="mt-3 text-[#59544D] leading-relaxed">{exp.description}</p>
+                                    <div className="mt-7 inline-flex items-center gap-3 text-[#1C1C1C] opacity-70 group-hover:opacity-100 transition-opacity">
+                                        <span className="text-[11px] tracking-[0.36em] uppercase border-b border-[#BDB6AD] pb-1 group-hover:border-[#1C1C1C] transition-colors">
+                                            Explore
+                                        </span>
+                                        <span aria-hidden className="text-lg leading-none">→</span>
+                                    </div>
+                                </div>
+                            </article>
+                        ))}
+                    </div>
 
-                    <blockquote className="font-serif text-2xl md:text-3xl lg:text-4xl text-[#2c2c2c] leading-relaxed mb-8 italic">
-                        "We don't just offer a place to stay—we offer a passage to Kerala's soul,
-                        where every sunrise over the backwaters tells a story older than time itself."
-                    </blockquote>
-
-                    <div className="w-16 h-[1px] bg-gradient-to-r from-transparent via-[#B8956A] to-transparent mx-auto mb-4" />
-
-                    <p className="text-sm tracking-[0.3em] uppercase text-[#B8956A] font-light">
-                        The Olivia Philosophy
-                    </p>
-                </div>
-            </section>
-
-            {/* CTA Section - Compact */}
-            <section className="py-16 px-6 bg-gradient-to-b from-[#fafaf8] to-white">
-                <div className="max-w-4xl mx-auto text-center">
-                    <h2 className="font-serif text-3xl md:text-4xl text-[#2c2c2c] mb-6">
-                        Begin Your Journey
-                    </h2>
-                    <p className="text-gray-600 mb-10 text-lg">
-                        Experience the perfect harmony of luxury and tradition
-                    </p>
-                    <div className="flex gap-4 justify-center flex-wrap">
-                        <Link
-                            href="/rooms"
-                            className="px-8 py-3 bg-[#B8956A] text-white text-sm tracking-wider uppercase hover:bg-[#a07d54] transition-all duration-300"
-                        >
-                            Explore Accommodations
-                        </Link>
-                        <Link
-                            href="/contact"
-                            className="px-8 py-3 border border-[#B8956A] text-[#B8956A] text-sm tracking-wider uppercase hover:bg-[#B8956A] hover:text-white transition-all duration-300"
-                        >
-                            Contact Us
-                        </Link>
+                    <div className="mt-10 rounded-[34px] border border-[#E2D7C7] bg-[#FBF8F2] p-8 md:p-10 lg:p-12">
+                        <div className="grid lg:grid-cols-12 gap-6 md:gap-8 items-center">
+                            <div className="lg:col-span-7">
+                                <p className="text-[10px] tracking-[0.36em] uppercase text-[#6B645C]">A quieter way to arrive</p>
+                                <p className="mt-4 font-serif text-[1.9rem] md:text-[2.5rem] leading-[1.05]">
+                                    The most luxurious stays feel effortless — the details simply fall into place.
+                                </p>
+                                <p className="mt-4 text-[#59544D] leading-relaxed">
+                                    Browse rooms, check availability, and reserve in moments — without leaving the calm of the page.
+                                </p>
+                            </div>
+                            <div className="lg:col-span-5 flex flex-col sm:flex-row lg:flex-col gap-3">
+                                <Link
+                                    href="/rooms"
+                                    className="inline-flex items-center justify-center rounded-xl bg-[#1C1C1C] px-8 py-3.5 text-white text-[11px] font-semibold tracking-[0.18em] uppercase hover:bg-[#333333] transition-colors"
+                                >
+                                    View rooms
+                                </Link>
+                                <Link
+                                    href="/book/search"
+                                    className="inline-flex items-center justify-center rounded-xl border border-[#CFC6BA] bg-transparent px-8 py-3.5 text-[#1C1C1C] text-[11px] tracking-[0.18em] uppercase hover:bg-white/60 transition-colors"
+                                >
+                                    Check availability
+                                </Link>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
