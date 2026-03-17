@@ -4,6 +4,7 @@ import { signIn, signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 
 const NAV_ITEMS = [
     'Discover',
@@ -19,6 +20,8 @@ const toNavHref = (item: string) => `/${item.toLowerCase().replace(/ & /g, '-').
 
 export default function RosewoodHeader() {
     const { data: session } = useSession();
+    const pathname = usePathname();
+    const router = useRouter();
     const [isTopBarVisible, setIsTopBarVisible] = useState(true);
     const [enableTopBarAnimation, setEnableTopBarAnimation] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -159,14 +162,21 @@ export default function RosewoodHeader() {
 
                 <nav className="hidden xl:flex justify-center items-center gap-6 w-2/4">
                     {NAV_ITEMS.map((item) => (
+                        (() => {
+                            const href = toNavHref(item);
+                            const isActive = pathname === href || pathname.startsWith(`${href}/`);
+                            return (
                         <Link
                             key={item}
-                            href={toNavHref(item)}
-                            className={`font-serif font-medium transition-colors text-[#3A342D] hover:text-[#121212] ${item === 'Conference & Events' ? 'text-base whitespace-nowrap' : 'text-lg'
+                            href={href}
+                            className={`font-serif font-medium transition-colors text-[#3A342D] hover:text-[#121212] rounded-full px-3 py-1.5 ${isActive ? 'bg-[#F3EEE4] text-[#121212]' : ''
+                                } ${item === 'Conference & Events' ? 'text-base whitespace-nowrap' : 'text-lg'
                                 }`}
                         >
                             {item}
                         </Link>
+                            );
+                        })()
                     ))}
                     <Link href="/shop" className="font-serif font-medium text-lg transition-colors flex items-start gap-0.5 text-[#3A342D] hover:text-[#121212]">
                         Shop
@@ -175,12 +185,21 @@ export default function RosewoodHeader() {
                 </nav>
 
                 <div className="flex justify-end items-center gap-1 xl:w-1/4">
-                    <Link
-                        href="#booking-search"
+                    <button
+                        type="button"
+                        onClick={() => {
+                            const el = document.getElementById('booking-search');
+                            if (el) {
+                                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                history.replaceState(null, '', '#booking-search');
+                                return;
+                            }
+                            router.push('/book/search');
+                        }}
                         className="hidden md:inline-block bg-[#0A332B] text-white text-[11px] font-bold uppercase tracking-[0.2em] px-8 py-4 hover:bg-[#15443B] transition-colors"
                     >
                         Reserve
-                    </Link>
+                    </button>
 
                     <button
                         type="button"
@@ -220,25 +239,41 @@ export default function RosewoodHeader() {
                         </div>
 
                         <div className="px-6 py-5">
-                            <Link
-                                href="#booking-search"
+                            <button
+                                type="button"
                                 className="block w-full text-center bg-[#0A332B] text-white text-[11px] font-bold uppercase tracking-[0.2em] px-6 py-3.5 hover:bg-[#15443B] transition-colors"
-                                onClick={() => setIsMobileMenuOpen(false)}
+                                onClick={() => {
+                                    setIsMobileMenuOpen(false);
+                                    const el = document.getElementById('booking-search');
+                                    if (el) {
+                                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                        history.replaceState(null, '', '#booking-search');
+                                        return;
+                                    }
+                                    router.push('/book/search');
+                                }}
                             >
                                 Reserve
-                            </Link>
+                            </button>
                         </div>
 
                         <nav className="px-6 pb-6 border-b border-gray-200 space-y-1">
                             {NAV_ITEMS.map((item) => (
+                                (() => {
+                                    const href = toNavHref(item);
+                                    const isActive = pathname === href || pathname.startsWith(`${href}/`);
+                                    return (
                                 <Link
                                     key={item}
-                                    href={toNavHref(item)}
+                                    href={href}
                                     onClick={() => setIsMobileMenuOpen(false)}
-                                    className="block py-3 text-[17px] font-serif text-[#1C1C1C] border-b border-gray-100 last:border-b-0"
+                                    className={`block py-3 px-3 -mx-3 rounded-lg text-[17px] font-serif border-b border-gray-100 last:border-b-0 ${isActive ? 'bg-white/60 text-[#0A332B]' : 'text-[#1C1C1C]'
+                                        }`}
                                 >
                                     {item}
                                 </Link>
+                                    );
+                                })()
                             ))}
                             <Link
                                 href="/shop"

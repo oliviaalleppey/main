@@ -135,14 +135,10 @@ export default function WeddingPage() {
             <main className="min-h-screen bg-[#FAF8F3] text-[#26322D]">
                 <section className="relative overflow-hidden border-b border-[#E8E0D2]">
                     <div className="relative h-[72vh] md:h-[78vh]">
-                        <Image
-                            src="/images/dining/hero.jpg"
-                            alt="Wedding venue by the backwaters at Olivia Alleppey"
-                            fill
-                            priority
-                            className="object-cover"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-r from-[#1F2623]/55 via-[#1F2623]/20 to-transparent" />
+                        {/* Placeholder background (image to be added later) */}
+                        <div className="absolute inset-0 bg-[linear-gradient(135deg,#1C2622_0%,#2B3A34_38%,#1B2421_100%)]" />
+                        <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_25%_30%,rgba(231,212,173,0.18)_0%,rgba(231,212,173,0)_60%)]" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-[#1F2623]/65 via-[#1F2623]/30 to-transparent" />
                     </div>
 
                     <div className="absolute inset-0 flex items-center">

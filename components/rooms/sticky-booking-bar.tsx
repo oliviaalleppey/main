@@ -26,13 +26,22 @@ export default function StickyBookingBar({ basePrice, roomSlug }: StickyBookingB
     });
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
     const [guests, setGuests] = useState({ adults: 2, children: 0 });
+    const [viewportWidth, setViewportWidth] = useState<number | null>(null);
+    const isMobile = (viewportWidth ?? 1024) < 768;
+
+    useEffect(() => {
+        const update = () => setViewportWidth(window.innerWidth);
+        update();
+        window.addEventListener('resize', update);
+        return () => window.removeEventListener('resize', update);
+    }, []);
 
     useEffect(() => {
         const onEscape = (event: KeyboardEvent) => {
             if (event.key === 'Escape') setIsDatePickerOpen(false);
         };
 
-        if (isDatePickerOpen) {
+        if (isDatePickerOpen && isMobile) {
             const html = document.documentElement;
             window.addEventListener('keydown', onEscape);
             const previousBodyOverflow = document.body.style.overflow;
@@ -50,6 +59,11 @@ export default function StickyBookingBar({ basePrice, roomSlug }: StickyBookingB
                 document.body.style.overscrollBehavior = previousBodyOverscroll;
                 html.style.overscrollBehavior = previousHtmlOverscroll;
             };
+        }
+
+        if (isDatePickerOpen && !isMobile) {
+            window.addEventListener('keydown', onEscape);
+            return () => window.removeEventListener('keydown', onEscape);
         }
     }, [isDatePickerOpen]);
 
@@ -76,14 +90,25 @@ export default function StickyBookingBar({ basePrice, roomSlug }: StickyBookingB
                         className="fixed inset-0 z-40 bg-black/35"
                         onClick={() => setIsDatePickerOpen(false)}
                     />
-                    <div className="fixed inset-x-0 bottom-0 md:inset-0 z-50 flex items-end md:items-center justify-center p-2 md:p-6 overscroll-none">
-                        <LuxuryDatePicker
-                            date={date}
-                            setDate={setDate}
-                            onClose={() => setIsDatePickerOpen(false)}
-                            className="w-full max-w-[860px] rounded-t-3xl md:rounded-3xl max-h-[90vh] overflow-auto overscroll-contain"
-                        />
-                    </div>
+                    {isMobile ? (
+                        <div className="fixed inset-x-0 bottom-0 z-50 flex items-end justify-center p-2 overscroll-none">
+                            <LuxuryDatePicker
+                                date={date}
+                                setDate={setDate}
+                                onClose={() => setIsDatePickerOpen(false)}
+                                className="w-full max-w-[860px] rounded-t-3xl max-h-[90vh] overflow-auto overscroll-contain"
+                            />
+                        </div>
+                    ) : (
+                        <div className="fixed inset-0 z-50 flex items-end justify-center p-6 pb-[112px]">
+                            <LuxuryDatePicker
+                                date={date}
+                                setDate={setDate}
+                                onClose={() => setIsDatePickerOpen(false)}
+                                className="w-full max-w-[860px] rounded-3xl max-h-[80vh] overflow-auto overscroll-contain"
+                            />
+                        </div>
+                    )}
                 </>
             )}
 

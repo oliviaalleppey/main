@@ -252,13 +252,9 @@ export default function ConferenceEventsPage() {
         <>
             <main className="min-h-screen bg-[#F8F6F1] text-[#1D1D1D]">
                 <section className="relative min-h-[62vh] md:min-h-[72vh] overflow-hidden">
-                    <Image
-                        src="/images/rooms/balcony-room-5.jpg"
-                        alt="Conference and events venue"
-                        fill
-                        className="object-cover"
-                        priority
-                    />
+                    {/* Placeholder background (image to be added later) */}
+                    <div className="absolute inset-0 bg-[linear-gradient(135deg,#1C2622_0%,#2B3A34_38%,#1B2421_100%)]" />
+                    <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_25%_30%,rgba(231,212,173,0.18)_0%,rgba(231,212,173,0)_60%)]" />
                     <div className="absolute inset-0 bg-gradient-to-r from-[#121A17]/78 via-[#1A211E]/58 to-[#121A17]/45" />
 
                     <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-10 pt-14 pb-16 md:pt-20 md:pb-20">

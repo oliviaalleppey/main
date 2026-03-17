@@ -100,13 +100,10 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
                     transition={{ duration: 8, ease: "easeOut" }}
                     className="absolute inset-0 z-0"
                 >
-                    <Image
-                        src="/images/rooms/balcony-room-5.jpg"
-                        alt="Luxury Accommodations"
-                        fill
-                        className="object-cover"
-                        priority
-                    />
+                    {/* Placeholder background (image to be added later) */}
+                    <div className="absolute inset-0 bg-[linear-gradient(135deg,#1C2622_0%,#2B3A34_38%,#1B2421_100%)]" />
+                    <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_25%_30%,rgba(231,212,173,0.18)_0%,rgba(231,212,173,0)_60%)]" />
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/15 to-black/40" />
                 </motion.div>
 
                 {/* Hero Content - Compact */}
@@ -166,12 +163,20 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
 
             {/* Room Categories Navigation */}
             <section
-                className="sticky z-40 bg-[#FBF9F3] border-b border-[#E8E0D1] py-2.5 transition-all duration-300"
+                className="sticky z-40 bg-[#FBF9F3] border-b border-[#E8E0D1] py-3 md:py-3.5 transition-all duration-300"
                 style={{ top: 'var(--site-header-height, 62px)' }}
             >
-                <div className="mx-auto w-full max-w-[1600px] px-3 md:px-6">
-                    <div className="-mx-1 overflow-x-auto no-scrollbar">
-                        <div className="flex min-w-max items-center gap-2 md:gap-4 px-1 md:px-2">
+                <div className="w-full px-3 sm:px-6 md:px-12">
+                    <div className="flex items-center justify-center gap-3 px-1 md:px-2 pb-2">
+                        <p className="text-[10px] md:text-[11px] uppercase tracking-[0.28em] text-[#6B645C] whitespace-nowrap">
+                            Select a room
+                        </p>
+                    </div>
+                    <p className="text-center text-[10px] md:text-[11px] uppercase tracking-[0.28em] text-[#6B645C] whitespace-nowrap lg:hidden -mt-1 mb-2">
+                        Swipe →
+                    </p>
+                    <div className="-mx-1 overflow-x-auto lg:overflow-x-visible no-scrollbar">
+                        <div className="flex min-w-max lg:min-w-0 lg:w-full items-center gap-2 md:gap-3 px-1 md:px-2 lg:justify-between">
                             {roomTypes.map((room, index) => (
                                 <button
                                     key={room.id}
@@ -179,10 +184,11 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
                                         setActiveRoom(index);
                                         document.getElementById(`room-${index}`)?.scrollIntoView({ behavior: 'smooth' });
                                     }}
-                                    className={`px-3 py-1.5 text-[11px] md:text-xs tracking-[0.08em] whitespace-nowrap transition-all duration-300 ${activeRoom === index
-                                        ? 'text-[#8A7351] border-b border-[#BCA06F]'
-                                        : 'text-[#45524B]/70 hover:text-[#2E3934]'
+                                    className={`relative px-4 md:px-5 py-2.5 text-[11px] md:text-xs tracking-[0.12em] uppercase whitespace-nowrap transition-colors duration-200 lg:flex-1 lg:text-center rounded-full border focus:outline-none focus-visible:ring-2 focus-visible:ring-[#BCA06F]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#FBF9F3] cursor-pointer ${activeRoom === index
+                                        ? 'bg-[#0A332B] border-[#0A332B] text-white shadow-[0_14px_30px_-22px_rgba(10,51,43,0.65)]'
+                                        : 'bg-white/80 border-[#E6DDCE] text-[#2E3934] hover:bg-white hover:border-[#CFC2AD]'
                                         }`}
+                                    aria-pressed={activeRoom === index}
                                 >
                                     {room.shortName}
                                 </button>
@@ -428,15 +434,28 @@ function RoomCard({ room, index }: { room: RoomViewModel; index: number }) {
                 </motion.div>
 
                 {/* Price Tag - Floating Premium Style */}
-                <div className="absolute top-6 right-6 z-10">
-                    <div className="bg-gradient-to-b from-[#FBF8F3] to-[#F3EEE5] border border-white/85 ring-1 ring-black/5 shadow-[0_18px_44px_-24px_rgba(0,0,0,0.28)] px-6 py-4 rounded-[30px] flex flex-col items-end">
-                        <span className="text-[#8A6B34] text-[10px] tracking-[0.42em] uppercase mb-2 font-medium">Room From</span>
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-[#1C1C1C] text-[1.6rem] md:text-[1.8rem] font-serif font-[300] lining-nums proportional-nums tracking-[-0.02em] leading-none">
-                                ₹{(room.basePrice / 100).toLocaleString('en-IN')}
-                            </span>
-                            <span className="text-[#6B645C] text-[11px] font-medium tracking-[0.18em] uppercase">/ Night</span>
-                        </div>
+                <div className="absolute top-3 right-3 md:top-4 md:right-4 z-10">
+                    {/* Mobile: compact chip */}
+                    <div className="md:hidden rounded-full bg-black/35 text-white border border-white/20 backdrop-blur-sm px-3 py-1.5 shadow-[0_10px_24px_-18px_rgba(0,0,0,0.45)]">
+                        <span className="text-[10px] tracking-[0.22em] uppercase opacity-90">From</span>
+                        <span className="ml-2 text-[13px] font-semibold tabular-nums">
+                            ₹{(room.basePrice / 100).toLocaleString('en-IN')}
+                        </span>
+                        <span className="ml-1 text-[10px] tracking-[0.18em] uppercase opacity-80">/ night</span>
+                    </div>
+
+                    {/* Desktop: premium badge */}
+                    <div className="hidden md:flex items-center gap-3 bg-gradient-to-b from-[#FBF8F3] to-[#F3EEE5] border border-white/85 ring-1 ring-black/5 shadow-[0_16px_36px_-26px_rgba(0,0,0,0.32)] px-4 py-2.5 rounded-full">
+                        <span className="text-[#8A6B34] text-[10px] tracking-[0.32em] uppercase font-medium">
+                            Room From
+                        </span>
+                        <span className="h-4 w-px bg-black/10" aria-hidden="true" />
+                        <span className="text-[#1C1C1C] text-[1.25rem] font-serif font-[300] lining-nums tabular-nums tracking-[-0.01em] leading-none">
+                            ₹{(room.basePrice / 100).toLocaleString('en-IN')}
+                        </span>
+                        <span className="text-[#6B645C] text-[10px] font-medium tracking-[0.16em] uppercase">
+                            / Night
+                        </span>
                     </div>
                 </div>
 
