@@ -138,6 +138,26 @@ export default function DiscoverPage() {
                                     Water, palms, and a slower rhythm — the backdrop to a more intentional stay.
                                 </p>
                             </div>
+
+                            <div className="mt-5 rounded-[28px] border border-[#E2D7C7] bg-[#FBF8F2] p-7 md:p-8">
+                                <p className="text-[10px] tracking-[0.36em] uppercase text-[#6B645C]">Signature moments</p>
+                                <div className="mt-4 space-y-3 text-sm text-[#59544D]">
+                                    <div className="flex items-start justify-between gap-4">
+                                        <p className="leading-relaxed">Sunrise on the water</p>
+                                        <span className="text-[10px] tracking-[0.26em] uppercase text-[#6B645C]">Quiet</span>
+                                    </div>
+                                    <div className="h-px bg-[#E2D7C7]" aria-hidden />
+                                    <div className="flex items-start justify-between gap-4">
+                                        <p className="leading-relaxed">Ayurvedic restoration</p>
+                                        <span className="text-[10px] tracking-[0.26em] uppercase text-[#6B645C]">Slow</span>
+                                    </div>
+                                    <div className="h-px bg-[#E2D7C7]" aria-hidden />
+                                    <div className="flex items-start justify-between gap-4">
+                                        <p className="leading-relaxed">Kerala cuisine, refined</p>
+                                        <span className="text-[10px] tracking-[0.26em] uppercase text-[#6B645C]">Local</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <div className="lg:col-span-8">
