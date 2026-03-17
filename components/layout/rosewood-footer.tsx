@@ -5,25 +5,26 @@ import Image from 'next/image';
 
 export default function RosewoodFooter() {
     return (
-        <footer className="bg-[#E8E2D9] text-[#1C1C1C] pt-12 pb-8">
-            <div className="container mx-auto px-6 md:px-12">
+        <footer className="bg-[#E8E2D9] text-[#1C1C1C] pt-10 pb-6">
+            <div className="max-w-7xl mx-auto px-6 md:px-12">
 
                 {/* Newsletter Section */}
-                <div className="border-b border-[#2C2C2C]/12 pb-10 mb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
+                <div className="border-b border-[#2C2C2C]/12 pb-8 mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-7">
                     <div className="max-w-md">
-                        <h3 className="text-2xl font-serif mb-4 tracking-wide text-[#1C1C1C]">Stay Connected</h3>
-                        <p className="text-[#4F4942] text-sm leading-relaxed">
+                        <h3 className="text-2xl font-serif mb-3 tracking-wide text-[#1C1C1C]">Stay Connected</h3>
+                        <p className="text-[#4F4942] text-base leading-relaxed">
                             Join our mailing list to receive potential updates and exclusive offers from Olivia Global.
                         </p>
                     </div>
-                    <div className="w-full md:w-auto flex-1 max-w-md">
+
+                    <div className="w-full md:max-w-xl">
                         <form className="flex items-center gap-3 rounded-2xl border border-[#BEB4A8] bg-white px-4 py-3">
                             <input
                                 type="email"
                                 placeholder="Email Address"
-                                className="w-full bg-transparent outline-none text-[#1C1C1C] placeholder-[#726B64] text-sm tracking-wide"
+                                className="w-full bg-transparent outline-none text-[#1C1C1C] placeholder-[#726B64] text-base tracking-wide"
                             />
-                            <button className="rounded-xl bg-[#2C2C2C] px-4 py-2 text-[11px] uppercase tracking-[0.18em] text-white hover:bg-[#1C1C1C] transition-colors font-medium">
+                            <button className="rounded-xl bg-[#2C2C2C] px-5 py-2.5 text-xs uppercase tracking-[0.18em] text-white hover:bg-[#1C1C1C] transition-colors font-medium whitespace-nowrap">
                                 Subscribe
                             </button>
                         </form>
@@ -31,81 +32,130 @@ export default function RosewoodFooter() {
                 </div>
 
                 {/* Links Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-10">
-                    {/* Column 1 */}
-                    <div className="space-y-6">
-                        <h4 className="text-xs uppercase tracking-[0.22em] text-[#7A5E28] mb-6">Contact Us</h4>
-                        <p className="text-sm text-[#403A35]">
-                            Olivia International,<br />
-                            Finishing Point, Punnamada,<br />
-                            Alappuzha, Kerala - 688013,<br />
-                            India
-                        </p>
-                        <p className="text-sm text-[#403A35] mt-4">
-                            Primary (Landline): +91/0 477225088, +91/0 4772250800<br />
-                            Primary: <a href="tel:+918075416514" className="underline decoration-[#2C2C2C]/20 hover:text-[#7A5E28] transition-colors">+91 8075 416 514</a><br />
-                            Reservations: <a href="tel:+918075416514" className="underline decoration-[#2C2C2C]/20 hover:text-[#7A5E28] transition-colors">+91 8075 416 514</a><br />
-                            WhatsApp: <a href="https://wa.me/918075416514" className="underline decoration-[#2C2C2C]/20 hover:text-[#7A5E28] transition-colors">+91 8075 416 514</a><br />
-                            Main: <a href="mailto:reservation@oliviaalleppey.com" className="underline decoration-[#2C2C2C]/20 hover:text-[#7A5E28] transition-colors">reservation@oliviaalleppey.com</a><br />
-                            Reservations: <a href="mailto:reservation@oliviaalleppey.com" className="underline decoration-[#2C2C2C]/20 hover:text-[#7A5E28] transition-colors">reservation@oliviaalleppey.com</a><br />
-                            Support: <a href="mailto:mail@oliviaalleppey.com" className="underline decoration-[#2C2C2C]/20 hover:text-[#7A5E28] transition-colors">mail@oliviaalleppey.com</a><br />
-                            Code: Outside India +91 | India 0<br />
-                            Reservations: 09:00 - 18:00 | Front Desk: 24/7 hrs
-                        </p>
+                <div className="grid md:grid-cols-12 gap-8 lg:gap-10 mb-8">
+                    {/* Contact */}
+                    <div className="md:col-span-5 lg:col-span-4">
+                        <h4 className="text-[11px] uppercase tracking-[0.28em] text-[#6B645C] mb-6">Contact us</h4>
+                        <div className="space-y-4 text-[15px] text-[#403A35] leading-relaxed">
+                            <p>
+                                Olivia International,<br />
+                                Finishing Point, Punnamada,<br />
+                                Alappuzha, Kerala - 688013, India
+                            </p>
+
+                            <div className="space-y-2">
+                                <p className="text-[11px] uppercase tracking-[0.24em] text-[#6B645C]">Phone</p>
+                                <a href="tel:+918075416514" className="underline decoration-[#2C2C2C]/20 hover:text-[#1C1C1C] transition-colors">
+                                    +91 8075 416 514
+                                </a>
+                                <p className="text-[13px] text-[#4F4942]">
+                                    Reservations: 09:00 - 18:00<br />
+                                    Front Desk: 24/7
+                                </p>
+                            </div>
+
+                            <p className="text-[13px] text-[#4F4942]">
+                                WhatsApp:{' '}
+                                <a href="https://wa.me/918075416514" className="underline decoration-[#2C2C2C]/20 hover:text-[#1C1C1C] transition-colors">
+                                    +91 8075 416 514
+                                </a>
+                                <br />
+                                Primary (Landline): +91/0 477225088, +91/0 4772250800
+                            </p>
+                        </div>
                     </div>
 
-                    {/* Column 2 */}
-                    <div className="space-y-4">
-                        <h4 className="text-xs uppercase tracking-[0.22em] text-[#7A5E28] mb-6">World of Olivia</h4>
-                        <ul className="space-y-3 text-sm text-[#403A35]">
-                            <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Our Story</Link></li>
-                            <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Residences</Link></li>
-                            <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Careers</Link></li>
-                            <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Press Room</Link></li>
-                        </ul>
+                    {/* Email column (separate, aligned with other headings) */}
+                    <div className="md:col-span-3 lg:col-span-3">
+                        <h4 className="text-[11px] uppercase tracking-[0.28em] text-[#6B645C] mb-6">Email</h4>
+                        <div className="space-y-3 text-[15px] text-[#403A35]">
+                            <a
+                                href="mailto:reservation@oliviaalleppey.com"
+                                className="block underline decoration-[#2C2C2C]/20 hover:text-[#1C1C1C] transition-colors"
+                            >
+                                reservation@oliviaalleppey.com
+                            </a>
+                            <a
+                                href="mailto:mail@oliviaalleppey.com"
+                                className="block underline decoration-[#2C2C2C]/20 hover:text-[#1C1C1C] transition-colors"
+                            >
+                                mail@oliviaalleppey.com
+                            </a>
+                        </div>
                     </div>
 
-                    {/* Column 3 */}
-                    <div className="space-y-4">
-                        <h4 className="text-xs uppercase tracking-[0.22em] text-[#7A5E28] mb-6">Support</h4>
-                        <ul className="space-y-3 text-sm text-[#403A35]">
-                            <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Manage Reservations</Link></li>
-                            <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Gift Cards</Link></li>
-                            <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Contact</Link></li>
-                            <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">FAQ</Link></li>
-                        </ul>
-                    </div>
+                    <div className="md:col-span-4 lg:col-span-5 grid grid-cols-2 md:grid-cols-3 gap-8 lg:gap-10">
+                        <div>
+                            <h4 className="text-[11px] uppercase tracking-[0.28em] text-[#6B645C] mb-6">World of Olivia</h4>
+                            <ul className="space-y-3 text-[15px] text-[#403A35]">
+                                <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Our Story</Link></li>
+                                <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Residences</Link></li>
+                                <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Careers</Link></li>
+                                <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Press Room</Link></li>
+                            </ul>
+                        </div>
 
-                    {/* Column 4 */}
-                    <div className="space-y-4">
-                        <h4 className="text-xs uppercase tracking-[0.22em] text-[#7A5E28] mb-6">Legal</h4>
-                        <ul className="space-y-3 text-sm text-[#403A35]">
-                            <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Privacy Policy</Link></li>
-                            <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Terms of Service</Link></li>
-                            <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Accessibility</Link></li>
-                            <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Cookie Policy</Link></li>
-                        </ul>
+                        <div>
+                            <h4 className="text-[11px] uppercase tracking-[0.28em] text-[#6B645C] mb-6">Support</h4>
+                            <ul className="space-y-3 text-[15px] text-[#403A35]">
+                                <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Manage Reservations</Link></li>
+                                <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Gift Cards</Link></li>
+                                <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Contact</Link></li>
+                                <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">FAQ</Link></li>
+                            </ul>
+                        </div>
+
+                        <div className="hidden md:block">
+                            <h4 className="text-[11px] uppercase tracking-[0.28em] text-[#6B645C] mb-6">Legal</h4>
+                            <ul className="space-y-3 text-[15px] text-[#403A35]">
+                                <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Privacy Policy</Link></li>
+                                <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Terms of Service</Link></li>
+                                <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Accessibility</Link></li>
+                                <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Cookie Policy</Link></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
 
-                {/* Brand & Copyright */}
-                <div className="flex flex-col items-center pt-6 border-t border-[#2C2C2C]/12">
-                    <Link href="/" aria-label="Olivia Alleppey" className="mb-2">
-                        <Image
-                            src="/images/olivia-logo.svg"
-                            alt="Olivia Alleppey"
-                            width={400}
-                            height={150}
-                            className="h-[120px] md:h-[140px] w-auto max-w-[80vw] mx-auto opacity-100 transition-opacity duration-300 pointer-events-auto"
-                        />
-                    </Link>
-                    <div className="flex flex-col md:flex-row justify-between w-full text-[10px] uppercase tracking-widest text-[#5E5851]">
-                        <p>© 2026 Olivia Hotel Group. All Rights Reserved.</p>
-                        <div className="flex gap-6 mt-4 md:mt-0">
-                            <Link href="#" className="hover:text-[#1C1C1C] transition-colors">Facebook</Link>
-                            <Link href="https://instagram.com/oliviaalleppey" target="_blank" rel="noopener noreferrer" className="hover:text-[#1C1C1C] transition-colors">Instagram</Link>
+                {/* Legal (mobile/tablet) */}
+                <div className="lg:hidden mb-10">
+                    <h4 className="text-[11px] uppercase tracking-[0.28em] text-[#6B645C] mb-6">Legal</h4>
+                    <ul className="grid grid-cols-2 gap-y-3 text-[15px] text-[#403A35]">
+                        <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Privacy Policy</Link></li>
+                        <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Terms of Service</Link></li>
+                        <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Accessibility</Link></li>
+                        <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Cookie Policy</Link></li>
+                    </ul>
+                </div>
 
+                {/* Brand & Copyright */}
+                <div className="pt-7 border-t border-[#2C2C2C]/12">
+                    <div className="flex flex-col items-center">
+                        <Link href="/" aria-label="Olivia Alleppey" className="mb-3">
+                            <Image
+                                src="/images/olivia-logo.svg"
+                                alt="Olivia Alleppey"
+                                width={380}
+                                height={140}
+                                className="h-[96px] md:h-[110px] w-auto max-w-[80vw] mx-auto opacity-100 transition-opacity duration-300 pointer-events-auto"
+                            />
+                        </Link>
+
+                        <div className="flex items-center gap-8 text-[10px] uppercase tracking-widest text-[#5E5851]">
+                            <Link href="#" className="hover:text-[#1C1C1C] transition-colors">Facebook</Link>
+                            <Link
+                                href="https://instagram.com/oliviaalleppey"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:text-[#1C1C1C] transition-colors"
+                            >
+                                Instagram
+                            </Link>
                         </div>
+
+                        <p className="mt-5 text-[10px] uppercase tracking-widest text-[#5E5851] text-center">
+                            © 2026 Olivia Hotel Group. All Rights Reserved.
+                        </p>
                     </div>
                 </div>
             </div>

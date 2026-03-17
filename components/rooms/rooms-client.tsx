@@ -89,7 +89,7 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
     const containerRef = useRef(null);
     const [activeRoom, setActiveRoom] = useState(0);
     const suiteRoom = roomTypes.find((r) => r.slug === 'lake-view-balcony-suite') ?? roomTypes[roomTypes.length - 1];
-    const balconyRoom = roomTypes.find((r) => r.slug === 'lake-view-balcony') ?? roomTypes[0];
+    const signatureRoom = roomTypes.find((r) => r.slug === 'boat-race-suite') ?? roomTypes[0];
 
     return (
         <div ref={containerRef} className="bg-[#FAF8F3]">
@@ -118,7 +118,7 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
                     >
                         <span className="w-8 h-[1px] bg-white/80" />
                         <p className="text-white text-[10px] tracking-[0.34em] uppercase font-light">
-                            Accommodations
+                            Olivia Alleppey
                         </p>
                         <span className="w-8 h-[1px] bg-white/80" />
                     </motion.div>
@@ -127,19 +127,10 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
                         initial={{ opacity: 0, y: 25 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.4 }}
-                        className="text-[2.75rem] md:text-[4.5rem] lg:text-[5.5rem] font-serif font-medium text-white mb-4 tracking-[-0.02em] leading-[1.05] [text-shadow:0_2px_18px_rgba(0,0,0,0.45)]"
+                        className="text-[4.25rem] sm:text-[5.25rem] md:text-[8.25rem] lg:text-[10.5rem] font-serif font-medium text-white mb-5 tracking-[-0.03em] leading-[0.92] [text-shadow:0_2px_22px_rgba(0,0,0,0.55)]"
                     >
                         Rooms & Suites
                     </motion.h1>
-
-                    <motion.p
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.6 }}
-                        className="text-white/90 text-sm md:text-base font-light max-w-lg mx-auto leading-relaxed mb-5 [text-shadow:0_1px_12px_rgba(0,0,0,0.4)]"
-                    >
-                        Where Kerala&apos;s timeless beauty meets contemporary luxury
-                    </motion.p>
 
                     <motion.div
                         initial={{ opacity: 0, y: 15 }}
@@ -205,13 +196,175 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
                 <div className="max-w-[1600px] mx-auto">
                     <div className="text-center mb-10 md:mb-12">
                         <span className="inline-block w-12 h-[1px] bg-[#C6AF84] mb-5" />
-                        <h2 className="text-4xl md:text-5xl font-serif text-[#2C3632] tracking-tight">The Collection</h2>
+                        <h2 className="text-4xl md:text-5xl font-serif text-[#2C3632] tracking-tight">Experience Rooms with a View</h2>
                     </div>
 
                     <div className="space-y-8 md:space-y-10">
                         {roomTypes.map((room, index) => (
                             <RoomCard key={room.id} room={room} index={index} />
                         ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Signature Highlight (Boat Race) */}
+            <section className="py-12 md:py-16 px-6 md:px-10 bg-[#FAF8F3]">
+                <div className="max-w-7xl mx-auto">
+                    <div className="grid lg:grid-cols-2 gap-6 items-center">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 1 }}
+                            className="relative h-[44vh] md:h-[58vh] order-2 lg:order-1 rounded-sm overflow-hidden"
+                        >
+                            <Image
+                                src={signatureRoom?.image || "/images/rooms/balcony-room-4.jpg"}
+                                alt={signatureRoom?.name || "Boat Race Finish Line View Suite Room"}
+                                fill
+                                className="object-cover"
+                            />
+                            <div className="absolute bottom-8 left-8 right-8">
+                                <span className="text-[#324038] text-xs tracking-[0.2em] uppercase bg-[#FCFAF5]/85 px-3 py-1.5 inline-block">
+                                    Starting from ₹{Math.round((signatureRoom?.basePrice || 0) / 100).toLocaleString('en-IN')}/night
+                                </span>
+                            </div>
+                        </motion.div>
+
+                        <motion.div
+                            initial={{ opacity: 0, x: 30 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 1 }}
+                            className="order-1 lg:order-2 lg:pl-8"
+                        >
+                            <span className="text-[#8D7858] text-[10px] tracking-[0.3em] uppercase mb-3 block">Signature experiences</span>
+                            <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-[#2D3732] mb-4 leading-tight">
+                                {signatureRoom?.name || 'Boat Race Finish Line View Suite Room'}
+                            </h2>
+                            <p className="-mt-2 mb-5 font-serif text-xl md:text-2xl text-[#2D3732]/85 leading-tight">
+                                {signatureRoom?.shortDescription ? 'The best seat in the house' : 'The best seat in the house'}
+                            </p>
+                            <p className="text-[#3E4C45]/75 text-base md:text-lg leading-relaxed mb-6">
+                                {signatureRoom?.shortDescription ||
+                                    "An exclusive suite offering a prime view of the legendary finish line — a heritage moment, framed in comfort."}
+                            </p>
+
+                            <div className="grid grid-cols-2 gap-4 mb-6">
+                                <div className="border-l-2 border-[#BCA06F] pl-3">
+                                    <p className="text-2xl font-serif text-[#2D3732]">{signatureRoom?.size ?? '—'}</p>
+                                    <p className="text-sm text-[#4B5A53]/70">Square Feet</p>
+                                </div>
+                                <div className="border-l-2 border-[#BCA06F] pl-3">
+                                    <p className="text-2xl font-serif text-[#2D3732]">{signatureRoom?.maxGuests ?? '—'}</p>
+                                    <p className="text-sm text-[#4B5A53]/70">Max Guests</p>
+                                </div>
+                                <div className="border-l-2 border-[#BCA06F] pl-3">
+                                    <p className="text-2xl font-serif text-[#2D3732]">
+                                        {(signatureRoom?.bedType || 'King Bed').split(' ')[0]}
+                                    </p>
+                                    <p className="text-sm text-[#4B5A53]/70">Bed Configuration</p>
+                                </div>
+                                <div className="border-l-2 border-[#BCA06F] pl-3">
+                                    <p className="text-2xl font-serif text-[#2D3732]">{signatureRoom?.view || 'Lake View'}</p>
+                                    <p className="text-sm text-[#4B5A53]/70">View</p>
+                                </div>
+                            </div>
+
+                            <div className="mb-7 border border-[#E6DDCE] bg-[#FCFAF5] px-5 py-4">
+                                <p className="text-[10px] tracking-[0.28em] uppercase text-[#6B645C]">Included</p>
+                                <div className="mt-3 flex flex-wrap gap-2">
+                                    {(signatureRoom?.features?.length ? signatureRoom.features : ['Premium Race View', 'Luxury Suite', 'Butler Service', 'Private Balcony'])
+                                        .slice(0, 6)
+                                        .map((f) => (
+                                            <span
+                                                key={f}
+                                                className="text-[11px] text-[#403A35] border border-[#BCA06F] bg-white/70 px-2.5 py-1"
+                                            >
+                                                {f}
+                                            </span>
+                                        ))}
+                                </div>
+                            </div>
+
+                            <Link
+                                href={`/rooms/${signatureRoom?.slug || 'boat-race-suite'}`}
+                                className="inline-flex items-center gap-4 group"
+                            >
+                                <span className="text-[#2D3732] text-sm tracking-[0.2em] uppercase font-medium">Explore and Book</span>
+                                <span className="w-8 h-[1px] bg-[#BCA06F] group-hover:w-14 transition-all duration-300" />
+                            </Link>
+                        </motion.div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Signature Highlight (Lake View Balcony Suite) */}
+            <section className="py-12 md:py-16 px-6 md:px-10 bg-[#FAF8F3]">
+                <div className="max-w-7xl mx-auto">
+                    <div className="grid lg:grid-cols-2 gap-6 items-center">
+                        <motion.div
+                            initial={{ opacity: 0, x: -30 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 1 }}
+                            className="lg:pr-8"
+                        >
+                            <span className="text-[#8D7858] text-[10px] tracking-[0.3em] uppercase mb-3 block">Signature experiences</span>
+                            <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-[#2D3732] mb-4 leading-tight">
+                                {suiteRoom?.name || 'Lake View Balcony Suite Room'}
+                            </h2>
+                            <p className="text-[#3E4C45]/75 text-base md:text-lg leading-relaxed mb-6">
+                                {suiteRoom?.shortDescription ||
+                                    "Our most exclusive accommodation offers an unparalleled lakeside experience, with refined space and a private balcony designed for quiet moments."}
+                            </p>
+
+                            <div className="grid grid-cols-2 gap-4 mb-6">
+                                <div className="border-l-2 border-[#BCA06F] pl-3">
+                                    <p className="text-2xl font-serif text-[#2D3732]">{suiteRoom?.size ?? '—'}</p>
+                                    <p className="text-sm text-[#4B5A53]/70">Square Feet</p>
+                                </div>
+                                <div className="border-l-2 border-[#BCA06F] pl-3">
+                                    <p className="text-2xl font-serif text-[#2D3732]">{suiteRoom?.maxGuests ?? '—'}</p>
+                                    <p className="text-sm text-[#4B5A53]/70">Max Guests</p>
+                                </div>
+                                <div className="border-l-2 border-[#BCA06F] pl-3">
+                                    <p className="text-2xl font-serif text-[#2D3732]">
+                                        {(suiteRoom?.bedType || 'King Bed').split(' ')[0]}
+                                    </p>
+                                    <p className="text-sm text-[#4B5A53]/70">Bed Configuration</p>
+                                </div>
+                                <div className="border-l-2 border-[#BCA06F] pl-3">
+                                    <p className="text-2xl font-serif text-[#2D3732]">{suiteRoom?.view || 'Lake View'}</p>
+                                    <p className="text-sm text-[#4B5A53]/70">View</p>
+                                </div>
+                            </div>
+
+                            <Link href={`/rooms/${suiteRoom?.slug || 'lake-view-balcony-suite'}`} className="inline-flex items-center gap-4 group">
+                                <span className="text-[#2D3732] text-sm tracking-[0.2em] uppercase font-medium">Discover the Suite</span>
+                                <span className="w-8 h-[1px] bg-[#BCA06F] group-hover:w-14 transition-all duration-300" />
+                            </Link>
+                        </motion.div>
+
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 1 }}
+                            className="relative h-[44vh] md:h-[58vh] rounded-sm overflow-hidden"
+                        >
+                            <Image
+                                src={suiteRoom?.image || "/images/rooms/balcony-room-5.jpg"}
+                                alt={suiteRoom?.name || "Lake View Balcony Suite Room"}
+                                fill
+                                className="object-cover"
+                            />
+                            <div className="absolute bottom-8 left-8 right-8">
+                                <span className="text-[#324038] text-xs tracking-[0.2em] uppercase bg-[#FCFAF5]/85 px-3 py-1.5 inline-block">
+                                    Starting from ₹{Math.round((suiteRoom?.basePrice || 0) / 100).toLocaleString('en-IN')}/night
+                                </span>
+                            </div>
+                        </motion.div>
                     </div>
                 </div>
             </section>
@@ -246,168 +399,6 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
                                 <p className="text-[#4A5A52]/70 text-sm">{amenity.description}</p>
                             </motion.div>
                         ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Signature Suite Highlight */}
-            <section className="py-12 md:py-16 px-6 md:px-10 bg-[#FAF8F3]">
-                <div className="max-w-7xl mx-auto">
-                    <div className="grid lg:grid-cols-2 gap-6 items-center">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 1 }}
-                            className="relative h-[44vh] md:h-[58vh] order-2 lg:order-1 rounded-sm overflow-hidden"
-                        >
-                            <Image
-                                src={suiteRoom?.image || "/images/rooms/balcony-room-5.jpg"}
-                                alt={suiteRoom?.name || "Lake View Balcony Suite Room"}
-                                fill
-                                className="object-cover"
-                            />
-                            <div className="absolute bottom-8 left-8 right-8">
-                                <span className="text-[#324038] text-xs tracking-[0.2em] uppercase bg-[#FCFAF5]/85 px-3 py-1.5 inline-block">
-                                    Starting from ₹{Math.round((suiteRoom?.basePrice || 0) / 100).toLocaleString('en-IN')}/night
-                                </span>
-                            </div>
-                        </motion.div>
-
-                        <motion.div
-                            initial={{ opacity: 0, x: 30 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 1 }}
-                            className="order-1 lg:order-2 lg:pl-8"
-                        >
-                            <span className="text-[#8D7858] text-[10px] tracking-[0.3em] uppercase mb-3 block">Signature experiences</span>
-                            <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-[#2D3732] mb-4 leading-tight">
-                                {suiteRoom?.name || 'Lake View Balcony Suite Room'}
-                            </h2>
-                            <p className="-mt-2 mb-5 font-serif text-xl md:text-2xl text-[#2D3732]/85 leading-tight">
-                                {suiteRoom?.view ? `View: ${suiteRoom.view}` : 'The ultimate lakeside luxury'}
-                            </p>
-                            <p className="text-[#3E4C45]/75 text-base md:text-lg leading-relaxed mb-6">
-                                {suiteRoom?.shortDescription ||
-                                    "Our most exclusive accommodation offers an unparalleled lakeside experience, with refined space and a private balcony designed for quiet moments."}
-                            </p>
-
-                            <div className="grid grid-cols-2 gap-4 mb-6">
-                                <div className="border-l-2 border-[#BCA06F] pl-3">
-                                    <p className="text-2xl font-serif text-[#2D3732]">{suiteRoom?.size ?? '—'}</p>
-                                    <p className="text-sm text-[#4B5A53]/70">Square Feet</p>
-                                </div>
-                                <div className="border-l-2 border-[#BCA06F] pl-3">
-                                    <p className="text-2xl font-serif text-[#2D3732]">{suiteRoom?.maxGuests ?? '—'}</p>
-                                    <p className="text-sm text-[#4B5A53]/70">Max Guests</p>
-                                </div>
-                                <div className="border-l-2 border-[#BCA06F] pl-3">
-                                    <p className="text-2xl font-serif text-[#2D3732]">
-                                        {(suiteRoom?.bedType || 'King Bed').split(' ')[0]}
-                                    </p>
-                                    <p className="text-sm text-[#4B5A53]/70">Bed Configuration</p>
-                                </div>
-                                <div className="border-l-2 border-[#BCA06F] pl-3">
-                                    <p className="text-2xl font-serif text-[#2D3732]">{suiteRoom?.view || 'Lake View'}</p>
-                                    <p className="text-sm text-[#4B5A53]/70">View</p>
-                                </div>
-                            </div>
-
-                            <div className="mb-7 border border-[#E6DDCE] bg-[#FCFAF5] px-5 py-4">
-                                <p className="text-[10px] tracking-[0.28em] uppercase text-[#6B645C]">Included</p>
-                                <div className="mt-3 flex flex-wrap gap-2">
-                                    {(suiteRoom?.features?.length ? suiteRoom.features : ['Private Balcony', 'Jacuzzi', 'Panoramic Views', 'Separate Living Room'])
-                                        .slice(0, 6)
-                                        .map((f) => (
-                                            <span
-                                                key={f}
-                                                className="text-[11px] text-[#403A35] border border-[#BCA06F] bg-white/70 px-2.5 py-1"
-                                            >
-                                                {f}
-                                            </span>
-                                        ))}
-                                </div>
-                            </div>
-
-                            <Link
-                                href={`/rooms/${suiteRoom?.slug || 'lake-view-balcony-suite'}`}
-                                className="inline-flex items-center gap-4 group"
-                            >
-                                <span className="text-[#2D3732] text-sm tracking-[0.2em] uppercase font-medium">Discover the Suite</span>
-                                <span className="w-8 h-[1px] bg-[#BCA06F] group-hover:w-14 transition-all duration-300" />
-                            </Link>
-                        </motion.div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Signature Room Highlight */}
-            <section className="py-12 md:py-16 px-6 md:px-10 bg-[#FAF8F3]">
-                <div className="max-w-7xl mx-auto">
-                    <div className="grid lg:grid-cols-2 gap-6 items-center">
-                        <motion.div
-                            initial={{ opacity: 0, x: -30 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 1 }}
-                            className="lg:pr-8"
-                        >
-                            <span className="text-[#8D7858] text-[10px] tracking-[0.3em] uppercase mb-3 block">Signature experiences</span>
-                            <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-[#2D3732] mb-4 leading-tight">
-                                {balconyRoom?.name || 'Lake View Balcony Room'}
-                            </h2>
-                            <p className="text-[#3E4C45]/75 text-base md:text-lg leading-relaxed mb-6">
-                                {balconyRoom?.shortDescription ||
-                                    "A refined balcony room with sweeping lake views and a calmer pace throughout the day."}
-                            </p>
-
-                            <div className="grid grid-cols-2 gap-4 mb-6">
-                                <div className="border-l-2 border-[#BCA06F] pl-3">
-                                    <p className="text-2xl font-serif text-[#2D3732]">{balconyRoom?.size ?? '—'}</p>
-                                    <p className="text-sm text-[#4B5A53]/70">Square Feet</p>
-                                </div>
-                                <div className="border-l-2 border-[#BCA06F] pl-3">
-                                    <p className="text-2xl font-serif text-[#2D3732]">{balconyRoom?.maxGuests ?? '—'}</p>
-                                    <p className="text-sm text-[#4B5A53]/70">Max Guests</p>
-                                </div>
-                                <div className="border-l-2 border-[#BCA06F] pl-3">
-                                    <p className="text-2xl font-serif text-[#2D3732]">
-                                        {(balconyRoom?.bedType || 'King Bed').split(' ')[0]}
-                                    </p>
-                                    <p className="text-sm text-[#4B5A53]/70">Bed Configuration</p>
-                                </div>
-                                <div className="border-l-2 border-[#BCA06F] pl-3">
-                                    <p className="text-2xl font-serif text-[#2D3732]">{balconyRoom?.view || 'Lake View'}</p>
-                                    <p className="text-sm text-[#4B5A53]/70">View</p>
-                                </div>
-                            </div>
-
-                            <Link href={`/rooms/${balconyRoom?.slug || 'lake-view-balcony'}`} className="inline-flex items-center gap-4 group">
-                                <span className="text-[#2D3732] text-sm tracking-[0.2em] uppercase font-medium">Discover the Room</span>
-                                <span className="w-8 h-[1px] bg-[#BCA06F] group-hover:w-14 transition-all duration-300" />
-                            </Link>
-                        </motion.div>
-
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 1 }}
-                            className="relative h-[44vh] md:h-[58vh] rounded-sm overflow-hidden"
-                        >
-                            <Image
-                                src={balconyRoom?.image || "/images/rooms/balcony-room-4.jpg"}
-                                alt={balconyRoom?.name || "Lake View Balcony Room"}
-                                fill
-                                className="object-cover"
-                            />
-                            <div className="absolute bottom-8 left-8 right-8">
-                                <span className="text-[#324038] text-xs tracking-[0.2em] uppercase bg-[#FCFAF5]/85 px-3 py-1.5 inline-block">
-                                    Starting from ₹{Math.round((balconyRoom?.basePrice || 0) / 100).toLocaleString('en-IN')}/night
-                                </span>
-                            </div>
-                        </motion.div>
                     </div>
                 </div>
             </section>
