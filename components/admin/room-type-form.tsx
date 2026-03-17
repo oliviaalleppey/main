@@ -20,6 +20,11 @@ interface RoomTypeFormProps {
 export function RoomTypeForm({ initialData }: RoomTypeFormProps) {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    
+    // We need local state for the amenities string to allow typing commas naturally
+    const [amenitiesText, setAmenitiesText] = useState(() => {
+        return initialData?.amenities ? initialData.amenities.join(', ') : '';
+    });
 
     const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm<RoomTypeFormValues>({
         resolver: zodResolver(roomTypeSchema),
@@ -109,6 +114,23 @@ export function RoomTypeForm({ initialData }: RoomTypeFormProps) {
                     <div className="col-span-2 space-y-2">
                         <Label htmlFor="shortDescription">Short Description</Label>
                         <Input id="shortDescription" {...register('shortDescription')} placeholder="Brief summary for lists" />
+                    </div>
+                    <div className="col-span-2 space-y-2">
+                        <Label htmlFor="amenities">Amenities (Comma separated tags)</Label>
+                        <Input
+                            id="amenities"
+                            value={amenitiesText}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setAmenitiesText(val); // Update local typed value
+                                
+                                // Update form value behind the scenes
+                                const arr = val.split(',').map(s => s.trim()).filter(Boolean);
+                                setValue('amenities', arr, { shouldDirty: true, shouldValidate: true });
+                            }}
+                            placeholder="e.g. Lake Views, Twin Beds, Free Wi-Fi, Rain Shower"
+                        />
+                        <p className="text-[10px] text-gray-500">These appear as the small feature tags on the room page.</p>
                     </div>
                     <div className="col-span-2 space-y-2">
                         <Label htmlFor="description">Full Description</Label>

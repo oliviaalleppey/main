@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 export default function CompactIntro() {
     return (
-        <section className="py-10 md:py-16 px-4 text-center bg-white">
+        <section className="py-6 md:py-10 px-4 text-center bg-white">
             <div className="max-w-2xl mx-auto">
                 <span className="text-[10px] md:text-xs uppercase tracking-[0.3em] text-[#7A5E28] mb-4 block font-medium">
                     Welcome to Olivia Alleppey

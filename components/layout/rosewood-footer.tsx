@@ -5,11 +5,11 @@ import Image from 'next/image';
 
 export default function RosewoodFooter() {
     return (
-        <footer className="bg-[#E8E2D9] text-[#1C1C1C] pt-20 pb-10">
+        <footer className="bg-[#E8E2D9] text-[#1C1C1C] pt-12 pb-8">
             <div className="container mx-auto px-6 md:px-12">
 
                 {/* Newsletter Section */}
-                <div className="border-b border-[#2C2C2C]/12 pb-16 mb-16 flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
+                <div className="border-b border-[#2C2C2C]/12 pb-10 mb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
                     <div className="max-w-md">
                         <h3 className="text-2xl font-serif mb-4 tracking-wide text-[#1C1C1C]">Stay Connected</h3>
                         <p className="text-[#4F4942] text-sm leading-relaxed">
@@ -31,7 +31,7 @@ export default function RosewoodFooter() {
                 </div>
 
                 {/* Links Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-10">
                     {/* Column 1 */}
                     <div className="space-y-6">
                         <h4 className="text-xs uppercase tracking-[0.22em] text-[#7A5E28] mb-6">Contact Us</h4>
@@ -89,14 +89,14 @@ export default function RosewoodFooter() {
                 </div>
 
                 {/* Brand & Copyright */}
-                <div className="flex flex-col items-center pt-12 border-t border-[#2C2C2C]/12">
-                    <Link href="/" aria-label="Olivia Alleppey" className="mb-4 -mt-6">
+                <div className="flex flex-col items-center pt-6 border-t border-[#2C2C2C]/12">
+                    <Link href="/" aria-label="Olivia Alleppey" className="mb-2">
                         <Image
                             src="/images/olivia-logo.svg"
                             alt="Olivia Alleppey"
                             width={400}
                             height={150}
-                            className="h-[220px] md:h-[280px] w-auto max-w-[80vw] mx-auto opacity-100 transition-opacity duration-300 pointer-events-auto"
+                            className="h-[120px] md:h-[140px] w-auto max-w-[80vw] mx-auto opacity-100 transition-opacity duration-300 pointer-events-auto"
                         />
                     </Link>
                     <div className="flex flex-col md:flex-row justify-between w-full text-[10px] uppercase tracking-widest text-[#5E5851]">
@@ -104,7 +104,7 @@ export default function RosewoodFooter() {
                         <div className="flex gap-6 mt-4 md:mt-0">
                             <Link href="#" className="hover:text-[#1C1C1C] transition-colors">Facebook</Link>
                             <Link href="https://instagram.com/oliviaalleppey" target="_blank" rel="noopener noreferrer" className="hover:text-[#1C1C1C] transition-colors">Instagram</Link>
-                            <Link href="#" className="hover:text-[#1C1C1C] transition-colors">WeChat</Link>
+
                         </div>
                     </div>
                 </div>

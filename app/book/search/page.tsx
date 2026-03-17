@@ -152,7 +152,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                             Compare room size, occupancy, meal plan, cancellation and live pricing before you continue.
                         </p>
                     </div>
-                    {isValidDates && (
+                    {isValidDates && sortedRooms.length > 1 && (
                         <div className="rounded-xl md:rounded-2xl border border-[#DCE2D1] bg-white p-2 md:p-4">
                             <div className="flex flex-wrap items-center gap-1.5 md:gap-2">
                                 <span className="inline-flex items-center gap-1 text-[11px] md:text-xs uppercase tracking-[0.18em] md:tracking-[0.2em] text-gray-500 pr-1">
@@ -318,9 +318,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
                                             <div className="w-full lg:w-[220px] shrink-0 rounded-xl lg:rounded-2xl border border-[#DCE2D2] bg-[#F9FAF6] p-3 md:p-3.5 lg:p-4">
                                                 <p className="text-[11px] uppercase tracking-[0.2em] text-gray-500 mb-1">Starting from</p>
-                                                <div className="text-2xl md:text-[22px] font-serif text-[#1C2822]">
+                                                <div className="text-2xl md:text-[26px] font-sans font-bold text-[#1C2822] tracking-tight">
                                                     {formatCurrency(result.price)}
-                                                    <span className="ml-1 text-sm font-sans font-normal text-gray-500">/ night</span>
+                                                    <span className="ml-1 text-sm font-normal text-gray-500 tracking-normal">/ night</span>
                                                 </div>
                                                 <p className="mt-2 text-xs text-gray-500">
                                                     Stay total (per room): {formatCurrency(result.totalPrice)}

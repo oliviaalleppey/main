@@ -488,7 +488,7 @@ function RoomCard({ room, index }: { room: RoomViewModel; index: number }) {
 
                     {/* Features */}
                     <div className="flex flex-wrap gap-1.5 mb-5">
-                        {room.features.slice(0, 6).map((feature: string) => (
+                        {room.features.map((feature: string) => (
                             <span
                                 key={feature}
                                 className="text-xs text-[#403A35] border border-gray-200 px-2.5 py-1"

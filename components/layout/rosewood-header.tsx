@@ -113,10 +113,10 @@ export default function RosewoodHeader() {
         <header ref={headerRef} className="sticky top-0 z-50 bg-white shadow-sm">
             <div
                 className={`hidden md:block overflow-hidden border-gray-200/20 duration-200 ease-out ${enableTopBarAnimation ? 'transition-[height,opacity,border-color]' : ''
-                    } ${isTopBarVisible ? 'h-12 border-b opacity-100' : 'h-0 border-b-0 opacity-0 pointer-events-none'
+                    } ${isTopBarVisible ? 'h-9 border-b opacity-100' : 'h-0 border-b-0 opacity-0 pointer-events-none'
                     }`}
             >
-                <div className="flex justify-end items-center px-6 md:px-12 py-3 text-xs font-medium font-sans text-[#23201C]">
+                <div className="flex justify-end items-center px-6 md:px-12 py-1.5 text-xs font-medium font-sans text-[#23201C]">
                     <div className="flex gap-6 items-center">
                         {session ? (
                             <div className="flex items-center gap-4">
@@ -143,7 +143,7 @@ export default function RosewoodHeader() {
                 </div>
             </div>
 
-            <div className="flex items-center justify-between px-6 md:px-12 h-[92px] md:h-[112px]">
+            <div className="flex items-center justify-between px-6 md:px-12 h-[68px] md:h-[80px]">
                 <div className="flex items-center flex-1 xl:w-1/4">
                     <Link href="/" className="inline-flex h-full items-center group whitespace-nowrap" aria-label="Olivia Alleppey">
                         <Image

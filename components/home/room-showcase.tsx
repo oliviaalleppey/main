@@ -11,6 +11,7 @@ type RoomCard = {
     description: string;
     image: string | null;
     link: string;
+    basePrice: number | null;
 };
 
 async function getShowcaseRooms(): Promise<RoomCard[]> {
@@ -24,9 +25,9 @@ async function getShowcaseRooms(): Promise<RoomCard[]> {
             featuredImage: true,
             images: true,
             sortOrder: true,
+            basePrice: true,
         },
         orderBy: (table, { asc }) => [asc(table.sortOrder), asc(table.name)],
-        limit: 3,
     });
 
     return rows.map((row) => {
@@ -36,6 +37,7 @@ async function getShowcaseRooms(): Promise<RoomCard[]> {
             description: row.shortDescription || row.description || 'Experience a thoughtfully designed stay with signature Olivia comforts.',
             image: row.featuredImage || images[0] || null,
             link: `/rooms/${row.slug}`,
+            basePrice: row.basePrice ?? null,
         };
     });
 }
@@ -45,15 +47,15 @@ export default async function RoomShowcase() {
     if (!rooms.length) return null;
 
     return (
-        <section className="py-14 md:py-24 bg-[#E8E2D9]">
+        <section className="py-10 md:py-14 bg-[#E8E2D9]">
             <div className="container mx-auto px-4 max-w-7xl">
 
                 {/* Header */}
-                <div className="flex justify-between items-end mb-7 md:mb-12">
+                <div className="flex justify-between items-end mb-6 md:mb-8">
                     <h2 className="text-3xl md:text-4xl font-serif text-[#1C1C1C]">Rooms</h2>
                     <Link
                         href="/rooms"
-                        className="hidden md:inline-flex items-center gap-2 text-[#1C1C1C] hover:text-[#B8956A] transition-colors uppercase tracking-widest text-xs font-medium"
+                        className="hidden md:flex items-center gap-2 text-sm font-bold text-[#1C1C1C] uppercase tracking-widest hover:opacity-70 transition-opacity"
                     >
                         All Rooms
                         <ArrowRight className="w-4 h-4" />
@@ -61,9 +63,13 @@ export default async function RoomShowcase() {
                 </div>
 
                 {/* Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                    {/* On mobile, only show first 3. On desktop, show all */}
                     {rooms.map((room, index) => (
-                        <div key={index} className="flex flex-col group">
+                        <div
+                            key={room.title}
+                            className={`flex flex-col group ${index >= 3 ? 'hidden md:flex' : 'flex'}`}
+                        >
 
                             {/* Image Container */}
                             <div className="relative aspect-[4/3] overflow-hidden rounded-lg mb-6 bg-[#E5E5E5]">
@@ -85,34 +91,53 @@ export default async function RoomShowcase() {
 
                             {/* Content */}
                             <div className="flex flex-col flex-1 px-1">
-                                <h3 className="text-xl font-bold text-[#1C1C1C] mb-3 font-sans">
+                                <h3 className="text-xl font-bold text-[#1C1C1C] mb-1 font-sans">
                                     {room.title}
                                 </h3>
-                                <p className="text-[#1C1C1C]/80 text-sm leading-relaxed mb-8 flex-1">
+                                <p className="text-[#1C1C1C]/80 text-sm leading-relaxed mb-5 flex-1">
                                     {room.description}
                                 </p>
 
                                 {/* Actions */}
-                                <div className="flex items-center justify-between mt-auto">
+                                <div className="flex items-center justify-between mt-auto pt-2">
                                     <Link
-                                        href={room.link}
-                                        className="px-8 py-3 rounded-full border border-[#1C1C1C] text-[#1C1C1C] text-sm font-bold hover:bg-[#1C1C1C] hover:text-white transition-all uppercase tracking-wide"
+                                        href={`/book/search?room=${room.link.replace('/rooms/', '')}`}
+                                        className="px-4 py-2 md:px-6 md:py-2.5 rounded-full border border-[#1C1C1C] text-[#1C1C1C] text-[10px] md:text-sm font-bold hover:bg-[#1C1C1C] hover:text-white transition-all uppercase tracking-wide whitespace-nowrap"
                                     >
                                         Book Now
                                     </Link>
 
+                                    {room.basePrice != null && (
+                                        <div className="text-[11px] md:text-sm text-[#7A5E28] font-medium px-2 text-center leading-tight">
+                                            From ₹{(room.basePrice / 100).toLocaleString('en-IN')} <br className="sm:hidden" /><span className="text-[#1C1C1C]/50 font-normal">/ night</span>
+                                        </div>
+                                    )}
+
                                     <Link
                                         href={room.link}
-                                        className="flex items-center gap-2 text-sm font-bold text-[#1C1C1C] hover:opacity-70 transition-opacity group/link"
+                                        className="flex items-center gap-1.5 md:gap-2 text-[11px] md:text-sm font-bold text-[#1C1C1C] hover:opacity-70 transition-opacity group/link whitespace-nowrap"
                                     >
                                         More
-                                        <ArrowRight className="w-4 h-4 transition-transform group-hover/link:translate-x-1" />
+                                        <ArrowRight className="w-3.5 h-3.5 md:w-4 md:h-4 transition-transform group-hover/link:translate-x-1" />
                                     </Link>
                                 </div>
                             </div>
                         </div>
                     ))}
                 </div>
+
+                {/* Mobile 'View All' Button (Hidden on md and up) */}
+                {rooms.length > 3 && (
+                    <div className="mt-8 flex justify-center md:hidden">
+                        <Link
+                            href="/rooms"
+                            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#1C1C1C] text-white text-sm font-bold hover:bg-[#333333] transition-all uppercase tracking-wide"
+                        >
+                            View All Rooms
+                            <ArrowRight className="w-4 h-4" />
+                        </Link>
+                    </div>
+                )}
 
             </div>
         </section>

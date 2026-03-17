@@ -57,9 +57,9 @@ export function SearchStayEditor({
                 <div>
                     <p className="text-[11px] uppercase tracking-[0.24em] md:tracking-[0.3em] text-gray-500 mb-1 md:mb-2 text-left">Stay Summary</p>
                     <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-4">
-                        <h1 className="text-2xl md:text-3xl font-serif text-[#1D2B25] leading-tight text-left">
+                        <h1 className="text-2xl md:text-3xl font-sans text-[#1C2822] font-semibold leading-tight text-left tracking-tight">
                             {format(initialCheckIn, 'd MMM')}
-                            <span className="text-[#8A968A] font-sans text-xl md:text-2xl mx-1 md:mx-2">to</span>
+                            <span className="text-[#6D7A6D] text-xl md:text-2xl mx-2 md:mx-3 font-normal">to</span>
                             {format(initialCheckOut, 'd MMM')}
                         </h1>
                         <p className="text-xs md:text-sm text-gray-600 bg-gray-100 px-2.5 py-1 rounded-full whitespace-nowrap">
