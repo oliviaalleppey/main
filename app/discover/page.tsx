@@ -104,9 +104,9 @@ export default function DiscoverPage() {
                                                 src={img.src}
                                                 alt={img.alt}
                                                 fill
-                                                className="object-cover saturate-[0.78] contrast-[1.06]"
+                                                className="object-cover"
                                             />
-                                            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.08)_0%,rgba(243,238,228,0.70)_100%)]" />
+                                            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.10)_0%,rgba(0,0,0,0)_55%,rgba(0,0,0,0.06)_100%)]" />
                                         </div>
                                     ))}
                                 </div>
@@ -167,9 +167,9 @@ export default function DiscoverPage() {
                                         src="/images/discover/heritage-hotel.png"
                                         alt="Olivia International Heritage"
                                         fill
-                                        className="object-cover saturate-[0.8] contrast-[1.03]"
+                                        className="object-cover"
                                     />
-                                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.06)_0%,rgba(243,238,228,0.82)_100%)]" />
+                                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.10)_0%,rgba(0,0,0,0)_52%,rgba(0,0,0,0.08)_100%)]" />
                                 </div>
                                 <div className="p-7 md:p-10 lg:p-12">
                                     <div className="space-y-4 text-[#59544D] leading-relaxed">
@@ -291,9 +291,9 @@ export default function DiscoverPage() {
                                         src={exp.image}
                                         alt={exp.title}
                                         fill
-                                        className="object-cover transition-transform duration-700 group-hover:scale-[1.03] saturate-[0.82] contrast-[1.06]"
+                                        className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
                                     />
-                                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.06)_0%,rgba(243,238,228,0.84)_100%)]" />
+                                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.10)_0%,rgba(0,0,0,0)_55%,rgba(0,0,0,0.08)_100%)]" />
                                 </div>
                                 <div className="p-7 md:p-8 lg:p-10">
                                     <p className="text-[10px] tracking-[0.32em] uppercase text-[#6B645C]">{exp.subtitle}</p>

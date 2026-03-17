@@ -171,7 +171,7 @@ export default function RosewoodHeader() {
                             <Link
                                 key={item.label}
                                 href={item.href}
-                                className={`font-serif font-medium transition-colors text-[#3A342D] hover:text-[#121212] rounded-full px-3 py-1.5 ${isActive ? 'bg-[#F3EEE4] text-[#121212]' : ''
+                                className={`font-serif font-medium transition-colors text-[#3A342D] hover:text-[#121212] rounded-full px-3 py-1.5 ${isActive ? 'bg-[#15443B] text-white' : ''
                                     } ${item.label === 'Conference & Events' ? 'text-base whitespace-nowrap' : 'text-lg'
                                     }`}
                             >
@@ -266,7 +266,7 @@ export default function RosewoodHeader() {
                                         key={item.label}
                                         href={item.href}
                                         onClick={() => setIsMobileMenuOpen(false)}
-                                        className={`block py-3 px-3 -mx-3 rounded-lg text-[17px] font-serif border-b border-gray-100 last:border-b-0 ${isActive ? 'bg-white/60 text-[#0A332B]' : 'text-[#1C1C1C]'
+                                        className={`block py-3 px-3 -mx-3 rounded-lg text-[17px] font-serif border-b border-gray-100 last:border-b-0 ${isActive ? 'bg-[#15443B] text-white' : 'text-[#1C1C1C]'
                                             }`}
                                     >
                                         {item.label}

@@ -88,6 +88,8 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
     });
     const containerRef = useRef(null);
     const [activeRoom, setActiveRoom] = useState(0);
+    const suiteRoom = roomTypes.find((r) => r.slug === 'lake-view-balcony-suite') ?? roomTypes[roomTypes.length - 1];
+    const balconyRoom = roomTypes.find((r) => r.slug === 'lake-view-balcony') ?? roomTypes[0];
 
     return (
         <div ref={containerRef} className="bg-[#FAF8F3]">
@@ -147,15 +149,15 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
                     >
                         <Link
                             href="#rooms-collection"
-                            className="border border-white/80 bg-white/92 text-[#2D3933] px-5 py-2 text-[10px] tracking-[0.2em] uppercase hover:bg-white transition-colors duration-300"
+                            className="border border-white/90 bg-white text-[#2D3933] px-6 py-2.5 text-[10px] tracking-[0.22em] uppercase font-semibold shadow-[0_18px_40px_-28px_rgba(0,0,0,0.65)] hover:bg-white/95 transition-colors duration-300"
                         >
-                            Explore Rooms
+                            Explore Room
                         </Link>
                         <Link
-                            href="#booking-search"
-                            className="border border-white/70 bg-transparent text-white px-5 py-2 text-[10px] tracking-[0.2em] uppercase hover:bg-white/12 transition-colors duration-300"
+                            href="/contact"
+                            className="border border-white/85 bg-black/20 text-white px-6 py-2.5 text-[10px] tracking-[0.22em] uppercase font-semibold backdrop-blur-sm hover:bg-black/30 transition-colors duration-300"
                         >
-                            Check Availability
+                            Contact now
                         </Link>
                     </motion.div>
                 </div>
@@ -173,7 +175,7 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
                         </p>
                     </div>
                     <p className="text-center text-[10px] md:text-[11px] uppercase tracking-[0.28em] text-[#6B645C] whitespace-nowrap lg:hidden -mt-1 mb-2">
-                        Swipe →
+                        →
                     </p>
                     <div className="-mx-1 overflow-x-auto lg:overflow-x-visible no-scrollbar">
                         <div className="flex min-w-max lg:min-w-0 lg:w-full items-center gap-2 md:gap-3 px-1 md:px-2 lg:justify-between">
@@ -260,13 +262,15 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
                             className="relative h-[44vh] md:h-[58vh] order-2 lg:order-1 rounded-sm overflow-hidden"
                         >
                             <Image
-                                src="/images/rooms/balcony-room-5.jpg"
-                                alt="Lake View Balcony Suite Room"
+                                src={suiteRoom?.image || "/images/rooms/balcony-room-5.jpg"}
+                                alt={suiteRoom?.name || "Lake View Balcony Suite Room"}
                                 fill
                                 className="object-cover"
                             />
                             <div className="absolute bottom-8 left-8 right-8">
-                                <span className="text-[#324038] text-xs tracking-[0.2em] uppercase bg-[#FCFAF5]/85 px-3 py-1.5 inline-block">Starting from ₹45,000/night</span>
+                                <span className="text-[#324038] text-xs tracking-[0.2em] uppercase bg-[#FCFAF5]/85 px-3 py-1.5 inline-block">
+                                    Starting from ₹{Math.round((suiteRoom?.basePrice || 0) / 100).toLocaleString('en-IN')}/night
+                                </span>
                             </div>
                         </motion.div>
 
@@ -279,42 +283,59 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
                         >
                             <span className="text-[#8D7858] text-[10px] tracking-[0.3em] uppercase mb-3 block">Signature experiences</span>
                             <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-[#2D3732] mb-4 leading-tight">
-                                Lake View Balcony Suite Room
+                                {suiteRoom?.name || 'Lake View Balcony Suite Room'}
                             </h2>
                             <p className="-mt-2 mb-5 font-serif text-xl md:text-2xl text-[#2D3732]/85 leading-tight">
-                                Lake View Balcony Room
+                                {suiteRoom?.view ? `View: ${suiteRoom.view}` : 'The ultimate lakeside luxury'}
                             </p>
                             <p className="text-[#3E4C45]/75 text-base md:text-lg leading-relaxed mb-6">
-                                Our most exclusive accommodation offers an unparalleled lakeside experience.
-                                With 900 square feet of refined living space, a private balcony with panoramic views,
-                                and a separate living area, this suite defines luxury living in Alappuzha.
+                                {suiteRoom?.shortDescription ||
+                                    "Our most exclusive accommodation offers an unparalleled lakeside experience, with refined space and a private balcony designed for quiet moments."}
                             </p>
 
                             <div className="grid grid-cols-2 gap-4 mb-6">
                                 <div className="border-l-2 border-[#BCA06F] pl-3">
-                                    <p className="text-2xl font-serif text-[#2D3732]">900</p>
+                                    <p className="text-2xl font-serif text-[#2D3732]">{suiteRoom?.size ?? '—'}</p>
                                     <p className="text-sm text-[#4B5A53]/70">Square Feet</p>
                                 </div>
                                 <div className="border-l-2 border-[#BCA06F] pl-3">
-                                    <p className="text-2xl font-serif text-[#2D3732]">4</p>
+                                    <p className="text-2xl font-serif text-[#2D3732]">{suiteRoom?.maxGuests ?? '—'}</p>
                                     <p className="text-sm text-[#4B5A53]/70">Max Guests</p>
                                 </div>
                                 <div className="border-l-2 border-[#BCA06F] pl-3">
-                                    <p className="text-2xl font-serif text-[#2D3732]">King</p>
+                                    <p className="text-2xl font-serif text-[#2D3732]">
+                                        {(suiteRoom?.bedType || 'King Bed').split(' ')[0]}
+                                    </p>
                                     <p className="text-sm text-[#4B5A53]/70">Bed Configuration</p>
                                 </div>
                                 <div className="border-l-2 border-[#BCA06F] pl-3">
-                                    <p className="text-2xl font-serif text-[#2D3732]">Private</p>
-                                    <p className="text-sm text-[#4B5A53]/70">Jacuzzi</p>
+                                    <p className="text-2xl font-serif text-[#2D3732]">{suiteRoom?.view || 'Lake View'}</p>
+                                    <p className="text-sm text-[#4B5A53]/70">View</p>
+                                </div>
+                            </div>
+
+                            <div className="mb-7 border border-[#E6DDCE] bg-[#FCFAF5] px-5 py-4">
+                                <p className="text-[10px] tracking-[0.28em] uppercase text-[#6B645C]">Included</p>
+                                <div className="mt-3 flex flex-wrap gap-2">
+                                    {(suiteRoom?.features?.length ? suiteRoom.features : ['Private Balcony', 'Jacuzzi', 'Panoramic Views', 'Separate Living Room'])
+                                        .slice(0, 6)
+                                        .map((f) => (
+                                            <span
+                                                key={f}
+                                                className="text-[11px] text-[#403A35] border border-[#BCA06F] bg-white/70 px-2.5 py-1"
+                                            >
+                                                {f}
+                                            </span>
+                                        ))}
                                 </div>
                             </div>
 
                             <Link
-                                href="/rooms/lake-view-balcony-suite"
+                                href={`/rooms/${suiteRoom?.slug || 'lake-view-balcony-suite'}`}
                                 className="inline-flex items-center gap-4 group"
                             >
                                 <span className="text-[#2D3732] text-sm tracking-[0.2em] uppercase font-medium">Discover the Suite</span>
-                                <span className="w-8 h-[1px] bg-[#C6AF84] group-hover:w-14 transition-all duration-300" />
+                                <span className="w-8 h-[1px] bg-[#BCA06F] group-hover:w-14 transition-all duration-300" />
                             </Link>
                         </motion.div>
                     </div>
@@ -334,33 +355,35 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
                         >
                             <span className="text-[#8D7858] text-[10px] tracking-[0.3em] uppercase mb-3 block">Signature experiences</span>
                             <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-[#2D3732] mb-4 leading-tight">
-                                Lake View Balcony Room
+                                {balconyRoom?.name || 'Lake View Balcony Room'}
                             </h2>
                             <p className="text-[#3E4C45]/75 text-base md:text-lg leading-relaxed mb-6">
-                                A refined balcony room with sweeping lake views and a calmer pace throughout the day.
-                                Step outside for morning light, fresh air, and a sense of place that feels effortless.
+                                {balconyRoom?.shortDescription ||
+                                    "A refined balcony room with sweeping lake views and a calmer pace throughout the day."}
                             </p>
 
                             <div className="grid grid-cols-2 gap-4 mb-6">
                                 <div className="border-l-2 border-[#BCA06F] pl-3">
-                                    <p className="text-2xl font-serif text-[#2D3732]">400</p>
+                                    <p className="text-2xl font-serif text-[#2D3732]">{balconyRoom?.size ?? '—'}</p>
                                     <p className="text-sm text-[#4B5A53]/70">Square Feet</p>
                                 </div>
                                 <div className="border-l-2 border-[#BCA06F] pl-3">
-                                    <p className="text-2xl font-serif text-[#2D3732]">2</p>
+                                    <p className="text-2xl font-serif text-[#2D3732]">{balconyRoom?.maxGuests ?? '—'}</p>
                                     <p className="text-sm text-[#4B5A53]/70">Max Guests</p>
                                 </div>
                                 <div className="border-l-2 border-[#BCA06F] pl-3">
-                                    <p className="text-2xl font-serif text-[#2D3732]">King</p>
+                                    <p className="text-2xl font-serif text-[#2D3732]">
+                                        {(balconyRoom?.bedType || 'King Bed').split(' ')[0]}
+                                    </p>
                                     <p className="text-sm text-[#4B5A53]/70">Bed Configuration</p>
                                 </div>
                                 <div className="border-l-2 border-[#BCA06F] pl-3">
-                                    <p className="text-2xl font-serif text-[#2D3732]">Private</p>
-                                    <p className="text-sm text-[#4B5A53]/70">Balcony</p>
+                                    <p className="text-2xl font-serif text-[#2D3732]">{balconyRoom?.view || 'Lake View'}</p>
+                                    <p className="text-sm text-[#4B5A53]/70">View</p>
                                 </div>
                             </div>
 
-                            <Link href="/rooms/lake-view-balcony" className="inline-flex items-center gap-4 group">
+                            <Link href={`/rooms/${balconyRoom?.slug || 'lake-view-balcony'}`} className="inline-flex items-center gap-4 group">
                                 <span className="text-[#2D3732] text-sm tracking-[0.2em] uppercase font-medium">Discover the Room</span>
                                 <span className="w-8 h-[1px] bg-[#BCA06F] group-hover:w-14 transition-all duration-300" />
                             </Link>
@@ -374,14 +397,14 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
                             className="relative h-[44vh] md:h-[58vh] rounded-sm overflow-hidden"
                         >
                             <Image
-                                src="/images/rooms/balcony-room-4.jpg"
-                                alt="Lake View Balcony Room"
+                                src={balconyRoom?.image || "/images/rooms/balcony-room-4.jpg"}
+                                alt={balconyRoom?.name || "Lake View Balcony Room"}
                                 fill
                                 className="object-cover"
                             />
                             <div className="absolute bottom-8 left-8 right-8">
                                 <span className="text-[#324038] text-xs tracking-[0.2em] uppercase bg-[#FCFAF5]/85 px-3 py-1.5 inline-block">
-                                    Starting from ₹22,000/night
+                                    Starting from ₹{Math.round((balconyRoom?.basePrice || 0) / 100).toLocaleString('en-IN')}/night
                                 </span>
                             </div>
                         </motion.div>
@@ -416,7 +439,9 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
 
             {/* Concierge CTA - Refined */}
             <section className="relative py-14 md:py-16 overflow-hidden">
-                <div className="absolute inset-0 bg-[url('/images/rooms/balcony-room-2.jpg')] bg-cover bg-center" />
+                {/* Neutral placeholder (image removed) */}
+                <div className="absolute inset-0 bg-[linear-gradient(135deg,#EFE6D7_0%,#F7F2E8_45%,#EEE4D3_100%)]" />
+                <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_30%_35%,rgba(255,255,255,0.55)_0%,rgba(255,255,255,0)_60%)]" />
 
                 <div className="relative z-10 max-w-3xl mx-auto text-center px-6 md:px-10 bg-[#FCFAF5]/92 border border-[#E6DDCE] py-8 md:py-10">
                     <motion.div
@@ -441,12 +466,6 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
                                 className="group relative border border-[#D3C2A4] bg-[#FCFAF5] text-[#2E3934] px-8 py-3 text-xs tracking-[0.24em] uppercase hover:bg-[#F3ECDD] transition-colors"
                             >
                                 <span className="relative z-10">Contact Concierge</span>
-                            </Link>
-                            <Link
-                                href="#booking-search"
-                                className="border border-[#D3C2A4] text-[#2E3934] bg-[#F7F2E8]/85 px-8 py-3 text-xs tracking-[0.24em] uppercase hover:bg-[#EFE6D5] transition-colors"
-                            >
-                                Check Availability
                             </Link>
                         </div>
                     </motion.div>
