@@ -49,7 +49,9 @@ export async function getAvailableRoomsForSearch(
 
     if (availability.status !== 'success') {
         const message = availability.message || 'Live inventory temporarily unavailable';
-        console.error(`[${provider.source}] Availability failed`, message);
+        // In Next.js dev, console.error triggers the red overlay. This failure is often expected
+        // (e.g. CRS not configured/reachable), so keep it as a warning.
+        console.warn(`[${provider.source}] Availability unavailable`, message);
 
         // Even in strict mode, return room types with a clear message (not bookable),
         // so the UI can explain the situation instead of looking like "0 rooms exist".
