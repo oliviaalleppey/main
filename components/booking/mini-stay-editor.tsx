@@ -17,13 +17,15 @@ const toDateInputValue = (date: Date) => date.toISOString().slice(0, 10);
 export function MiniStayEditor({
     checkIn,
     checkOut,
-    adults,
-    childCount,
+    adults: initialAdults,
+    childCount: initialChildCount,
     roomCount = 1,
 }: MiniStayEditorProps) {
     const router = useRouter();
     const [fromDate, setFromDate] = useState(checkIn);
     const [toDate, setToDate] = useState(checkOut);
+    const [adults, setAdults] = useState(initialAdults);
+    const [children, setChildren] = useState(initialChildCount);
     const [error, setError] = useState<string | null>(null);
 
     const nights = useMemo(() => {
@@ -66,7 +68,7 @@ export function MiniStayEditor({
             checkIn: fromDate,
             checkOut: toDate,
             adults: String(adults),
-            children: String(childCount),
+            children: String(children),
             rooms: String(roomCount),
         });
         router.push(`/book/search?${params.toString()}`);
@@ -80,7 +82,7 @@ export function MiniStayEditor({
                     Mini Date Picker
                 </p>
                 <span className="text-[10px] md:text-[11px] rounded-full bg-white border border-gray-200 px-2 py-0.5 text-gray-600">
-                    {roomCount}R · {adults}A · {childCount}C · {nights}N
+                    {roomCount}R · {adults}A · {children}C · {nights}N
                 </span>
             </div>
 
@@ -105,6 +107,51 @@ export function MiniStayEditor({
                     />
                 </label>
             </div>
+
+            {/* Adults and Children Controls */}
+            <div className="grid grid-cols-2 gap-2 mt-3">
+                <div className="flex items-center justify-between rounded-md border border-gray-200 bg-white px-2 py-1.5">
+                    <span className="text-[10px] text-gray-500 uppercase">Adults</span>
+                    <div className="flex items-center gap-1">
+                        <button
+                            type="button"
+                            onClick={() => setAdults(Math.max(1, adults - 1))}
+                            className="h-6 w-6 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 flex items-center justify-center text-sm"
+                        >
+                            -
+                        </button>
+                        <span className="w-6 text-center text-xs font-semibold">{adults}</span>
+                        <button
+                            type="button"
+                            onClick={() => setAdults(Math.min(8, adults + 1))}
+                            className="h-6 w-6 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 flex items-center justify-center text-sm"
+                        >
+                            +
+                        </button>
+                    </div>
+                </div>
+                <div className="flex items-center justify-between rounded-md border border-gray-200 bg-white px-2 py-1.5">
+                    <span className="text-[10px] text-gray-500 uppercase">Children</span>
+                    <div className="flex items-center gap-1">
+                        <button
+                            type="button"
+                            onClick={() => setChildren(Math.max(0, children - 1))}
+                            className="h-6 w-6 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 flex items-center justify-center text-sm"
+                        >
+                            -
+                        </button>
+                        <span className="w-6 text-center text-xs font-semibold">{children}</span>
+                        <button
+                            type="button"
+                            onClick={() => setChildren(Math.min(6, children + 1))}
+                            className="h-6 w-6 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 flex items-center justify-center text-sm"
+                        >
+                            +
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <button
                 type="button"
                 onClick={handleRecheck}

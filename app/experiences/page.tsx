@@ -280,14 +280,8 @@ export default function ExperiencesPage() {
                             </div>
                         </div>
 
-                        <div className="relative overflow-hidden rounded-[28px] border border-[#E6DDCE] bg-[#F7F2E9] min-h-[320px] md:min-h-[520px]">
-                            <Image
-                                src="/images/discover/backwater-serenity.png"
-                                alt="Backwater experience near Olivia Alleppey"
-                                fill
-                                priority
-                                className="object-cover"
-                            />
+                        <div className="relative overflow-hidden rounded-[28px] border border-[#E6DDCE] bg-[#E8E2D9] min-h-[320px] md:min-h-[520px] flex items-center justify-center">
+                            <p className="text-[#8D8378] text-sm">Backwater Experience</p>
                             <div className="absolute inset-0 bg-gradient-to-t from-white/65 via-transparent to-transparent" />
                             <div className="absolute bottom-5 left-5 right-5 rounded-2xl border border-[#E6DDCE] bg-white/90 backdrop-blur-sm px-4 py-4">
                                 <div className="flex items-start justify-between gap-4">

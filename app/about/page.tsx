@@ -10,8 +10,7 @@ export default function AboutPage() {
 
             {/* Hero Section */}
             <section className="relative h-[70vh] flex items-center justify-center overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-b from-[#0A4D4E]/30 to-[#0A4D4E]/70" />
-                <div className="absolute inset-0 bg-[url('/images/about/hero.jpg')] bg-cover bg-center" />
+                <div className="absolute inset-0 bg-gradient-to-b from-[#0A4D4E] to-[#15443B]" />
                 <div className="relative z-10 text-center px-6">
                     <p className="text-[#7A5E28] text-sm tracking-[0.3em] uppercase mb-4">Our Story</p>
                     <h1 className="text-5xl md:text-7xl font-serif text-white mb-6 tracking-wide">
