@@ -130,7 +130,7 @@ export default function DiningPage() {
 
             {/* Hero Section - Full width dark gradient like rooms page */}
             <section className="relative overflow-hidden mb-8 md:mb-10 -mx-4 md:-mx-6">
-                <div className="relative h-[320px] md:h-[380px]">
+                <div className="relative h-[72vh] md:h-[78vh] min-h-[500px]">
                     {/* Dark gradient background */}
                     <div className="absolute inset-0 bg-[linear-gradient(135deg,#1C2622_0%,#2B3A34_38%,#1B2421_100%)]" />
                     <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_25%_30%,rgba(231,212,173,0.18)_0%,rgba(231,212,173,0)_60%)]" />
