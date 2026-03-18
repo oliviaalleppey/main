@@ -90,7 +90,7 @@ export function RoomSelectionsEditor({
                 {items.map((item) => {
                     const quantity = item.quantity;
                     const lineTotal = item.quotedPricePerNight * item.nights * quantity;
-                    const canIncrease = totalRooms < adults;
+                    const canIncrease = totalRooms < 8;
 
                     return (
                         <div key={item.roomTypeId} className="rounded-lg border border-gray-200 bg-white p-2.5 md:p-3">
