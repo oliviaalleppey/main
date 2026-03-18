@@ -129,51 +129,14 @@ export default function DiningPage() {
             <WhatsAppWidget />
 
             <section className="max-w-7xl mx-auto px-4 md:px-6 pt-6 md:pt-8 pb-10 md:pb-14">
-                <section className="grid lg:grid-cols-[1.05fr_0.95fr] gap-4 md:gap-6 items-stretch">
-                    <div className="relative overflow-hidden rounded-[24px] border border-[#E2D8C8] bg-[#FAF6EF] p-7 md:p-10 lg:p-12">
-                        <div className="pointer-events-none absolute -top-14 -right-14 w-44 h-44 rounded-full bg-[#EEDFC4]/45 blur-2xl" />
-                        <div className="pointer-events-none absolute -bottom-16 -left-10 w-52 h-52 rounded-full bg-[#E9D5B6]/35 blur-2xl" />
-
-                        <p className="relative text-[#9D7A44] text-[10px] tracking-[0.34em] uppercase mb-4">Dining Experience</p>
-                        <h1 className="relative font-serif text-[2.2rem] md:text-[3.8rem] leading-[0.96] text-[#2E2A24]">
-                            Dining at Olivia
-                        </h1>
-                        <p className="relative mt-3 text-[#4A453D] text-base md:text-xl leading-snug max-w-xl">
-                            Discover exceptional culinary moments from global cuisine to coastal seafood.
-                        </p>
-
-                        <div className="relative mt-6 grid grid-cols-2 gap-2.5 max-w-md">
-                            <div className="rounded-xl border border-[#DCCBAE] bg-[#FFFDF8] px-3 py-2.5">
-                                <p className="text-[10px] uppercase tracking-[0.18em] text-[#8D724A]">Operational</p>
-                                <p className="font-serif text-2xl text-[#2E2A24] leading-none mt-1">{operationalOutlets.length}</p>
-                            </div>
-                            <div className="rounded-xl border border-[#DCCBAE] bg-[#FFFDF8] px-3 py-2.5">
-                                <p className="text-[10px] uppercase tracking-[0.18em] text-[#8D724A]">Opening Soon</p>
-                                <p className="font-serif text-2xl text-[#2E2A24] leading-none mt-1">{upcomingOutlets.length}</p>
-                            </div>
-                        </div>
-
-                        <div className="relative mt-8 flex flex-col sm:flex-row gap-3">
-                            <a
-                                href="#reserve-table"
-                                className="inline-flex items-center justify-center rounded-xl bg-[#B68845] px-8 py-3 text-white text-[11px] tracking-[0.16em] uppercase hover:bg-[#A87D3F] transition-colors"
-                            >
-                                Reserve a Table
-                            </a>
-                            <a
-                                href="#dining-options"
-                                className="inline-flex items-center justify-center gap-3 rounded-xl border border-[#CEB48C] bg-[#FBF8F1] px-8 py-3 text-[#916B34] text-[11px] tracking-[0.16em] uppercase hover:bg-[#F4ECDC] transition-colors"
-                            >
-                                <span className="inline-flex items-center justify-center rounded-full border border-[#C7A878] h-7 w-7">
-                                    <ArrowRight className="w-4 h-4" />
-                                </span>
-                                Explore Menus
-                            </a>
-                        </div>
-                    </div>
-
-                    <div className="relative overflow-hidden rounded-[24px] border border-[#E2D8C8] min-h-[280px] md:min-h-[380px] lg:min-h-[460px] bg-[#E8E0D2]" />
-                </section>
+                {/* Breadcrumb style header */}
+                <div className="mb-6">
+                    <nav className="flex items-center gap-2 text-sm text-[#8D7B5F]">
+                        <Link href="/" className="hover:text-[#2E2A24] transition-colors">Home</Link>
+                        <span>/</span>
+                        <span className="text-[#2E2A24] font-medium">Explore Our Dining Options</span>
+                    </nav>
+                </div>
 
                 <section id="dining-options" className="mt-8 md:mt-10">
                     <h2 className="font-serif text-3xl md:text-5xl text-[#2E2A24] text-center">Explore Our Dining Options</h2>
