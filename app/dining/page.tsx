@@ -129,21 +129,33 @@ export default function DiningPage() {
             <WhatsAppWidget />
 
             <section className="max-w-7xl mx-auto px-4 md:px-6 pt-6 md:pt-8 pb-10 md:pb-14">
-                {/* Breadcrumb style header */}
-                <div className="mb-6">
-                    <nav className="flex items-center gap-2 text-sm text-[#8D7B5F]">
-                        <Link href="/" className="hover:text-[#2E2A24] transition-colors">Home</Link>
-                        <span>/</span>
-                        <span className="text-[#2E2A24] font-medium">Explore Our Dining Options</span>
-                    </nav>
-                </div>
+                {/* Hero Section - Dark gradient like rooms page */}
+                <section className="relative overflow-hidden rounded-[24px] border border-[#E2D8C8] mb-8 md:mb-10">
+                    <div className="relative h-[320px] md:h-[380px]">
+                        {/* Dark gradient background */}
+                        <div className="absolute inset-0 bg-[linear-gradient(135deg,#1C2622_0%,#2B3A34_38%,#1B2421_100%)]" />
+                        <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_25%_30%,rgba(231,212,173,0.18)_0%,rgba(231,212,173,0)_60%)]" />
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/15 to-black/40" />
+                    </div>
+
+                    <div className="absolute inset-0 flex items-center">
+                        <div className="max-w-3xl mx-auto px-6 md:px-10 text-center">
+                            <div className="flex items-center justify-center gap-3 mb-4">
+                                <span className="w-8 h-[1px] bg-white/80" />
+                                <p className="text-white/70 text-[10px] tracking-[0.34em] uppercase">Dining</p>
+                                <span className="w-8 h-[1px] bg-white/80" />
+                            </div>
+                            <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl text-white leading-tight mb-4">
+                                Explore Our Dining Options
+                            </h1>
+                            <p className="text-white/80 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
+                                Every outlet includes live operating hours, location, and capacity so guests can decide quickly.
+                            </p>
+                        </div>
+                    </div>
+                </section>
 
                 <section id="dining-options" className="mt-8 md:mt-10">
-                    <h2 className="font-serif text-3xl md:text-5xl text-[#2E2A24] text-center">Explore Our Dining Options</h2>
-                    <p className="mt-3 text-center text-[#6A6256] max-w-3xl mx-auto">
-                        Every outlet includes live operating hours, location, and capacity so guests can decide quickly.
-                    </p>
-
                     <div className="mt-7 grid md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5">
                         {allOutlets.map((outlet) => (
                             <DiningCard key={outlet.slug} outlet={outlet} />
