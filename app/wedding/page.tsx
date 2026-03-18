@@ -52,7 +52,7 @@ const celebrationStyles: CelebrationStyle[] = [
 const venueList: VenueInfo[] = [
     {
         name: 'Backwater Lawn',
-        image: '/images/rooms/balcony-room-5.jpg',
+        image: '',
         capacity: 'Up to 180',
         area: '6,000 sq ft',
         description: 'Sunset-facing ceremony lawn with soft ambient lighting and open-sky aisle setup.',
@@ -60,7 +60,7 @@ const venueList: VenueInfo[] = [
     },
     {
         name: 'Olivia Grand Hall',
-        image: '/images/conference/hero.png',
+        image: '',
         capacity: 'Up to 400',
         area: '8,500 sq ft',
         description: 'An elegant indoor venue for formal receptions, stage events, and weather-safe celebrations.',
@@ -68,7 +68,7 @@ const venueList: VenueInfo[] = [
     },
     {
         name: 'Canal Terrace',
-        image: '/images/dining/hero.jpg',
+        image: '',
         capacity: 'Up to 120',
         area: '3,200 sq ft',
         description: 'A refined semi-outdoor venue with water views, ideal for welcome dinners and brunches.',
@@ -212,22 +212,8 @@ export default function WeddingPage() {
                         </div>
 
                         <div className="grid gap-4">
-                            <div className="relative h-56 md:h-64 rounded-sm overflow-hidden">
-                                <Image
-                                    src="/images/rooms/balcony-room-3.jpg"
-                                    alt="Wedding welcome setup"
-                                    fill
-                                    className="object-cover"
-                                />
-                            </div>
-                            <div className="relative h-52 md:h-56 rounded-sm overflow-hidden">
-                                <Image
-                                    src="/images/rooms/balcony-room-4.jpg"
-                                    alt="Wedding dinner setup"
-                                    fill
-                                    className="object-cover"
-                                />
-                            </div>
+                            <div className="relative h-56 md:h-64 rounded-sm overflow-hidden bg-[#E8E0D2]" />
+                            <div className="relative h-52 md:h-56 rounded-sm overflow-hidden bg-[#DCD4C4]" />
                         </div>
                     </div>
                 </section>
@@ -275,14 +261,7 @@ export default function WeddingPage() {
                         <div className="grid lg:grid-cols-3 gap-5">
                             {venueList.map((venue) => (
                                 <article key={venue.name} className="border border-[#E4D9C7] bg-[#FCFAF5] overflow-hidden">
-                                    <div className="relative h-52">
-                                        <Image
-                                            src={venue.image}
-                                            alt={venue.name}
-                                            fill
-                                            className="object-cover"
-                                        />
-                                    </div>
+                                    <div className="relative h-52 bg-[#E8E0D2]" />
                                     <div className="p-5">
                                         <h3 className="font-serif text-2xl text-[#1F2925] mb-2">{venue.name}</h3>
                                         <p className="text-sm text-[#43534B] mb-2">{venue.description}</p>
