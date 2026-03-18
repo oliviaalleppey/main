@@ -41,6 +41,17 @@ export const metadata: Metadata = {
 
 const outlets: DiningOutlet[] = [
     {
+        name: 'In-Room Dining',
+        description: 'Round-the-clock dining service delivered to rooms and suites with local and global options.',
+        slug: 'in-room-dining',
+        image: '',
+        capacity: '88 Rooms and Suites',
+        location: 'Lobby Level',
+        operatingHours: '24 Hours',
+        cuisine: 'Local & Global',
+        status: 'operational',
+    },
+    {
         name: 'Finishing Point',
         description: 'Our all-day dining venue with a refined spread of Kerala favorites and global classics.',
         slug: 'finishing-point',
@@ -63,17 +74,6 @@ const outlets: DiningOutlet[] = [
         status: 'operational',
     },
     {
-        name: 'In-Room Dining',
-        description: 'Round-the-clock dining service delivered to rooms and suites with local and global options.',
-        slug: 'in-room-dining',
-        image: '',
-        capacity: '88 Rooms and Suites',
-        location: 'Lobby Level',
-        operatingHours: '24 Hours',
-        cuisine: 'Local & Global',
-        status: 'operational',
-    },
-    {
         name: 'Aqua Pool Lounge',
         description: 'Poolside refreshments and light bites with a calm daytime setting.',
         slug: 'aqua-pool-lounge',
@@ -85,17 +85,6 @@ const outlets: DiningOutlet[] = [
         status: 'operational',
     },
     {
-        name: 'Kaayal',
-        description: 'Upcoming seafood concept with global and local culinary direction.',
-        slug: 'kaayal',
-        image: '',
-        capacity: '72 Guests',
-        location: '3rd Floor',
-        operatingHours: '19:00 HRS to 23:00 HRS (as per local government regulations)',
-        cuisine: 'Live Seafood - Global & Local (Bar & Beverages)',
-        status: 'upcoming',
-    },
-    {
         name: 'Club 9',
         description: 'Upcoming evening lounge with curated bar and beverage experiences.',
         slug: 'club-9',
@@ -104,6 +93,17 @@ const outlets: DiningOutlet[] = [
         location: '1st Floor',
         operatingHours: '11:00 HRS to 23:00 HRS (as per local government regulations)',
         cuisine: 'Bar & Beverage',
+        status: 'upcoming',
+    },
+    {
+        name: 'Kaayal',
+        description: 'Upcoming seafood concept with global and local culinary direction.',
+        slug: 'kaayal',
+        image: '',
+        capacity: '72 Guests',
+        location: '3rd Floor',
+        operatingHours: '19:00 HRS to 23:00 HRS (as per local government regulations)',
+        cuisine: 'Live Seafood - Global & Local (Bar & Beverages)',
         status: 'upcoming',
     },
 ];
@@ -118,6 +118,8 @@ const experiences = [
 ];
 
 export default function DiningPage() {
+    // All outlets in sorted order (already sorted in the array)
+    const allOutlets = outlets;
     const operationalOutlets = outlets.filter((outlet) => outlet.status === 'operational');
     const upcomingOutlets = outlets.filter((outlet) => outlet.status === 'upcoming');
 
@@ -180,25 +182,11 @@ export default function DiningPage() {
                     </p>
 
                     <div className="mt-7 grid md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5">
-                        {operationalOutlets.map((outlet) => (
+                        {allOutlets.map((outlet) => (
                             <DiningCard key={outlet.slug} outlet={outlet} />
                         ))}
                     </div>
                 </section>
-
-                {upcomingOutlets.length > 0 && (
-                    <section className="mt-10 md:mt-12">
-                        <h3 className="font-serif text-3xl md:text-4xl text-[#2E2A24] text-center">Opening Soon</h3>
-                        <div className="mt-6 grid md:grid-cols-2 gap-4 md:gap-5">
-                            {upcomingOutlets.map((outlet) => (
-                                <DiningCard key={outlet.slug} outlet={outlet} />
-                            ))}
-                        </div>
-                        <p className="mt-4 text-center text-xs text-[#7A7367]">
-                            Timings for upcoming outlets are subject to local regulations and final operational rollout.
-                        </p>
-                    </section>
-                )}
 
                 <section className="mt-8 md:mt-10 rounded-[18px] border border-[#E5DCCB] bg-[#FBF8F2] px-4 md:px-6 py-5 md:py-6">
                     <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-2">
