@@ -111,13 +111,8 @@ export default function DiscoverPage() {
 
                         <div className="lg:col-span-8">
                             <div className="rounded-[34px] border border-[#E2D7C7] bg-[#FDFBF7] overflow-hidden">
-                                <div className="relative h-[320px] md:h-[420px] lg:h-[520px]">
-                                    <NextImage
-                                        src="/images/discover/heritage-hotel.png"
-                                        alt="Olivia International Heritage"
-                                        fill
-                                        className="object-cover"
-                                    />
+                                <div className="relative h-[320px] md:h-[420px] lg:h-[520px] bg-[#E8E2D9] flex items-center justify-center">
+                                    <p className="text-[#8D8378] text-sm">Olivia Heritage</p>
                                     <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.10)_0%,rgba(0,0,0,0)_52%,rgba(0,0,0,0.08)_100%)]" />
                                 </div>
                                 <div className="p-7 md:p-10 lg:p-12">
