@@ -10,20 +10,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const HERO_IMAGES = [
     {
-        url: "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?q=80&w=2560&auto=format&fit=crop",
-        alt: "Infinity Pool overlooking lush greenery"
+        url: "/images/home/hotellandscape.jpeg",
+        alt: "Olivia Hotel Landscape"
     },
     {
-        url: "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2560&auto=format&fit=crop",
-        alt: "Luxury Resort Atmosphere"
-    },
-    {
-        url: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=2560&auto=format&fit=crop",
-        alt: "Relaxing Poolside"
-    },
-    {
-        url: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=2560&auto=format&fit=crop",
-        alt: "Fine Dining Experience"
+        url: "/images/home/ambal.jpeg",
+        alt: "Olivia Hotel Ambal"
     }
 ];
 
