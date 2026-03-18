@@ -52,8 +52,8 @@ export default async function RoomDetailPage({ params }: { params: Promise<{ slu
 
     const roomName = formatRoomName(room.name);
 
-    // Dynamic images from DB
-    const roomImages = room.images && room.images.length > 0
+    // Dynamic images from DB - filter out second image (index 1)
+    const allImages = room.images && room.images.length > 0
         ? room.images.map((src, index) => ({ id: index + 1, alt: `${roomName} view ${index + 1}`, src }))
         : [
             { id: 1, alt: 'Main room view', src: `/images/rooms/${slug}-1.jpg` },
@@ -62,6 +62,8 @@ export default async function RoomDetailPage({ params }: { params: Promise<{ slu
             { id: 4, alt: 'Room amenities', src: `/images/rooms/${slug}-4.jpg` },
             { id: 5, alt: 'Room detail', src: `/images/rooms/${slug}-5.jpg` },
         ];
+    // Remove the second image (index 1)
+    const roomImages = allImages.filter((_, index) => index !== 1);
 
     const details = [
         { label: 'Size', value: `${room.size} sq ft` },
