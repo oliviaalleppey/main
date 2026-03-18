@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import NextImage from 'next/image';
+import React from 'react';
 
 export default function DiscoverPage() {
     const experiences = [
@@ -9,25 +9,25 @@ export default function DiscoverPage() {
             title: 'Backwater Serenity',
             subtitle: 'Tranquil Escapes',
             description: 'Drift through the serene backwaters of Alappuzha, where time slows and nature whispers ancient stories',
-            image: '/images/discover/backwater-serenity.png',
+            image: '',
         },
         {
             title: 'Ayurvedic Wellness',
             subtitle: 'Ancient Healing',
             description: 'Experience the transformative power of authentic Ayurvedic treatments in our world-class wellness center',
-            image: '/images/discover/ayurvedic-wellness.png',
+            image: '',
         },
         {
             title: 'Culinary Journey',
             subtitle: 'Farm to Table',
             description: 'Savor the rich flavors of Kerala cuisine, crafted with locally-sourced ingredients and centuries-old recipes',
-            image: '/images/discover/culinary-journey.png',
+            image: '',
         },
         {
             title: 'Cultural Heritage',
             subtitle: 'Living Traditions',
             description: 'Immerse yourself in Kerala\'s vibrant cultural tapestry through traditional art forms and local experiences',
-            image: '/images/discover/heritage-hotel.png',
+            image: '',
         },
     ];
 
@@ -230,15 +230,7 @@ export default function DiscoverPage() {
                                     idx === 0 ? 'lg:col-span-7' : 'lg:col-span-5',
                                 ].join(' ')}
                             >
-                                <div className="relative h-[240px] md:h-[290px] lg:h-[320px]">
-                                    <NextImage
-                                        src={exp.image}
-                                        alt={exp.title}
-                                        fill
-                                        className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-                                    />
-                                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.10)_0%,rgba(0,0,0,0)_55%,rgba(0,0,0,0.08)_100%)]" />
-                                </div>
+                                <div className="h-[240px] md:h-[290px] lg:h-[320px] bg-[#E8E2D9]" />
                                 <div className="p-7 md:p-8 lg:p-10">
                                     <p className="text-[10px] tracking-[0.32em] uppercase text-[#6B645C]">{exp.subtitle}</p>
                                     <h3 className="mt-3 font-serif font-semibold text-[2.1rem] leading-tight">

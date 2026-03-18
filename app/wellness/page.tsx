@@ -18,7 +18,7 @@ const wellnessServices = [
             { name: 'Aromatherapy Journey', duration: '60 min', price: '₹5,500' },
             { name: 'Deep Tissue Relief', duration: '60 min', price: '₹6,000' },
         ],
-        image: '/images/wellness/spa.jpg',
+        image: '',
     },
     {
         id: 'yoga',
@@ -32,7 +32,7 @@ const wellnessServices = [
             { name: 'Sunset Meditation', time: '6:00 PM - 7:00 PM', level: 'All Levels' },
             { name: 'Private Yoga Session', time: 'By Appointment', level: 'Customized' },
         ],
-        image: '/images/wellness/yoga.jpg',
+        image: '',
     },
     {
         id: 'fitness',
@@ -47,7 +47,7 @@ const wellnessServices = [
             'Pilates Studio',
             'Spin Classes',
         ],
-        image: '/images/wellness/fitness.jpg',
+        image: '',
     },
     {
         id: 'pool',
@@ -62,7 +62,7 @@ const wellnessServices = [
             'Lap Swimming Hours',
             'Private Pool Parties',
         ],
-        image: '/images/wellness/pool.jpg',
+        image: '',
     },
 ];
 

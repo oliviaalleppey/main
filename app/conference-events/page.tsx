@@ -50,7 +50,7 @@ const venues: Venue[] = [
     {
         name: 'Grand BallRoom',
         slug: 'grand-ballroom',
-        image: '/images/rooms/balcony-room-5.jpg',
+        image: '',
         description: 'Pillarless flagship venue designed for high-impact conferences and celebration-scale events.',
         bestFor: 'Conferences, weddings, gala evenings',
         dimensions: { length: '95', width: '53', height: '13' },
@@ -66,7 +66,7 @@ const venues: Venue[] = [
     {
         name: 'Grand BallRoom 1',
         slug: 'grand-ballroom-1',
-        image: '/images/rooms/balcony-room-3.jpg',
+        image: '',
         description: 'Divisible section of the ballroom for focused sessions and medium-format gatherings.',
         bestFor: 'Meetings, seminars, corporate sessions',
         dimensions: { length: '53', width: '33', height: '13' },
@@ -82,7 +82,7 @@ const venues: Venue[] = [
     {
         name: 'Grand BallRoom 2',
         slug: 'grand-ballroom-2',
-        image: '/images/rooms/balcony-room-2.jpg',
+        image: '',
         description: 'Balanced format venue suitable for workshops, leadership meets, and conference tracks.',
         bestFor: 'Conferences, workshops, breakouts',
         dimensions: { length: '53', width: '35', height: '13' },
@@ -98,7 +98,7 @@ const venues: Venue[] = [
     {
         name: 'Grand BallRoom 3',
         slug: 'grand-ballroom-3',
-        image: '/images/rooms/balcony-room-4.jpg',
+        image: '',
         description: 'Flexible ballroom section built for training batches and presentation-led sessions.',
         bestFor: 'Training sessions, presentations',
         dimensions: { length: '53', width: '27', height: '13' },
@@ -114,7 +114,7 @@ const venues: Venue[] = [
     {
         name: 'Forum',
         slug: 'forum',
-        image: '/images/rooms/balcony-room-3.jpg',
+        image: '',
         description: 'Mid-scale conference venue that balances capacity with focused business interaction.',
         bestFor: 'Mid-size conferences, strategy meets',
         dimensions: { length: '61', width: '33', height: '9' },
@@ -130,7 +130,7 @@ const venues: Venue[] = [
     {
         name: 'Forum 1',
         slug: 'forum-1',
-        image: '/images/rooms/balcony-room-2.jpg',
+        image: '',
         description: 'Compact breakout venue for private workshops and internal planning sessions.',
         bestFor: 'Workshops, meetings',
         dimensions: { length: '33', width: '20', height: '9' },
@@ -146,7 +146,7 @@ const venues: Venue[] = [
     {
         name: 'Forum 2',
         slug: 'forum-2',
-        image: '/images/rooms/balcony-room-4.jpg',
+        image: '',
         description: 'Breakout-focused space with straightforward layouts for productive work sessions.',
         bestFor: 'Breakouts, committee meetings',
         dimensions: { length: '33', width: '20', height: '9' },
@@ -162,7 +162,7 @@ const venues: Venue[] = [
     {
         name: 'Forum 3',
         slug: 'forum-3',
-        image: '/images/rooms/balcony-room-5.jpg',
+        image: '',
         description: 'Private-format meeting room suited for decision rooms and leadership briefings.',
         bestFor: 'Leadership meetings, workshops',
         dimensions: { length: '42', width: '21', height: '9' },
@@ -178,7 +178,7 @@ const venues: Venue[] = [
     {
         name: 'Poolside',
         slug: 'poolside',
-        image: '/images/rooms/balcony-room-4.jpg',
+        image: '',
         description: 'Outdoor venue for social evenings, celebrations, and curated hospitality-led events.',
         bestFor: 'Outdoor celebrations, dinners, networking',
         dimensions: { length: '—', width: '—', height: '—' },
@@ -229,11 +229,11 @@ const eventPackages = [
 ];
 
 const galleryItems = [
-    { title: 'Grand BallRoom - Theatre Setup', image: '/images/rooms/balcony-room-5.jpg' },
-    { title: 'Forum - Classroom Setup', image: '/images/rooms/balcony-room-3.jpg' },
-    { title: 'Wedding Celebration Layout', image: '/images/rooms/balcony-room-2.jpg' },
-    { title: 'Poolside Evening Dinner', image: '/images/rooms/balcony-room-4.jpg' },
-    { title: 'Conference Stage Arrangement', image: '/images/rooms/balcony-room-5.jpg' },
+    { title: 'Grand BallRoom - Theatre Setup', image: '' },
+    { title: 'Forum - Classroom Setup', image: '' },
+    { title: 'Wedding Celebration Layout', image: '' },
+    { title: 'Poolside Evening Dinner', image: '' },
+    { title: 'Conference Stage Arrangement', image: '' },
 ];
 
 function formatArea(area: string) {
@@ -317,13 +317,15 @@ export default function ConferenceEventsPage() {
                                     key={venue.slug}
                                     className="group min-w-[84%] snap-start rounded-xl overflow-hidden border border-[#E6DECf] bg-white shadow-[0_18px_40px_-34px_rgba(20,20,20,0.55)] md:min-w-0"
                                 >
-                                    <div className="relative h-52 overflow-hidden">
-                                        <Image
-                                            src={venue.image}
-                                            alt={venue.name}
-                                            fill
-                                            className="object-cover transition-transform duration-700 group-hover:scale-105"
-                                        />
+                                    <div className={`relative h-52 overflow-hidden ${venue.image ? '' : 'bg-[#E8E2D9]'}`}>
+                                        {venue.image ? (
+                                            <Image
+                                                src={venue.image}
+                                                alt={venue.name}
+                                                fill
+                                                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                                            />
+                                        ) : null}
                                     </div>
                                     <div className="p-4 md:p-5">
                                         <h3 className="font-serif text-2xl text-[#1C1C1C] leading-tight">{venue.name}</h3>
@@ -346,13 +348,15 @@ export default function ConferenceEventsPage() {
 
                 <section className="py-12 md:py-16 px-6 md:px-10 bg-white border-y border-[#ECE5D8]">
                     <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-7 md:gap-10 items-center">
-                        <div className="relative h-[320px] md:h-[460px] rounded-xl overflow-hidden">
-                            <Image
-                                src={featuredVenue.image}
-                                alt={featuredVenue.name}
-                                fill
-                                className="object-cover"
-                            />
+                        <div className={`relative h-[320px] md:h-[460px] rounded-xl overflow-hidden ${featuredVenue.image ? '' : 'bg-[#E8E2D9]'}`}>
+                            {featuredVenue.image ? (
+                                <Image
+                                    src={featuredVenue.image}
+                                    alt={featuredVenue.name}
+                                    fill
+                                    className="object-cover"
+                                />
+                            ) : null}
                         </div>
 
                         <div>
@@ -400,15 +404,19 @@ export default function ConferenceEventsPage() {
                             {galleryItems.map((item, index) => (
                                 <div
                                     key={item.title}
-                                    className={`group relative min-w-[84%] snap-start overflow-hidden rounded-xl border border-[#E6DECf] h-[250px] md:min-w-0 ${index === 0 ? 'md:col-span-2 md:row-span-2 md:h-[500px]' : 'md:h-[240px]'}`}
+                                    className={`group relative min-w-[84%] snap-start overflow-hidden rounded-xl border border-[#E6DECf] h-[250px] md:min-w-0 ${index === 0 ? 'md:col-span-2 md:row-span-2 md:h-[500px]' : 'md:h-[240px]'} ${item.image ? '' : 'bg-[#E8E2D9]'}`}
                                 >
-                                    <Image
-                                        src={item.image}
-                                        alt={item.title}
-                                        fill
-                                        className="object-cover transition-transform duration-700 group-hover:scale-105"
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+                                    {item.image ? (
+                                        <>
+                                            <Image
+                                                src={item.image}
+                                                alt={item.title}
+                                                fill
+                                                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+                                        </>
+                                    ) : null}
                                     <div className="absolute left-4 right-4 bottom-4 text-white">
                                         <p className="text-sm md:text-base font-medium">{item.title}</p>
                                     </div>

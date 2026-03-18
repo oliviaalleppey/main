@@ -101,7 +101,7 @@ const experiences: Experience[] = [
         title: 'Backwater Cruises & Houseboat Evenings',
         description:
             'Set out from Olivia for slow-moving cruises through Alleppey’s canals and lake stretches. Choose a short golden-hour sail, a lunch route, or an overnight houseboat stay when you want the backwaters to become the stay itself.',
-        image: '/images/discover/backwater-serenity.png',
+        image: '',
         imageAlt: 'Backwater cruising experience near Olivia Alleppey',
         icon: Waves,
         location: 'Punnamada and nearby backwater routes',
@@ -120,7 +120,7 @@ const experiences: Experience[] = [
         title: 'Ayurveda, Spa & Deep Rest',
         description:
             'Balance the energy of travel with therapies inspired by Ayurvedic traditions. Treatments are best approached as a calm sequence: consultation, oil-based therapy, unhurried recovery time, and a gentle return to the rest of the day.',
-        image: '/images/discover/ayurvedic-wellness.png',
+        image: '',
         imageAlt: 'Ayurvedic wellness treatment at Olivia Alleppey',
         icon: HeartPulse,
         location: 'Wellness spaces arranged through the hotel',
@@ -139,7 +139,7 @@ const experiences: Experience[] = [
         title: 'Sunrise Yoga & Breathwork',
         description:
             'Start softly. These sessions focus on gentle movement, longer breaths, and a clearer transition into the day. It is a strong choice for guests who want to travel with more space and less rush.',
-        image: '/images/rooms/balcony-room-3.jpg',
+        image: '',
         imageAlt: 'Calm morning atmosphere suitable for yoga at Olivia Alleppey',
         icon: Sunrise,
         location: 'Quiet hotel spaces selected by the team',
@@ -158,7 +158,7 @@ const experiences: Experience[] = [
         title: 'Village Walks & Cultural Moments',
         description:
             'Step beyond the hotel and into the everyday rhythm of Alappuzha. These outings lean toward local lanes, waterside homes, market energy, and small encounters that feel rooted rather than performative.',
-        image: '/images/discover/heritage-hotel.png',
+        image: '',
         imageAlt: 'Local heritage-inspired experience in Alleppey',
         icon: Users,
         location: 'Neighborhood routes around Alappuzha',
@@ -177,7 +177,7 @@ const experiences: Experience[] = [
         title: 'Kerala Cooking & Culinary Discovery',
         description:
             'Learn the flavor logic behind Kerala cuisine through spice-led cooking, ingredient stories, and plated meals that feel both generous and grounded. This experience suits guests who enjoy culture through the table.',
-        image: '/images/discover/culinary-journey.png',
+        image: '',
         imageAlt: 'Kerala culinary journey experience at Olivia Alleppey',
         icon: UtensilsCrossed,
         location: 'Hotel dining spaces and curated culinary settings',
@@ -362,9 +362,13 @@ export default function ExperiencesPage() {
                                     <AnchorTargets ids={experience.ids} />
                                     <article className="overflow-hidden rounded-[30px] border border-[#E1D7C8] bg-white shadow-[0_22px_70px_-55px_rgba(27,33,31,0.22)]">
                                         <div className={`grid lg:grid-cols-2 ${isReversed ? 'lg:[&>div:first-child]:order-2' : ''}`}>
-                                            <div className="relative min-h-[320px] md:min-h-[440px]">
-                                                <Image src={experience.image} alt={experience.imageAlt} fill className="object-cover" />
-                                                <div className="absolute inset-0 bg-gradient-to-t from-white/75 via-transparent to-transparent" />
+                                            <div className={`relative min-h-[320px] md:min-h-[440px] ${experience.image ? '' : 'bg-[#E8E2D9]'}`}>
+                                                {experience.image ? (
+                                                    <>
+                                                        <Image src={experience.image} alt={experience.imageAlt} fill className="object-cover" />
+                                                        <div className="absolute inset-0 bg-gradient-to-t from-white/75 via-transparent to-transparent" />
+                                                    </>
+                                                ) : null}
                                                 <div className="absolute left-5 top-5 rounded-full border border-[#E6DDCE] bg-white/90 px-3 py-1.5 text-[10px] tracking-[0.24em] uppercase text-[#7C6338]">
                                                     {experience.eyebrow}
                                                 </div>
@@ -514,18 +518,7 @@ export default function ExperiencesPage() {
                     {/* Final CTA */}
                     <section className="mt-10 md:mt-14 overflow-hidden rounded-[30px] border border-[#DDCFBB] bg-white">
                         <div className="grid lg:grid-cols-[1.02fr_0.98fr]">
-                            <div className="relative min-h-[280px] md:min-h-[360px]">
-                                <Image
-                                    src="/images/rooms/balcony-room-5.jpg"
-                                    alt="Stay at Olivia Alleppey"
-                                    fill
-                                    className="object-cover"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-r from-white/75 via-white/20 to-transparent" />
-                                <div className="absolute left-4 bottom-4 right-4 md:left-6 md:right-auto md:bottom-6 rounded-full border border-[#E6DDCE] bg-white/90 px-4 py-2 text-[10px] tracking-[0.24em] uppercase text-[#7C6338] backdrop-blur-sm">
-                                    Tailored for couples, families, and slow travelers
-                                </div>
-                            </div>
+                            <div className="min-h-[280px] md:min-h-[360px] bg-[#E8E2D9]" />
 
                             <div className="bg-[#FFFCF7] p-6 md:p-8 lg:p-10">
                                 <p className="text-[#9C7A45] text-[10px] tracking-[0.3em] uppercase">Tailored itinerary</p>

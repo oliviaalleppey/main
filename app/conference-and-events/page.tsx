@@ -30,14 +30,7 @@ export default async function ConferenceEventsPage() {
             {/* Luxury Hero Section with Image */}
             <section className="relative h-[90vh] flex items-center justify-center overflow-hidden">
                 {/* Background Image */}
-                <div className="absolute inset-0 z-0">
-                    <Image
-                        src="/images/conference/hero.png"
-                        alt="Luxury Conference Venue"
-                        fill
-                        className="object-cover"
-                        priority
-                    />
+                <div className="absolute inset-0 z-0 bg-[#0A332B]">
                     <div className="absolute inset-0 bg-gradient-to-b from-[#0A332B]/80 via-[#0A332B]/60 to-[#0A332B]/90" />
                 </div>
 
@@ -226,15 +219,7 @@ export default async function ConferenceEventsPage() {
                 <div className="max-w-7xl mx-auto">
                     <div className="grid md:grid-cols-2 gap-16 items-center">
                         {/* Image Side */}
-                        <div className="relative h-[500px] md:h-[600px] order-2 md:order-1">
-                            <Image
-                                src="/images/conference/meeting-room.png"
-                                alt="Luxury Event Space"
-                                fill
-                                className="object-cover shadow-2xl"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-[#0A332B]/20 to-transparent" />
-                        </div>
+                        <div className="relative h-[500px] md:h-[600px] order-2 md:order-1 bg-[#E8E2D9]" />
 
                         {/* Content Side */}
                         <div className="order-1 md:order-2">
@@ -286,13 +271,7 @@ export default async function ConferenceEventsPage() {
             {/* Luxury CTA with Background Image */}
             <section className="relative py-32 px-6 overflow-hidden">
                 {/* Background Image */}
-                <div className="absolute inset-0 z-0">
-                    <Image
-                        src="/images/dining/hero.jpg"
-                        alt="Luxury Venue"
-                        fill
-                        className="object-cover"
-                    />
+                <div className="absolute inset-0 z-0 bg-[#0A332B]">
                     <div className="absolute inset-0 bg-gradient-to-b from-[#0A332B]/95 via-[#0A332B]/90 to-[#0A332B]/95" />
                 </div>
 
