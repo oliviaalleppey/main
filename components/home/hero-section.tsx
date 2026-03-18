@@ -10,10 +10,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const HERO_IMAGES = [
     {
-        url: "/images/home/hotellandscape.jpeg",
-        alt: "Olivia Hotel Landscape"
-    },
-    {
         url: "/images/home/ambal.jpeg",
         alt: "Olivia Hotel Ambal"
     }
@@ -43,7 +39,8 @@ export default function HeroSection() {
                 const { getHeroImages } = await import('@/lib/db/actions/settings-actions');
                 const dynamicImages = await getHeroImages();
                 if (dynamicImages && dynamicImages.length > 0) {
-                    setHeroImages(dynamicImages);
+                    // Filter out the first image
+                    setHeroImages(dynamicImages.slice(1));
                 }
             } catch (error) {
                 console.error("Failed to fetch hero images", error);
