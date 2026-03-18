@@ -18,20 +18,20 @@ export default function PhotoCarousel() {
 
     const images = {
         topRow: [
-            { src: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2940&auto=format&fit=crop', label: 'Olivia Alappuzha' },
-            { src: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=2940&auto=format&fit=crop', label: 'Olivia Grand Lobby' },
-            { src: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=2940&auto=format&fit=crop', label: 'Olivia Restaurant' },
-            { src: 'https://images.unsplash.com/photo-1575429198097-0414ec08e8cd?q=80&w=2940&auto=format&fit=crop', label: 'Olivia Pool Ibiza' },
-            { src: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?q=80&w=2960&auto=format&fit=crop', label: 'Olivia Rooftop' },
-            { src: 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=2940&auto=format&fit=crop', label: 'Olivia Suites' },
+            { src: '', label: 'Olivia Alappuzha' },
+            { src: '', label: 'Olivia Grand Lobby' },
+            { src: '', label: 'Olivia Restaurant' },
+            { src: '', label: 'Olivia Pool Ibiza' },
+            { src: '', label: 'Olivia Rooftop' },
+            { src: '', label: 'Olivia Suites' },
         ],
         bottomRow: [
-            { src: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?q=80&w=2940&auto=format&fit=crop', label: 'Olivia Deluxe Room' },
-            { src: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=2940&auto=format&fit=crop', label: 'Olivia Spa' },
-            { src: 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?q=80&w=2940&auto=format&fit=crop', label: 'Olivia Banquet' },
-            { src: 'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?q=80&w=2948&auto=format&fit=crop', label: 'Olivia Gardens' },
-            { src: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=2996&auto=format&fit=crop', label: 'Olivia Events' },
-            { src: 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?q=80&w=2774&auto=format&fit=crop', label: 'Olivia Premium' },
+            { src: '', label: 'Olivia Deluxe Room' },
+            { src: '', label: 'Olivia Spa' },
+            { src: '', label: 'Olivia Banquet' },
+            { src: '', label: 'Olivia Gardens' },
+            { src: '', label: 'Olivia Events' },
+            { src: '', label: 'Olivia Premium' },
         ],
     };
 
@@ -68,14 +68,18 @@ export default function PhotoCarousel() {
                         className="flex gap-1 overflow-x-auto scrollbar-hide scroll-smooth px-0"
                     >
                         {topRowLooped.map((image, index) => (
-                            <div key={index} className="relative flex-shrink-0 w-[400px] h-[250px] group overflow-hidden">
-                                <Image
-                                    src={image.src}
-                                    alt={image.label}
-                                    fill
-                                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                                />
-                                <div className="absolute inset-0 bg-black/25 group-hover:bg-black/35 transition-colors"></div>
+                            <div key={index} className={`relative flex-shrink-0 w-[400px] h-[250px] group overflow-hidden ${image.src ? '' : 'bg-[#E8E2D9]'}`}>
+                                {image.src ? (
+                                    <>
+                                        <Image
+                                            src={image.src}
+                                            alt={image.label}
+                                            fill
+                                            className="object-cover transition-transform duration-500 group-hover:scale-105"
+                                        />
+                                        <div className="absolute inset-0 bg-black/25 group-hover:bg-black/35 transition-colors"></div>
+                                    </>
+                                ) : null}
                                 <div className="absolute bottom-4 left-4 text-white z-10">
                                     <p className="text-sm font-semibold drop-shadow-lg">{image.label}</p>
                                 </div>
@@ -110,14 +114,18 @@ export default function PhotoCarousel() {
                         className="flex gap-1 overflow-x-auto scrollbar-hide scroll-smooth"
                     >
                         {bottomRowLooped.map((image, index) => (
-                            <div key={index} className="relative flex-shrink-0 w-[400px] h-[250px] group overflow-hidden">
-                                <Image
-                                    src={image.src}
-                                    alt={image.label}
-                                    fill
-                                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                                />
-                                <div className="absolute inset-0 bg-black/25 group-hover:bg-black/35 transition-colors"></div>
+                            <div key={index} className={`relative flex-shrink-0 w-[400px] h-[250px] group overflow-hidden ${image.src ? '' : 'bg-[#E8E2D9]'}`}>
+                                {image.src ? (
+                                    <>
+                                        <Image
+                                            src={image.src}
+                                            alt={image.label}
+                                            fill
+                                            className="object-cover transition-transform duration-500 group-hover:scale-105"
+                                        />
+                                        <div className="absolute inset-0 bg-black/25 group-hover:bg-black/35 transition-colors"></div>
+                                    </>
+                                ) : null}
                                 <div className="absolute bottom-4 left-4 text-white z-10">
                                     <p className="text-sm font-semibold drop-shadow-lg">{image.label}</p>
                                 </div>

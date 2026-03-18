@@ -7,7 +7,7 @@ const AMENITIES = [
     {
         title: "Infinity Pool",
         description: "A seamless merge of azure waters and the horizon.",
-        image: "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?q=80&w=2940&auto=format&fit=crop", // Pool
+        image: "",
         link: "/wellness#pool",
         colSpan: "md:col-span-2",
         height: "h-[400px] md:h-[500px]"
@@ -15,7 +15,7 @@ const AMENITIES = [
     {
         title: "State-of-the-Art Gym",
         description: "maintain your wellness routine with premium Technogym equipment.",
-        image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2940&auto=format&fit=crop", // Gym
+        image: "",
         link: "/wellness#fitness",
         colSpan: "md:col-span-1",
         height: "h-[400px] md:h-[500px]"
@@ -23,7 +23,7 @@ const AMENITIES = [
     {
         title: "The Spa",
         description: "Rejuvenate with holistic treatments inspired by ancient traditions.",
-        image: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=2940&auto=format&fit=crop", // Spa
+        image: "",
         link: "/wellness#spa",
         colSpan: "md:col-span-1",
         height: "h-[400px] md:h-[500px]"
@@ -31,7 +31,7 @@ const AMENITIES = [
     {
         title: "Yoga & Meditation",
         description: "Breathe, stretch, and reset with guided sessions in a serene setting.",
-        image: "https://images.unsplash.com/photo-1545389336-cf090694435e?q=80&w=2940&auto=format&fit=crop",
+        image: "",
         link: "/wellness#yoga",
         colSpan: "md:col-span-2",
         height: "h-[400px] md:h-[500px]"
@@ -54,16 +54,22 @@ export default function AmenitiesGallery() {
                         <Link
                             key={index}
                             href={item.link}
-                            className={`group relative overflow-hidden rounded-sm ${item.colSpan} ${item.height}`}
+                            className={`group relative overflow-hidden rounded-sm ${item.colSpan} ${item.height} ${item.image ? '' : 'bg-[#E8E2D9]'}`}
                         >
-                            <Image
-                                src={item.image}
-                                alt={item.title}
-                                fill
-                                className="object-cover transition-transform duration-700 group-hover:scale-110"
-                            />
-                            {/* Overlay */}
-                            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-500" />
+                            {item.image ? (
+                                <>
+                                    <Image
+                                        src={item.image}
+                                        alt={item.title}
+                                        fill
+                                        className="object-cover transition-transform duration-700 group-hover:scale-110"
+                                    />
+                                    {/* Overlay */}
+                                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-500" />
+                                </>
+                            ) : (
+                                <div className="absolute inset-0 bg-[#E8E2D9]" />
+                            )}
 
                             {/* Content */}
                             <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-12">

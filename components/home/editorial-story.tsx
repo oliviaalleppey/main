@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 
 const PILLARS = [
@@ -25,13 +24,7 @@ export default function EditorialStory() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 items-stretch">
 
                     {/* Left — Large editorial photo */}
-                    <div className="relative w-full h-[420px] md:h-[500px] lg:h-auto lg:min-h-[560px] overflow-hidden group">
-                        <Image
-                            src="https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?q=80&w=1600&auto=format&fit=crop"
-                            alt="Alleppey Backwaters — Olivia Hotel"
-                            fill
-                            className="object-cover transition-transform duration-700 group-hover:scale-110"
-                        />
+                    <div className="relative w-full h-[420px] md:h-[500px] lg:h-auto lg:min-h-[560px] overflow-hidden group bg-[#E8E2D9]">
                         {/* Caption overlay */}
                         <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/60 to-transparent">
                             <span className="text-white/60 text-[10px] uppercase tracking-[0.3em]">
