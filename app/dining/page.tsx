@@ -157,7 +157,7 @@ export default function DiningPage() {
             <section className="max-w-7xl mx-auto px-4 md:px-6 pb-10 md:pb-14">
 
                 <section id="dining-options" className="mt-8 md:mt-10">
-                    <div className="mt-7 grid md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5">
+                    <div className="mt-7 grid grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-5">
                         {allOutlets.map((outlet) => (
                             <DiningCard key={outlet.slug} outlet={outlet} />
                         ))}
