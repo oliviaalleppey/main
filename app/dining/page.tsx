@@ -44,7 +44,7 @@ const outlets: DiningOutlet[] = [
         name: 'Finishing Point',
         description: 'Our all-day dining venue with a refined spread of Kerala favorites and global classics.',
         slug: 'finishing-point',
-        image: '/images/dining/finishing-point.png',
+        image: '',
         capacity: '94 Guests',
         location: 'Lobby Level',
         operatingHours: '07:00 HRS to 23:00 HRS',
@@ -55,7 +55,7 @@ const outlets: DiningOutlet[] = [
         name: 'Brew & Bite',
         description: 'A 24-hour coffee and snack lounge for quick meetings, relaxed breaks, and comfort bites.',
         slug: 'brew-bar',
-        image: '/images/dining/brew-bar.png',
+        image: '',
         capacity: '24 Guests',
         location: 'Lobby Level',
         operatingHours: '24 Hours',
@@ -66,7 +66,7 @@ const outlets: DiningOutlet[] = [
         name: 'In-Room Dining',
         description: 'Round-the-clock dining service delivered to rooms and suites with local and global options.',
         slug: 'in-room-dining',
-        image: '/images/rooms/balcony-room-5.jpg',
+        image: '',
         capacity: '88 Rooms and Suites',
         location: 'Lobby Level',
         operatingHours: '24 Hours',
@@ -77,7 +77,7 @@ const outlets: DiningOutlet[] = [
         name: 'Aqua Pool Lounge',
         description: 'Poolside refreshments and light bites with a calm daytime setting.',
         slug: 'aqua-pool-lounge',
-        image: '/images/rooms/balcony-room-2.jpg',
+        image: '',
         capacity: '24 Guests',
         location: '3rd Floor',
         operatingHours: '07:00 HRS to 19:00 HRS',
@@ -88,7 +88,7 @@ const outlets: DiningOutlet[] = [
         name: 'Kaayal',
         description: 'Upcoming seafood concept with global and local culinary direction.',
         slug: 'kaayal',
-        image: '/images/dining/kaayal.png',
+        image: '',
         capacity: '72 Guests',
         location: '3rd Floor',
         operatingHours: '19:00 HRS to 23:00 HRS (as per local government regulations)',
@@ -99,7 +99,7 @@ const outlets: DiningOutlet[] = [
         name: 'Club 9',
         description: 'Upcoming evening lounge with curated bar and beverage experiences.',
         slug: 'club-9',
-        image: '/images/rooms/balcony-room-4.jpg',
+        image: '',
         capacity: '44 Guests',
         location: '1st Floor',
         operatingHours: '11:00 HRS to 23:00 HRS (as per local government regulations)',
@@ -170,19 +170,7 @@ export default function DiningPage() {
                         </div>
                     </div>
 
-                    <div className="relative overflow-hidden rounded-[24px] border border-[#E2D8C8] min-h-[280px] md:min-h-[380px] lg:min-h-[460px]">
-                        <Image
-                            src="/images/dining/hero.jpg"
-                            alt="Dining Experience at Olivia"
-                            fill
-                            priority
-                            className="object-cover"
-                        />
-                        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/40 to-transparent" />
-                        <p className="absolute bottom-4 left-4 rounded-full border border-white/30 bg-black/25 px-3 py-1.5 text-[11px] tracking-[0.16em] uppercase text-white backdrop-blur-sm">
-                            Backwater-facing Dining
-                        </p>
-                    </div>
+                    <div className="relative overflow-hidden rounded-[24px] border border-[#E2D8C8] min-h-[280px] md:min-h-[380px] lg:min-h-[460px] bg-[#E8E0D2]" />
                 </section>
 
                 <section id="dining-options" className="mt-8 md:mt-10">
@@ -250,15 +238,7 @@ export default function DiningPage() {
                                 </p>
                             </div>
 
-                            <div className="relative min-h-[220px] md:min-h-[300px]">
-                                <Image
-                                    src="/images/dining/hero.jpg"
-                                    alt="Reserve your table"
-                                    fill
-                                    className="object-cover"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-l from-transparent via-white/10 to-white/30" />
-                            </div>
+                            <div className="relative min-h-[220px] md:min-h-[300px] bg-[#E8E0D2]" />
                         </div>
                     </div>
 
@@ -328,19 +308,7 @@ function DiningCard({ outlet }: { outlet: DiningOutlet }) {
 
     return (
         <article className="rounded-[18px] border border-[#E3DACA] bg-[#FAF7F2] overflow-hidden shadow-[0_14px_34px_-26px_rgba(20,20,20,0.5)]">
-            <div className="relative h-[190px] md:h-[215px]">
-                <Image
-                    src={outlet.image}
-                    alt={outlet.name}
-                    fill
-                    className="object-cover"
-                />
-                {isUpcoming && (
-                    <span className="absolute top-3 right-3 rounded-full border border-[#D8BE94] bg-[#F0E3CF] px-3 py-1 text-[10px] tracking-[0.15em] uppercase text-[#936C35]">
-                        Opening Soon
-                    </span>
-                )}
-            </div>
+            <div className="relative h-[190px] md:h-[215px] bg-[#E8E0D2]" />
 
             <div className="p-5 md:p-6">
                 <h3 className="font-serif text-4xl leading-none text-[#2C2A27]">{outlet.name}</h3>
