@@ -47,8 +47,8 @@ export function CheckoutForm({ amount }: { amount: number }) {
     };
 
     return (
-        <div className="space-y-4 md:space-y-6">
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 md:p-4">
+        <div className="space-y-3">
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-2 md:p-3">
                 <div className="flex items-start gap-2">
                     <ShieldCheck className="w-4 h-4 text-emerald-700 mt-0.5" />
                     <div>
@@ -58,8 +58,8 @@ export function CheckoutForm({ amount }: { amount: number }) {
                 </div>
             </div>
 
-            <div className="bg-gray-50 p-4 md:p-6 rounded-xl border border-gray-200">
-                <div className="flex items-center justify-between gap-3 mb-3 md:mb-4">
+            <div className="bg-gray-50 p-3 md:p-4 rounded-xl border border-gray-200">
+                <div className="flex items-center justify-between gap-3 mb-2 md:mb-3">
                     <div className="flex items-center gap-3">
                         <CreditCard className="w-5 h-5 text-[#1C1C1C]" />
                         <span className="text-sm md:text-base font-medium">Secure Payment via Omniware</span>
@@ -69,7 +69,7 @@ export function CheckoutForm({ amount }: { amount: number }) {
                     </span>
                 </div>
 
-                <div className="rounded-xl border border-gray-200 bg-white p-3 md:p-4">
+                <div className="rounded-xl border border-gray-200 bg-white p-2 md:p-3">
                     <div className="flex items-center gap-2">
                         <BadgeCheck className="w-4 h-4 text-blue-600" />
                         <div>
@@ -79,18 +79,18 @@ export function CheckoutForm({ amount }: { amount: number }) {
                     </div>
                 </div>
 
-                <p className="text-xs text-gray-400 mt-3 flex items-center gap-1">
+                <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">
                     <Lock className="w-3 h-3" /> Secure payment session
                 </p>
             </div>
 
             {error && (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                <div className="rounded-xl border border-red-200 bg-red-50 p-2.5 text-sm text-red-700">
                     {error}
                 </div>
             )}
 
-            <label className="flex items-start gap-3 rounded-xl border border-gray-200 bg-white p-3 md:p-4">
+            <label className="flex items-start gap-2.5 rounded-xl border border-gray-200 bg-white p-2.5 md:p-3">
                 <input
                     type="checkbox"
                     checked={acceptedTerms}
@@ -105,13 +105,13 @@ export function CheckoutForm({ amount }: { amount: number }) {
             <Button
                 onClick={handlePayment}
                 disabled={isPending || !acceptedTerms}
-                className="w-full rounded-xl bg-[#0A332B] text-white py-4 md:py-6 text-base md:text-lg font-semibold hover:bg-[#15443B] transition-colors shadow-lg shadow-[#0A332B]/20"
+                className="w-full rounded-xl bg-[#0A332B] text-white py-3 md:py-4 text-sm font-semibold hover:bg-[#15443B] transition-colors shadow-lg shadow-[#0A332B]/20"
             >
                 {isPending ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
                 {!isPending ? `Pay ${payLabel} via Omniware` : 'Redirecting to Payment...'}
             </Button>
 
-            <div className="rounded-xl border border-gray-200 bg-white p-3 md:p-4">
+            <div className="rounded-xl border border-gray-200 bg-white p-2.5 md:p-3">
                 <p className="text-xs uppercase tracking-wider text-gray-500 font-semibold mb-2">What happens next</p>
                 <ul className="space-y-2 text-sm text-gray-700">
                     <li className="flex items-start gap-2">

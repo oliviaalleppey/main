@@ -76,8 +76,8 @@ export function AddOnsSelector({ options, initialSelected }: AddOnsSelectorProps
     };
 
     return (
-        <div className="space-y-3 md:space-y-5">
-            <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-3 md:p-4">
+        <div className="space-y-2 md:space-y-3">
+            <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-2 md:p-3">
                 <div className="flex items-center justify-between gap-3 md:gap-4">
                     <div>
                         <p className="text-xs md:text-sm font-semibold text-amber-900 inline-flex items-center gap-1.5">
@@ -95,7 +95,7 @@ export function AddOnsSelector({ options, initialSelected }: AddOnsSelectorProps
                 </div>
             </div>
 
-            <div className="space-y-2 md:space-y-3">
+            <div className="space-y-1.5 md:space-y-2">
                 {options.map((option) => {
                     const quantity = quantities[option.id] || 0;
                     const typeLabel = option.type === 'per_person' ? 'per person' : 'per unit';
@@ -104,7 +104,7 @@ export function AddOnsSelector({ options, initialSelected }: AddOnsSelectorProps
                     return (
                         <div
                             key={option.id}
-                            className={`rounded-xl border p-3 md:p-4 transition-colors ${quantity > 0
+                            className={`rounded-lg border p-2 md:p-3 transition-colors ${quantity > 0
                                 ? 'border-[#0A332B]/30 bg-[#0A332B]/5'
                                 : 'border-gray-200 bg-gray-50'
                                 }`}
@@ -121,7 +121,7 @@ export function AddOnsSelector({ options, initialSelected }: AddOnsSelectorProps
                                     </p>
                                 </div>
 
-                                <div className="flex items-center justify-between md:justify-end gap-3 md:gap-4 md:min-w-[220px]">
+                                <div className="flex items-center justify-between md:justify-end gap-2 md:gap-3 md:min-w-[180px]">
                                     <div className="flex items-center gap-2">
                                         <button
                                             type="button"
@@ -154,7 +154,7 @@ export function AddOnsSelector({ options, initialSelected }: AddOnsSelectorProps
                 })}
             </div>
 
-            <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-3 md:p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-4">
+            <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-2 md:p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 md:gap-3">
                 <div className="flex-1">
                     {message ? (
                         <p className={`text-xs font-medium ${message === 'Add-ons updated' ? 'text-emerald-700' : 'text-amber-700'}`}>

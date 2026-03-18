@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trash2, Upload, Loader2, Save } from 'lucide-react';
+import { Trash2, Upload, Loader2, Save, Database, AlertCircle } from 'lucide-react';
 import Image from 'next/image';
 
 export default function SettingsPage() {
@@ -90,6 +90,26 @@ export default function SettingsPage() {
             newImages[index].alt = text;
             return newImages;
         });
+    }
+
+    async function runMigration() {
+        if (!confirm('Run database migrations? This is safe and won\'t affect your data.')) {
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/admin/migrate', { method: 'POST' });
+            const data = await response.json();
+
+            if (data.success) {
+                alert('Migration completed successfully!');
+            } else {
+                alert('Migration failed: ' + data.error);
+            }
+        } catch (error) {
+            console.error('Migration failed:', error);
+            alert('Migration failed. Check console for details.');
+        }
     }
 
     if (loading) {
@@ -177,6 +197,33 @@ export default function SettingsPage() {
                     <p className="text-sm text-muted-foreground">
                         Supported formats: JPG, PNG, WEBP. Max size: 4.5MB per file.
                     </p>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <Database className="h-5 w-5" />
+                        Database Migrations
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="rounded-lg bg-amber-50 border border-amber-200 p-3">
+                        <div className="flex items-start gap-2">
+                            <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5" />
+                            <p className="text-sm text-amber-800">
+                                Run migrations to create new database tables. This is safe and won&apos;t affect existing data.
+                            </p>
+                        </div>
+                    </div>
+                    <Button
+                        onClick={runMigration}
+                        variant="outline"
+                        className="w-full"
+                    >
+                        <Database className="mr-2 h-4 w-4" />
+                        Run Database Migrations
+                    </Button>
                 </CardContent>
             </Card>
         </div>

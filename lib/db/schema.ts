@@ -505,6 +505,26 @@ export const bookingAddOns = pgTable('booking_add_ons', {
     createdAt: timestamp('created_at').defaultNow(),
 });
 
+// Table to link add-ons to specific room types
+// If empty/null, add-on applies to all rooms
+export const addOnRoomTypes = pgTable('add_on_room_types', {
+    id: uuid('id').defaultRandom().primaryKey(),
+    addOnId: uuid('add_on_id').references(() => addOns.id).notNull(),
+    roomTypeId: uuid('room_type_id').references(() => roomTypes.id).notNull(),
+});
+
+// Relations for addOnRoomTypes
+export const addOnRoomTypesRelations = relations(addOnRoomTypes, ({ one }) => ({
+    addOn: one(addOns, {
+        fields: [addOnRoomTypes.addOnId],
+        references: [addOns.id],
+    }),
+    roomType: one(roomTypes, {
+        fields: [addOnRoomTypes.roomTypeId],
+        references: [roomTypes.id],
+    }),
+}));
+
 // ============================================
 // PAYMENTS
 // ============================================
@@ -879,6 +899,7 @@ export const roomTypesRelations = relations(roomTypes, ({ many }) => ({
     inventory: many(roomInventory),
     images: many(roomImages),
     ratePlans: many(ratePlans),
+    addOns: many(addOnRoomTypes),
 }));
 
 // ============================================
@@ -1080,6 +1101,7 @@ export const dailyStatsRelations = relations(dailyStats, ({ one }) => ({
 
 export const addOnsRelation = relations(addOns, ({ many }) => ({
     bookingAddOns: many(bookingAddOns),
+    roomTypes: many(addOnRoomTypes),
 }));
 
 export const bookingAddOnsRelations = relations(bookingAddOns, ({ one }) => ({

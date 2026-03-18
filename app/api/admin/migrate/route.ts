@@ -200,12 +200,73 @@ export async function POST() {
         `);
 
         // Add rate_plan_id to booking_items if it doesn't exist
+        // Only run if booking_items table exists
         await db.execute(sql`
-            DO $$ BEGIN
-                ALTER TABLE "booking_items" ADD COLUMN IF NOT EXISTS "rate_plan_id" uuid REFERENCES "rate_plans"("id");
+            DO $
+            BEGIN
+                IF EXISTS (SELECT FROM pg_tables WHERE tablename = 'booking_items') THEN
+                    IF NOT EXISTS (
+                        SELECT 1 FROM information_schema.columns 
+                        WHERE table_name = 'booking_items' AND column_name = 'rate_plan_id'
+                    ) THEN
+                        ALTER TABLE booking_items ADD COLUMN rate_plan_id uuid;
+                    END IF;
+                END IF;
+            END
+            $;
+        `);
+
+        // Add foreign key constraint separately (skip if already exists)
+        await db.execute(sql`
+            DO $
+            BEGIN
+                IF EXISTS (SELECT FROM pg_tables WHERE tablename = 'booking_items') THEN
+                    ALTER TABLE booking_items 
+                    ADD CONSTRAINT IF NOT EXISTS booking_items_rate_plan_fkey 
+                    FOREIGN KEY (rate_plan_id) REFERENCES rate_plans(id) ON DELETE SET NULL;
+                END IF;
             EXCEPTION
-                WHEN duplicate_column THEN null;
-            END $$;
+                WHEN duplicate_table THEN null;
+            END
+            $;
+        `);
+
+        // Create add_on_room_types table if it doesn't exist (for linking add-ons to specific rooms)
+        // Using DO$ to safely handle if table already exists
+        await db.execute(sql`
+            DO $
+            BEGIN
+                IF NOT EXISTS (SELECT FROM pg_tables WHERE tablename = 'add_on_room_types') THEN
+                    CREATE TABLE add_on_room_types (
+                        id uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+                        add_on_id uuid NOT NULL,
+                        room_type_id uuid NOT NULL,
+                        UNIQUE(add_on_id, room_type_id)
+                    );
+                END IF;
+            END
+            $;
+        `);
+
+        // Add foreign key constraints (won't fail if already exists)
+        await db.execute(sql`
+            ALTER TABLE add_on_room_types 
+            ADD CONSTRAINT add_on_room_types_add_on_fkey 
+            FOREIGN KEY (add_on_id) REFERENCES add_ons(id) ON DELETE CASCADE;
+        `);
+
+        await db.execute(sql`
+            ALTER TABLE add_on_room_types 
+            ADD CONSTRAINT add_on_room_types_room_type_fkey 
+            FOREIGN KEY (room_type_id) REFERENCES room_types(id) ON DELETE CASCADE;
+        `);
+
+        // Add indexes for add_on_room_types
+        await db.execute(sql`
+            CREATE INDEX IF NOT EXISTS idx_add_on_room_types_add_on_id ON add_on_room_types(add_on_id);
+        `);
+        await db.execute(sql`
+            CREATE INDEX IF NOT EXISTS idx_add_on_room_types_room_type_id ON add_on_room_types(room_type_id);
         `);
 
         return NextResponse.json({

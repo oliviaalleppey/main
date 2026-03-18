@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { db } from '@/lib/db';
-import { addOns, bookingSessions, roomTypes } from '@/lib/db/schema';
+import { addOns, addOnRoomTypes, bookingSessions, roomTypes } from '@/lib/db/schema';
 import { eq, inArray } from 'drizzle-orm';
 import { CheckoutForm } from '@/components/booking/checkout-form';
 import {
@@ -300,26 +300,26 @@ export default async function CheckoutPage({
     const addMoreRoomsHref = `/book/search?${addMoreRoomsParams.toString()}`;
 
     return (
-        <div className="min-h-screen bg-[#F6F1E8] py-4 md:py-12 px-3 md:px-6">
-            <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-5 md:gap-12">
+        <div className="min-h-screen bg-[#F6F1E8] py-2 md:py-6 px-2 md:px-4">
+            <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-6">
                 <div className="lg:col-span-2 order-2 lg:order-1">
-                    <div className="mb-4 md:mb-8 rounded-xl md:rounded-2xl border border-gray-200 bg-gradient-to-r from-white to-gray-50 p-3 md:p-5">
-                        <p className="text-[11px] md:text-xs uppercase tracking-[0.2em] md:tracking-[0.25em] text-gray-500 mb-3 md:mb-4">Booking Progress</p>
-                        <div className="grid grid-cols-3 gap-2 md:gap-3 text-[11px] md:text-sm">
+                    <div className="mb-3 md:mb-5 rounded-xl md:rounded-2xl border border-gray-200 bg-gradient-to-r from-white to-gray-50 p-2 md:p-4">
+                        <p className="text-[11px] md:text-xs uppercase tracking-[0.2em] md:tracking-[0.25em] text-gray-500 mb-2 md:mb-3">Booking Progress</p>
+                        <div className="grid grid-cols-3 gap-1.5 md:gap-2 text-[10px] md:text-sm">
                             <div className="rounded-lg md:rounded-xl border border-emerald-200 bg-emerald-50 px-2 md:px-3 py-1.5 md:py-2 text-emerald-700 font-medium inline-flex items-center gap-1.5 md:gap-2">
                                 <CircleCheck className="w-4 h-4" />
                                 <span>1. Select Room</span>
                             </div>
                             <div className={`rounded-lg md:rounded-xl px-2 md:px-3 py-1.5 md:py-2 inline-flex items-center gap-1.5 md:gap-2 font-medium border ${hasRequiredGuestDetails
-                                    ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                                    : 'border-[#1C1C1C]/20 bg-white text-[#1C1C1C]'
+                                ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                                : 'border-[#1C1C1C]/20 bg-white text-[#1C1C1C]'
                                 }`}>
                                 {hasRequiredGuestDetails ? <CircleCheck className="w-4 h-4" /> : <CircleDot className="w-4 h-4" />}
                                 <span>2. Guest Details</span>
                             </div>
                             <div className={`rounded-lg md:rounded-xl px-2 md:px-3 py-1.5 md:py-2 inline-flex items-center gap-1.5 md:gap-2 border ${showPaymentSection
-                                    ? 'border-[#1C1C1C]/20 bg-white text-[#1C1C1C] font-semibold'
-                                    : 'border-gray-200 bg-gray-50 text-gray-400 font-medium'
+                                ? 'border-[#1C1C1C]/20 bg-white text-[#1C1C1C] font-semibold'
+                                : 'border-gray-200 bg-gray-50 text-gray-400 font-medium'
                                 }`}>
                                 <CircleDot className="w-4 h-4" />
                                 <span>3. Payment</span>
@@ -327,8 +327,8 @@ export default async function CheckoutPage({
                         </div>
                     </div>
 
-                    <h1 className="text-2xl md:text-3xl font-serif mb-1 md:mb-2">Checkout</h1>
-                    <p className="text-sm md:text-base text-gray-500 mb-1 md:mb-2">
+                    <h1 className="text-xl md:text-2xl font-serif mb-1">Checkout</h1>
+                    <p className="text-sm text-gray-500 mb-1">
                         {showPaymentSection
                             ? 'Review details, add enhancements, and complete payment.'
                             : 'Add guest details to continue to payment.'}
@@ -348,18 +348,25 @@ export default async function CheckoutPage({
                         </div>
                     )}
 
-                    <div className="bg-white p-4 md:p-8 rounded-xl md:rounded-2xl shadow-sm border border-gray-100 mb-4 md:mb-8">
-                        <div className="flex items-center justify-between gap-3 md:gap-4 mb-3 md:mb-4">
+                    <div className="bg-white p-3 md:p-5 rounded-xl md:rounded-2xl shadow-sm border border-gray-100 mb-2 md:mb-4">
+                        <AddOnsSelector
+                            options={availableAddOns}
+                            initialSelected={selectedAddOns}
+                        />
+                    </div>
+
+                    <div className="bg-white p-3 md:p-5 rounded-xl md:rounded-2xl shadow-sm border border-gray-100 mb-2 md:mb-4">
+                        <div className="flex items-center justify-between gap-3 md:gap-4 mb-2 md:mb-3">
                             <div>
-                                <h3 className="text-xl md:text-2xl font-semibold text-[#1C1C1C]">Guest Information</h3>
-                                <p className="text-xs text-gray-500 mt-1">Primary contact for this reservation</p>
+                                <h3 className="text-lg md:text-xl font-semibold text-[#1C1C1C]">Guest Information</h3>
+                                <p className="text-xs text-gray-500 mt-0.5">Primary contact for this reservation</p>
                             </div>
                             {hasRequiredGuestDetails && !isEditingGuestDetails && (
                                 <Link
                                     href="/book/checkout?edit=1"
-                                    className="text-xs font-semibold uppercase tracking-wider text-[#1C1C1C] hover:text-[#E95D20] transition-colors rounded-lg border border-gray-300 px-3 py-1.5"
+                                    className="text-xs font-semibold uppercase tracking-wider text-[#1C1C1C] hover:text-[#E95D20] transition-colors rounded-lg border border-gray-300 px-2.5 py-1.5"
                                 >
-                                    Edit Details
+                                    Edit
                                 </Link>
                             )}
                         </div>
@@ -367,7 +374,7 @@ export default async function CheckoutPage({
                         {isEditingGuestDetails ? (
                             <div>
                                 {showGuestDetailsError && (
-                                    <p className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                                    <p className="mb-3 rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-xs text-amber-900">
                                         Please save valid guest details before payment.
                                     </p>
                                 )}
@@ -378,41 +385,32 @@ export default async function CheckoutPage({
                             </div>
                         ) : (
                             <>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 text-xs md:text-sm">
-                                    <div className="rounded-lg md:rounded-xl border border-gray-200 bg-gray-50 px-3 md:px-4 py-2.5 md:py-3">
-                                        <span className="text-gray-500 block text-xs uppercase tracking-wider">Name</span>
-                                        <span className="font-medium text-sm md:text-base">{guestDetails.firstName || '-'} {guestDetails.lastName || ''}</span>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3 text-xs md:text-sm">
+                                    <div className="rounded-lg md:rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 md:py-2.5">
+                                        <span className="text-gray-500 block text-[10px] uppercase tracking-wider">Name</span>
+                                        <span className="font-medium text-sm">{guestDetails.firstName || '-'} {guestDetails.lastName || ''}</span>
                                     </div>
-                                    <div className="rounded-lg md:rounded-xl border border-gray-200 bg-gray-50 px-3 md:px-4 py-2.5 md:py-3">
-                                        <span className="text-gray-500 block text-xs uppercase tracking-wider">Email</span>
-                                        <span className="font-medium text-sm md:text-base break-all">{guestDetails.email || '-'}</span>
+                                    <div className="rounded-lg md:rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 md:py-2.5">
+                                        <span className="text-gray-500 block text-[10px] uppercase tracking-wider">Email</span>
+                                        <span className="font-medium text-sm break-all">{guestDetails.email || '-'}</span>
                                     </div>
-                                    <div className="rounded-lg md:rounded-xl border border-gray-200 bg-gray-50 px-3 md:px-4 py-2.5 md:py-3">
-                                        <span className="text-gray-500 block text-xs uppercase tracking-wider">Phone</span>
-                                        <span className="font-medium text-sm md:text-base">{guestDetails.phone || '-'}</span>
+                                    <div className="rounded-lg md:rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 md:py-2.5">
+                                        <span className="text-gray-500 block text-[10px] uppercase tracking-wider">Phone</span>
+                                        <span className="font-medium text-sm">{guestDetails.phone || '-'}</span>
                                     </div>
                                 </div>
-                                <div className="mt-2 md:mt-4 rounded-lg md:rounded-xl border border-gray-200 bg-gray-50 px-3 md:px-4 py-2.5 md:py-3">
-                                    <span className="text-gray-500 block text-xs uppercase tracking-wider">Special Requests</span>
-                                    <p className="text-sm mt-1 text-gray-800">{guestDetails.requests || 'None'}</p>
+                                <div className="mt-2 rounded-lg md:rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 md:py-2.5">
+                                    <span className="text-gray-500 block text-[10px] uppercase tracking-wider">Special Requests</span>
+                                    <p className="text-xs mt-0.5 text-gray-800">{guestDetails.requests || 'None'}</p>
                                 </div>
                             </>
                         )}
                     </div>
 
-                    {availableAddOns.length > 0 && (
-                        <div className="bg-white p-4 md:p-8 rounded-xl md:rounded-2xl shadow-sm border border-gray-100 mb-4 md:mb-8">
-                            <AddOnsSelector
-                                options={availableAddOns}
-                                initialSelected={selectedAddOns}
-                            />
-                        </div>
-                    )}
-
-                    <div id="payment-section" className="bg-white p-4 md:p-8 rounded-xl md:rounded-2xl shadow-sm border border-gray-100">
-                        <div className="mb-4 md:mb-6">
-                            <h3 className="text-xl md:text-2xl font-semibold text-[#1C1C1C]">Payment</h3>
-                            <p className="text-xs text-gray-500 mt-1">Final step to confirm your reservation</p>
+                    <div id="payment-section" className="bg-white p-3 md:p-5 rounded-xl md:rounded-2xl shadow-sm border border-gray-100">
+                        <div className="mb-3 md:mb-4">
+                            <h3 className="text-lg md:text-xl font-semibold text-[#1C1C1C]">Payment</h3>
+                            <p className="text-xs text-gray-500 mt-0.5">Final step to confirm your reservation</p>
                         </div>
                         {showPaymentSection ? (
                             <CheckoutForm amount={totalPrice} />
@@ -427,8 +425,8 @@ export default async function CheckoutPage({
                     </div>
                 </div>
 
-                <div className="order-1 lg:order-2 bg-white p-4 md:p-6 rounded-xl md:rounded-2xl shadow-sm border border-gray-100 h-fit lg:sticky lg:top-8">
-                    <div className="flex items-center justify-between border-b border-gray-100 pb-3 md:pb-4 mb-3 md:mb-4">
+                <div className="order-1 lg:order-2 bg-white p-3 md:p-5 rounded-xl md:rounded-2xl shadow-sm border border-gray-100 h-fit lg:sticky lg:top-6">
+                    <div className="flex items-center justify-between border-b border-gray-100 pb-2 md:pb-3 mb-2 md:mb-3">
                         <h2 className="text-lg md:text-xl font-medium">Order Summary</h2>
                         <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 md:px-2.5 md:py-1 text-[10px] md:text-[11px] font-semibold uppercase tracking-wider text-emerald-700">
                             <ShieldCheck className="w-3.5 h-3.5" />

@@ -130,15 +130,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         <div className="min-h-screen bg-[#F4F5F0] pb-12 md:pb-20">
             <div className="border-b border-[#E4E8DD] bg-gradient-to-b from-[#FAFAF5] via-[#F7F8F2] to-[#F4F5F0]">
                 <div className="max-w-[1400px] mx-auto px-3 md:px-6 py-4 md:py-10">
-                    <div className="rounded-2xl md:rounded-3xl border border-[#D8DEC9] bg-white/95 p-3 md:p-8 shadow-[0_20px_45px_-32px_rgba(15,23,42,0.5)]">
-                        <SearchStayEditor
-                            initialCheckIn={checkInDate}
-                            initialCheckOut={checkOutDate}
-                            initialAdults={safeAdults}
-                            initialChildren={safeChildren}
-                            initialRooms={safeRooms}
-                        />
-                    </div>
+                    <SearchStayEditor
+                        initialCheckIn={checkInDate}
+                        initialCheckOut={checkOutDate}
+                        initialAdults={safeAdults}
+                        initialChildren={safeChildren}
+                        initialRooms={safeRooms}
+                    />
                 </div>
             </div>
 

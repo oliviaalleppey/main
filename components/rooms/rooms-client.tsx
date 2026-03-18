@@ -207,6 +207,19 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
                 </div>
             </section>
 
+            {/* Marquee break */}
+            <section className="bg-[#FAF8F3] px-6 md:px-10">
+                <div className="max-w-7xl mx-auto">
+                    <div className="border-y border-[#0F2F28] bg-[#15443B] overflow-hidden">
+                        <div className="py-5 md:py-6">
+                            <p className="text-center text-[15px] md:text-[18px] uppercase tracking-[0.42em] text-white/90 font-semibold">
+                                Signature Views
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {/* Signature Highlight (Boat Race) */}
             <section className="py-12 md:py-16 px-6 md:px-10 bg-[#FAF8F3]">
                 <div className="max-w-7xl mx-auto">
@@ -602,11 +615,11 @@ function RoomCard({ room, index }: { room: RoomViewModel; index: number }) {
                     <div className="flex items-center pt-2">
                         <Link
                             href={`/rooms/${room.slug}`}
-                            className="group relative inline-flex items-center justify-center px-8 py-3.5 border border-[#BCA06F] text-[#1C1C1C] overflow-hidden transition-colors duration-300 hover:border-[#15443B]"
+                            className="group relative inline-flex items-center justify-center px-8 py-3.5 border border-[#15443B] md:border-[#BCA06F] text-white md:text-[#1C1C1C] overflow-hidden transition-colors duration-300 md:hover:border-[#15443B] bg-[#15443B] md:bg-transparent"
                         >
                             <span className="absolute inset-0 w-full h-full bg-[#15443B] origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out z-0"></span>
-                            <span className="relative z-10 text-[11px] tracking-[0.24em] uppercase font-normal group-hover:text-white transition-colors duration-300">Explore Room</span>
-                            <svg className="relative z-10 w-3.5 h-3.5 ml-3 transform group-hover:translate-x-1 group-hover:text-white transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <span className="relative z-10 text-[11px] tracking-[0.24em] uppercase font-normal text-white md:text-[inherit] md:group-hover:text-white transition-colors duration-300">Explore &amp; Book</span>
+                            <svg className="relative z-10 w-3.5 h-3.5 ml-3 transform group-hover:translate-x-1 text-white md:text-[inherit] md:group-hover:text-white transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                             </svg>
                         </Link>

@@ -11,6 +11,7 @@ import {
     Clock,
     DollarSign,
     ChevronRight,
+    Sparkles,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -19,6 +20,7 @@ const NAV_ITEMS = [
     { href: '/admin/availability', label: 'Availability', icon: Clock },
     { href: '/admin/pricing', label: 'Pricing', icon: DollarSign },
     { href: '/admin/rooms/types', label: 'Room Types', icon: BedDouble },
+    { href: '/admin/add-ons', label: 'Add-ons', icon: Sparkles },
     { href: '/admin/settings', label: 'Site Appearance', icon: Settings },
 ];
 
@@ -54,8 +56,8 @@ export function Sidebar({ pendingConfirmations = 0, atRiskConfirmations = 0 }: S
                             key={item.href}
                             href={item.href}
                             className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all group ${isActive
-                                    ? 'bg-white/10 text-white'
-                                    : 'text-white/50 hover:bg-white/5 hover:text-white'
+                                ? 'bg-white/10 text-white'
+                                : 'text-white/50 hover:bg-white/5 hover:text-white'
                                 }`}
                         >
                             <Icon className={`h-4 w-4 flex-shrink-0 ${isActive ? 'text-amber-400' : 'text-white/40 group-hover:text-white/92'}`} />
