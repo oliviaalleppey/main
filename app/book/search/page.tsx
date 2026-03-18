@@ -110,6 +110,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 if (a.bookable !== b.bookable) {
                     return a.bookable ? -1 : 1;
                 }
+                const aSort = a.roomType.sortOrder ?? 0;
+                const bSort = b.roomType.sortOrder ?? 0;
+                if (aSort !== bSort) return aSort - bSort;
                 return a.price - b.price;
         }
     });

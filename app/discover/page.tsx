@@ -33,85 +33,34 @@ export default function DiscoverPage() {
 
     return (
         <div className="min-h-screen bg-[#F3EEE4] text-[#1C1C1C] selection:bg-[#1C1C1C] selection:text-white">
-            {/* soft framing */}
-            <div className="h-8 md:h-12 bg-[linear-gradient(180deg,#F3EEE4_0%,#F7F2E9_100%)]" />
 
-            {/* HERO: centered editorial + muted image strip */}
-            <section className="px-4 md:px-6">
-                <div className="max-w-7xl mx-auto">
-                    <div className="rounded-[34px] border border-[#E2D7C7] bg-[#FBF8F2] shadow-[0_50px_140px_-110px_rgba(0,0,0,0.55)] overflow-hidden">
-                        <div className="p-8 md:p-12 lg:p-14">
-                            <div className="flex items-center justify-center gap-3">
-                                <span className="h-[1px] w-10 bg-[#BDB6AD]" aria-hidden />
-                                <p className="text-[10px] tracking-[0.38em] uppercase text-[#6B645C]">
-                                    Where luxury meets legacy
-                                </p>
-                                <span className="h-[1px] w-10 bg-[#BDB6AD]" aria-hidden />
-                            </div>
+            {/* HERO: Full-width with dark gradient background like rooms page */}
+            <section className="relative py-24 md:py-32 text-center overflow-hidden">
+                {/* Dark gradient background like rooms page hero */}
+                <div className="absolute inset-0 bg-[linear-gradient(135deg,#1C2622_0%,#2B3A34_38%,#1B2421_100%)]" />
+                <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_25%_30%,rgba(231,212,173,0.12)_0%,rgba(231,212,173,0)_60%)]" />
 
-                            <h1 className="mt-7 text-center font-serif text-[3rem] sm:text-[3.6rem] md:text-[5.2rem] leading-[0.94] tracking-[-0.03em]">
-                                Discover
-                                <span className="block">Olivia</span>
-                            </h1>
+                <div className="relative z-10">
+                    <p className="text-[11px] tracking-[0.4em] uppercase text-white/60 mb-8">
+                        Alappuzha, Kerala
+                    </p>
 
-                            <p className="mt-5 mx-auto max-w-2xl text-center text-[#59544D] text-base md:text-lg leading-relaxed">
-                                A sanctuary where Kerala&apos;s timeless beauty converges with contemporary elegance,
-                                creating moments that transcend the ordinary.
-                            </p>
+                    <h1 className="font-serif text-[3.5rem] sm:text-[4.5rem] md:text-[6rem] leading-[0.9] tracking-[-0.02em] text-white">
+                        Discover
+                        <span className="block text-white/70">Olivia</span>
+                    </h1>
 
-                            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-                                <Link
-                                    href="/rooms"
-                                    className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-[#1C1C1C] px-9 py-3.5 text-white text-[11px] font-semibold tracking-[0.18em] uppercase hover:bg-[#333333] transition-colors"
-                                >
-                                    Explore accommodations
-                                </Link>
-                                <Link
-                                    href="/contact"
-                                    className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl border border-[#CFC6BA] bg-transparent px-9 py-3.5 text-[#1C1C1C] text-[11px] tracking-[0.18em] uppercase hover:bg-white/60 transition-colors"
-                                >
-                                    Contact us
-                                </Link>
-                            </div>
+                    <p className="mt-6 text-white/60 text-lg md:text-xl leading-relaxed max-w-xl mx-auto">
+                        A sanctuary where Kerala&apos;s timeless beauty converges with contemporary elegance.
+                    </p>
 
-                            <div className="mt-10 grid md:grid-cols-12 gap-4 md:gap-5">
-                                <a
-                                    href="#heritage"
-                                    className="md:col-span-3 rounded-2xl border border-[#E2D7C7] bg-[#FDFBF7] px-5 py-4 hover:bg-white transition-colors"
-                                >
-                                    <p className="text-[10px] tracking-[0.34em] uppercase text-[#6B645C]">Chapter 01</p>
-                                    <p className="mt-2 font-serif text-2xl leading-none">Our story</p>
-                                </a>
-                                <a
-                                    href="#philosophy"
-                                    className="md:col-span-3 rounded-2xl border border-[#E2D7C7] bg-[#FDFBF7] px-5 py-4 hover:bg-white transition-colors"
-                                >
-                                    <p className="text-[10px] tracking-[0.34em] uppercase text-[#6B645C]">Chapter 02</p>
-                                    <p className="mt-2 font-serif text-2xl leading-none">Our philosophy</p>
-                                </a>
-
-                                <div className="md:col-span-6 grid grid-cols-3 gap-3">
-                                    {[
-                                        { src: '/images/discover/backwater-serenity.png', alt: 'Backwaters' },
-                                        { src: '/images/discover/ayurvedic-wellness.png', alt: 'Wellness' },
-                                        { src: '/images/discover/culinary-journey.png', alt: 'Culinary' },
-                                    ].map((img) => (
-                                        <div
-                                            key={img.src}
-                                            className="relative h-24 md:h-28 rounded-2xl overflow-hidden border border-[#E2D7C7] bg-[#F7F2E9]"
-                                        >
-                                            <NextImage
-                                                src={img.src}
-                                                alt={img.alt}
-                                                fill
-                                                className="object-cover"
-                                            />
-                                            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.10)_0%,rgba(0,0,0,0)_55%,rgba(0,0,0,0.06)_100%)]" />
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
+                    <div className="mt-10 flex items-center justify-center gap-8">
+                        <Link
+                            href="/book/search"
+                            className="inline-flex items-center justify-center bg-white text-[#1C2622] px-12 py-3 text-[11px] tracking-[0.2em] uppercase hover:bg-white/90 transition-colors"
+                        >
+                            Explore & Book
+                        </Link>
                     </div>
                 </div>
             </section>

@@ -1,22 +1,14 @@
 'use client';
 
 import Image from 'next/image';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface RoomHeroProps {
     images: { id: number; alt: string; src?: string }[];
 }
 
 export default function RoomHero({ images }: RoomHeroProps) {
-    const displayImages = useMemo(
-        () =>
-            Array.from({ length: 5 }, (_, i) => ({
-                id: images[i]?.id || i + 100,
-                alt: images[i]?.alt || `Room view ${i + 1}`,
-                src: images[i]?.src || `/images/rooms/balcony-room-${(i % 5) + 1}.jpg`,
-            })),
-        [images],
-    );
+    const displayImages = images;
 
     const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
     const touchStartX = useRef<number | null>(null);
