@@ -44,11 +44,11 @@ export function LuxuryDatePicker({
         }
     }, [date]);
 
-    // Handle range selection - let react-day-picker handle selection naturally
-    // Only intervene when user already has a complete range and clicks a new date
+    // Handle range selection
     const handleSelect = (range: DateRange | undefined) => {
-        // If we have a complete range and user clicks a date, start fresh
-        if (selectedDate?.from && selectedDate?.to && range?.from && !range?.to) {
+        // If we have a complete range, always start fresh with new check-in
+        // This prevents extending the existing range on 3rd click
+        if (selectedDate?.from && selectedDate?.to && range?.from) {
             setSelectedDate({ from: range.from, to: undefined });
         } else {
             setSelectedDate(range);
