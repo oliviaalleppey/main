@@ -23,9 +23,7 @@ export function LuxuryDatePicker({
     const [selectedDate, setSelectedDate] = React.useState<DateRange | undefined>(date);
     const [month, setMonth] = React.useState<Date>(date?.from || new Date());
     const [monthsToShow, setMonthsToShow] = React.useState(2);
-
-    // Use ref to track if we already have a complete range
-    const hasCompleteRange = React.useRef(false);
+    const [selectionStage, setSelectionStage] = React.useState<'idle' | 'checkIn' | 'checkOut'>('idle');
 
     React.useEffect(() => {
         const handleResize = () => {
@@ -49,22 +47,20 @@ export function LuxuryDatePicker({
 
     // Handle range selection
     const handleSelect = (range: DateRange | undefined) => {
-        // Check if we had a complete range before this click
-        const hadCompleteRange = hasCompleteRange.current;
-
-        // Reset the ref
-        hasCompleteRange.current = false;
-
-        if (hadCompleteRange && range?.from) {
-            // Start fresh with new check-in
+        // If we're in checkOut stage and user clicks, start fresh with new check-in
+        if (selectionStage === 'checkOut' && range?.from) {
+            setSelectionStage('checkIn');
             setSelectedDate({ from: range.from, to: undefined });
         } else {
             setSelectedDate(range);
-        }
-
-        // Update ref for next click
-        if (range?.from && range?.to) {
-            hasCompleteRange.current = true;
+            // Update stage
+            if (range?.from && range?.to) {
+                setSelectionStage('checkOut');
+            } else if (range?.from) {
+                setSelectionStage('checkIn');
+            } else {
+                setSelectionStage('idle');
+            }
         }
     };
 
