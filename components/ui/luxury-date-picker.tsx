@@ -24,6 +24,9 @@ export function LuxuryDatePicker({
     const [month, setMonth] = React.useState<Date>(date?.from || new Date());
     const [monthsToShow, setMonthsToShow] = React.useState(2);
 
+    // Use ref to track if we already have a complete range
+    const hasCompleteRange = React.useRef(false);
+
     React.useEffect(() => {
         const handleResize = () => {
             setMonthsToShow(window.innerWidth < 768 ? 1 : 2);
@@ -44,9 +47,25 @@ export function LuxuryDatePicker({
         }
     }, [date]);
 
-    // Handle range selection - just pass through to react-day-picker
+    // Handle range selection
     const handleSelect = (range: DateRange | undefined) => {
-        setSelectedDate(range);
+        // Check if we had a complete range before this click
+        const hadCompleteRange = hasCompleteRange.current;
+
+        // Reset the ref
+        hasCompleteRange.current = false;
+
+        if (hadCompleteRange && range?.from) {
+            // Start fresh with new check-in
+            setSelectedDate({ from: range.from, to: undefined });
+        } else {
+            setSelectedDate(range);
+        }
+
+        // Update ref for next click
+        if (range?.from && range?.to) {
+            hasCompleteRange.current = true;
+        }
     };
 
     // Apply button handler
