@@ -1,5 +1,5 @@
 import { db } from '@/lib/db';
-import { bookings, payments, bookingItems, bookingGuests, bookingConfirmations, bookingLogs, roomTypes } from '@/lib/db/schema';
+import { bookings, payments, bookingItems, bookingGuests, bookingConfirmations, bookingLogs, roomTypes, bookingAddOns, addOns } from '@/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { notFound, redirect } from 'next/navigation';
 import { auth } from '@/auth';
@@ -15,11 +15,13 @@ function formatCurrency(paise: number) {
 }
 
 function formatDate(dateStr: string | Date) {
-    return new Date(dateStr).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    if (!dateStr) return '';
+    return new Date(dateStr).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' });
 }
 
 function formatDateTime(dateStr: string | Date) {
-    return new Date(dateStr).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    if (!dateStr) return '';
+    return new Date(dateStr).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' });
 }
 
 const STATUS_CONFIG: Record<string, { label: string; icon: React.ElementType; tw: string }> = {
@@ -62,9 +64,12 @@ export default async function BookingDetailPage({ params }: PageProps) {
     const booking = await db.query.bookings.findFirst({ where: eq(bookings.id, id) });
     if (!booking) notFound();
 
-    const [bookingItemRows, , confirmationRows, logRows] = await Promise.all([
+    const [bookingItemRows, addOnRows, confirmationRows, logRows] = await Promise.all([
         db.query.bookingItems.findMany({ where: eq(bookingItems.bookingId, id) }),
-        db.query.bookingGuests.findMany({ where: eq(bookingGuests.bookingId, id) }),
+        db.query.bookingAddOns.findMany({ 
+            where: eq(bookingAddOns.bookingId, id),
+            with: { addOn: true }
+        }),
         db.query.bookingConfirmations.findMany({
             where: eq(bookingConfirmations.bookingId, id),
             orderBy: [desc(bookingConfirmations.confirmedAt)],
@@ -179,13 +184,63 @@ export default async function BookingDetailPage({ params }: PageProps) {
                             </tr>
                         )}
                     </tbody>
-                    <tfoot>
-                        <tr className="bg-gray-50">
-                            <td colSpan={3} className="px-6 py-3.5 text-right text-sm font-semibold text-gray-600">Total Charged</td>
-                            <td className="px-6 py-3.5 text-right font-bold text-gray-900">{formatCurrency(booking.totalAmount)}</td>
-                        </tr>
-                    </tfoot>
                 </table>
+            </div>
+
+            {/* Add-ons */}
+            {addOnRows.length > 0 && (
+                <div className="rounded-2xl border border-gray-100 bg-white overflow-hidden mt-5">
+                    <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                        <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400">Enhancements & Add-ons</h2>
+                    </div>
+                    <table className="w-full text-sm">
+                        <thead>
+                            <tr className="border-b border-gray-100 text-gray-400 font-semibold text-[11px] uppercase tracking-wider">
+                                <th className="px-6 py-3 text-left">Item</th>
+                                <th className="px-6 py-3 text-center">Qty</th>
+                                <th className="px-6 py-3 text-right">Unit Price</th>
+                                <th className="px-6 py-3 text-right">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {addOnRows.map(row => (
+                                <tr key={row.id} className="border-b border-gray-50">
+                                    <td className="px-6 py-3.5 font-medium text-gray-900">{row.addOn?.name || 'Add-on'}</td>
+                                    <td className="px-6 py-3.5 text-center text-gray-500">{row.quantity}</td>
+                                    <td className="px-6 py-3.5 text-right text-gray-500">{formatCurrency(row.price)}</td>
+                                    <td className="px-6 py-3.5 text-right font-semibold text-gray-900">{formatCurrency(row.subtotal)}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+
+            {/* Invoice Summary */}
+            <div className="rounded-2xl border border-amber-200 bg-amber-50/50 overflow-hidden mt-6 mb-8 max-w-sm ml-auto shadow-sm">
+                <div className="px-6 py-5">
+                    <div className="space-y-3.5 text-[13px]">
+                        <div className="flex justify-between items-center text-amber-900">
+                            <span>Room Subtotal</span>
+                            <span className="font-medium">{formatCurrency(bookingItemRows.reduce((a, i) => a + (i.subtotal || 0), 0))}</span>
+                        </div>
+                        {addOnRows.length > 0 && (
+                            <div className="flex justify-between items-center text-amber-900">
+                                <span>Enhancements Subtotal</span>
+                                <span className="font-medium">{formatCurrency(addOnRows.reduce((a, r) => a + r.subtotal, 0))}</span>
+                            </div>
+                        )}
+                        <div className="flex justify-between items-center text-amber-900/70">
+                            <span>Taxes & Fees</span>
+                            <span className="font-medium">{formatCurrency(booking.taxAmount || 0)}</span>
+                        </div>
+                        
+                        <div className="pt-4 border-t border-amber-200 mt-4 flex justify-between items-end">
+                            <span className="text-[11px] font-bold uppercase tracking-widest text-amber-700">Total Charged</span>
+                            <span className="text-2xl font-bold tracking-tight text-amber-950">{formatCurrency(booking.totalAmount || 0)}</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* Payment */}

@@ -84,12 +84,27 @@ export function CheckoutStepper({
         setActiveStep(nextStep);
     };
 
+    // Auto-scroll to active step
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        
+        const timer = setTimeout(() => {
+            const el = document.getElementById(`step-${activeStep}`);
+            if (el) {
+                const yOffset = typeof window !== 'undefined' && window.innerWidth < 1024 ? -80 : -20; // account for sticky mobile header
+                const y = el.getBoundingClientRect().top + window.scrollY + yOffset;
+                window.scrollTo({ top: y, behavior: 'smooth' });
+            }
+        }, 350); // wait for framer-motion exit animation to clear the DOM space
+        return () => clearTimeout(timer);
+    }, [activeStep]);
+
     return (
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start max-w-[1400px] mx-auto w-full">
             {/* Main Content Area */}
             <div className="flex-1 w-full space-y-4">
                 {/* Step 1: Search */}
-                <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden transition-all">
+                <div id="step-1" className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden transition-all">
                     <div 
                         className={`px-4 py-4 md:px-5 flex items-center justify-between cursor-pointer ${activeStep === 1 ? 'bg-[#1C1C1C]' : 'bg-white'}`}
                         onClick={() => setActiveStep(1)}
@@ -127,7 +142,7 @@ export function CheckoutStepper({
                 </div>
                 
                 {/* Step 2: Room */}
-                <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden transition-all">
+                <div id="step-2" className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden transition-all">
                     <div 
                         className={`px-4 py-4 md:px-5 flex items-center justify-between cursor-pointer ${activeStep === 2 ? 'bg-[#1C1C1C]' : 'bg-white'}`}
                         onClick={() => {
@@ -167,7 +182,7 @@ export function CheckoutStepper({
                 </div>
 
                 {/* Step 3: Enhance Your Stay */}
-                <div className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm transition-all">
+                <div id="step-3" className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm transition-all">
                     <div 
                         className={`px-4 py-4 md:px-5 flex items-center justify-between cursor-pointer ${activeStep === 3 ? 'bg-[#1C1C1C]' : 'bg-gray-50'}`}
                         onClick={() => setActiveStep(3)}
@@ -208,7 +223,7 @@ export function CheckoutStepper({
                 </div>
 
                 {/* Step 4: Guest Information */}
-                <div className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm transition-all">
+                <div id="step-4" className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm transition-all">
                     <div 
                         className={`px-4 py-4 md:px-5 flex items-center justify-between ${activeStep === 4 ? 'bg-[#1C1C1C]' : 'bg-gray-50'} ${completedSteps.includes(3) || hasGuestDetails ? 'cursor-pointer' : 'opacity-60 cursor-not-allowed'}`}
                         onClick={() => {
@@ -255,7 +270,7 @@ export function CheckoutStepper({
                 </div>
 
                 {/* Step 5: Payment */}
-                <div className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm transition-all mb-8">
+                <div id="step-5" className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm transition-all mb-8">
                     <div className={`px-4 py-4 md:px-5 flex items-center gap-3 ${activeStep === 5 ? 'bg-[#1C1C1C]' : 'bg-gray-50'} ${activeStep >= 4 || hasGuestDetails ? 'opacity-100' : 'opacity-60'}`}>
                         <div className={`w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold ${activeStep === 5 ? 'bg-white text-[#1C1C1C]' : 'bg-gray-200 text-gray-500'}`}>
                             5

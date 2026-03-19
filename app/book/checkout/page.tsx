@@ -495,9 +495,9 @@ export default async function CheckoutPage({
                         </div>
 
                         <div className="mt-5 border-t border-gray-200 pt-4">
-                            <div className="flex justify-between items-end">
-                                <span className="text-gray-900 font-bold">Total Amount</span>
-                                <span className="text-2xl font-serif text-[#1C1C1C]">{formatCurrency(totalPrice)}</span>
+                            <div className="flex justify-between items-center">
+                                <span className="text-[#1C1C1C] font-semibold text-[13px] uppercase tracking-[0.1em]">Total Amount</span>
+                                <span className="text-2xl font-medium text-[#1C1C1C] tracking-tight">{formatCurrency(totalPrice)}</span>
                             </div>
                         </div>
                     </div>
