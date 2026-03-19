@@ -46,7 +46,13 @@ export function LuxuryDatePicker({
 
     // Handle range selection
     const handleSelect = (range: DateRange | undefined) => {
-        setSelectedDate(range);
+        // If we already have a complete range and user clicks a new date,
+        // just set it as new check-in (don't clear entire range)
+        if (selectedDate?.from && selectedDate?.to && range?.from && !range?.to) {
+            setSelectedDate({ from: range.from, to: undefined });
+        } else {
+            setSelectedDate(range);
+        }
     };
 
     // Apply button handler
