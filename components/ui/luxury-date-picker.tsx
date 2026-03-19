@@ -46,9 +46,10 @@ export function LuxuryDatePicker({
 
     // Handle range selection
     const handleSelect = (range: DateRange | undefined) => {
-        // If we already have a complete range and user clicks a new date,
-        // just set it as new check-in (don't clear entire range)
-        if (selectedDate?.from && selectedDate?.to && range?.from && !range?.to) {
+        // If we already have a complete range and user clicks any date,
+        // start fresh with new check-in (don't extend or modify existing range)
+        if (selectedDate?.from && selectedDate?.to && range?.from) {
+            // Always start fresh - new check-in, no check-out yet
             setSelectedDate({ from: range.from, to: undefined });
         } else {
             setSelectedDate(range);
