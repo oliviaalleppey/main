@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { addDays, format, startOfDay } from 'date-fns';
+import { format } from 'date-fns';
 import { DateRange } from 'react-day-picker';
 import { LuxuryDatePicker } from '@/components/ui/luxury-date-picker';
 import { useRouter } from 'next/navigation';
@@ -19,10 +19,7 @@ export default function HeroSection() {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
     const [searchError, setSearchError] = useState<string | null>(null);
-    const [date, setDate] = useState<DateRange | undefined>({
-        from: startOfDay(new Date()),
-        to: addDays(startOfDay(new Date()), 1),
-    });
+    const [date, setDate] = useState<DateRange | undefined>(undefined);
     const [guests, setGuests] = useState({ adults: 2, children: 0 });
     const router = useRouter();
 
