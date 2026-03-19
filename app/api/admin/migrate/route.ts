@@ -200,35 +200,15 @@ export async function POST() {
         `);
 
         // Add rate_plan_id to booking_items if it doesn't exist
-        // Only run if booking_items table exists
         await db.execute(sql`
-            DO $
-            BEGIN
-                IF EXISTS (SELECT FROM pg_tables WHERE tablename = 'booking_items') THEN
-                    IF NOT EXISTS (
-                        SELECT 1 FROM information_schema.columns 
-                        WHERE table_name = 'booking_items' AND column_name = 'rate_plan_id'
-                    ) THEN
-                        ALTER TABLE booking_items ADD COLUMN rate_plan_id uuid;
-                    END IF;
-                END IF;
-            END
-            $;
+            ALTER TABLE booking_items ADD COLUMN IF NOT EXISTS rate_plan_id uuid;
         `);
 
         // Add foreign key constraint separately (skip if already exists)
         await db.execute(sql`
-            DO $
-            BEGIN
-                IF EXISTS (SELECT FROM pg_tables WHERE tablename = 'booking_items') THEN
-                    ALTER TABLE booking_items 
-                    ADD CONSTRAINT IF NOT EXISTS booking_items_rate_plan_fkey 
-                    FOREIGN KEY (rate_plan_id) REFERENCES rate_plans(id) ON DELETE SET NULL;
-                END IF;
-            EXCEPTION
-                WHEN duplicate_table THEN null;
-            END
-            $;
+            ALTER TABLE booking_items 
+            ADD CONSTRAINT IF NOT EXISTS booking_items_rate_plan_fkey 
+            FOREIGN KEY (rate_plan_id) REFERENCES rate_plans(id) ON DELETE SET NULL;
         `);
 
         // Create add_on_room_types table if it doesn't exist (for linking add-ons to specific rooms)
@@ -267,6 +247,11 @@ export async function POST() {
         `);
         await db.execute(sql`
             CREATE INDEX IF NOT EXISTS idx_add_on_room_types_room_type_id ON add_on_room_types(room_type_id);
+        `);
+
+        // Add tax_rate column to add_ons if it doesn't exist
+        await db.execute(sql`
+            ALTER TABLE add_ons ADD COLUMN IF NOT EXISTS tax_rate integer DEFAULT 18;
         `);
 
         return NextResponse.json({

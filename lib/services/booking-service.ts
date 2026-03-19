@@ -645,10 +645,26 @@ export class BookingService {
                 };
             });
 
-            const payableTotal = roomLineItems.reduce((sum, line) => sum + line.subtotal, 0) + addOnSubtotal;
-            // Prices presented in checkout are treated as payable totals; derive a consistent tax split for CRS reporting.
-            const taxAmount = Math.round((payableTotal * 18) / 118);
-            const subtotal = payableTotal - taxAmount;
+            const roomSubtotal = roomLineItems.reduce((sum, line) => sum + line.subtotal, 0);
+            const roomTaxAmount = roomLineItems.reduce((sum, line) => {
+                // If quoteSnapshot exists, subtotal already matches that quote; tax details are stored in quoteSnapshot when available.
+                // In checkout, we compute room tax from the room type taxRate if quote tax isn't present.
+                // Here, we mirror checkout by using stored selection.quoteSnapshot.taxesAndFees when present.
+                const selection = roomSelections.find((s) => s.roomTypeId === line.roomTypeId);
+                const quotedTaxes = selection?.quoteSnapshot?.taxesAndFees;
+                if (typeof quotedTaxes === 'number' && quotedTaxes > 0) return sum + quotedTaxes;
+
+                const roomType = roomTypeMap.get(line.roomTypeId)!;
+                const taxRate = (roomType as { taxRate?: number }).taxRate ?? 12;
+                return sum + Math.round(line.subtotal * (taxRate / 100));
+            }, 0);
+
+            // Add-ons are taxed separately at 18%.
+            const addOnTaxAmount = Math.round(addOnSubtotal * 0.18);
+
+            const subtotal = roomSubtotal + addOnSubtotal;
+            const taxAmount = roomTaxAmount + addOnTaxAmount;
+            const payableTotal = subtotal + taxAmount;
 
             const [newBooking] = await db.insert(bookings).values({
                 bookingNumber: bookingRef,

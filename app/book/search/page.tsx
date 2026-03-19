@@ -77,14 +77,17 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     const isValidDates = !isNaN(checkInDate.getTime()) && !isNaN(checkOutDate.getTime()) && checkOutDate > checkInDate;
 
     let rooms: SearchResult[] = [];
+    let searchError: string | undefined;
     if (isValidDates) {
         try {
-            rooms = await getAvailableRoomsForSearch(
+            const payload = await getAvailableRoomsForSearch(
                 checkInDate,
                 checkOutDate,
                 { adults: safeAdults, children: safeChildren },
                 safeRooms,
             );
+            rooms = payload.rooms;
+            searchError = payload.error;
         } catch (error) {
             console.error('Failed to fetch rooms', error);
         }
@@ -179,6 +182,15 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                         </div>
                     )}
                 </div>
+
+                {searchError && (
+                    <div className="mb-4 md:mb-7 rounded-xl md:rounded-2xl border border-red-200 bg-red-50 p-4 relative">
+                        <div className="text-sm text-red-800 pr-6 space-y-1">
+                            <p>{searchError}</p>
+                            <p className="font-semibold mt-2">Inventory search fail.</p>
+                        </div>
+                    </div>
+                )}
 
                 {providerUnavailable && (
                     <div className="mb-4 md:mb-7 rounded-xl md:rounded-2xl border border-amber-200 bg-amber-50 px-3 md:px-4 py-2.5 md:py-3 text-amber-900">
@@ -344,8 +356,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                                                     <BookingButton
                                                         roomId={result.roomType.slug}
                                                         searchParams={{
-                                                            checkIn: checkInDate.toISOString(),
-                                                            checkOut: checkOutDate.toISOString(),
+                                                            checkIn: checkInDate.toISOString().split('T')[0],
+                                                            checkOut: checkOutDate.toISOString().split('T')[0],
                                                             adults: safeAdults,
                                                             children: safeChildren,
                                                         }}

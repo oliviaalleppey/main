@@ -3,6 +3,7 @@
 import { BookingService } from '@/lib/services/booking-service';
 import { OmniwareService } from '@/lib/services/omniware';
 import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 import { cookies, headers } from 'next/headers';
 import { RateLimiter } from '@/lib/rate-limit';
 
@@ -16,6 +17,7 @@ import { ensureRoomTypeMinOccupancyColumn } from '@/lib/db/schema-guard';
 import { mapCrsRoomTypeMatchesInternal } from '@/lib/config/crs';
 import { getBookingProvider } from '@/lib/providers/crs/factory';
 import { formatRoomName } from '@/lib/utils';
+import { getAvailableRoomsForSearch } from '@/lib/services/search';
 
 type SelectedAddOnInput = {
     addOnId: string;
@@ -200,10 +202,10 @@ async function persistSessionRoomSelections(
         0
     );
 
-    if (totalSelectedRooms > adults) {
+    if (totalSelectedRooms > adults + children) {
         return {
             success: false,
-            message: 'At least one adult is required per room. Increase adults or reduce selected rooms.',
+            message: 'At least one guest is required per room. Increase guests or reduce selected rooms.',
         };
     }
 
@@ -307,25 +309,32 @@ async function calculateSessionPayableAmount(sessionId: string): Promise<number>
     const roomTypeIds = Array.from(new Set(roomSelections.map((item) => item.roomTypeId)));
     const roomRows = await db.query.roomTypes.findMany({
         where: inArray(roomTypes.id, roomTypeIds),
-        columns: { id: true, basePrice: true },
+        columns: { id: true, basePrice: true, taxRate: true },
     });
-    const roomTypePriceMap = new Map(roomRows.map((row) => [row.id, row.basePrice]));
+    const roomTypePriceMap = new Map(roomRows.map((row) => [row.id, { basePrice: row.basePrice, taxRate: row.taxRate }]));
 
     const roomSubtotal = roomSelections.reduce((sum, selection) => {
         const quantity = sanitizeRoomCount(selection.quantity);
-        const basePrice = roomTypePriceMap.get(selection.roomTypeId);
-        if (typeof basePrice !== 'number') {
+        const roomData = roomTypePriceMap.get(selection.roomTypeId);
+        if (!roomData) {
             throw new Error('Selected room type no longer exists');
         }
 
-        const pricePerNight = selection.quoteSnapshot?.pricePerNight || basePrice;
+        const pricePerNight = selection.quoteSnapshot?.pricePerNight || roomData.basePrice;
         const computed = pricePerNight * nights * quantity;
         const quoted = selection.quoteSnapshot?.totalPrice;
         const lineSubtotal = typeof quoted === 'number' && quoted > 0
             ? Math.max(quoted, computed)
             : computed;
 
-        return sum + lineSubtotal;
+        const taxRate = roomData.taxRate ?? 12;
+        const computedTaxes = Math.round(lineSubtotal * (taxRate / 100));
+        const quotedTaxes = selection.quoteSnapshot?.taxesAndFees;
+        const lineTaxes = typeof quotedTaxes === 'number' && quotedTaxes > 0
+            ? quotedTaxes
+            : computedTaxes;
+
+        return sum + lineSubtotal + lineTaxes;
     }, 0);
 
     const selectedAddOns = sanitizeSelectedAddOns(cartData.selectedAddOns);
@@ -353,7 +362,9 @@ async function calculateSessionPayableAmount(sessionId: string): Promise<number>
         return sum + (price * selected.quantity);
     }, 0);
 
-    return roomSubtotal + addOnsSubtotal;
+    // Add-ons GST is always 18% (add-ons are separate from room taxes).
+    const addOnsTax = Math.round(addOnsSubtotal * 0.18);
+    return roomSubtotal + addOnsSubtotal + addOnsTax;
 }
 
 export async function startBookingSession(
@@ -419,6 +430,7 @@ export async function startBookingSession(
 
         const ratePlan = await db.query.ratePlans.findFirst({
             where: eq(ratePlans.roomTypeId, roomType.id),
+            orderBy: (ratePlans, { asc, desc }) => [desc(ratePlans.isDefault), asc(ratePlans.displayOrder)],
         });
         if (!ratePlan) {
             throw new Error(`No rate plan available for room: ${roomSlug}`);
@@ -475,8 +487,8 @@ export async function startBookingSession(
             (sum, selection) => sum + sanitizeRoomCount(selection.quantity),
             0
         );
-        if (totalSelectedRooms > searchParams.adults) {
-            throw new Error('At least one adult is required per room. Increase adults or reduce selected rooms.');
+        if (totalSelectedRooms > searchParams.adults + searchParams.children) {
+            throw new Error('At least one guest is required per room. Increase guests or reduce selected rooms.');
         }
 
         await db.update(bookingSessions).set({
@@ -758,3 +770,181 @@ export async function initiateOmniwarePaymentAction(): Promise<{
         return { success: false, error: message };
     }
 }
+
+export async function updateSessionSearch(params: { checkIn: Date; checkOut: Date; adults: number; children: number }) {
+    const sessionId = (await cookies()).get('booking_session')?.value;
+    if (!sessionId) {
+        return { success: false, message: 'Booking session expired. Please search again.' };
+    }
+
+    const session = await db.query.bookingSessions.findFirst({
+        where: eq(bookingSessions.id, sessionId),
+    });
+    if (!session) {
+        return { success: false, message: 'Booking session expired. Please search again.' };
+    }
+
+    const cartData = (session.cartData as SessionCartData | null) || {};
+    
+    // Check if the dates are actually different
+    const checkInDateOnly = toDateOnlyString(params.checkIn);
+    const checkOutDateOnly = toDateOnlyString(params.checkOut);
+    const oldCheckInDateOnly = toDateOnlyString(session.checkIn);
+    const oldCheckOutDateOnly = toDateOnlyString(session.checkOut);
+    const didChange = checkInDateOnly !== oldCheckInDateOnly || checkOutDateOnly !== oldCheckOutDateOnly || params.adults !== session.adults || params.children !== session.children;
+
+    if (!didChange) {
+        return { success: true };
+    }
+
+    // Changing search params invalidates current room prices/availability, so we Auto-Requote
+    let autoRequoteSnapshot: any = undefined;
+    let autoSelectRatePlanId: string | null = session.selectedRatePlanId;
+    let autoSelectRoomTypeId: string | null = session.selectedRoomTypeId;
+
+    if (session.selectedRoomTypeId) {
+        try {
+            const searchResult = await getAvailableRoomsForSearch(
+                params.checkIn,
+                params.checkOut,
+                { adults: params.adults, children: params.children },
+                1
+            );
+            
+            if (searchResult.rooms.length > 0) {
+                const matchedRoom = searchResult.rooms.find(r => r.roomType.id === session.selectedRoomTypeId);
+                
+                if (matchedRoom && matchedRoom.bookable && matchedRoom.availableRooms >= 1) {
+                    let matchedRatePlan = matchedRoom.ratePlans.find(rp => rp.id === session.selectedRatePlanId);
+                    if (!matchedRatePlan && matchedRoom.ratePlans.length > 0) {
+                        matchedRatePlan = matchedRoom.ratePlans[0];
+                        autoSelectRatePlanId = matchedRatePlan.id;
+                    }
+                    
+                    if (matchedRatePlan) {
+                        autoRequoteSnapshot = {
+                            pricePerNight: matchedRatePlan.amount,
+                            totalPrice: matchedRatePlan.amount,
+                            taxesAndFees: matchedRatePlan.tax || Math.round(matchedRatePlan.amount * ((matchedRoom.roomType.taxRate || 12) / 100)),
+                            externalRatePlanId: matchedRatePlan.id,
+                            capturedAt: new Date().toISOString()
+                        };
+                    } else {
+                        autoSelectRoomTypeId = null;
+                        autoSelectRatePlanId = null;
+                    }
+                } else {
+                    autoSelectRoomTypeId = null;
+                    autoSelectRatePlanId = null;
+                }
+            } else {
+                autoSelectRoomTypeId = null;
+                autoSelectRatePlanId = null;
+            }
+        } catch (err) {
+            console.error('Failed to auto-requote room in updateSessionSearch:', err);
+            autoSelectRoomTypeId = null;
+            autoSelectRatePlanId = null;
+        }
+    }
+
+    const nextCartData = {
+        ...cartData,
+        roomSelections: [],
+        quoteSnapshot: autoRequoteSnapshot || undefined,
+    };
+
+    await db.update(bookingSessions).set({
+        checkIn: checkInDateOnly,
+        checkOut: checkOutDateOnly,
+        adults: params.adults,
+        children: params.children,
+        selectedRoomTypeId: autoSelectRoomTypeId,
+        selectedRatePlanId: autoSelectRatePlanId,
+        cartData: nextCartData,
+        updatedAt: new Date(),
+    }).where(eq(bookingSessions.id, sessionId));
+
+    revalidatePath('/book/checkout');
+    return { success: true };
+}
+
+export async function updateSessionRoom(
+    roomTypeId: string, 
+    quantity: number, 
+    ratePlanId?: string,
+    quoteSnapshot?: { pricePerNight: number; totalPrice: number; taxesAndFees: number; externalRatePlanId?: string; }
+) {
+    const sessionId = (await cookies()).get('booking_session')?.value;
+    if (!sessionId) {
+        return { success: false, message: 'Booking session expired.' };
+    }
+
+    const session = await db.query.bookingSessions.findFirst({
+        where: eq(bookingSessions.id, sessionId),
+    });
+    if (!session) return { success: false, message: 'Booking session expired.' };
+
+    const cartData = (session.cartData as SessionCartData | null) || {};
+
+    const roomType = await db.query.roomTypes.findFirst({
+        where: eq(roomTypes.id, roomTypeId),
+    });
+    if (!roomType) return { success: false, message: `Room type not found.` };
+
+    let ratePlan;
+    if (ratePlanId) {
+        ratePlan = await db.query.ratePlans.findFirst({
+            where: eq(ratePlans.id, ratePlanId),
+        });
+    } else {
+        ratePlan = await db.query.ratePlans.findFirst({
+            where: eq(ratePlans.roomTypeId, roomType.id),
+            orderBy: (ratePlans, { asc, desc }) => [desc(ratePlans.isDefault), asc(ratePlans.displayOrder)],
+        });
+    }
+    if (!ratePlan) return { success: false, message: `No rate plan available.` };
+
+    const checkInDateOnly = toDateOnlyString(session.checkIn);
+    const checkOutDateOnly = toDateOnlyString(session.checkOut);
+    const provider = getBookingProvider();
+    
+    const adultsPerRoom = Math.max(1, Math.ceil((session.adults || 1) / quantity));
+    const childrenPerRoom = Math.max(0, Math.ceil((session.children || 0) / quantity));
+
+    const availability = await provider.checkAvailability({
+        checkIn: checkInDateOnly,
+        checkOut: checkOutDateOnly,
+        adults: adultsPerRoom,
+        children: childrenPerRoom,
+    });
+    
+    if (availability.status !== 'success') {
+        return { success: false, message: availability.message || 'Availability check failed.' };
+    }
+
+    const matchedAvailability = availability.rooms.find((room) => mapCrsRoomTypeMatchesInternal({
+        internalRoomTypeId: roomType.id,
+        internalRoomTypeSlug: roomType.slug,
+        crsRoomTypeId: room.roomTypeId,
+    }));
+
+    if (!matchedAvailability || matchedAvailability.availableCount < quantity) {
+        return { success: false, message: `Only ${matchedAvailability?.availableCount || 0} room(s) available.` };
+    }
+
+    const nextSelections: RoomSelectionInput[] = [
+        {
+            roomTypeId: roomType.id,
+            roomSlug: roomType.slug,
+            ratePlanId: ratePlan.id,
+            quantity: quantity,
+            quoteSnapshot: quoteSnapshot || undefined,
+        },
+    ];
+
+    const result = await persistSessionRoomSelections(session, cartData, nextSelections);
+    if (result.success) revalidatePath('/book/checkout');
+    return result;
+}
+

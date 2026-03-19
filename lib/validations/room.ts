@@ -21,6 +21,7 @@ export const roomTypeSchema = z
         images: z.array(z.string()).default([]),
         status: z.enum(['active', 'inactive', 'maintenance']).default('active'),
         sortOrder: z.coerce.number().default(0),
+        taxRate: z.coerce.number().min(0, 'Tax rate cannot be negative').max(100, 'Tax rate cannot exceed 100%').default(12),
     })
     .superRefine((data, ctx) => {
         if (data.minOccupancy > data.maxGuests) {

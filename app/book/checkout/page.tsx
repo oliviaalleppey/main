@@ -15,12 +15,17 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { CheckoutStepper } from '@/components/booking/checkout-stepper';
+import { SearchStayEditor } from '@/components/booking/search-stay-editor';
+import { CheckoutRoomList } from '@/components/booking/checkout-room-list';
+import { getAvailableRoomsForSearch } from '@/lib/services/search';
+import { updateSessionSearch } from '@/app/book/actions';
 import { GuestForm } from '@/components/booking/guest-form';
 import { AddOnsSelector } from '@/components/booking/add-ons-selector';
-import { MiniStayEditor } from '@/components/booking/mini-stay-editor';
-import { RoomSelectionsEditor } from '@/components/booking/room-selections-editor';
 import { ensureRoomTypeMinOccupancyColumn } from '@/lib/db/schema-guard';
 import { formatRoomName } from '@/lib/utils';
+import { Pencil, Check } from 'lucide-react';
+import { format } from 'date-fns';
 
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -203,15 +208,22 @@ export default async function CheckoutPage({
             const subtotal = typeof quotedSubtotal === 'number' && quotedSubtotal > 0
                 ? Math.max(quotedSubtotal, computedSubtotal)
                 : computedSubtotal;
+            const taxRate = (room as any).taxRate ?? 12;
+            const computedTaxes = Math.round(computedSubtotal * (taxRate / 100));
+            const quotedTaxes = selection.quoteSnapshot?.taxesAndFees;
+            const taxesAndFees = typeof quotedTaxes === 'number' && quotedTaxes > 0
+                ? quotedTaxes
+                : computedTaxes;
 
             return {
                 room,
                 quantity,
                 quotedPricePerNight,
                 subtotal,
+                taxesAndFees,
             };
         })
-        .filter((entry): entry is { room: typeof roomTypes.$inferSelect; quantity: number; quotedPricePerNight: number; subtotal: number } => entry !== null);
+        .filter((entry): entry is { room: typeof roomTypes.$inferSelect; quantity: number; quotedPricePerNight: number; subtotal: number; taxesAndFees: number } => entry !== null);
 
     if (!roomLineItems.length) return <div>Selected room types are no longer available.</div>;
 
@@ -220,6 +232,7 @@ export default async function CheckoutPage({
     const totalRoomCount = roomLineItems.reduce((sum, entry) => sum + entry.quantity, 0);
     const selectedRoomTypeCount = roomLineItems.length;
     const roomSubtotal = roomLineItems.reduce((sum, entry) => sum + entry.subtotal, 0);
+    const roomTaxesAndFees = roomLineItems.reduce((sum, entry) => sum + entry.taxesAndFees, 0);
     const selectedAddOns = Array.isArray(cartData.selectedAddOns)
         ? cartData.selectedAddOns
             .map((entry) => {
@@ -241,12 +254,18 @@ export default async function CheckoutPage({
             name: addOn.name,
             quantity: selectedAddOnMap.get(addOn.id) || 0,
             price: addOn.price,
+            taxRate: addOn.taxRate ?? 18,
             subtotal: addOn.price * (selectedAddOnMap.get(addOn.id) || 0),
         }))
         .filter((entry) => entry.quantity > 0);
 
     const addOnsTotal = selectedAddOnRows.reduce((sum, entry) => sum + entry.subtotal, 0);
-    const totalPrice = roomSubtotal + addOnsTotal;
+    // Calculate tax for each add-on based on its specific tax rate
+    const addOnsTax = selectedAddOnRows.reduce((sum, entry) => {
+        return sum + Math.round(entry.subtotal * (entry.taxRate / 100));
+    }, 0);
+    const taxesAndFeesTotal = roomTaxesAndFees + addOnsTax;
+    const totalPrice = roomSubtotal + addOnsTotal + taxesAndFeesTotal;
 
     const hasRequiredGuestDetails = Boolean(
         guestDetails.firstName &&
@@ -299,272 +318,191 @@ export default async function CheckoutPage({
     });
     const addMoreRoomsHref = `/book/search?${addMoreRoomsParams.toString()}`;
 
+    const initialStep = roomLineItems.length === 0 ? 2 : (showPaymentSection ? 5 : 3);
+
+    const searchPayload = await getAvailableRoomsForSearch(
+        checkInDate,
+        checkOutDate,
+        { adults: session.adults || 1, children: session.children || 0 },
+        Math.max(1, totalRoomCount)
+    );
+    const availableRooms = searchPayload.rooms;
+    const searchError = searchPayload.error;
+
     return (
-        <div className="min-h-screen bg-[#F6F1E8] py-2 md:py-6 px-2 md:px-4">
-            <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-6">
-                <div className="lg:col-span-2 order-2 lg:order-1">
-                    <div className="mb-3 md:mb-5 rounded-xl md:rounded-2xl border border-gray-200 bg-gradient-to-r from-white to-gray-50 p-2 md:p-4">
-                        <p className="text-[11px] md:text-xs uppercase tracking-[0.2em] md:tracking-[0.25em] text-gray-500 mb-2 md:mb-3">Booking Progress</p>
-                        <div className="grid grid-cols-3 gap-1.5 md:gap-2 text-[10px] md:text-sm">
-                            <div className="rounded-lg md:rounded-xl border border-emerald-200 bg-emerald-50 px-2 md:px-3 py-1.5 md:py-2 text-emerald-700 font-medium inline-flex items-center gap-1.5 md:gap-2">
-                                <CircleCheck className="w-4 h-4" />
-                                <span>1. Select Room</span>
-                            </div>
-                            <div className={`rounded-lg md:rounded-xl px-2 md:px-3 py-1.5 md:py-2 inline-flex items-center gap-1.5 md:gap-2 font-medium border ${hasRequiredGuestDetails
-                                ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                                : 'border-[#1C1C1C]/20 bg-white text-[#1C1C1C]'
-                                }`}>
-                                {hasRequiredGuestDetails ? <CircleCheck className="w-4 h-4" /> : <CircleDot className="w-4 h-4" />}
-                                <span>2. Guest Details</span>
-                            </div>
-                            <div className={`rounded-lg md:rounded-xl px-2 md:px-3 py-1.5 md:py-2 inline-flex items-center gap-1.5 md:gap-2 border ${showPaymentSection
-                                ? 'border-[#1C1C1C]/20 bg-white text-[#1C1C1C] font-semibold'
-                                : 'border-gray-200 bg-gray-50 text-gray-400 font-medium'
-                                }`}>
-                                <CircleDot className="w-4 h-4" />
-                                <span>3. Payment</span>
-                            </div>
-                        </div>
+        <div className="min-h-screen bg-[#F6F1E8] py-4 md:py-8 px-4 md:px-6">
+            <CheckoutStepper
+                hasGuestDetails={hasRequiredGuestDetails}
+                initialStep={initialStep}
+                selectedRatePlanId={session.selectedRatePlanId || undefined}
+                searchHash={`${session.checkIn}-${session.checkOut}-${session.adults}-${session.children}`}
+                searchStep={
+                    <div className="text-sm font-semibold text-gray-900 leading-tight">
+                        <span>{format(new Date(session.checkIn as string | Date), 'dd MMM yyyy')} - {format(new Date(session.checkOut as string | Date), 'dd MMM yyyy')}</span>
+                        <span className="hidden sm:inline mx-2 text-gray-400">/</span>
+                        <span className="block sm:inline mt-1 sm:mt-0">{totalRoomCount} Room{totalRoomCount > 1 ? 's' : ''}, {session.adults} Adult{session.adults !== 1 ? 's' : ''}</span>
                     </div>
-
-                    <h1 className="text-xl md:text-2xl font-serif mb-1">Checkout</h1>
-                    <p className="text-sm text-gray-500 mb-1">
-                        {showPaymentSection
-                            ? 'Review details, add enhancements, and complete payment.'
-                            : 'Add guest details to continue to payment.'}
-                    </p>
-                    <p className="text-xs text-gray-500 mb-4 md:mb-8 inline-flex items-center gap-1.5">
-                        <ShieldCheck className="w-3.5 h-3.5 text-gray-400" />
-                        Your details are used for invoice, confirmation, and support only.
-                    </p>
-
-                    {error && (
-                        <div className="bg-red-50 border border-red-200 text-red-600 p-3 md:p-4 rounded-xl mb-4 md:mb-6 flex items-start gap-2">
-                            <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                            <div>
-                                <h4 className="font-bold">Booking Could Not Be Completed</h4>
-                                <p className="text-sm">{errorMessage}</p>
+                }
+                inlineSearchEditor={
+                    <SearchStayEditor
+                        initialCheckIn={new Date(session.checkIn!)}
+                        initialCheckOut={new Date(session.checkOut!)}
+                        initialAdults={session.adults || 1}
+                        initialChildren={session.children || 0}
+                        initialRooms={Math.max(1, totalRoomCount)}
+                        onUpdate={async (checkIn, checkOut, adults, children) => {
+                            "use server";
+                            await updateSessionSearch({ checkIn, checkOut, adults, children });
+                        }}
+                    />
+                }
+                roomStep={
+                    <div className="space-y-1.5 mt-1">
+                        {roomLineItems.length > 0 ? roomLineItems.map(item => (
+                            <div key={item.room.id} className="text-sm font-semibold text-gray-900 leading-tight flex flex-col sm:flex-row sm:items-center">
+                                <span>{formatRoomName(item.room.name)}</span>
+                                <span className="text-xs font-medium text-gray-500 sm:ml-2 mt-0.5 sm:mt-0">{formatCurrency(item.subtotal)} Room/Night</span>
                             </div>
-                        </div>
-                    )}
-
-                    <div className="bg-white p-3 md:p-5 rounded-xl md:rounded-2xl shadow-sm border border-gray-100 mb-2 md:mb-4">
-                        <AddOnsSelector
-                            options={availableAddOns}
-                            initialSelected={selectedAddOns}
+                        )) : <span className="text-sm text-gray-500 font-semibold">No room selected.</span>}
+                    </div>
+                }
+                roomListContent={
+                    <CheckoutRoomList
+                        rooms={availableRooms}
+                        selectedRoomTypeId={session.selectedRoomTypeId || ''}
+                        errorMessage={searchError}
+                    />
+                }
+                availableAddOns={availableAddOns}
+                selectedAddOns={selectedAddOns}
+                guestInfoContent={
+                    <div>
+                        {showGuestDetailsError && (
+                            <p className="mb-3 rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-xs text-amber-900">
+                                Please save valid guest details before payment.
+                            </p>
+                        )}
+                        <GuestForm
+                            initialValues={guestDetails}
+                            submitLabel="Save Guest Details"
                         />
                     </div>
-
-                    <div className="bg-white p-3 md:p-5 rounded-xl md:rounded-2xl shadow-sm border border-gray-100 mb-2 md:mb-4">
-                        <div className="flex items-center justify-between gap-3 md:gap-4 mb-2 md:mb-3">
-                            <div>
-                                <h3 className="text-lg md:text-xl font-semibold text-[#1C1C1C]">Guest Information</h3>
-                                <p className="text-xs text-gray-500 mt-0.5">Primary contact for this reservation</p>
-                            </div>
-                            {hasRequiredGuestDetails && !isEditingGuestDetails && (
-                                <Link
-                                    href="/book/checkout?edit=1"
-                                    className="text-xs font-semibold uppercase tracking-wider text-[#1C1C1C] hover:text-[#E95D20] transition-colors rounded-lg border border-gray-300 px-2.5 py-1.5"
-                                >
-                                    Edit
-                                </Link>
-                            )}
-                        </div>
-
-                        {isEditingGuestDetails ? (
-                            <div>
-                                {showGuestDetailsError && (
-                                    <p className="mb-3 rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-xs text-amber-900">
-                                        Please save valid guest details before payment.
-                                    </p>
-                                )}
-                                <GuestForm
-                                    initialValues={guestDetails}
-                                    submitLabel={hasRequiredGuestDetails ? 'Save Guest Details' : 'Save & Continue to Payment'}
-                                />
-                            </div>
-                        ) : (
-                            <>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3 text-xs md:text-sm">
-                                    <div className="rounded-lg md:rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 md:py-2.5">
-                                        <span className="text-gray-500 block text-[10px] uppercase tracking-wider">Name</span>
-                                        <span className="font-medium text-sm">{guestDetails.firstName || '-'} {guestDetails.lastName || ''}</span>
-                                    </div>
-                                    <div className="rounded-lg md:rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 md:py-2.5">
-                                        <span className="text-gray-500 block text-[10px] uppercase tracking-wider">Email</span>
-                                        <span className="font-medium text-sm break-all">{guestDetails.email || '-'}</span>
-                                    </div>
-                                    <div className="rounded-lg md:rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 md:py-2.5">
-                                        <span className="text-gray-500 block text-[10px] uppercase tracking-wider">Phone</span>
-                                        <span className="font-medium text-sm">{guestDetails.phone || '-'}</span>
-                                    </div>
-                                </div>
-                                <div className="mt-2 rounded-lg md:rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 md:py-2.5">
-                                    <span className="text-gray-500 block text-[10px] uppercase tracking-wider">Special Requests</span>
-                                    <p className="text-xs mt-0.5 text-gray-800">{guestDetails.requests || 'None'}</p>
-                                </div>
-                            </>
-                        )}
-                    </div>
-
-                    <div id="payment-section" className="bg-white p-3 md:p-5 rounded-xl md:rounded-2xl shadow-sm border border-gray-100">
-                        <div className="mb-3 md:mb-4">
-                            <h3 className="text-lg md:text-xl font-semibold text-[#1C1C1C]">Payment</h3>
+                }
+                paymentContent={
+                    <div>
+                        <div className="mb-4">
+                            <h3 className="text-lg font-semibold text-[#1C1C1C]">Payment</h3>
                             <p className="text-xs text-gray-500 mt-0.5">Final step to confirm your reservation</p>
                         </div>
+                        {error && (
+                            <div className="bg-red-50 border border-red-200 text-red-600 p-3 md:p-4 rounded-xl mb-4 flex items-start gap-2">
+                                <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                                <div>
+                                    <h4 className="font-bold">Booking Could Not Be Completed</h4>
+                                    <p className="text-sm">{errorMessage}</p>
+                                </div>
+                            </div>
+                        )}
                         {showPaymentSection ? (
                             <CheckoutForm amount={totalPrice} />
                         ) : (
                             <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-900">
                                 <p className="text-sm font-semibold">Guest details required before payment</p>
                                 <p className="text-xs mt-1">
-                                    Save guest details above to unlock secure payment and booking confirmation.
+                                    Save guest details to unlock secure payment.
                                 </p>
                             </div>
                         )}
                     </div>
-                </div>
+                }
+                orderSummary={
+                    <div className="bg-white p-4 md:p-6 rounded-xl md:rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100">
+                        <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
+                            <h2 className="text-lg font-medium">Your Booking Details</h2>
+                            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-700">
+                                <ShieldCheck className="w-3.5 h-3.5" />
+                                Secure
+                            </span>
+                        </div>
 
-                <div className="order-1 lg:order-2 bg-white p-3 md:p-5 rounded-xl md:rounded-2xl shadow-sm border border-gray-100 h-fit lg:sticky lg:top-6">
-                    <div className="flex items-center justify-between border-b border-gray-100 pb-2 md:pb-3 mb-2 md:mb-3">
-                        <h2 className="text-lg md:text-xl font-medium">Order Summary</h2>
-                        <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 md:px-2.5 md:py-1 text-[10px] md:text-[11px] font-semibold uppercase tracking-wider text-emerald-700">
-                            <ShieldCheck className="w-3.5 h-3.5" />
-                            Secure
-                        </span>
-                    </div>
+                        <div className="rounded-xl border border-gray-200 bg-gray-50 p-3 mb-4">
+                            <div className="flex gap-3">
+                                {primaryRoom.images && primaryRoom.images[0] && (
+                                    <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                                        <Image src={primaryRoom.images[0]} alt={primaryRoomName} fill className="object-cover" />
+                                    </div>
+                                )}
+                                <div className="min-w-0 flex-1">
+                                    <h3 className="font-serif text-lg leading-tight text-[#1C1C1C]">
+                                        {primaryRoomName}
+                                        {selectedRoomTypeCount > 1 ? ` + ${selectedRoomTypeCount - 1} more type${selectedRoomTypeCount - 1 > 1 ? 's' : ''}` : ''}
+                                    </h3>
+                                    <div className="mt-2 flex flex-wrap gap-1.5 whitespace-nowrap">
+                                        <span className="bg-white border border-gray-200 px-2 py-0.5 text-[11px] text-gray-700 rounded-sm">
+                                            {nights} night{nights > 1 ? 's' : ''}
+                                        </span>
+                                        <span className="bg-white border border-gray-200 px-2 py-0.5 text-[11px] text-gray-700 rounded-sm">
+                                            {totalRoomCount} room{totalRoomCount > 1 ? 's' : ''}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
-                        <div className="flex gap-3">
-                            {primaryRoom.images && primaryRoom.images[0] && (
-                                <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden flex-shrink-0">
-                                    <Image src={primaryRoom.images[0]} alt={primaryRoomName} fill className="object-cover" />
+                        <div className="space-y-3 text-sm text-gray-600 border-t border-gray-100 pt-4">
+                            <div className="flex justify-between">
+                                <span>Stay Dates</span>
+                                <span className="font-medium text-black text-right">{format(new Date(session.checkIn as string | Date), 'dd MMM')} - {format(new Date(session.checkOut as string | Date), 'dd MMM yyyy')}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span>Guests</span>
+                                <span className="font-medium text-black text-right">{session.adults} Adult, {session.children} Children</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span>Room Subtotal</span>
+                                <span className="font-medium text-black">{formatCurrency(roomSubtotal)}</span>
+                            </div>
+                            <div className="flex justify-between text-[13px]">
+                                <span className="text-gray-500">Room Tax</span>
+                                <span className="font-medium text-gray-700">{formatCurrency(roomTaxesAndFees)}</span>
+                            </div>
+
+                            {selectedAddOnRows.length > 0 && (
+                                <div className="pt-2 border-t border-dashed border-gray-200 space-y-2">
+                                    {selectedAddOnRows.map((entry) => (
+                                        <div key={entry.id} className="flex justify-between text-xs">
+                                            <span>{entry.name} x {entry.quantity}</span>
+                                            <span className="font-medium text-black">{formatCurrency(entry.subtotal)}</span>
+                                        </div>
+                                    ))}
+                                    <div className="flex justify-between text-[13px]">
+                                        <span>Add-ons Subtotal</span>
+                                        <span className="font-medium text-black">{formatCurrency(addOnsTotal)}</span>
+                                    </div>
+                                    <div className="flex justify-between text-[13px]">
+                                        <span className="text-gray-500">Add-ons Tax</span>
+                                        <span className="font-medium text-gray-700">{formatCurrency(addOnsTax)}</span>
+                                    </div>
                                 </div>
                             )}
-                            <div className="min-w-0">
-                                <h3 className="font-serif text-lg md:text-xl leading-tight text-[#1C1C1C]">
-                                    {primaryRoomName}
-                                    {selectedRoomTypeCount > 1 ? ` + ${selectedRoomTypeCount - 1} more type${selectedRoomTypeCount - 1 > 1 ? 's' : ''}` : ''}
-                                </h3>
-                                <div className="mt-2 flex flex-wrap gap-1.5">
-                                    <span className="rounded-full bg-white border border-gray-200 px-2 py-0.5 text-[11px] text-gray-700">
-                                        {nights} night{nights > 1 ? 's' : ''}
-                                    </span>
-                                    <span className="rounded-full bg-white border border-gray-200 px-2 py-0.5 text-[11px] text-gray-700">
-                                        {totalRoomCount} room{totalRoomCount > 1 ? 's' : ''}
-                                    </span>
-                                    <span className="rounded-full bg-white border border-gray-200 px-2 py-0.5 text-[11px] text-gray-700">
-                                        {session.adults} Adults, {session.children} Children
-                                    </span>
-                                    {selectedAddOnsCount > 0 && (
-                                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200 px-2 py-0.5 text-[11px] text-amber-800">
-                                            <Sparkles className="w-3 h-3" />
-                                            {selectedAddOnsCount} Add-on{selectedAddOnsCount > 1 ? 's' : ''}
-                                        </span>
-                                    )}
+
+                            {selectedAddOnRows.length > 0 && (
+                                <div className="flex justify-between pt-3 border-t border-gray-100">
+                                    <span>Total Taxes</span>
+                                    <span className="font-medium text-black">{formatCurrency(taxesAndFeesTotal)}</span>
                                 </div>
-                            </div>
+                            )}
                         </div>
-                        <p className="text-xs text-gray-500 mt-3">{stayDatesLabel}</p>
-                    </div>
 
-                    <div className="mt-3 space-y-2">
-                        <div className="rounded-lg border border-amber-200 bg-amber-50 p-2.5 flex items-start gap-2">
-                            <Clock3 className="w-4 h-4 mt-0.5 text-amber-700 flex-shrink-0" />
-                            <div>
-                                <p className="text-xs font-semibold text-amber-900">
-                                    Session hold: {sessionHoldLabel}
-                                </p>
-                                <p className="text-[11px] text-amber-800">
-                                    Until {sessionExpiryLabel} IST. Complete payment to secure this selection.
-                                </p>
-                            </div>
-                        </div>
-                        <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-2.5 flex items-start gap-2">
-                            <ShieldCheck className="w-4 h-4 mt-0.5 text-emerald-700 flex-shrink-0" />
-                            <div>
-                                <p className="text-xs font-semibold text-emerald-900">Protected checkout</p>
-                                <p className="text-[11px] text-emerald-800">Pricing and inventory are re-verified before confirmation.</p>
+                        <div className="mt-5 border-t border-gray-200 pt-4">
+                            <div className="flex justify-between items-end">
+                                <span className="text-gray-900 font-bold">Total Amount</span>
+                                <span className="text-2xl font-serif text-[#1C1C1C]">{formatCurrency(totalPrice)}</span>
                             </div>
                         </div>
                     </div>
-
-                    <div className="mt-4">
-                        <MiniStayEditor
-                            checkIn={toDateOnlyString(session.checkIn)}
-                            checkOut={toDateOnlyString(session.checkOut)}
-                            adults={session.adults || 1}
-                            childCount={session.children || 0}
-                            roomCount={totalRoomCount}
-                        />
-                    </div>
-
-                    <div className="mt-4">
-                        <RoomSelectionsEditor
-                            items={roomLineItems.map((entry) => ({
-                                roomTypeId: entry.room.id,
-                                roomName: formatRoomName(entry.room.name),
-                                quantity: entry.quantity,
-                                quotedPricePerNight: entry.quotedPricePerNight,
-                                nights,
-                            }))}
-                            adults={session.adults || 1}
-                            addMoreRoomsHref={addMoreRoomsHref}
-                        />
-                    </div>
-
-                    <div className="space-y-2.5 md:space-y-3 text-xs md:text-sm text-gray-600 mt-4 border-t border-gray-100 pt-4">
-                        <div className="flex justify-between">
-                            <span>Dates</span>
-                            <span className="font-medium text-black text-right">{stayDatesLabel}</span>
-                        </div>
-                        {roomLineItems.map((entry) => (
-                            <div key={entry.room.id} className="flex justify-between">
-                                <span className="max-w-[70%]">
-                                    {formatRoomName(entry.room.name)} ({formatCurrency(entry.quotedPricePerNight)} x {nights}N x {entry.quantity}R)
-                                </span>
-                                <span className="font-medium text-black">{formatCurrency(entry.subtotal)}</span>
-                            </div>
-                        ))}
-                        <div className="flex justify-between">
-                            <span>Room Subtotal</span>
-                            <span className="font-medium text-black">{formatCurrency(roomSubtotal)}</span>
-                        </div>
-                        {selectedAddOnRows.length > 0 && (
-                            <div className="pt-2 border-t border-dashed border-gray-200 space-y-2">
-                                {selectedAddOnRows.map((entry) => (
-                                    <div key={entry.id} className="flex justify-between text-xs">
-                                        <span>{entry.name} x {entry.quantity}</span>
-                                        <span className="font-medium text-black">{formatCurrency(entry.subtotal)}</span>
-                                    </div>
-                                ))}
-                                <div className="flex justify-between text-sm">
-                                    <span>Add-ons Total</span>
-                                    <span className="font-medium text-black">{formatCurrency(addOnsTotal)}</span>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="mt-4 border-t border-gray-100 pt-4">
-                        <div className="flex justify-between items-end">
-                            <span className="text-gray-900 font-semibold">Total to Pay</span>
-                            <span className="text-2xl md:text-3xl font-serif text-[#E95D20]">{formatCurrency(totalPrice)}</span>
-                        </div>
-                        <div className="mt-3 rounded-lg border border-gray-200 bg-gray-50 p-2.5 md:p-3 flex items-center justify-between gap-2 md:gap-3">
-                            <p className="text-[11px] text-gray-600 uppercase tracking-wider">Need help booking?</p>
-                            <Link
-                                href="/contact"
-                                className="inline-flex items-center gap-1 text-xs font-semibold text-[#1C1C1C] hover:text-[#E95D20] transition-colors"
-                            >
-                                <PhoneCall className="w-3.5 h-3.5" />
-                                Talk to Reservations
-                            </Link>
-                        </div>
-                        <p className="text-xs text-gray-400 mt-3 text-center">Secure SSL encrypted transaction</p>
-                    </div>
-                </div>
-            </div>
+                }
+            />
         </div>
     );
 }

@@ -1,8 +1,9 @@
 'use client';
 
+import Image from 'next/image';
 import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, Minus, Plus, Sparkles, Tag } from 'lucide-react';
+import { Loader2, Minus, Plus, Sparkles, Tag, Check } from 'lucide-react';
 import { updateSessionAddOns } from '@/app/book/actions';
 import { formatCurrency } from '@/lib/services/payment';
 
@@ -12,6 +13,7 @@ type AddOnOption = {
     description: string | null;
     price: number;
     type: 'per_person' | 'per_unit' | null;
+    imageUrl?: string | null;
 };
 
 type SelectedAddOn = {
@@ -22,9 +24,10 @@ type SelectedAddOn = {
 interface AddOnsSelectorProps {
     options: AddOnOption[];
     initialSelected: SelectedAddOn[];
+    onContinue?: () => void;
 }
 
-export function AddOnsSelector({ options, initialSelected }: AddOnsSelectorProps) {
+export function AddOnsSelector({ options, initialSelected, onContinue }: AddOnsSelectorProps) {
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
     const [message, setMessage] = useState<string | null>(null);
@@ -50,19 +53,21 @@ export function AddOnsSelector({ options, initialSelected }: AddOnsSelectorProps
     }, [selectedItems]);
 
     const setQuantity = (addOnId: string, next: number) => {
+        const nextValue = Math.max(0, Math.min(10, next));
         setMessage(null);
+        
         setQuantities((prev) => ({
             ...prev,
-            [addOnId]: Math.max(0, Math.min(10, next)),
+            [addOnId]: nextValue,
         }));
-    };
 
-    const handleSave = () => {
         startTransition(async () => {
-            const payload = selectedItems.map((item) => ({
-                addOnId: item.id,
-                quantity: item.quantity,
-            }));
+            const payload = options
+                .map((option) => ({
+                    addOnId: option.id,
+                    quantity: option.id === addOnId ? nextValue : (quantities[option.id] || 0),
+                }))
+                .filter((item) => item.quantity > 0);
 
             const response = await updateSessionAddOns(payload);
             if (!response.success) {
@@ -70,7 +75,6 @@ export function AddOnsSelector({ options, initialSelected }: AddOnsSelectorProps
                 return;
             }
 
-            setMessage('Add-ons updated');
             router.refresh();
         });
     };
@@ -95,7 +99,7 @@ export function AddOnsSelector({ options, initialSelected }: AddOnsSelectorProps
                 </div>
             </div>
 
-            <div className="space-y-1.5 md:space-y-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {options.map((option) => {
                     const quantity = quantities[option.id] || 0;
                     const typeLabel = option.type === 'per_person' ? 'per person' : 'per unit';
@@ -104,48 +108,59 @@ export function AddOnsSelector({ options, initialSelected }: AddOnsSelectorProps
                     return (
                         <div
                             key={option.id}
-                            className={`rounded-lg border p-2 md:p-3 transition-colors ${quantity > 0
-                                ? 'border-[#0A332B]/30 bg-[#0A332B]/5'
-                                : 'border-gray-200 bg-gray-50'
+                            className={`rounded-2xl border transition-all overflow-hidden flex flex-col ${quantity > 0
+                                ? 'border-[#0A332B] ring-1 ring-[#0A332B] shadow-sm'
+                                : 'border-gray-200 bg-white hover:border-gray-300'
                                 }`}
                         >
-                            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-3">
-                                <div className="space-y-1 min-w-0">
-                                    <p className="text-xs md:text-sm font-semibold text-gray-900">{option.name}</p>
-                                    {option.description && (
-                                        <p className="text-xs text-gray-600">{option.description}</p>
-                                    )}
-                                    <p className="text-xs text-gray-500 inline-flex items-center gap-1">
-                                        <Tag className="w-3 h-3" />
-                                        {formatCurrency(option.price)} {typeLabel}
-                                    </p>
-                                </div>
+                            {/* Image Section */}
+                            <div className="relative h-40 w-full bg-gray-100 shrink-0">
+                                {option.imageUrl ? (
+                                    <Image src={option.imageUrl} alt={option.name} fill className="object-cover" />
+                                ) : (
+                                    <div className="absolute inset-0 flex items-center justify-center text-gray-300 bg-gray-50">
+                                        <Sparkles className="w-8 h-8 opacity-40" />
+                                    </div>
+                                )}
+                                {quantity > 0 && (
+                                    <div className="absolute top-3 right-3 bg-[#0A332B] text-white rounded-full p-1 shadow-sm">
+                                        <Check className="w-4 h-4" />
+                                    </div>
+                                )}
+                            </div>
 
-                                <div className="flex items-center justify-between md:justify-end gap-2 md:gap-3 md:min-w-[180px]">
-                                    <div className="flex items-center gap-2">
+                            {/* Content Section */}
+                            <div className="p-4 flex flex-col flex-1">
+                                <h3 className="text-sm font-semibold text-gray-900">{option.name}</h3>
+                                {option.description && (
+                                    <p className="text-xs text-gray-500 mt-1 line-clamp-2">{option.description}</p>
+                                )}
+                                <div className="mt-3 text-[11px] text-gray-600 font-medium inline-flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-md self-start border border-gray-100">
+                                    <Tag className="w-3 h-3 text-gray-400" />
+                                    <span>{formatCurrency(option.price)} <span className="text-gray-400 font-normal">/ {typeLabel}</span></span>
+                                </div>
+                                
+                                <div className="mt-auto pt-5 flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
                                         <button
                                             type="button"
                                             onClick={() => setQuantity(option.id, quantity - 1)}
-                                            className="h-7 w-7 md:h-8 md:w-8 rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-40"
+                                            className="h-8 w-8 rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-40 flex items-center justify-center transition-colors"
                                             disabled={isPending || quantity === 0}
                                             aria-label={`Decrease ${option.name}`}
                                         >
-                                            <Minus className="w-3.5 h-3.5 mx-auto" />
+                                            <Minus className="w-3.5 h-3.5" />
                                         </button>
-                                        <span className="w-8 text-center text-sm font-semibold text-gray-900">{quantity}</span>
+                                        <span className="w-4 text-center text-sm font-bold text-gray-900 tabular-nums">{quantity}</span>
                                         <button
                                             type="button"
                                             onClick={() => setQuantity(option.id, quantity + 1)}
-                                            className="h-7 w-7 md:h-8 md:w-8 rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-40"
+                                            className="h-8 w-8 rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-40 flex items-center justify-center transition-colors"
                                             disabled={isPending || quantity >= 10}
                                             aria-label={`Increase ${option.name}`}
                                         >
-                                            <Plus className="w-3.5 h-3.5 mx-auto" />
+                                            <Plus className="w-3.5 h-3.5" />
                                         </button>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-[11px] uppercase tracking-wider text-gray-500">Line Total</p>
-                                        <p className="text-xs md:text-sm font-semibold text-gray-900">{quantity > 0 ? formatCurrency(rowTotal) : '-'}</p>
                                     </div>
                                 </div>
                             </div>
@@ -157,32 +172,19 @@ export function AddOnsSelector({ options, initialSelected }: AddOnsSelectorProps
             <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-2 md:p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 md:gap-3">
                 <div className="flex-1">
                     {message ? (
-                        <p className={`text-xs font-medium ${message === 'Add-ons updated' ? 'text-emerald-700' : 'text-amber-700'}`}>
+                        <p className={`text-xs font-medium text-amber-700`}>
                             {message}
                         </p>
                     ) : (
-                        <p className="text-xs text-gray-500 italic">
-                            {addOnsTotal > 0
-                                ? 'Review your selections and save to update your total.'
+                        <p className="text-xs text-gray-500 italic flex items-center gap-1.5">
+                            {isPending && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                            {isPending ? 'Saving...' : addOnsTotal > 0
+                                ? 'Your enhancements are saved automatically.'
                                 : 'No enhancements selected. You can skip this and continue to payment.'}
                         </p>
                     )}
                 </div>
                 <div className="flex items-center gap-2 sm:self-end">
-                    {Object.entries(quantities).some(([id, q]) => {
-                        const initial = initialSelected.find(s => s.addOnId === id)?.quantity || 0;
-                        return q !== initial;
-                    }) && (
-                            <button
-                                type="button"
-                                onClick={handleSave}
-                                disabled={isPending}
-                                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#E95D20] px-4 py-2 text-[11px] md:text-xs font-semibold uppercase tracking-wider text-white hover:bg-[#D54D15] disabled:opacity-60 transition-colors shadow-sm"
-                            >
-                                {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
-                                Save Enhancements
-                            </button>
-                        )}
                     <button
                         type="button"
                         onClick={() => {

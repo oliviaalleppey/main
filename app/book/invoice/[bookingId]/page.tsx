@@ -42,17 +42,11 @@ export default async function InvoicePage({ params }: { params: Promise<{ bookin
         ? 'Multiple Room Types'
         : formatRoomName(primaryItem?.roomType?.name);
 
-    // Helper: Calculate Tax
-    const pricePerNight = primaryItem?.pricePerNight || 0;
-    const priceInRupees = pricePerNight / 100;
-
-    // Tax Logic: < 7500 -> 12%, >= 7500 -> 18%
-    const taxRate = priceInRupees >= 7500 ? 0.18 : 0.12;
-
-    // Reverse Calc Assuming Total Amount is Inclusive
+    // Use stored values from booking (rooms + add-ons can have different GST rates).
+    // We therefore avoid inferring GST slab from a single room price.
     const grandTotal = booking.totalAmount / 100;
-    const taxableValue = grandTotal / (1 + taxRate);
-    const totalTax = grandTotal - taxableValue;
+    const taxableValue = (booking.subtotal || 0) / 100;
+    const totalTax = (booking.taxAmount || 0) / 100;
     const cgst = totalTax / 2;
     const sgst = totalTax / 2;
 
@@ -110,7 +104,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ bookin
                 </div>
                 <div className="grid grid-cols-4 text-xs border-b border-gray-400 divide-x divide-gray-400">
                     <div className="p-1"><span className="text-blue-900 font-bold">Check-In :</span> {checkIn}</div>
-                    <div className="p-1"><span className="text-blue-900 font-bold">Tariff :</span> {priceInRupees.toFixed(2)}</div>
+                    <div className="p-1"><span className="text-blue-900 font-bold">Tariff :</span> {(primaryItem?.pricePerNight || 0 / 100).toFixed(2)}</div>
                     <div className="p-1 col-span-1"></div>
                     <div className="p-1"><span className="text-blue-900 font-bold">GRC No :</span> -</div>
                 </div>
@@ -138,8 +132,8 @@ export default async function InvoicePage({ params }: { params: Promise<{ bookin
                                 <div className="font-bold">
                                     Room Tariff [{roomTypeLabel}] x {totalRoomCount} room{totalRoomCount > 1 ? 's' : ''}
                                 </div>
-                                <div className="text-gray-500 mt-1">CGST @ {(taxRate * 100 / 2)}%</div>
-                                <div className="text-gray-500">SGST @ {(taxRate * 100 / 2)}%</div>
+                                <div className="text-gray-500 mt-1">CGST</div>
+                                <div className="text-gray-500">SGST</div>
                             </td>
                             <td className="p-2 border-r border-gray-400 text-center align-top">996311</td>
                             <td className="p-2 text-right align-top">

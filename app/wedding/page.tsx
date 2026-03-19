@@ -1,7 +1,10 @@
+'use client';
+
 import StickyBookButton from '@/components/sticky-book-button';
 import WhatsAppWidget from '@/components/whatsapp-widget';
 import Link from 'next/link';
 import Image from 'next/image';
+import { motion } from 'framer-motion';
 import { CalendarDays, Flower2, Sparkles, Users, type LucideIcon } from 'lucide-react';
 
 interface CelebrationStyle {
@@ -133,42 +136,61 @@ export default function WeddingPage() {
     return (
         <>
             <main className="min-h-screen bg-[#FAF8F3] text-[#26322D]">
-                <section className="relative overflow-hidden border-b border-[#E8E0D2]">
-                    <div className="relative h-[72vh] md:h-[78vh]">
-                        {/* Placeholder background (image to be added later) */}
+                <section className="relative h-[44vh] md:h-[52vh] w-full overflow-hidden">
+                    <motion.div
+                        initial={{ scale: 1.05 }}
+                        animate={{ scale: 1 }}
+                        transition={{ duration: 8, ease: "easeOut" }}
+                        className="absolute inset-0 z-0"
+                    >
+                        {/* Dark gradient background */}
                         <div className="absolute inset-0 bg-[linear-gradient(135deg,#1C2622_0%,#2B3A34_38%,#1B2421_100%)]" />
                         <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_25%_30%,rgba(231,212,173,0.18)_0%,rgba(231,212,173,0)_60%)]" />
-                        <div className="absolute inset-0 bg-gradient-to-r from-[#1F2623]/65 via-[#1F2623]/30 to-transparent" />
-                    </div>
+                    </motion.div>
 
-                    <div className="absolute inset-0 flex items-center">
-                        <div className="max-w-6xl mx-auto px-6 md:px-10 w-full">
-                            <div className="max-w-3xl">
-                                <p className="text-[#E2CC9E] text-[11px] tracking-[0.35em] uppercase mb-5">
-                                    Wedding Experiences At Olivia Alleppey
+                    <div className="relative z-10 h-full flex items-center justify-center text-center px-6">
+                        <div className="max-w-4xl">
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.8, delay: 0.2 }}
+                                className="flex items-center justify-center gap-4 mb-3"
+                            >
+                                <span className="w-8 h-[1px] bg-white/80" />
+                                <p className="text-white text-[10px] tracking-[0.34em] uppercase font-light">
+                                    Olivia Alleppey
                                 </p>
-                                <h1 className="font-serif text-4xl md:text-6xl lg:text-7xl text-[#F8F5EE] leading-[1.05] mb-5">
-                                    A Wedding Program That Feels Personal, Not Packaged
-                                </h1>
-                                <p className="text-[#F3EFE4]/90 text-base md:text-lg max-w-2xl leading-relaxed mb-8">
-                                    From intimate vow ceremonies to multi-day family celebrations, our team builds a realistic wedding plan
-                                    around guest comfort, timing, and elegant execution.
-                                </p>
-                                <div className="flex flex-col sm:flex-row gap-3">
-                                    <Link
-                                        href="/contact?type=wedding"
-                                        className="inline-flex items-center justify-center bg-[#E7D4AD] text-[#2A332F] px-7 py-3 text-xs tracking-[0.2em] uppercase hover:bg-[#E1CB9C] transition-colors"
-                                    >
-                                        Plan A Consultation
-                                    </Link>
-                                    <Link
-                                        href="#wedding-venues"
-                                        className="inline-flex items-center justify-center border border-[#F3EADB]/60 text-[#F8F5EE] px-7 py-3 text-xs tracking-[0.2em] uppercase hover:bg-white/10 transition-colors"
-                                    >
-                                        Explore Venues
-                                    </Link>
-                                </div>
-                            </div>
+                                <span className="w-8 h-[1px] bg-white/80" />
+                            </motion.div>
+
+                            <motion.h1
+                                initial={{ opacity: 0, y: 25 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.8, delay: 0.4 }}
+                                className="text-[2.5rem] sm:text-[3.5rem] md:text-[5rem] lg:text-[6rem] font-serif font-medium text-white mb-5 tracking-[-0.02em] leading-[0.92] [text-shadow:0_2px_22px_rgba(0,0,0,0.55)]"
+                            >
+                                Weddings
+                            </motion.h1>
+
+                            <motion.div
+                                initial={{ opacity: 0, y: 15 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.8, delay: 0.8 }}
+                                className="flex flex-col sm:flex-row gap-3 justify-center"
+                            >
+                                <Link
+                                    href="/contact?type=wedding"
+                                    className="border border-white/90 bg-white text-[#2D3933] px-6 py-2.5 text-[10px] tracking-[0.22em] uppercase font-semibold shadow-[0_18px_40px_-28px_rgba(0,0,0,0.65)] hover:bg-white/95 transition-colors duration-300"
+                                >
+                                    Plan Consultation
+                                </Link>
+                                <Link
+                                    href="#wedding-venues"
+                                    className="border border-white/85 bg-black/20 text-white px-6 py-2.5 text-[10px] tracking-[0.22em] uppercase font-semibold backdrop-blur-sm hover:bg-black/30 transition-colors duration-300"
+                                >
+                                    Explore Venues
+                                </Link>
+                            </motion.div>
                         </div>
                     </div>
                 </section>
@@ -385,7 +407,7 @@ export default function WeddingPage() {
                         </div>
                     </div>
                 </section>
-            </main>
+            </main >
 
             <StickyBookButton />
             <WhatsAppWidget />

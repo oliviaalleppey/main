@@ -81,8 +81,14 @@ export default function StickyBookingBar({ basePrice, roomSlug }: StickyBookingB
         router.push(`/book/search?${params.toString()}`);
     };
 
+    // Check if we're on mobile view
+    const isMobileView = (viewportWidth ?? 1024) < 768;
+
     return (
-        <div className="fixed bottom-0 left-0 z-50 w-full bg-white/95 backdrop-blur-md border-t border-[#1C1C1C]/5 py-2 transition-all duration-300 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
+        <div className={`${isMobileView
+            ? 'fixed bottom-0 left-0 z-50 bg-white/95 backdrop-blur-md border-t border-[#1C1C1C]/5 py-2 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]'
+            : 'w-full bg-gradient-to-r from-[#1C2622] via-[#2B3A34] to-[#1C2622] py-4 px-4 md:px-6 rounded-xl shadow-lg'
+            }`}>
             {isDatePickerOpen && (
                 <>
                     <button
@@ -112,53 +118,70 @@ export default function StickyBookingBar({ basePrice, roomSlug }: StickyBookingB
                 </>
             )}
 
-            <div className="max-w-[1400px] mx-auto px-6 md:px-12 flex flex-col xl:flex-row items-center justify-between gap-6 relative">
-                <div className="flex flex-wrap items-center justify-center gap-6 md:gap-8">
+            <div className={`max-w-[1400px] mx-auto ${isMobileView ? 'px-6 md:px-12' : ''} flex ${isMobileView ? 'flex-col xl:flex-row' : 'flex-col md:flex-row'} items-center justify-between gap-4 md:gap-6 relative`}>
+                <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
                     <div className="flex items-center gap-3">
                         <button
                             type="button"
                             onClick={() => setIsDatePickerOpen(true)}
-                            className="flex bg-white border border-[#1C1C1C]/10 px-4 py-2.5 rounded-sm items-center gap-3 shadow-sm hover:border-[#1C1C1C]/30 transition-colors min-w-[260px] text-left"
+                            className={`flex ${isMobileView
+                                ? 'bg-white border border-[#1C1C1C]/10 shadow-sm hover:border-[#1C1C1C]/30'
+                                : 'bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20'
+                                } px-4 py-2.5 ${isMobileView ? 'rounded-sm' : 'rounded-lg'} items-center gap-3 transition-colors min-w-[260px] text-left`}
                         >
-                            <span className="text-sm font-medium text-[#1C1C1C]">
+                            <span className={`text-sm font-medium ${isMobileView ? 'text-[#1C1C1C]' : 'text-white'}`}>
                                 {date?.from ? format(date.from, 'EEE, d MMM yyyy') : 'Select Date'}
                             </span>
-                            <span className="text-[#7C746B] text-xs">→</span>
-                            <span className="text-sm font-medium text-[#1C1C1C]">
+                            <span className={`text-xs ${isMobileView ? 'text-[#7C746B]' : 'text-[#E7D4AD]'}`}>→</span>
+                            <span className={`text-sm font-medium ${isMobileView ? 'text-[#1C1C1C]' : 'text-white'}`}>
                                 {date?.to ? format(date.to, 'EEE, d MMM yyyy') : 'Select Date'}
                             </span>
                         </button>
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <span className="text-[#1C1C1C] font-bold text-sm hidden md:inline">Guests</span>
+                        <span className={`font-bold text-sm hidden md:inline ${isMobileView ? 'text-[#1C1C1C]' : 'text-[#E7D4AD]'}`}>Guests</span>
 
-                        <div className="flex bg-white border border-[#1C1C1C]/10 px-3 py-2.5 rounded-sm items-center gap-3 shadow-sm hover:border-[#1C1C1C]/30 transition-colors">
-                            <span className="text-sm text-[#1C1C1C]">Adult</span>
+                        <div className={`flex ${isMobileView
+                            ? 'bg-white border border-[#1C1C1C]/10 shadow-sm hover:border-[#1C1C1C]/30'
+                            : 'bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20'
+                            } px-3 py-2.5 ${isMobileView ? 'rounded-sm' : 'rounded-lg'} items-center gap-3 transition-colors`}>
+                            <span className={`text-sm ${isMobileView ? 'text-[#1C1C1C]' : 'text-white'}`}>Adult</span>
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={() => setGuests(p => ({ ...p, adults: Math.max(1, p.adults - 1) }))}
-                                    className="w-5 h-5 flex items-center justify-center rounded-full border border-[#1C1C1C]/20 text-[10px] hover:bg-[#1C1C1C] hover:text-white transition-colors"
+                                    className={`w-5 h-5 flex items-center justify-center rounded-full border text-[10px] transition-colors ${isMobileView
+                                        ? 'border-[#1C1C1C]/20 hover:bg-[#1C1C1C] hover:text-white'
+                                        : 'border-[#E7D4AD]/40 text-[#E7D4AD] hover:bg-[#E7D4AD] hover:text-[#1C2622]'}`}
                                 >-</button>
-                                <span className="text-sm font-medium w-3 text-center">{guests.adults}</span>
+                                <span className={`text-sm font-medium w-3 text-center ${isMobileView ? 'text-[#1C1C1C]' : 'text-white'}`}>{guests.adults}</span>
                                 <button
                                     onClick={() => setGuests(p => ({ ...p, adults: Math.min(8, p.adults + 1) }))}
-                                    className="w-5 h-5 flex items-center justify-center rounded-full border border-[#1C1C1C]/20 text-[10px] hover:bg-[#1C1C1C] hover:text-white transition-colors"
+                                    className={`w-5 h-5 flex items-center justify-center rounded-full border text-[10px] transition-colors ${isMobileView
+                                        ? 'border-[#1C1C1C]/20 hover:bg-[#1C1C1C] hover:text-white'
+                                        : 'border-[#E7D4AD]/40 text-[#E7D4AD] hover:bg-[#E7D4AD] hover:text-[#1C2622]'}`}
                                 >+</button>
                             </div>
                         </div>
 
-                        <div className="flex bg-white border border-[#1C1C1C]/10 px-3 py-2.5 rounded-sm items-center gap-3 shadow-sm hover:border-[#1C1C1C]/30 transition-colors">
-                            <span className="text-sm text-[#1C1C1C]">Children</span>
+                        <div className={`flex ${isMobileView
+                            ? 'bg-white border border-[#1C1C1C]/10 shadow-sm hover:border-[#1C1C1C]/30'
+                            : 'bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20'
+                            } px-3 py-2.5 ${isMobileView ? 'rounded-sm' : 'rounded-lg'} items-center gap-3 transition-colors`}>
+                            <span className={`text-sm ${isMobileView ? 'text-[#1C1C1C]' : 'text-white'}`}>Children</span>
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={() => setGuests(p => ({ ...p, children: Math.max(0, p.children - 1) }))}
-                                    className="w-5 h-5 flex items-center justify-center rounded-full border border-[#1C1C1C]/20 text-[10px] hover:bg-[#1C1C1C] hover:text-white transition-colors"
+                                    className={`w-5 h-5 flex items-center justify-center rounded-full border text-[10px] transition-colors ${isMobileView
+                                        ? 'border-[#1C1C1C]/20 hover:bg-[#1C1C1C] hover:text-white'
+                                        : 'border-[#E7D4AD]/40 text-[#E7D4AD] hover:bg-[#E7D4AD] hover:text-[#1C2622]'}`}
                                 >-</button>
-                                <span className="text-sm font-medium w-3 text-center">{guests.children}</span>
+                                <span className={`text-sm font-medium w-3 text-center ${isMobileView ? 'text-[#1C1C1C]' : 'text-white'}`}>{guests.children}</span>
                                 <button
                                     onClick={() => setGuests(p => ({ ...p, children: Math.min(6, p.children + 1) }))}
-                                    className="w-5 h-5 flex items-center justify-center rounded-full border border-[#1C1C1C]/20 text-[10px] hover:bg-[#1C1C1C] hover:text-white transition-colors"
+                                    className={`w-5 h-5 flex items-center justify-center rounded-full border text-[10px] transition-colors ${isMobileView
+                                        ? 'border-[#1C1C1C]/20 hover:bg-[#1C1C1C] hover:text-white'
+                                        : 'border-[#E7D4AD]/40 text-[#E7D4AD] hover:bg-[#E7D4AD] hover:text-[#1C2622]'}`}
                                 >+</button>
                             </div>
                         </div>
@@ -167,15 +190,15 @@ export default function StickyBookingBar({ basePrice, roomSlug }: StickyBookingB
                 </div>
 
                 <div className="flex items-center gap-6 justify-center">
-                    <div className="hidden xl:block text-right">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-[#6B645C]">From</p>
-                        <p className="text-lg font-serif text-[#1C1C1C]">{formatCurrency(basePrice)}<span className="text-xs font-sans text-[#59544D]"> / night</span></p>
+                    <div className={`${isMobileView ? 'hidden xl:block' : 'hidden md:block'} text-right`}>
+                        <p className={`text-[10px] uppercase tracking-[0.2em] ${isMobileView ? 'text-[#6B645C]' : 'text-[#E7D4AD]'}`}>From</p>
+                        <p className={`text-lg font-serif ${isMobileView ? 'text-[#1C1C1C]' : 'text-white'}`}>{formatCurrency(basePrice)}<span className={`text-xs font-sans ${isMobileView ? 'text-[#59544D]' : 'text-[#B9AA90]'}`}> / night</span></p>
                     </div>
 
                     <button
                         onClick={handleSearch}
                         disabled={!date?.from || !date?.to}
-                        className="bg-[#1C1C1C] text-white px-8 py-3 text-sm font-medium hover:bg-[#333] transition-colors rounded-sm shadow-md shadow-[#1C1C1C]/10 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                        className={`${isMobileView ? 'bg-[#1C1C1C] hover:bg-[#333]' : 'bg-[#B68845] hover:bg-[#A97E3F]'} text-white px-8 py-3 text-sm font-medium transition-colors ${isMobileView ? 'rounded-sm shadow-md shadow-[#1C1C1C]/10' : 'rounded-lg shadow-md shadow-[#B68845]/20'} whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
                         Search Availability
                     </button>

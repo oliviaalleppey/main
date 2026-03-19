@@ -68,6 +68,7 @@ export const roomTypes = pgTable('room_types', {
     featuredImage: text('featured_image'),
     status: roomStatusEnum('status').default('active'),
     sortOrder: integer('sort_order').default(0),
+    taxRate: integer('tax_rate').default(12), // GST % applied on top of base price (e.g. 12 = 12%)
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow(),
 });
@@ -489,6 +490,8 @@ export const addOns = pgTable('add_ons', {
     price: integer('price').notNull(), // in paise
     type: addOnTypeEnum('type').default('per_unit'),
     icon: varchar('icon', { length: 100 }),
+    imageUrl: text('image_url'),
+    taxRate: integer('tax_rate').default(18), // GST % applied on add-on price (e.g. 18 = 18%)
     isActive: boolean('is_active').default(true),
     sortOrder: integer('sort_order').default(0),
     createdAt: timestamp('created_at').defaultNow(),

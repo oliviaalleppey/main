@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import React from 'react';
 
 export default function DiscoverPage() {
@@ -34,34 +35,61 @@ export default function DiscoverPage() {
     return (
         <div className="min-h-screen bg-[#F3EEE4] text-[#1C1C1C] selection:bg-[#1C1C1C] selection:text-white">
 
-            {/* HERO: Full-width with dark gradient background like rooms page */}
-            <section className="relative py-24 md:py-32 text-center overflow-hidden">
-                {/* Dark gradient background like rooms page hero */}
-                <div className="absolute inset-0 bg-[linear-gradient(135deg,#1C2622_0%,#2B3A34_38%,#1B2421_100%)]" />
-                <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_25%_30%,rgba(231,212,173,0.12)_0%,rgba(231,212,173,0)_60%)]" />
+            {/* HERO: Compact style like rooms page */}
+            <section className="relative h-[44vh] md:h-[52vh] w-full overflow-hidden">
+                <motion.div
+                    initial={{ scale: 1.05 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 8, ease: "easeOut" }}
+                    className="absolute inset-0 z-0"
+                >
+                    {/* Dark gradient background like rooms page hero */}
+                    <div className="absolute inset-0 bg-[linear-gradient(135deg,#1C2622_0%,#2B3A34_38%,#1B2421_100%)]" />
+                    <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_25%_30%,rgba(231,212,173,0.12)_0%,rgba(231,212,173,0)_60%)]" />
+                </motion.div>
 
-                <div className="relative z-10">
-                    <p className="text-[11px] tracking-[0.4em] uppercase text-white/60 mb-8">
-                        Alappuzha, Kerala
-                    </p>
+                <div className="relative z-10 h-full flex flex-col justify-center items-center text-center px-6">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8, delay: 0.2 }}
+                        className="flex items-center gap-4 mb-3"
+                    >
+                        <span className="w-8 h-[1px] bg-white/80" />
+                        <p className="text-white text-[10px] tracking-[0.34em] uppercase font-light">
+                            Olivia Alleppey
+                        </p>
+                        <span className="w-8 h-[1px] bg-white/80" />
+                    </motion.div>
 
-                    <h1 className="font-serif text-[3.5rem] sm:text-[4.5rem] md:text-[6rem] leading-[0.9] tracking-[-0.02em] text-white">
+                    <motion.h1
+                        initial={{ opacity: 0, y: 25 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8, delay: 0.4 }}
+                        className="text-[3.5rem] sm:text-[4.5rem] md:text-[6rem] lg:text-[8rem] font-serif font-medium text-white mb-5 tracking-[-0.02em] leading-[0.92] [text-shadow:0_2px_22px_rgba(0,0,0,0.55)]"
+                    >
                         Discover
-                        <span className="block text-white/70">Olivia</span>
-                    </h1>
+                    </motion.h1>
 
-                    <p className="mt-6 text-white/60 text-lg md:text-xl leading-relaxed max-w-xl mx-auto">
-                        A sanctuary where Kerala&apos;s timeless beauty converges with contemporary elegance.
-                    </p>
-
-                    <div className="mt-10 flex items-center justify-center gap-8">
+                    <motion.div
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8, delay: 0.8 }}
+                        className="flex gap-3"
+                    >
                         <Link
                             href="/book/search"
-                            className="inline-flex items-center justify-center bg-white text-[#1C2622] px-12 py-3 text-[11px] tracking-[0.2em] uppercase hover:bg-white/90 transition-colors"
+                            className="border border-white/90 bg-white text-[#2D3933] px-6 py-2.5 text-[10px] tracking-[0.22em] uppercase font-semibold shadow-[0_18px_40px_-28px_rgba(0,0,0,0.65)] hover:bg-white/95 transition-colors duration-300"
                         >
                             Explore & Book
                         </Link>
-                    </div>
+                        <Link
+                            href="/contact"
+                            className="border border-white/85 bg-black/20 text-white px-6 py-2.5 text-[10px] tracking-[0.22em] uppercase font-semibold backdrop-blur-sm hover:bg-black/30 transition-colors duration-300"
+                        >
+                            Contact now
+                        </Link>
+                    </motion.div>
                 </div>
             </section>
 

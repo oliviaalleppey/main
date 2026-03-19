@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import type { ComponentType } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { DiningHero } from '@/components/dining-hero';
 import {
     ArrowRight,
     MapPin,
@@ -67,7 +68,7 @@ const outlets: DiningOutlet[] = [
         name: 'Aqua Pool Lounge',
         description: 'Poolside refreshments and light bites with a calm daytime setting.',
         slug: 'aqua-pool-lounge',
-        image: '/images/dining/aquapool.jpeg',
+        image: '/images/dining/aquapool.webp',
         capacity: '24 Guests',
         location: '3rd Floor',
         operatingHours: '07:00 HRS to 19:00 HRS',
@@ -109,31 +110,8 @@ export default function DiningPage() {
             <StickyBookButton />
             <WhatsAppWidget />
 
-            {/* Hero Section - Full width like rooms page */}
-            <section className="relative overflow-hidden mb-8 md:mb-10 -mx-4 md:-mx-6">
-                <div className="relative h-[44vh] md:h-[52vh]">
-                    {/* Dark gradient background */}
-                    <div className="absolute inset-0 bg-[linear-gradient(135deg,#1C2622_0%,#2B3A34_38%,#1B2421_100%)]" />
-                    <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_25%_30%,rgba(231,212,173,0.18)_0%,rgba(231,212,173,0)_60%)]" />
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/15 to-black/40" />
-                </div>
-
-                <div className="absolute inset-0 flex items-center">
-                    <div className="max-w-7xl mx-auto px-4 md:px-6 w-full text-center">
-                        <div className="flex items-center justify-center gap-3 mb-4">
-                            <span className="w-8 h-[1px] bg-white/80" />
-                            <p className="text-white/70 text-[10px] tracking-[0.34em] uppercase">Dining</p>
-                            <span className="w-8 h-[1px] bg-white/80" />
-                        </div>
-                        <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl text-white leading-tight mb-4">
-                            Explore Our Dining Options
-                        </h1>
-                        <p className="text-white/80 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
-                            Every outlet includes live operating hours, location, and capacity so guests can decide quickly.
-                        </p>
-                    </div>
-                </div>
-            </section>
+            {/* Hero Section */}
+            <DiningHero />
 
             <section className="max-w-7xl mx-auto px-4 md:px-6 pb-10 md:pb-14">
 

@@ -1,10 +1,10 @@
 import { addDays, format as formatDate } from 'date-fns';
-import { and, eq, inArray, sql } from 'drizzle-orm';
+import { and, eq, inArray, sql, gte, lte } from 'drizzle-orm';
 import { BOOKING_FLOW_MODE } from '@/lib/config/booking-flow-mode';
 import { mapCrsRoomTypeMatchesInternal } from '@/lib/config/crs';
 import { getBookingProvider } from '@/lib/providers/crs/factory';
 import { db } from '../db';
-import { bookingItems, bookings, rooms, roomTypes } from '../db/schema';
+import { bookingItems, bookings, rooms, roomTypes, roomInventory } from '../db/schema';
 import { ensureRoomTypeMinOccupancyColumn } from '@/lib/db/schema-guard';
 import { formatRoomName } from '@/lib/utils';
 
@@ -114,12 +114,25 @@ export async function getAvailabilityCalendar(params: {
             totalRooms,
         });
 
+    // Fetch local pricing overrides
+    const inventoryOverrides = await db
+        .select()
+        .from(roomInventory)
+        .where(and(
+            eq(roomInventory.roomTypeId, roomTypeId),
+            gte(roomInventory.date, toDateString(startDate)),
+            lte(roomInventory.date, toDateString(endDate))
+        ));
+
+    const overrideMap = new Map(inventoryOverrides.map(inv => [inv.date, inv.price]));
+
     const days: AvailabilityDay[] = [];
     const currentDate = new Date(startDate);
     const end = new Date(endDate);
 
     while (currentDate <= end) {
         const dateStr = toDateString(currentDate);
+        const dayPrice = overrideMap.get(dateStr) || price;
 
         days.push({
             date: dateStr,
@@ -127,7 +140,7 @@ export async function getAvailabilityCalendar(params: {
             availableRooms: availableRoomsFromProvider,
             blockedRooms: 0,
             bookedRooms,
-            price,
+            price: dayPrice,
             minStay: 1,
             status,
         });

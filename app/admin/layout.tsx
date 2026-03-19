@@ -4,7 +4,7 @@ import { Sidebar } from '@/components/admin/sidebar';
 import { auth } from '@/auth';
 import { db } from '@/lib/db';
 import { bookings } from '@/lib/db/schema';
-import { and, gte, inArray, sql } from 'drizzle-orm';
+import { and, gte, sql } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -29,14 +29,19 @@ async function AdminLayoutContent({ children }: { children: React.ReactNode }) {
         redirect('/signin');
     }
 
+    // NOTE: Some environments may have an older Postgres enum for booking_status
+    // that doesn't include newer states like 'payment_success'/'booking_requested' yet.
+    // Comparing as text avoids runtime errors and keeps the admin dashboard usable.
+    const PENDING_STATES = ['payment_success', 'booking_requested'] as const;
+
     const [pendingRows, atRiskRows] = await Promise.all([
         db.select({ count: sql<number>`count(*)` })
             .from(bookings)
-            .where(inArray(bookings.status, ['payment_success', 'booking_requested'])),
+            .where(sql`${bookings.status}::text in (${sql.join(PENDING_STATES.map((s) => sql`${s}`), sql`, `)})`),
         db.select({ count: sql<number>`count(*)` })
             .from(bookings)
             .where(and(
-                inArray(bookings.status, ['payment_success', 'booking_requested']),
+                sql`${bookings.status}::text in (${sql.join(PENDING_STATES.map((s) => sql`${s}`), sql`, `)})`,
                 gte(bookings.retryCount, MAX_RETRIES)
             )),
     ]);

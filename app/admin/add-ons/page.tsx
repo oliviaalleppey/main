@@ -13,6 +13,7 @@ import {
     Loader2
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/services/payment';
+import { ImageUpload } from '@/components/ui/image-upload';
 
 type AddOnWithRooms = {
     id: string;
@@ -21,6 +22,8 @@ type AddOnWithRooms = {
     price: number;
     type: 'per_person' | 'per_unit' | null;
     icon: string | null;
+    imageUrl: string | null;
+    taxRate: number | null;
     isActive: boolean;
     sortOrder: number;
     roomTypes: { id: string; name: string }[];
@@ -44,6 +47,8 @@ export default function AddOnsPage() {
         price: '',
         type: 'per_unit' as 'per_unit' | 'per_person',
         icon: '',
+        imageUrl: '',
+        taxRate: '18',
         isActive: true,
         roomTypeIds: [] as string[],
     });
@@ -103,6 +108,8 @@ export default function AddOnsPage() {
                         price: Math.round(parseFloat(formData.price) * 100), // Convert to paise
                         type: formData.type,
                         icon: formData.icon || null,
+                        imageUrl: formData.imageUrl || null,
+                        taxRate: Math.round(parseFloat(formData.taxRate || '18')), // GST percentage
                         isActive: formData.isActive,
                         roomTypeIds: formData.roomTypeIds,
                     }),
@@ -117,6 +124,8 @@ export default function AddOnsPage() {
                         price: '',
                         type: 'per_unit',
                         icon: '',
+                        imageUrl: '',
+                        taxRate: '18',
                         isActive: true,
                         roomTypeIds: [],
                     });
@@ -136,6 +145,8 @@ export default function AddOnsPage() {
             price: (addOn.price / 100).toString(),
             type: addOn.type as 'per_unit' | 'per_person',
             icon: addOn.icon || '',
+            imageUrl: addOn.imageUrl || '',
+            taxRate: addOn.taxRate ? addOn.taxRate.toString() : '18',
             isActive: addOn.isActive,
             roomTypeIds: addOn.roomTypes.map(r => r.id),
         });
@@ -187,6 +198,8 @@ export default function AddOnsPage() {
                             price: '',
                             type: 'per_unit',
                             icon: '',
+                            imageUrl: '',
+                            taxRate: '18',
                             isActive: true,
                             roomTypeIds: [],
                         });
@@ -278,6 +291,34 @@ export default function AddOnsPage() {
                         </div>
 
                         <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Image URL
+                            </label>
+                            <ImageUpload
+                                value={formData.imageUrl ? [formData.imageUrl] : []}
+                                onChange={(urls) => setFormData({ ...formData, imageUrl: urls.length > 0 ? urls[0] : '' })}
+                                onRemove={() => setFormData({ ...formData, imageUrl: '' })}
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Tax Rate (%)
+                            </label>
+                            <input
+                                type="number"
+                                min="0"
+                                max="100"
+                                step="0.01"
+                                value={formData.taxRate}
+                                onChange={e => setFormData({ ...formData, taxRate: e.target.value })}
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                                placeholder="e.g., 18"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">GST percentage to apply on this add-on</p>
+                        </div>
+
+                        <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Apply to Room Types (leave empty for all rooms)
                             </label>
@@ -293,8 +334,8 @@ export default function AddOnsPage() {
                                             type="button"
                                             onClick={() => toggleRoomType(roomType.id)}
                                             className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${formData.roomTypeIds.includes(roomType.id)
-                                                    ? 'bg-[#0A332B] text-white'
-                                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                ? 'bg-[#0A332B] text-white'
+                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                                 }`}
                                         >
                                             {formData.roomTypeIds.includes(roomType.id) && (
@@ -355,6 +396,9 @@ export default function AddOnsPage() {
                                 Price
                             </th>
                             <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                Tax %
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                                 Type
                             </th>
                             <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -371,14 +415,14 @@ export default function AddOnsPage() {
                     <tbody className="divide-y divide-gray-200">
                         {loading ? (
                             <tr>
-                                <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
+                                <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
                                     <Loader2 className="w-5 h-5 animate-spin mx-auto" />
                                     <p className="mt-2 text-sm">Loading add-ons...</p>
                                 </td>
                             </tr>
                         ) : addOns.length === 0 ? (
                             <tr>
-                                <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
+                                <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
                                     <Sparkles className="w-8 h-8 mx-auto text-gray-300" />
                                     <p className="mt-2 text-sm">No add-ons yet. Create your first add-on!</p>
                                 </td>
@@ -399,6 +443,11 @@ export default function AddOnsPage() {
                                     <td className="px-4 py-3">
                                         <span className="font-medium text-gray-900">
                                             {formatCurrency(addOn.price)}
+                                        </span>
+                                    </td>
+                                    <td className="px-4 py-3">
+                                        <span className="text-xs text-gray-500">
+                                            {addOn.taxRate ?? 18}%
                                         </span>
                                     </td>
                                     <td className="px-4 py-3">

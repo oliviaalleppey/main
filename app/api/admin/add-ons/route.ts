@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json();
-        const { name, description, price, type, icon, isActive, roomTypeIds } = body;
+        const { name, description, price, type, icon, imageUrl, isActive, roomTypeIds, taxRate } = body;
 
         // Get the highest sort order
         const maxOrder = await db
@@ -128,6 +128,8 @@ export async function POST(request: NextRequest) {
                 price,
                 type,
                 icon,
+                imageUrl,
+                taxRate,
                 isActive,
                 sortOrder: nextOrder,
             })
@@ -161,7 +163,7 @@ export async function PUT(request: NextRequest) {
         }
 
         const body = await request.json();
-        const { id, name, description, price, type, icon, isActive, roomTypeIds } = body;
+        const { id, name, description, price, type, icon, imageUrl, isActive, roomTypeIds, taxRate } = body;
 
         // Update the add-on
         await db
@@ -172,6 +174,8 @@ export async function PUT(request: NextRequest) {
                 price,
                 type,
                 icon,
+                imageUrl,
+                taxRate,
                 isActive,
                 updatedAt: new Date(),
             })

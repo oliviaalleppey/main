@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { format } from 'date-fns';
 import { DateRange } from 'react-day-picker';
 import { LuxuryDatePicker } from '@/components/ui/luxury-date-picker';
 import { useRouter } from 'next/navigation';
-import { ChevronDown, Search } from 'lucide-react';
+import { ChevronDown, Search, Loader2 } from 'lucide-react';
 
 interface SearchStayEditorProps {
     initialCheckIn: Date;
@@ -13,6 +13,7 @@ interface SearchStayEditorProps {
     initialAdults: number;
     initialChildren: number;
     initialRooms: number;
+    onUpdate?: (checkIn: Date, checkOut: Date, adults: number, children: number, rooms: number) => void;
 }
 
 export function SearchStayEditor({
@@ -21,8 +22,10 @@ export function SearchStayEditor({
     initialAdults,
     initialChildren,
     initialRooms,
+    onUpdate,
 }: SearchStayEditorProps) {
     const router = useRouter();
+    const [isPending, startTransition] = useTransition();
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
 
     const [date, setDate] = useState<DateRange | undefined>({
@@ -37,6 +40,13 @@ export function SearchStayEditor({
 
     const handleUpdate = () => {
         if (!date?.from || !date?.to) return;
+
+        if (onUpdate) {
+            startTransition(() => {
+                onUpdate(date.from!, date.to!, guests.adults, guests.children, guests.rooms);
+            });
+            return;
+        }
 
         const params = new URLSearchParams();
         params.set('checkIn', format(date.from, 'yyyy-MM-dd'));
@@ -125,10 +135,11 @@ export function SearchStayEditor({
 
                 <button
                     onClick={handleUpdate}
-                    className="mt-4 w-full h-12 bg-[#0A332B] hover:bg-[#15443B] text-white rounded-2xl text-sm font-bold uppercase tracking-widest transition-all shadow-[0_18px_40px_-22px_rgba(10,51,43,0.55)] flex items-center justify-center gap-2"
+                    disabled={isPending}
+                    className="mt-4 w-full h-12 bg-[#0A332B] hover:bg-[#15443B] disabled:opacity-70 text-white rounded-2xl text-sm font-bold uppercase tracking-widest transition-all shadow-[0_18px_40px_-22px_rgba(10,51,43,0.55)] flex items-center justify-center gap-2"
                 >
-                    <Search className="w-4 h-4" />
-                    Update results
+                    {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                    {isPending ? 'Updating...' : 'Update results'}
                 </button>
             </div>
 
@@ -200,10 +211,11 @@ export function SearchStayEditor({
 
                         <button
                             onClick={handleUpdate}
-                            className="h-12 px-8 bg-[#0A332B] hover:bg-[#15443B] text-white rounded-xl text-sm font-bold uppercase tracking-widest transition-all shadow-md flex items-center justify-center gap-2 ml-auto"
+                            disabled={isPending}
+                            className="h-12 px-8 bg-[#0A332B] hover:bg-[#15443B] disabled:opacity-70 text-white rounded-xl text-sm font-bold uppercase tracking-widest transition-all shadow-md flex items-center justify-center gap-2 ml-auto"
                         >
-                            <Search className="w-4 h-4" />
-                            Update Results
+                            {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                            {isPending ? 'Updating...' : 'Update Results'}
                         </button>
                     </div>
                 </div>

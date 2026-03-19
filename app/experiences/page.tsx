@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { LucideIcon } from 'lucide-react';
 import { ArrowRight, CalendarDays, Clock3, Dumbbell, HeartPulse, MapPin, Sparkles, Sunrise, Users, UtensilsCrossed, Waves } from 'lucide-react';
+import { ExperiencesHero } from '@/components/experiences/experiences-hero';
 import StickyBookButton from '@/components/sticky-book-button';
 import WhatsAppWidget from '@/components/whatsapp-widget';
 
@@ -238,68 +239,12 @@ export default function ExperiencesPage() {
             <StickyBookButton />
             <WhatsAppWidget />
 
-            {/* Hero: light editorial, no dark overlay */}
-            <section className="pt-10 md:pt-14">
-                <div className="max-w-7xl mx-auto px-4 md:px-6">
-                    <div className="grid lg:grid-cols-[1.06fr_0.94fr] gap-6 md:gap-8 items-stretch">
-                        <div className="rounded-[28px] border border-[#E6DDCE] bg-white px-6 pb-6 pt-8 md:px-10 md:pb-10 md:pt-12">
-                            <p className="text-[#9C7A45] text-[10px] tracking-[0.34em] uppercase">Experiences</p>
-                            <h1 className="mt-4 font-serif text-[2.65rem] md:text-[4.4rem] leading-[0.96] text-[#2E2A24]">
-                                Experience Kerala with clarity, comfort, and depth.
-                            </h1>
-                            <p className="mt-4 text-[#5A5348] text-base md:text-lg leading-relaxed max-w-2xl">
-                                From sunrise cruises and village walks to Ayurveda and slower evenings by the water,
-                                every moment should feel calm, vivid, and easy to understand at a glance.
-                            </p>
+            {/* Hero Section */}
+            <ExperiencesHero />
 
-                            <div className="mt-7 flex flex-col sm:flex-row gap-3">
-                                <a
-                                    href="#experience-collection"
-                                    className="inline-flex items-center justify-center rounded-xl bg-[#0A332B] px-8 py-3.5 text-white text-[11px] font-semibold tracking-[0.18em] uppercase hover:bg-[#15443B] transition-colors"
-                                >
-                                    Explore the Collection
-                                </a>
-                                <Link
-                                    href="/contact"
-                                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#D9C6A7] bg-[#FFFCF7] px-8 py-3.5 text-[#7F6438] text-[11px] tracking-[0.18em] uppercase hover:bg-[#FAF4E8] transition-colors"
-                                >
-                                    Speak to Concierge
-                                    <ArrowRight className="w-4 h-4" />
-                                </Link>
-                            </div>
-
-                            <div className="mt-7 flex flex-wrap gap-2.5">
-                                {heroBeats.map((beat) => (
-                                    <span
-                                        key={beat}
-                                        className="rounded-full border border-[#E8DFD1] bg-[#FFFDF8] px-3.5 py-2 text-[10px] uppercase tracking-[0.18em] text-[#5D554A]"
-                                    >
-                                        {beat}
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="relative overflow-hidden rounded-[28px] border border-[#E6DDCE] bg-[#E8E2D9] min-h-[320px] md:min-h-[520px] flex items-center justify-center">
-                            <p className="text-[#8D8378] text-sm">Backwater Experience</p>
-                            <div className="absolute inset-0 bg-gradient-to-t from-white/65 via-transparent to-transparent" />
-                            <div className="absolute bottom-5 left-5 right-5 rounded-2xl border border-[#E6DDCE] bg-white/90 backdrop-blur-sm px-4 py-4">
-                                <div className="flex items-start justify-between gap-4">
-                                    <div>
-                                        <p className="text-[10px] tracking-[0.28em] uppercase text-[#8C7249]">Location</p>
-                                        <p className="mt-1 text-[#2E2A24] font-medium">Alappuzha, Kerala</p>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-[10px] tracking-[0.28em] uppercase text-[#8C7249]">Style</p>
-                                        <p className="mt-1 text-[#2E2A24] font-medium">Concierge-curated</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Experience index */}
-                    <section className="mt-8 md:mt-10 rounded-[24px] border border-[#E2D7C7] bg-white p-4 md:p-6">
+            {/* Experience index */}
+            <section className="max-w-7xl mx-auto px-4 md:px-6 pb-10 md:pb-14">
+                <div className="mt-8 md:mt-10 rounded-[24px] border border-[#E2D7C7] bg-white p-4 md:p-6">
                         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-2">
                             <div>
                                 <p className="text-[#9C7A45] text-[10px] tracking-[0.3em] uppercase">Experience index</p>
@@ -335,7 +280,6 @@ export default function ExperiencesPage() {
                                 );
                             })}
                         </div>
-                    </section>
                 </div>
             </section>
 

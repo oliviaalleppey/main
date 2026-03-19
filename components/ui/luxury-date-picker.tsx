@@ -23,7 +23,9 @@ export function LuxuryDatePicker({
     const [selectedDate, setSelectedDate] = React.useState<DateRange | undefined>(date);
     const [month, setMonth] = React.useState<Date>(date?.from || new Date());
     const [monthsToShow, setMonthsToShow] = React.useState(2);
-    const [selectionStage, setSelectionStage] = React.useState<'idle' | 'checkIn' | 'checkOut'>('idle');
+    const [selectionStage, setSelectionStage] = React.useState<'checkIn' | 'checkOut'>(
+        date?.from && date?.to ? 'checkOut' : 'checkIn'
+    );
 
     React.useEffect(() => {
         const handleResize = () => {
@@ -45,21 +47,29 @@ export function LuxuryDatePicker({
         }
     }, [date]);
 
-    // Handle range selection
-    const handleSelect = (range: DateRange | undefined) => {
-        // If we're in checkOut stage and user clicks, start fresh with new check-in
-        if (selectionStage === 'checkOut' && range?.from) {
-            setSelectionStage('checkIn');
-            setSelectedDate({ from: range.from, to: undefined });
+    // Custom day click — implements the 3-click cycle:
+    // Stage checkIn  → 1st click sets check-in only
+    // Stage checkOut → 2nd click sets check-out (must be after check-in), or resets if same/before
+    // After both dates set, 3rd click resets to new check-in
+    const handleDayClick = (day: Date) => {
+        const clickedDay = startOfDay(day);
+
+        if (selectionStage === 'checkIn') {
+            // 1st click (or after reset): set check-in
+            setSelectedDate({ from: clickedDay, to: undefined });
+            setSelectionStage('checkOut');
         } else {
-            setSelectedDate(range);
-            // Update stage
-            if (range?.from && range?.to) {
-                setSelectionStage('checkOut');
-            } else if (range?.from) {
-                setSelectionStage('checkIn');
+            // selectionStage === 'checkOut'
+            if (selectedDate?.from && clickedDay > selectedDate.from) {
+                // 2nd click: valid check-out
+                setSelectedDate({ from: selectedDate.from, to: clickedDay });
+                // Stay in 'checkOut' — next click will reset (3rd click)
+                // But we track that both are set; next click should reset
+                setSelectionStage('checkIn'); // 3rd click will act as new check-in
             } else {
-                setSelectionStage('idle');
+                // Clicked same day or before check-in → reset to this new check-in
+                setSelectedDate({ from: clickedDay, to: undefined });
+                setSelectionStage('checkOut');
             }
         }
     };
@@ -73,6 +83,7 @@ export function LuxuryDatePicker({
     // Clear button handler
     const handleClear = () => {
         setSelectedDate(undefined);
+        setSelectionStage('checkIn');
     };
 
     const handlePreset = (nights: number) => {
@@ -107,15 +118,15 @@ export function LuxuryDatePicker({
             <div className="mb-6 border-b border-gray-200 pb-6">
                 <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5">
                     <div className="flex flex-col sm:flex-row sm:items-end gap-5 sm:gap-7 md:gap-9">
-                        <div className="min-w-[220px]">
-                            <p className="text-[12px] uppercase tracking-[0.2em] text-slate-500 font-semibold mb-2">Check-in</p>
+                        <div className={`min-w-[220px] pb-1 border-b-2 transition-colors ${selectionStage === 'checkIn' && (!selectedDate?.from || !selectedDate?.to) ? 'border-[#0A332B]' : 'border-transparent'}`}>
+                            <p className={`text-[12px] uppercase tracking-[0.2em] font-semibold mb-2 transition-colors ${selectionStage === 'checkIn' && (!selectedDate?.from || !selectedDate?.to) ? 'text-[#0A332B]' : 'text-slate-500'}`}>Check-in</p>
                             <p className="text-[32px] leading-none font-sans font-semibold tracking-[-0.02em] text-[#0A332B]">
                                 {selectedDate?.from ? format(selectedDate.from, 'd MMM yyyy') : 'Select Date'}
                             </p>
                         </div>
                         <div className="hidden sm:block h-14 w-px bg-gray-200" />
-                        <div className="min-w-[220px]">
-                            <p className="text-[12px] uppercase tracking-[0.2em] text-slate-500 font-semibold mb-2">Check-out</p>
+                        <div className={`min-w-[220px] pb-1 border-b-2 transition-colors ${selectedDate?.from && selectionStage === 'checkOut' ? 'border-[#0A332B]' : 'border-transparent'}`}>
+                            <p className={`text-[12px] uppercase tracking-[0.2em] font-semibold mb-2 transition-colors ${selectedDate?.from && selectionStage === 'checkOut' ? 'text-[#0A332B]' : 'text-slate-500'}`}>Check-out</p>
                             <p className="text-[32px] leading-none font-sans font-semibold tracking-[-0.02em] text-[#0A332B]">
                                 {selectedDate?.to ? format(selectedDate.to, 'd MMM yyyy') : 'Select Date'}
                             </p>
@@ -168,6 +179,8 @@ export function LuxuryDatePicker({
                 .luxury-rdp .rdp-months {
                     justify-content: center;
                     display: flex;
+                    flex-direction: row;
+                    flex-wrap: nowrap;
                     gap: 2rem;
                 }
 
@@ -330,9 +343,11 @@ export function LuxuryDatePicker({
                     <DayPicker
                         mode="range"
                         selected={selectedDate}
-                        onSelect={handleSelect}
+                        onDayClick={(day, modifiers) => {
+                            if (modifiers.disabled) return;
+                            handleDayClick(day);
+                        }}
                         month={month}
-                        onMonthChange={setMonth}
                         numberOfMonths={monthsToShow}
                         hideNavigation
                         showOutsideDays={false}

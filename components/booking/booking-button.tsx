@@ -40,14 +40,21 @@ export function BookingButton({
         Math.min(effectiveMaxRooms, Math.max(1, Math.floor(defaultRoomCount)))
     );
 
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
     const handleSelect = () => {
+        setErrorMsg(null);
         startTransition(async () => {
-            await startBookingSession(roomId, searchParams, quoteSnapshot, roomCount);
+            try {
+                await startBookingSession(roomId, searchParams, quoteSnapshot, roomCount);
+            } catch (error) {
+                setErrorMsg(error instanceof Error ? error.message : 'An error occurred while selecting the room.');
+            }
         });
     };
 
     return (
-        <div className="space-y-1.5 md:space-y-2">
+        <div className="space-y-1.5 md:space-y-2 relative">
             {!disabled && effectiveMaxRooms > 1 && (
                 <div className="rounded-lg border border-gray-200 bg-white px-2.5 md:px-3 py-2">
                     <p className="text-[10px] uppercase tracking-[0.15em] text-gray-500 mb-1">Rooms</p>
@@ -91,6 +98,12 @@ export function BookingButton({
                             ? `Select ${roomCount} Rooms`
                             : 'Select Room')}
             </Button>
+
+            {errorMsg && (
+                <div className="text-xs text-red-500 text-center font-medium mt-2 bg-red-50 border border-red-100 p-2 rounded-md">
+                    {errorMsg}
+                </div>
+            )}
         </div>
     );
 }

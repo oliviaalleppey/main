@@ -40,6 +40,7 @@ export function RoomTypeForm({ initialData }: RoomTypeFormProps) {
             basePrice: initialData.basePrice / 100, // Convert paise to rupees for display
             extraAdultPrice: (initialData.extraAdultPrice || 0) / 100,
             extraChildPrice: (initialData.extraChildPrice || 0) / 100,
+            taxRate: (initialData as any).taxRate ?? 12,
         } as unknown as RoomTypeFormValues) : {
             name: '',
             slug: '',
@@ -60,6 +61,7 @@ export function RoomTypeForm({ initialData }: RoomTypeFormProps) {
             images: [],
             status: 'active',
             sortOrder: 0,
+            taxRate: 12,
         },
     });
 
@@ -214,6 +216,29 @@ export function RoomTypeForm({ initialData }: RoomTypeFormProps) {
                         />
                         {errors.maxAdults && <p className="text-sm text-red-500 mt-1">{errors.maxAdults.message}</p>}
                     </div>
+
+                    <div>
+                        <Label htmlFor="maxChildren">Max Children</Label>
+                        <Input
+                            id="maxChildren"
+                            type="number"
+                            {...register('maxChildren', { valueAsNumber: false })}
+                            className="mt-1"
+                        />
+                        {errors.maxChildren && <p className="text-sm text-red-500 mt-1">{errors.maxChildren.message}</p>}
+                    </div>
+
+                    <div>
+                        <Label htmlFor="taxRate">Tax Rate (%) *</Label>
+                        <Input
+                            id="taxRate"
+                            type="number"
+                            {...register('taxRate', { valueAsNumber: false })}
+                            className="mt-1"
+                        />
+                        {errors.taxRate && <p className="text-sm text-red-500 mt-1">{errors.taxRate.message}</p>}
+                        <p className="text-[10px] text-gray-500 mt-1">e.g. 12 or 18</p>
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
@@ -239,15 +264,6 @@ export function RoomTypeForm({ initialData }: RoomTypeFormProps) {
                         <p className="text-[10px] text-gray-500 mt-1">Per night above base</p>
                     </div>
 
-                    <div>
-                        <Label htmlFor="maxChildren">Max Children</Label>
-                        <Input
-                            id="maxChildren"
-                            type="number"
-                            {...register('maxChildren', { valueAsNumber: false })}
-                            className="mt-1"
-                        />
-                    </div>
 
                     <div>
                         <Label htmlFor="bedType">Bed Type</Label>

@@ -20,8 +20,21 @@ export interface PricingResult {
         seasonalAdjustment: number;
         occupancyAdjustment: number;
         extraPersonCharge: number;
+        extraPersonTaxRate: number; // percent
+        extraPersonTaxAmount: number; // paise
         finalPricePerNight: number;
     };
+}
+
+/**
+ * Extra bed / extra person GST slab based on room nightly price.
+ * Rule:
+ * - <= ₹7,499  → 5%
+ * - >  ₹7,499  → 18%
+ */
+export function getExtraPersonTaxRateForRoomPrice(roomPricePaise: number): number {
+    const roomPriceRupees = (roomPricePaise || 0) / 100;
+    return roomPriceRupees <= 7499 ? 5 : 18;
 }
 
 /**
@@ -96,12 +109,13 @@ export async function calculateDynamicPrice(context: PricingContext): Promise<Pr
         const checkOutStr = checkOut.toISOString().split('T')[0];
 
         // 2. Check for date-specific overrides in roomInventory
+        // We apply the override for the check-in date (first night). When you want a per-day preview,
+        // call calculateDynamicPrice with checkOut = checkIn + 1 day (see getPricingPreview).
         const inventoryOverrides = await db.select()
             .from(roomInventory)
             .where(and(
                 eq(roomInventory.roomTypeId, roomTypeId),
-                gte(roomInventory.date, checkInStr),
-                lte(roomInventory.date, checkOutStr)
+                eq(roomInventory.date, checkInStr)
             ))
             .limit(1);
 
@@ -153,6 +167,9 @@ export async function calculateDynamicPrice(context: PricingContext): Promise<Pr
         const totalGuests = (context.guests || 2); // Default to 2 if not provided
         const baseOccupancy = roomType.baseOccupancy || 2;
         let extraPersonCharge = 0;
+        const roomPriceBeforeExtras = currentPrice;
+        const extraPersonTaxRate = getExtraPersonTaxRateForRoomPrice(roomPriceBeforeExtras);
+        let extraPersonTaxAmount = 0;
 
         // This is a simplified logic where we don't distinguish adults/children strictly for the COUNT,
         // but ideally we should. context.guests should probably be { adults: number, children: number }
@@ -181,7 +198,9 @@ export async function calculateDynamicPrice(context: PricingContext): Promise<Pr
 
         if (extraPersonCharge > 0) {
             currentPrice += extraPersonCharge;
+            extraPersonTaxAmount = Math.round(extraPersonCharge * (extraPersonTaxRate / 100));
             appliedRules.push(`Extra person charges: ₹${extraPersonCharge / 100}`);
+            appliedRules.push(`Extra person GST: ${extraPersonTaxRate}%`);
         }
 
         return {
@@ -194,6 +213,8 @@ export async function calculateDynamicPrice(context: PricingContext): Promise<Pr
                 seasonalAdjustment,
                 occupancyAdjustment,
                 extraPersonCharge,
+                extraPersonTaxRate,
+                extraPersonTaxAmount,
                 finalPricePerNight: currentPrice,
             },
         };

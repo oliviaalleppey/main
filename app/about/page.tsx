@@ -1,29 +1,75 @@
 'use client';
 
-
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 
 export default function AboutPage() {
     return (
         <main className="min-h-screen bg-[#F6F1E8] font-sans">
 
 
-            {/* Hero Section */}
-            <section className="relative h-[70vh] flex items-center justify-center overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-b from-[#0A4D4E] to-[#15443B]" />
-                <div className="relative z-10 text-center px-6">
-                    <p className="text-[#7A5E28] text-sm tracking-[0.3em] uppercase mb-4">Our Story</p>
-                    <h1 className="text-5xl md:text-7xl font-serif text-white mb-6 tracking-wide">
+            {/* Hero Section - Compact style like rooms page */}
+            <section className="relative h-[44vh] md:h-[52vh] w-full overflow-hidden">
+                <motion.div
+                    initial={{ scale: 1.05 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 8, ease: "easeOut" }}
+                    className="absolute inset-0 z-0"
+                >
+                    {/* Dark gradient background like rooms page hero */}
+                    <div className="absolute inset-0 bg-[linear-gradient(135deg,#1C2622_0%,#2B3A34_38%,#1B2421_100%)]" />
+                    <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_25%_30%,rgba(231,212,173,0.18)_0%,rgba(231,212,173,0)_60%)]" />
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/15 to-black/40" />
+                </motion.div>
+
+                {/* Hero Content - Compact */}
+                <div className="relative z-10 h-full flex flex-col justify-center items-center text-center px-6">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8, delay: 0.2 }}
+                        className="flex items-center gap-4 mb-3"
+                    >
+                        <span className="w-8 h-[1px] bg-white/80" />
+                        <p className="text-white text-[10px] tracking-[0.34em] uppercase font-light">
+                            Olivia Alleppey
+                        </p>
+                        <span className="w-8 h-[1px] bg-white/80" />
+                    </motion.div>
+
+                    <motion.h1
+                        initial={{ opacity: 0, y: 25 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8, delay: 0.4 }}
+                        className="text-[4.25rem] sm:text-[5.25rem] md:text-[8.25rem] lg:text-[10.5rem] font-serif font-medium text-white mb-5 tracking-[-0.03em] leading-[0.92] [text-shadow:0_2px_22px_rgba(0,0,0,0.55)]"
+                    >
                         About Olivia
-                    </h1>
-                    <p className="text-white/95 text-lg md:text-xl max-w-2xl mx-auto font-light">
-                        Where luxury meets Kerala's timeless beauty
-                    </p>
+                    </motion.h1>
+
+                    <motion.div
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8, delay: 0.8 }}
+                        className="flex gap-3"
+                    >
+                        <Link
+                            href="#brand-story"
+                            className="border border-white/90 bg-white text-[#2D3933] px-6 py-2.5 text-[10px] tracking-[0.22em] uppercase font-semibold shadow-[0_18px_40px_-28px_rgba(0,0,0,0.65)] hover:bg-white/95 transition-colors duration-300"
+                        >
+                            Our Story
+                        </Link>
+                        <Link
+                            href="/contact"
+                            className="border border-white/85 bg-black/20 text-white px-6 py-2.5 text-[10px] tracking-[0.22em] uppercase font-semibold backdrop-blur-sm hover:bg-black/30 transition-colors duration-300"
+                        >
+                            Contact now
+                        </Link>
+                    </motion.div>
                 </div>
             </section>
 
             {/* Brand Story */}
-            <section className="py-24 px-6 md:px-12">
+            <section id="brand-story" className="py-24 px-6 md:px-12">
                 <div className="max-w-4xl mx-auto">
                     <div className="text-center mb-16">
                         <h2 className="text-4xl md:text-5xl font-serif text-[#1C1C1C] mb-8 tracking-wide">
