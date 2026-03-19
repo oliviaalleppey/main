@@ -100,6 +100,12 @@ export default async function BookingDetailPage({ params }: PageProps) {
     ));
 
     const crsConfirmation = confirmationRows[0];
+    
+    const addOnsTax = addOnRows.reduce((sum, row) => {
+        const taxRate = row.addOn?.taxRate ? parseFloat(String(row.addOn.taxRate)) : 18;
+        return sum + Math.round(row.subtotal * (taxRate / 100));
+    }, 0);
+    const roomTaxesAndFees = Math.max(0, (booking.taxAmount || 0) - addOnsTax);
 
     return (
         <div className="max-w-3xl space-y-5">
@@ -224,16 +230,23 @@ export default async function BookingDetailPage({ params }: PageProps) {
                             <span>Room Subtotal</span>
                             <span className="font-medium">{formatCurrency(bookingItemRows.reduce((a, i) => a + (i.subtotal || 0), 0))}</span>
                         </div>
-                        {addOnRows.length > 0 && (
-                            <div className="flex justify-between items-center text-amber-900">
-                                <span>Enhancements Subtotal</span>
-                                <span className="font-medium">{formatCurrency(addOnRows.reduce((a, r) => a + r.subtotal, 0))}</span>
-                            </div>
-                        )}
-                        <div className="flex justify-between items-center text-amber-900/70">
-                            <span>Taxes & Fees</span>
-                            <span className="font-medium">{formatCurrency(booking.taxAmount || 0)}</span>
+                        <div className="flex justify-between items-center text-amber-900/70 text-xs">
+                            <span className="pl-2 border-l-2 border-amber-200/50">Room Tax</span>
+                            <span>{formatCurrency(roomTaxesAndFees)}</span>
                         </div>
+                        
+                        {addOnRows.length > 0 && (
+                            <>
+                                <div className="flex justify-between items-center text-amber-900 mt-2 pt-2 border-t border-amber-200/50">
+                                    <span>Enhancements Subtotal</span>
+                                    <span className="font-medium">{formatCurrency(addOnRows.reduce((a, r) => a + r.subtotal, 0))}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-amber-900/70 text-xs">
+                                    <span className="pl-2 border-l-2 border-amber-200/50">Add-ons Tax</span>
+                                    <span>{formatCurrency(addOnsTax)}</span>
+                                </div>
+                            </>
+                        )}
                         
                         <div className="pt-4 border-t border-amber-200 mt-4 flex justify-between items-end">
                             <span className="text-[11px] font-bold uppercase tracking-widest text-amber-700">Total Charged</span>
