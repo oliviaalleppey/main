@@ -23,6 +23,7 @@ export function LuxuryDatePicker({
     const [selectedDate, setSelectedDate] = React.useState<DateRange | undefined>(date);
     const [month, setMonth] = React.useState<Date>(date?.from || new Date());
     const [monthsToShow, setMonthsToShow] = React.useState(2);
+    const [clickCount, setClickCount] = React.useState(0);
 
     React.useEffect(() => {
         const handleResize = () => {
@@ -46,11 +47,21 @@ export function LuxuryDatePicker({
 
     // Handle range selection
     const handleSelect = (range: DateRange | undefined) => {
-        // If we already have a complete range and user clicks any date,
-        // start fresh with new check-in (don't extend or modify existing range)
-        if (selectedDate?.from && selectedDate?.to && range?.from) {
-            // Always start fresh - new check-in, no check-out yet
+        // Track clicks: 0 = no selection, 1 = check-in set, 2+ = check-out set or modifying
+        const isRangeComplete = selectedDate?.from && selectedDate?.to;
+
+        if (isRangeComplete && range?.from) {
+            // Already have complete range - start fresh with new check-in
+            setClickCount(1);
             setSelectedDate({ from: range.from, to: undefined });
+        } else if (range?.from && !range?.to) {
+            // Setting check-in
+            setClickCount(1);
+            setSelectedDate(range);
+        } else if (range?.from && range?.to) {
+            // Setting check-out
+            setClickCount(2);
+            setSelectedDate(range);
         } else {
             setSelectedDate(range);
         }
