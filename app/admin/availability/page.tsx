@@ -2,7 +2,8 @@ import { db } from '@/lib/db';
 import { roomTypes, rooms } from '@/lib/db/schema';
 import { eq, sql } from 'drizzle-orm';
 import Link from 'next/link';
-import { BedDouble, TrendingUp, CalendarDays, Ban, ArrowRight, Users, CheckCircle2 } from 'lucide-react';
+import { BedDouble, TrendingUp, CalendarDays, Ban, ArrowRight, Users, CheckCircle2, BookOpen } from 'lucide-react';
+import { HotsoftCrsProvider } from '@/lib/providers/crs/hotsoft-crs-provider';
 
 function formatPrice(paise: number): string {
     return new Intl.NumberFormat('en-IN', {
@@ -38,6 +39,44 @@ export default async function AdminAvailabilityPage() {
     const totalRooms = roomTypesWithCounts.reduce((sum, rt) => sum + Number(rt.totalRooms), 0);
     const activeTypes = roomTypesWithCounts.filter(rt => rt.status === 'active').length;
 
+    // Fetch live CRS availability for today
+    let crsAvailMap: Record<string, number> = {};
+    let crsTotalBookedToday = 0;
+    let crsError = false;
+
+    try {
+        const provider = new HotsoftCrsProvider();
+        const now = new Date();
+        const tomorrow = new Date(now);
+        tomorrow.setDate(now.getDate() + 1);
+
+        const avail = await provider.checkAvailability({
+            checkIn: now.toISOString(),
+            checkOut: tomorrow.toISOString(),
+            adults: 2,
+            children: 0,
+        });
+
+        if (avail.status === 'success') {
+            for (const room of avail.rooms) {
+                crsAvailMap[room.roomTypeId] = room.availableCount;
+            }
+
+            // Calculate booked: sum across all room types
+            for (const rt of roomTypesWithCounts) {
+                const available = crsAvailMap[rt.slug] ?? null;
+                if (available !== null) {
+                    const booked = Math.max(0, Number(rt.totalRooms) - available);
+                    crsTotalBookedToday += booked;
+                }
+            }
+        } else {
+            crsError = true;
+        }
+    } catch (e) {
+        crsError = true;
+    }
+
     return (
         <div className="space-y-8">
             {/* Header */}
@@ -56,7 +95,7 @@ export default async function AdminAvailabilityPage() {
             </div>
 
             {/* Summary Stats */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-4 gap-4">
                 <div className="rounded-xl border bg-white p-5 shadow-sm">
                     <div className="flex items-center justify-between mb-3">
                         <p className="text-sm text-gray-500 font-medium">Room Types</p>
@@ -81,6 +120,26 @@ export default async function AdminAvailabilityPage() {
 
                 <div className="rounded-xl border bg-white p-5 shadow-sm">
                     <div className="flex items-center justify-between mb-3">
+                        <p className="text-sm text-gray-500 font-medium">Booked Today</p>
+                        <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center">
+                            <BookOpen className="w-4 h-4 text-orange-600" />
+                        </div>
+                    </div>
+                    {crsError ? (
+                        <>
+                            <p className="text-3xl font-bold text-gray-400">—</p>
+                            <p className="text-xs text-red-400 mt-1">CRS unavailable</p>
+                        </>
+                    ) : (
+                        <>
+                            <p className="text-3xl font-bold text-gray-900">{crsTotalBookedToday}</p>
+                            <p className="text-xs text-gray-400 mt-1">Live from CRS</p>
+                        </>
+                    )}
+                </div>
+
+                <div className="rounded-xl border bg-white p-5 shadow-sm">
+                    <div className="flex items-center justify-between mb-3">
                         <p className="text-sm text-gray-500 font-medium">Highest Rate</p>
                         <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center">
                             <TrendingUp className="w-4 h-4 text-purple-600" />
@@ -97,76 +156,95 @@ export default async function AdminAvailabilityPage() {
             <div>
                 <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-4">All Room Types</h2>
                 <div className="space-y-3">
-                    {roomTypesWithCounts.map((roomType) => (
-                        <div
-                            key={roomType.id}
-                            className="rounded-xl border bg-white shadow-sm hover:shadow-md transition-shadow overflow-hidden"
-                        >
-                            <div className="flex items-center gap-4 p-5">
-                                {/* Color Indicator */}
-                                <div className="w-1.5 self-stretch rounded-full bg-emerald-400 flex-shrink-0" />
+                    {roomTypesWithCounts.map((roomType) => {
+                        const available = crsAvailMap[roomType.slug] ?? null;
+                        const booked = available !== null
+                            ? Math.max(0, Number(roomType.totalRooms) - available)
+                            : null;
 
-                                {/* Room Info */}
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <h3 className="font-semibold text-gray-900">{roomType.name}</h3>
-                                        {roomType.status === 'active' ? (
-                                            <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
-                                                <CheckCircle2 className="w-3 h-3" /> Active
-                                            </span>
-                                        ) : (
-                                            <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-semibold text-gray-500">
-                                                Inactive
-                                            </span>
-                                        )}
-                                    </div>
-                                    <p className="text-xs text-gray-400 font-mono">{roomType.slug}</p>
-                                </div>
+                        return (
+                            <div
+                                key={roomType.id}
+                                className="rounded-xl border bg-white shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+                            >
+                                <div className="flex items-center gap-4 p-5">
+                                    {/* Color Indicator */}
+                                    <div className="w-1.5 self-stretch rounded-full bg-emerald-400 flex-shrink-0" />
 
-                                {/* Stats */}
-                                <div className="flex items-center gap-8 flex-shrink-0">
-                                    <div className="text-center">
-                                        <p className="text-xs text-gray-400 mb-1 flex items-center gap-1">
-                                            <BedDouble className="w-3 h-3" /> Rooms
-                                        </p>
-                                        <p className="text-lg font-bold text-gray-900">{Number(roomType.totalRooms)}</p>
+                                    {/* Room Info */}
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <h3 className="font-semibold text-gray-900">{roomType.name}</h3>
+                                            {roomType.status === 'active' ? (
+                                                <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
+                                                    <CheckCircle2 className="w-3 h-3" /> Active
+                                                </span>
+                                            ) : (
+                                                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-semibold text-gray-500">
+                                                    Inactive
+                                                </span>
+                                            )}
+                                        </div>
+                                        <p className="text-xs text-gray-400 font-mono">{roomType.slug}</p>
                                     </div>
-                                    <div className="text-center">
-                                        <p className="text-xs text-gray-400 mb-1 flex items-center gap-1">
-                                            <Users className="w-3 h-3" /> Guests
-                                        </p>
-                                        <p className="text-lg font-bold text-gray-900">{roomType.maxGuests || '—'}</p>
-                                    </div>
-                                    <div className="text-center">
-                                        <p className="text-xs text-gray-400 mb-1 flex items-center gap-1">
-                                            <TrendingUp className="w-3 h-3" /> Rate
-                                        </p>
-                                        <p className="text-lg font-bold text-gray-900">
-                                            {formatPrice(Number(roomType.basePrice))}
-                                        </p>
-                                    </div>
-                                </div>
 
-                                {/* Actions */}
-                                <div className="flex items-center gap-2 flex-shrink-0">
-                                    <Link
-                                        href={`/admin/availability/blocking?roomType=${roomType.id}`}
-                                        className="rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors flex items-center gap-1.5"
-                                    >
-                                        <Ban className="w-3.5 h-3.5" />
-                                        Block
-                                    </Link>
-                                    <Link
-                                        href={`/admin/availability/${roomType.id}`}
-                                        className="rounded-lg bg-gray-900 px-3 py-2 text-xs font-medium text-white hover:bg-gray-700 transition-colors flex items-center gap-1.5"
-                                    >
-                                        View Calendar
-                                        <ArrowRight className="w-3.5 h-3.5" />
-                                    </Link>
+                                    {/* Stats */}
+                                    <div className="flex items-center gap-8 flex-shrink-0">
+                                        <div className="text-center">
+                                            <p className="text-xs text-gray-400 mb-1 flex items-center gap-1">
+                                                <BedDouble className="w-3 h-3" /> Rooms
+                                            </p>
+                                            <p className="text-lg font-bold text-gray-900">{Number(roomType.totalRooms)}</p>
+                                        </div>
+                                        <div className="text-center">
+                                            <p className="text-xs text-gray-400 mb-1 flex items-center gap-1">
+                                                <BookOpen className="w-3 h-3" /> Booked
+                                            </p>
+                                            {booked !== null ? (
+                                                <p className={`text-lg font-bold ${booked > 0 ? 'text-orange-600' : 'text-gray-400'}`}>
+                                                    {booked}
+                                                </p>
+                                            ) : (
+                                                <p className="text-lg font-bold text-gray-300">—</p>
+                                            )}
+                                        </div>
+                                        <div className="text-center">
+                                            <p className="text-xs text-gray-400 mb-1 flex items-center gap-1">
+                                                <Users className="w-3 h-3" /> Guests
+                                            </p>
+                                            <p className="text-lg font-bold text-gray-900">{roomType.maxGuests || '—'}</p>
+                                        </div>
+                                        <div className="text-center">
+                                            <p className="text-xs text-gray-400 mb-1 flex items-center gap-1">
+                                                <TrendingUp className="w-3 h-3" /> Rate
+                                            </p>
+                                            <p className="text-lg font-bold text-gray-900">
+                                                {formatPrice(Number(roomType.basePrice))}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Actions */}
+                                    <div className="flex items-center gap-2 flex-shrink-0">
+                                        <Link
+                                            href={`/admin/availability/blocking?roomType=${roomType.id}`}
+                                            className="rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors flex items-center gap-1.5"
+                                        >
+                                            <Ban className="w-3.5 h-3.5" />
+                                            Block
+                                        </Link>
+                                        <Link
+                                            href={`/admin/availability/${roomType.id}`}
+                                            className="rounded-lg bg-gray-900 px-3 py-2 text-xs font-medium text-white hover:bg-gray-700 transition-colors flex items-center gap-1.5"
+                                        >
+                                            View Calendar
+                                            <ArrowRight className="w-3.5 h-3.5" />
+                                        </Link>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </div>
         </div>
