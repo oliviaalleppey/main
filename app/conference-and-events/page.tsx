@@ -27,61 +27,45 @@ export default async function ConferenceEventsPage() {
             <StickyBookButton />
             <WhatsAppWidget />
 
-            {/* Luxury Hero Section with Image */}
-            <section className="relative h-[90vh] flex items-center justify-center overflow-hidden">
-                {/* Background Image */}
-                <div className="absolute inset-0 z-0 bg-[#0A332B]">
-                    <div className="absolute inset-0 bg-gradient-to-b from-[#0A332B]/80 via-[#0A332B]/60 to-[#0A332B]/90" />
-                </div>
-
-                {/* Award Badge */}
-                <div className="absolute top-12 right-12 z-20 hidden md:block">
-                    <div className="bg-[#C5A059] text-[#1C1C1C] px-6 py-3 rounded-sm shadow-xl">
-                        <div className="flex items-center gap-2">
-                            <Award className="w-4 h-4" />
-                            <span className="text-xs font-medium tracking-[0.15em] uppercase">Award-Winning Venues</span>
-                        </div>
-                    </div>
-                </div>
+            {/* Hero Section - Rooms Style */}
+            <section className="relative h-[44vh] md:h-[52vh] w-full overflow-hidden">
+                <div className="absolute inset-0 bg-[linear-gradient(135deg,#1C2622_0%,#2B3A34_38%,#1B2421_100%)]" />
+                <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_25%_30%,rgba(231,212,173,0.18)_0%,rgba(231,212,173,0)_60%)]" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/15 to-black/40" />
 
                 {/* Hero Content */}
-                <div className="relative z-10 text-center text-white px-6 max-w-6xl mx-auto">
-                    <div className="flex items-center justify-center gap-6 mb-8">
-                        <span className="w-20 h-[1px] bg-[#C5A059]" />
-                        <p className="text-[#7A5E28] text-[11px] tracking-[0.5em] uppercase font-light">Business Excellence</p>
-                        <span className="w-20 h-[1px] bg-[#C5A059]" />
+                <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-6">
+                    <div className="mb-4">
+                        <span className="inline-block px-4 py-1 border border-[#C5A059]/50 text-[#C5A059] text-[10px] tracking-[0.3em] uppercase">Business Excellence</span>
                     </div>
-                    <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl mb-8 tracking-tight leading-[1.1]">
+                    <h1 className="font-serif text-4xl md:text-6xl lg:text-7xl text-white mb-6 tracking-tight">
                         Exceptional Events<br />
-                        <span className="text-[#7A5E28] italic">Unforgettable Moments</span>
+                        <span className="text-[#C5A059] italic">Unforgettable Moments</span>
                     </h1>
-                    <p className="text-lg md:text-xl text-white/90 max-w-3xl mx-auto mb-12 leading-relaxed font-light">
+                    <p className="text-white/80 text-sm md:text-base max-w-2xl mb-8 font-light leading-relaxed">
                         World-class venues, impeccable service, and meticulous attention to detail<br className="hidden md:block" />
                         for your most important gatherings
                     </p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <div className="flex flex-col sm:flex-row gap-3">
                         <Link
                             href="/contact?type=corporate"
-                            className="group inline-flex items-center justify-center gap-3 bg-[#C5A059] hover:bg-[#D4B76A] text-[#1C1C1C] px-10 py-4 text-[11px] tracking-[0.25em] uppercase font-semibold transition-all duration-300 shadow-2xl hover:shadow-[#C9A961]/20"
+                            className="inline-flex items-center justify-center gap-2 bg-[#C5A059] hover:bg-[#D4B76A] text-[#1C1C1C] px-8 py-3 text-[10px] tracking-[0.2em] uppercase font-semibold transition-all duration-300"
                         >
                             Request Proposal
-                            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                            <ArrowRight className="w-3 h-3" />
                         </Link>
                         <Link
                             href="#venues"
-                            className="inline-flex items-center justify-center gap-3 border-2 border-white/40 hover:border-white text-white hover:bg-white/10 px-10 py-4 text-[11px] tracking-[0.25em] uppercase font-semibold transition-all duration-300"
+                            className="inline-flex items-center justify-center gap-2 border border-white/40 hover:border-white text-white hover:bg-white/10 px-8 py-3 text-[10px] tracking-[0.2em] uppercase font-semibold transition-all duration-300"
                         >
                             Explore Venues
                         </Link>
                     </div>
                 </div>
-
-                {/* Gradient Overlay at Bottom */}
-                <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#FBFBF9] to-transparent z-10" />
             </section>
 
             {/* Introduction Strip */}
-            <section className="py-16 px-6 bg-white border-y border-[#C9A961]/10">
+            <section className="py-16 px-6 bg-white border-y border-[#C5A059]/10">
                 <div className="max-w-5xl mx-auto text-center">
                     <p className="text-[#403A35] text-base md:text-lg leading-relaxed font-light">
                         From intimate boardroom meetings to grand celebrations for 500 guests, Olivia Alleppey offers <span className="text-[#7A5E28] font-medium">8 distinctive venues</span> with state-of-the-art facilities,
@@ -92,88 +76,96 @@ export default async function ConferenceEventsPage() {
 
 
             {/* Featured Venues with Images */}
-            {featuredVenues.length > 0 && (
-                <section className="py-24 px-6 bg-gradient-to-b from-white to-[#FBFBF9]">
-                    <div className="max-w-7xl mx-auto">
-                        <div className="text-center mb-20">
-                            <div className="flex items-center justify-center gap-4 mb-5">
-                                <Sparkles className="w-5 h-5 text-[#7A5E28]" />
-                                <p className="text-[#7A5E28] text-[11px] tracking-[0.4em] uppercase">Featured Spaces</p>
-                                <Sparkles className="w-5 h-5 text-[#7A5E28]" />
+            {
+                featuredVenues.length > 0 && (
+                    <section className="py-24 px-6 bg-gradient-to-b from-white to-[#FBFBF9]">
+                        <div className="max-w-7xl mx-auto">
+                            <div className="text-center mb-20">
+                                <div className="flex items-center justify-center gap-4 mb-5">
+                                    <Sparkles className="w-5 h-5 text-[#7A5E28]" />
+                                    <p className="text-[#7A5E28] text-[11px] tracking-[0.4em] uppercase">Featured Spaces</p>
+                                    <Sparkles className="w-5 h-5 text-[#7A5E28]" />
+                                </div>
+                                <h2 className="font-serif text-5xl md:text-6xl text-[#1C1C1C] mb-5 tracking-tight">Signature Venues</h2>
+                                <p className="text-[#59544D] max-w-2xl mx-auto text-lg font-light">
+                                    Our most sought-after spaces for extraordinary events
+                                </p>
                             </div>
-                            <h2 className="font-serif text-5xl md:text-6xl text-[#1C1C1C] mb-5 tracking-tight">Signature Venues</h2>
-                            <p className="text-[#59544D] max-w-2xl mx-auto text-lg font-light">
-                                Our most sought-after spaces for extraordinary events
-                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                {featuredVenues.map((venue) => (
+                                    <VenueCard key={venue.id} venue={venue} />
+                                ))}
+                            </div>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                            {featuredVenues.map((venue) => (
-                                <VenueCard key={venue.id} venue={venue} />
-                            ))}
-                        </div>
-                    </div>
-                </section>
-            )}
+                    </section>
+                )
+            }
 
             {/* Grand Ballrooms */}
-            {ballrooms.length > 0 && (
-                <section className="py-24 px-6">
-                    <div className="max-w-7xl mx-auto">
-                        <div className="text-center mb-20">
-                            <p className="text-[#7A5E28] text-[11px] tracking-[0.4em] uppercase mb-4">Elegant Spaces</p>
-                            <h2 className="font-serif text-5xl md:text-6xl text-[#1C1C1C] mb-5 tracking-tight">Grand Ballrooms</h2>
-                            <p className="text-[#59544D] max-w-2xl mx-auto text-lg font-light">
-                                Majestic spaces for weddings, galas, and large-scale celebrations
-                            </p>
+            {
+                ballrooms.length > 0 && (
+                    <section className="py-24 px-6">
+                        <div className="max-w-7xl mx-auto">
+                            <div className="text-center mb-20">
+                                <p className="text-[#7A5E28] text-[11px] tracking-[0.4em] uppercase mb-4">Elegant Spaces</p>
+                                <h2 className="font-serif text-5xl md:text-6xl text-[#1C1C1C] mb-5 tracking-tight">Grand Ballrooms</h2>
+                                <p className="text-[#59544D] max-w-2xl mx-auto text-lg font-light">
+                                    Majestic spaces for weddings, galas, and large-scale celebrations
+                                </p>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                {ballrooms.map((venue) => (
+                                    <VenueCard key={venue.id} venue={venue} />
+                                ))}
+                            </div>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {ballrooms.map((venue) => (
-                                <VenueCard key={venue.id} venue={venue} />
-                            ))}
-                        </div>
-                    </div>
-                </section>
-            )}
+                    </section>
+                )
+            }
 
             {/* Meeting Rooms */}
-            {meetingRooms.length > 0 && (
-                <section className="py-24 px-6 bg-white">
-                    <div className="max-w-7xl mx-auto">
-                        <div className="text-center mb-20">
-                            <p className="text-[#7A5E28] text-[11px] tracking-[0.4em] uppercase mb-4">Professional Spaces</p>
-                            <h2 className="font-serif text-5xl md:text-6xl text-[#1C1C1C] mb-5 tracking-tight">Meeting Rooms</h2>
-                            <p className="text-[#59544D] max-w-2xl mx-auto text-lg font-light">
-                                Intimate settings for productive business gatherings
-                            </p>
+            {
+                meetingRooms.length > 0 && (
+                    <section className="py-24 px-6 bg-white">
+                        <div className="max-w-7xl mx-auto">
+                            <div className="text-center mb-20">
+                                <p className="text-[#7A5E28] text-[11px] tracking-[0.4em] uppercase mb-4">Professional Spaces</p>
+                                <h2 className="font-serif text-5xl md:text-6xl text-[#1C1C1C] mb-5 tracking-tight">Meeting Rooms</h2>
+                                <p className="text-[#59544D] max-w-2xl mx-auto text-lg font-light">
+                                    Intimate settings for productive business gatherings
+                                </p>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                {meetingRooms.map((venue) => (
+                                    <VenueCard key={venue.id} venue={venue} />
+                                ))}
+                            </div>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {meetingRooms.map((venue) => (
-                                <VenueCard key={venue.id} venue={venue} />
-                            ))}
-                        </div>
-                    </div>
-                </section>
-            )}
+                    </section>
+                )
+            }
 
             {/* Outdoor Venues with Image */}
-            {outdoorVenues.length > 0 && (
-                <section className="py-24 px-6 bg-[#F6F1E8]">
-                    <div className="max-w-7xl mx-auto">
-                        <div className="text-center mb-20">
-                            <p className="text-[#7A5E28] text-[11px] tracking-[0.4em] uppercase mb-4">Al Fresco Events</p>
-                            <h2 className="font-serif text-5xl md:text-6xl text-[#1C1C1C] mb-5 tracking-tight">Outdoor Venues</h2>
-                            <p className="text-[#59544D] max-w-2xl mx-auto text-lg font-light">
-                                Breathtaking settings under the open sky
-                            </p>
+            {
+                outdoorVenues.length > 0 && (
+                    <section className="py-24 px-6 bg-[#F6F1E8]">
+                        <div className="max-w-7xl mx-auto">
+                            <div className="text-center mb-20">
+                                <p className="text-[#7A5E28] text-[11px] tracking-[0.4em] uppercase mb-4">Al Fresco Events</p>
+                                <h2 className="font-serif text-5xl md:text-6xl text-[#1C1C1C] mb-5 tracking-tight">Outdoor Venues</h2>
+                                <p className="text-[#59544D] max-w-2xl mx-auto text-lg font-light">
+                                    Breathtaking settings under the open sky
+                                </p>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                {outdoorVenues.map((venue) => (
+                                    <VenueCard key={venue.id} venue={venue} />
+                                ))}
+                            </div>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                            {outdoorVenues.map((venue) => (
-                                <VenueCard key={venue.id} venue={venue} />
-                            ))}
-                        </div>
-                    </div>
-                </section>
-            )}
+                    </section>
+                )
+            }
 
             {/* Premium Amenities with Luxury Design */}
             <section className="py-28 px-6 bg-gradient-to-b from-white via-[#FBFBF9] to-white relative overflow-hidden">
@@ -312,6 +304,6 @@ export default async function ConferenceEventsPage() {
                     </div>
                 </div>
             </section>
-        </main>
+        </main >
     );
 }

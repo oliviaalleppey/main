@@ -251,54 +251,38 @@ export default function ConferenceEventsPage() {
     return (
         <>
             <main className="min-h-screen bg-[#F8F6F1] text-[#1D1D1D]">
-                <section className="relative min-h-[62vh] md:min-h-[72vh] overflow-hidden">
-                    {/* Placeholder background (image to be added later) */}
-                    <div className="absolute inset-0 bg-[linear-gradient(135deg,#1C2622_0%,#2B3A34_38%,#1B2421_100%)]" />
-                    <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_25%_30%,rgba(231,212,173,0.18)_0%,rgba(231,212,173,0)_60%)]" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#121A17]/78 via-[#1A211E]/58 to-[#121A17]/45" />
+                <section className="relative h-[44vh] md:h-[52vh] w-full overflow-hidden">
+                    <div className="absolute inset-0 z-0">
+                        <div className="absolute inset-0 bg-[linear-gradient(135deg,#1C2622_0%,#2B3A34_38%,#1B2421_100%)]" />
+                        <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_25%_30%,rgba(231,212,173,0.18)_0%,rgba(231,212,173,0)_60%)]" />
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/15 to-black/40" />
+                    </div>
 
-                    <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-10 pt-14 pb-16 md:pt-20 md:pb-20">
-                        <p className="text-[#D6B27A] text-[10px] tracking-[0.34em] uppercase mb-4">Conference & Events</p>
-                        <h1 className="font-serif text-[2.4rem] md:text-[4rem] leading-[1.05] text-white max-w-4xl tracking-tight">
-                            Conferences & Events at Olivia Alleppey
-                        </h1>
-                        <p className="mt-5 text-white/85 text-sm md:text-lg max-w-3xl leading-relaxed">
-                            Elegant venues for meetings, conferences, weddings and celebrations in the heart of Alleppey.
-                        </p>
-
-                        <div className="mt-7 grid grid-cols-2 md:grid-cols-4 gap-2.5 md:gap-3 max-w-4xl">
-                            {[
-                                { icon: Users, label: 'Up to 500 Guests' },
-                                { icon: LayoutGrid, label: `${venues.length} Event Spaces` },
-                                { icon: Ruler, label: '5,035 sq ft Ballroom' },
-                                { icon: Building2, label: 'Indoor & Poolside venues' },
-                            ].map((stat) => {
-                                const Icon = stat.icon;
-                                return (
-                                    <div key={stat.label} className="rounded-lg border border-white/25 bg-black/20 backdrop-blur-sm px-3 py-3">
-                                        <div className="flex items-center gap-2">
-                                            <Icon className="w-4 h-4 text-[#E4C28D]" />
-                                            <span className="text-white text-[11px] md:text-xs tracking-wide">{stat.label}</span>
-                                        </div>
-                                    </div>
-                                );
-                            })}
+                    <div className="relative z-10 h-full flex flex-col justify-center items-center text-center px-6">
+                        <div className="flex items-center gap-4 mb-3">
+                            <span className="w-8 h-[1px] bg-white/80" />
+                            <p className="text-white text-[10px] tracking-[0.34em] uppercase font-light">
+                                Olivia Alleppey
+                            </p>
+                            <span className="w-8 h-[1px] bg-white/80" />
                         </div>
 
-                        <div className="mt-7 flex flex-col sm:flex-row gap-3">
+                        <h1 className="text-[3rem] sm:text-[4rem] md:text-[6rem] lg:text-[8rem] font-serif font-medium text-white mb-5 tracking-[-0.03em] leading-[0.92] [text-shadow:0_2px_22px_rgba(0,0,0,0.55)]">
+                            Conference & Events
+                        </h1>
+
+                        <div className="flex gap-3">
                             <Link
                                 href="#event-form"
-                                className="inline-flex items-center justify-center gap-2 bg-[#B68A4A] text-white px-7 py-3 text-[11px] tracking-[0.2em] uppercase hover:bg-[#A57D44] transition-colors"
+                                className="border border-white/90 bg-white text-[#2D3933] px-6 py-2.5 text-[10px] tracking-[0.22em] uppercase font-semibold shadow-[0_18px_40px_-28px_rgba(0,0,0,0.65)] hover:bg-white/95 transition-colors duration-300"
                             >
-                                Plan Your Event
-                                <ArrowRight className="w-4 h-4" />
+                                Inquire Now
                             </Link>
                             <Link
-                                href="/contact?asset=venue-brochure"
-                                className="inline-flex items-center justify-center gap-2 border border-white/45 text-white px-7 py-3 text-[11px] tracking-[0.2em] uppercase hover:bg-white/10 transition-colors"
+                                href="/contact"
+                                className="border border-white/85 bg-black/20 text-white px-6 py-2.5 text-[10px] tracking-[0.22em] uppercase font-semibold backdrop-blur-sm hover:bg-black/30 transition-colors duration-300"
                             >
-                                Download Venue Brochure
-                                <Download className="w-4 h-4" />
+                                Contact now
                             </Link>
                         </div>
                     </div>

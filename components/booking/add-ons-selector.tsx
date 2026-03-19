@@ -188,9 +188,8 @@ export function AddOnsSelector({ options, initialSelected, onContinue }: AddOnsS
                     <button
                         type="button"
                         onClick={() => {
-                            const paymentSection = document.getElementById('payment-section');
-                            if (paymentSection) {
-                                paymentSection.scrollIntoView({ behavior: 'smooth' });
+                            if (onContinue) {
+                                onContinue();
                             }
                         }}
                         className="inline-flex items-center justify-center gap-2 rounded-lg bg-white border border-gray-300 px-4 py-2 text-[11px] md:text-xs font-semibold uppercase tracking-wider text-gray-700 hover:bg-gray-50 transition-colors"

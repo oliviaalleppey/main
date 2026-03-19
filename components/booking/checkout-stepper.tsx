@@ -59,6 +59,16 @@ export function CheckoutStepper({
         prevRatePlanId.current = selectedRatePlanId;
     }, [selectedRatePlanId, activeStep]);
 
+    // Listen for manual "Select" clicks on the exact same rate plan
+    useEffect(() => {
+        const handleRoomSelected = () => {
+            setCompletedSteps((prev) => Array.from(new Set([...prev, 2])));
+            setActiveStep((prev) => (prev === 2 ? 3 : prev));
+        };
+        window.addEventListener('room-selected', handleRoomSelected);
+        return () => window.removeEventListener('room-selected', handleRoomSelected);
+    }, []);
+
     // Force return to step 2 if search params change
     const prevSearchHash = useRef(searchHash);
     useEffect(() => {

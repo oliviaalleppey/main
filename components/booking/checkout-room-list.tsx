@@ -63,6 +63,8 @@ function CheckoutRoomCard({ result, isSelected }: { result: any, isSelected: boo
             const res = await updateSessionRoom(result.roomType.id, 1, ratePlanId, quoteSnapshot);
             if (!res.success) {
                 alert(res.message || 'Failed to select room');
+            } else {
+                window.dispatchEvent(new CustomEvent('room-selected'));
             }
             setSelectingRateId(null);
         });
@@ -217,7 +219,7 @@ function CheckoutRoomCard({ result, isSelected }: { result: any, isSelected: boo
                                                     'bg-[#1C1C1C] text-white hover:bg-black'
                                                 }`}
                                             >
-                                                {selectingRateId === plan.id ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Book Now'}
+                                                {selectingRateId === plan.id ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Select'}
                                             </button>
                                             
                                             <p className="text-[11px] text-gray-600 mt-2 text-right">
