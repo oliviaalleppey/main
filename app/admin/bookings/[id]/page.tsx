@@ -107,6 +107,12 @@ export default async function BookingDetailPage({ params }: PageProps) {
     }, 0);
     const roomTaxesAndFees = Math.max(0, (booking.taxAmount || 0) - addOnsTax);
 
+    const roomSubtotal = bookingItemRows.reduce((a, i) => a + (i.subtotal || 0), 0);
+    const roomTaxPercent = roomSubtotal > 0 ? Math.round((roomTaxesAndFees / roomSubtotal) * 100) : 0;
+    
+    const addOnsSubtotal = addOnRows.reduce((a, r) => a + r.subtotal, 0);
+    const addOnsTaxPercent = addOnsSubtotal > 0 ? Math.round((addOnsTax / addOnsSubtotal) * 100) : 0;
+
     return (
         <div className="max-w-3xl space-y-5">
             {/* Header */}
@@ -228,10 +234,10 @@ export default async function BookingDetailPage({ params }: PageProps) {
                     <div className="space-y-3.5 text-[13px]">
                         <div className="flex justify-between items-center text-amber-900">
                             <span>Room Subtotal</span>
-                            <span className="font-medium">{formatCurrency(bookingItemRows.reduce((a, i) => a + (i.subtotal || 0), 0))}</span>
+                            <span className="font-medium">{formatCurrency(roomSubtotal)}</span>
                         </div>
                         <div className="flex justify-between items-center text-amber-900/70 text-xs">
-                            <span className="pl-2 border-l-2 border-amber-200/50">Room Tax</span>
+                            <span className="pl-2 border-l-2 border-amber-200/50">Room Tax {roomTaxPercent > 0 ? `(${roomTaxPercent}%)` : ''}</span>
                             <span>{formatCurrency(roomTaxesAndFees)}</span>
                         </div>
                         
@@ -239,10 +245,10 @@ export default async function BookingDetailPage({ params }: PageProps) {
                             <>
                                 <div className="flex justify-between items-center text-amber-900 mt-2 pt-2 border-t border-amber-200/50">
                                     <span>Enhancements Subtotal</span>
-                                    <span className="font-medium">{formatCurrency(addOnRows.reduce((a, r) => a + r.subtotal, 0))}</span>
+                                    <span className="font-medium">{formatCurrency(addOnsSubtotal)}</span>
                                 </div>
                                 <div className="flex justify-between items-center text-amber-900/70 text-xs">
-                                    <span className="pl-2 border-l-2 border-amber-200/50">Add-ons Tax</span>
+                                    <span className="pl-2 border-l-2 border-amber-200/50">Add-ons Tax {addOnsTaxPercent > 0 ? `(${addOnsTaxPercent}%)` : ''}</span>
                                     <span>{formatCurrency(addOnsTax)}</span>
                                 </div>
                             </>
