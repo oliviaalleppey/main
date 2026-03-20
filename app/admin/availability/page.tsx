@@ -1,9 +1,13 @@
 import { db } from '@/lib/db';
-import { roomTypes, rooms } from '@/lib/db/schema';
-import { eq, sql } from 'drizzle-orm';
+import { roomTypes, rooms, bookings, bookingItems } from '@/lib/db/schema';
+import { eq, sql, and, lte, gt, inArray } from 'drizzle-orm';
 import Link from 'next/link';
-import { BedDouble, TrendingUp, CalendarDays, Ban, ArrowRight, Users, CheckCircle2, BookOpen } from 'lucide-react';
+import { BedDouble, TrendingUp, CalendarDays, Ban, ArrowRight, Users, CheckCircle2, BookOpen, AlertTriangle } from 'lucide-react';
 import { HotsoftCrsProvider } from '@/lib/providers/crs/hotsoft-crs-provider';
+
+// Cache this page for 1 hour to prevent rate-limiting the Hotsoft CRS
+// (each page load = 6 API calls; without caching this exhausts the daily quota)
+export const revalidate = 3600;
 
 function formatPrice(paise: number): string {
     return new Intl.NumberFormat('en-IN', {
@@ -39,9 +43,35 @@ export default async function AdminAvailabilityPage() {
     const totalRooms = roomTypesWithCounts.reduce((sum, rt) => sum + Number(rt.totalRooms), 0);
     const activeTypes = roomTypesWithCounts.filter(rt => rt.status === 'active').length;
 
-    // Fetch live CRS availability for today
-    let crsAvailMap: Record<string, number> = {};
-    let crsTotalBookedToday = 0;
+    // Always fetch local DB bookings (website bookings only — used as fallback when CRS is down)
+    const todayStr = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    const localBookingRows = await db
+        .select({
+            roomTypeId: bookingItems.roomTypeId,
+            count: sql<number>`count(distinct ${bookings.id})`,
+        })
+        .from(bookings)
+        .innerJoin(bookingItems, eq(bookingItems.bookingId, bookings.id))
+        .where(
+            and(
+                lte(bookings.checkIn, todayStr),
+                gt(bookings.checkOut, todayStr),
+                inArray(bookings.status, ['confirmed', 'completed', 'booking_requested'])
+            )
+        )
+        .groupBy(bookingItems.roomTypeId);
+
+    // roomTypeId (uuid) -> booked count from local DB
+    const localBookedMap: Record<string, number> = {};
+    for (const row of localBookingRows) {
+        localBookedMap[row.roomTypeId] = Number(row.count);
+    }
+    const localTotalBooked = Object.values(localBookedMap).reduce((s, n) => s + n, 0);
+
+    // Fetch live CRS availability — includes walk-ins, OTA, and all channels
+    // This is the source of truth for real availability across all booking channels
+    let crsAvailMap: Record<string, number> = {}; // slug -> available count
+    let crsTotalBooked = 0;
     let crsError = false;
 
     try {
@@ -61,20 +91,19 @@ export default async function AdminAvailabilityPage() {
             for (const room of avail.rooms) {
                 crsAvailMap[room.roomTypeId] = room.availableCount;
             }
-
-            // Calculate booked: sum across all room types
             for (const rt of roomTypesWithCounts) {
                 const available = crsAvailMap[rt.slug] ?? null;
                 if (available !== null) {
-                    const booked = Math.max(0, Number(rt.totalRooms) - available);
-                    crsTotalBookedToday += booked;
+                    crsTotalBooked += Math.max(0, Number(rt.totalRooms) - available);
                 }
             }
         } else {
             crsError = true;
+            console.warn('[Availability] CRS returned failure:', avail.message);
         }
     } catch (e) {
         crsError = true;
+        console.warn('[Availability] CRS exception:', e);
     }
 
     return (
@@ -121,19 +150,21 @@ export default async function AdminAvailabilityPage() {
                 <div className="rounded-xl border bg-white p-5 shadow-sm">
                     <div className="flex items-center justify-between mb-3">
                         <p className="text-sm text-gray-500 font-medium">Booked Today</p>
-                        <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center">
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${crsError ? 'bg-orange-50' : 'bg-orange-50'}`}>
                             <BookOpen className="w-4 h-4 text-orange-600" />
                         </div>
                     </div>
                     {crsError ? (
                         <>
-                            <p className="text-3xl font-bold text-gray-400">—</p>
-                            <p className="text-xs text-red-400 mt-1">CRS unavailable</p>
+                            <p className="text-3xl font-bold text-gray-900">{localTotalBooked}</p>
+                            <p className="text-xs text-orange-500 mt-1 flex items-center gap-1">
+                                <AlertTriangle className="w-3 h-3" /> Website only
+                            </p>
                         </>
                     ) : (
                         <>
-                            <p className="text-3xl font-bold text-gray-900">{crsTotalBookedToday}</p>
-                            <p className="text-xs text-gray-400 mt-1">Live from CRS</p>
+                            <p className="text-3xl font-bold text-gray-900">{crsTotalBooked}</p>
+                            <p className="text-xs text-gray-400 mt-1">All channels (CRS)</p>
                         </>
                     )}
                 </div>
@@ -152,15 +183,29 @@ export default async function AdminAvailabilityPage() {
                 </div>
             </div>
 
+            {/* CRS Warning Banner */}
+            {crsError && (
+                <div className="flex items-start gap-3 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3">
+                    <AlertTriangle className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                        <p className="text-sm font-semibold text-orange-700">CRS connection unavailable</p>
+                        <p className="text-xs text-orange-600 mt-0.5">
+                            Cannot reach Hotsoft CRS. Booked counts show <strong>website bookings only</strong> — walk-ins and OTA bookings are not included. Contact PurpleKeys if this persists.
+                        </p>
+                    </div>
+                </div>
+            )}
+
             {/* Room Type Cards */}
             <div>
                 <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-4">All Room Types</h2>
                 <div className="space-y-3">
                     {roomTypesWithCounts.map((roomType) => {
-                        const available = crsAvailMap[roomType.slug] ?? null;
-                        const booked = available !== null
-                            ? Math.max(0, Number(roomType.totalRooms) - available)
-                            : null;
+                        // Use CRS available count if we have it, else fall back to local DB
+                        const crsAvailable = crsAvailMap[roomType.slug] ?? null;
+                        const booked = crsAvailable !== null
+                            ? Math.max(0, Number(roomType.totalRooms) - crsAvailable)
+                            : (localBookedMap[roomType.id] ?? null);
 
                         return (
                             <div
