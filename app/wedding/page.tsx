@@ -163,14 +163,14 @@ export default function WeddingPage() {
                                 <span className="w-8 h-[1px] bg-white/80" />
                             </motion.div>
 
-<motion.h1
-    initial={{ opacity: 0, y: 25 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.8, delay: 0.4 }}
-    className="text-[2.5rem] sm:text-[3.5rem] md:text-[5rem] lg:text-[6rem] font-serif font-medium text-white mb-5 tracking-[-0.02em] leading-[0.92] [text-shadow:0_2px_22px_rgba(0,0,0,0.55)]"
->
-    Celebrations at Olivia
-</motion.h1>
+                            <motion.h1
+                                initial={{ opacity: 0, y: 25 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.8, delay: 0.4 }}
+                                className="text-[2.5rem] sm:text-[3.5rem] md:text-[5rem] lg:text-[6rem] font-serif font-medium text-white mb-5 tracking-[-0.02em] leading-[0.92] [text-shadow:0_2px_22px_rgba(0,0,0,0.55)]"
+                            >
+                                Celebrations at Olivia
+                            </motion.h1>
 
                             <motion.div
                                 initial={{ opacity: 0, y: 15 }}
@@ -197,7 +197,7 @@ export default function WeddingPage() {
 
                 <section className="border-b border-[#E8E0D2] bg-[#F6F1E7]">
                     <div className="max-w-6xl mx-auto px-6 md:px-10 py-6 md:py-7 grid grid-cols-2 md:grid-cols-4 gap-5">
-                        <Fact label="Celebration Size" value="40 to 400 Guests" />
+                        <Fact label="Celebration Size" value="25 - 750 Guests" />
                         <Fact label="Planning Window" value="4 to 8 Months" />
                         <Fact label="Venue Options" value="Indoor + Outdoor" />
                         <Fact label="Response Time" value="Within 24 Hours" />
