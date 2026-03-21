@@ -167,7 +167,7 @@ export default function WeddingPage() {
                                 initial={{ opacity: 0, y: 25 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.8, delay: 0.4 }}
-                                className="text-[3rem] sm:text-[4rem] md:text-[6rem] lg:text-[7rem] font-serif font-medium text-white mb-5 tracking-[-0.02em] leading-[0.92] [text-shadow:0_2px_22px_rgba(0,0,0,0.55)]"
+                                className="text-[3.5rem] sm:text-[5rem] md:text-[7rem] lg:text-[8rem] font-serif font-medium text-white mb-5 tracking-[-0.02em] leading-none whitespace-nowrap [text-shadow:0_2px_22px_rgba(0,0,0,0.55)]"
                             >
                                 Celebrations at Olivia
                             </motion.h1>
