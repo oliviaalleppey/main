@@ -43,27 +43,6 @@ interface RoomsClientProps {
 }
 
 export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
-    // Luxury amenities data
-    const roomAmenities = [
-        { name: 'Premium Bedding', description: '600-thread-count Egyptian cotton linens' },
-        { name: 'Bespoke Toiletries', description: 'Artisan-crafted bath amenities' },
-        { name: 'Smart Technology', description: 'Integrated room controls & entertainment' },
-        { name: '24-Hour Concierge', description: 'Personalized service around the clock' },
-        { name: 'Gourmet Minibar', description: 'Curated selection of refreshments' },
-        { name: 'In-Room Dining', description: '24-hour culinary service' },
-    ];
-
-    // Room features icons
-    const featuresList = [
-        'Lake Views',
-        'Private Balcony',
-        'Rain Shower',
-        'King Bed',
-        'Work Desk',
-        'Seating Area',
-        'Mini Bar',
-        'Safe Deposit',
-    ];
     const roomTypes: RoomViewModel[] = initialRooms.map((room) => {
         const displayName = formatRoomName(room.name);
         return {
@@ -382,64 +361,7 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
                 </div>
             </section>
 
-            {/* Amenities Section */}
-            <section className="py-12 md:py-16 bg-[#F3EEE4] text-[#2D3732] border-y border-[#E4DCCB]">
-                <div className="max-w-6xl mx-auto px-6 md:px-10">
-                    <div className="text-center mb-10">
-                        <span className="text-[#8D7858] text-[10px] tracking-[0.3em] uppercase mb-4 block">In-Room Amenities</span>
-                        <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif mb-4 tracking-wide">
-                            Every Detail Considered
-                        </h2>
-                        <p className="text-[#42524A]/75 text-base md:text-lg max-w-2xl mx-auto">
-                            Thoughtfully curated amenities ensure your comfort is never compromised
-                        </p>
-                    </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-5 md:gap-8">
-                        {roomAmenities.map((amenity, index) => (
-                            <motion.div
-                                key={amenity.name}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ duration: 0.6, delay: index * 0.1 }}
-                                className="text-center group"
-                            >
-                                <div className="w-11 h-11 mx-auto mb-4 border border-[#D6C3A0] bg-[#FBF7EE] flex items-center justify-center group-hover:border-[#BCA06F] transition-colors duration-300">
-                                    <span className="text-[#8D7858] text-lg font-serif">{String(index + 1).padStart(2, '0')}</span>
-                                </div>
-                                <h3 className="text-lg font-serif mb-1.5">{amenity.name}</h3>
-                                <p className="text-[#4A5A52]/70 text-sm">{amenity.description}</p>
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Features Grid */}
-            <section className="py-10 md:py-14 px-6 md:px-10 bg-[#FCFAF5] border-t border-[#ECE5D7]">
-                <div className="max-w-6xl mx-auto">
-                    <div className="grid md:grid-cols-4 gap-5">
-                        {featuresList.map((feature, index) => (
-                            <motion.div
-                                key={feature}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ duration: 0.5, delay: index * 0.1 }}
-                                className="flex items-center gap-3 group"
-                            >
-                                <div className="w-9 h-9 border border-[#DCCBAA] bg-[#FEFCF7] flex items-center justify-center group-hover:bg-[#F4ECDD] transition-colors duration-300">
-                                    <svg className="w-4 h-4 text-[#A48755] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
-                                    </svg>
-                                </div>
-                                <span className="text-[#3E4D46]/80 text-sm tracking-wide">{feature}</span>
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
-            </section>
 
             {/* Concierge CTA - Refined */}
             <section className="relative py-14 md:py-16 overflow-hidden">

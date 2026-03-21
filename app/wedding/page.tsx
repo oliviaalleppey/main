@@ -198,9 +198,9 @@ export default function WeddingPage() {
                 <section className="border-b border-[#E8E0D2] bg-[#F6F1E7]">
                     <div className="max-w-6xl mx-auto px-6 md:px-10 py-6 md:py-7 grid grid-cols-2 md:grid-cols-4 gap-5">
                         <Fact label="Celebration Size" value="25 - 750 Guests" />
-                        <Fact label="Planning Window" value="4 to 8 Months" />
                         <Fact label="Venue Options" value="Indoor + Outdoor" />
-                        <Fact label="Response Time" value="Within 24 Hours" />
+                        <Fact label="Response Time" value="Instant clarification" />
+                        <Fact label="Location" value="Olivia ALleppey" />
                     </div>
                 </section>
 
@@ -240,37 +240,7 @@ export default function WeddingPage() {
                     </div>
                 </section>
 
-                <section className="py-12 md:py-14 bg-[#F6F1E7] border-y border-[#E8E0D2]">
-                    <div className="max-w-6xl mx-auto px-6 md:px-10">
-                        <p className="text-[#9E8152] text-[11px] tracking-[0.3em] uppercase mb-3">
-                            Celebration Formats
-                        </p>
-                        <h2 className="font-serif text-3xl md:text-5xl text-[#1F2925] mb-8">
-                            Choose Your Wedding Scale
-                        </h2>
-                        <div className="grid lg:grid-cols-3 gap-5">
-                            {celebrationStyles.map((style) => {
-                                const Icon = style.icon;
-                                return (
-                                    <article key={style.title} className="border border-[#E4D9C7] bg-[#FCFAF5] p-6">
-                                        <Icon className="w-6 h-6 text-[#B18F59] mb-4" />
-                                        <h3 className="font-serif text-2xl text-[#1F2925] mb-3">{style.title}</h3>
-                                        <p className="text-sm text-[#3C4B44] mb-1">{style.capacity}</p>
-                                        <p className="text-sm text-[#3C4B44] mb-1">{style.investment}</p>
-                                        <p className="text-sm text-[#3C4B44]/80 mb-4">{style.idealFor}</p>
-                                        <ul className="space-y-2">
-                                            {style.highlights.map((item) => (
-                                                <li key={item} className="text-sm text-[#425149]">
-                                                    {item}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </article>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </section>
+
 
                 <section id="wedding-venues" className="py-12 md:py-14">
                     <div className="max-w-6xl mx-auto px-6 md:px-10">
