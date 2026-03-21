@@ -238,21 +238,22 @@ export default function WeddingPage() {
 
 
                 <section className="py-12 md:py-14">
-                    <div className="max-w-6xl mx-auto px-6 md:px-10 grid lg:grid-cols-2 gap-8">
-                        <div>
-                        <h2 className="font-serif text-3xl md:text-4xl text-[#1F2925] mb-6">
-                            Frequently Asked Questions
-                        </h2>
-                        <div className="space-y-3">
-                            {faqs.map((faq) => (
-                                <details key={faq.question} className="group border border-[#E3D9C8] bg-[#FCFAF5] px-5 py-4">
-                                    <summary className="cursor-pointer list-none text-[#24302B] font-medium pr-8 relative">
-                                        {faq.question}
-                                        <span className="absolute right-0 top-0 text-[#9E8152] transition-transform group-open:rotate-45">+</span>
-                                    </summary>
-                                    <p className="text-sm text-[#3E4D46] mt-3 leading-relaxed">{faq.answer}</p>
-                                </details>
-                            ))}
+                    <div className="max-w-6xl mx-auto px-6 md:px-10">
+                        <div className="max-w-3xl mx-auto">
+                            <h2 className="font-serif text-3xl md:text-4xl text-[#1F2925] mb-6">
+                                Frequently Asked Questions
+                            </h2>
+                            <div className="space-y-3">
+                                {faqs.map((faq) => (
+                                    <details key={faq.question} className="group border border-[#E3D9C8] bg-[#FCFAF5] px-5 py-4">
+                                        <summary className="cursor-pointer list-none text-[#24302B] font-medium pr-8 relative">
+                                            {faq.question}
+                                            <span className="absolute right-0 top-0 text-[#9E8152] transition-transform group-open:rotate-45">+</span>
+                                        </summary>
+                                        <p className="text-sm text-[#3E4D46] mt-3 leading-relaxed">{faq.answer}</p>
+                                    </details>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -285,7 +286,7 @@ export default function WeddingPage() {
                         </div>
                     </div>
                 </section>
-            </main >
+            </main>
 
             <StickyBookButton />
             <WhatsAppWidget />
