@@ -79,39 +79,6 @@ const venueList: VenueInfo[] = [
     },
 ];
 
-const planningTimeline = [
-    {
-        label: 'Step 01',
-        title: 'Consultation & Budget Match',
-        detail: 'We map your guest count, style and budget range into a venue and function plan within 48 hours.',
-    },
-    {
-        label: 'Step 02',
-        title: 'Menu, Decor & Rooming',
-        detail: 'Finalise cuisine style, decor direction, room blocks and movement flow for each function.',
-    },
-    {
-        label: 'Step 03',
-        title: 'Execution Blueprint',
-        detail: 'Shared timeline with vendor slots, setup windows, rehearsal timing, and function wise checklists.',
-    },
-    {
-        label: 'Step 04',
-        title: 'On-Ground Wedding Management',
-        detail: 'Dedicated operations lead and hospitality desk ensure guest handling and event transitions run smoothly.',
-    },
-];
-
-const includedServices = [
-    'Dedicated wedding planning lead',
-    'Function wise setup and dismantle coordination',
-    'Chef-led menu tasting for final shortlist',
-    'Guest room allocation support',
-    'Vendor docking and service corridor logistics',
-    'Power backup and technical readiness',
-    'Valet and arrival management',
-    'Rain backup options for outdoor functions',
-];
 
 const faqs = [
     {
@@ -269,71 +236,10 @@ export default function WeddingPage() {
                     </div>
                 </section>
 
-                <section className="py-12 md:py-14 bg-[#FCFAF5] border-y border-[#E8E0D2]">
-                    <div className="max-w-6xl mx-auto px-6 md:px-10">
-                        <p className="text-[#9E8152] text-[11px] tracking-[0.3em] uppercase mb-3">
-                            Execution Timeline
-                        </p>
-                        <h2 className="font-serif text-3xl md:text-5xl text-[#1F2925] mb-8">
-                            Planning In Four Clear Stages
-                        </h2>
-                        <div className="grid md:grid-cols-2 gap-4">
-                            {planningTimeline.map((step) => (
-                                <article key={step.title} className="border border-[#E6DDCF] p-5 bg-white">
-                                    <p className="text-[11px] tracking-[0.24em] uppercase text-[#9A7C4A] mb-2">{step.label}</p>
-                                    <h3 className="font-serif text-2xl text-[#1F2925] mb-2">{step.title}</h3>
-                                    <p className="text-sm text-[#3F4F47] leading-relaxed">{step.detail}</p>
-                                </article>
-                            ))}
-                        </div>
-                    </div>
-                </section>
 
                 <section className="py-12 md:py-14">
                     <div className="max-w-6xl mx-auto px-6 md:px-10 grid lg:grid-cols-2 gap-8">
                         <div>
-                            <p className="text-[#9E8152] text-[11px] tracking-[0.3em] uppercase mb-3">
-                                Included In Most Wedding Proposals
-                            </p>
-                            <h2 className="font-serif text-3xl md:text-5xl text-[#1F2925] mb-6">
-                                Core Services Covered
-                            </h2>
-                            <div className="grid sm:grid-cols-2 gap-3">
-                                {includedServices.map((service) => (
-                                    <div key={service} className="border border-[#E7DFD0] bg-[#FCFAF5] px-4 py-3 text-sm text-[#3F4F47]">
-                                        {service}
-                                    </div>
-                                ))}
-                            </div>
-                            <p className="text-sm text-[#5A6962] mt-5">
-                                Final inclusions depend on chosen venue, function count, and seasonal rates.
-                            </p>
-                        </div>
-
-                        <div className="border border-[#E6DDCF] bg-[#F7F2E8] p-6 h-fit">
-                            <div className="flex items-start gap-3 mb-4">
-                                <CalendarDays className="w-5 h-5 text-[#A88750] mt-0.5" />
-                                <div>
-                                    <h3 className="font-serif text-2xl text-[#1F2925] mb-1">
-                                        Investment Notes
-                                    </h3>
-                                    <p className="text-sm text-[#4A5952]">
-                                        Indicative figures are before taxes and premium decor upgrades.
-                                    </p>
-                                </div>
-                            </div>
-                            <ul className="space-y-2 text-sm text-[#3E4E46]">
-                                <li>Peak dates may have minimum room commitment.</li>
-                                <li>Menu pricing depends on cuisine mix and service style.</li>
-                                <li>Outside vendor policies are shared at proposal stage.</li>
-                                <li>Audio/lighting upgrades are quoted per event plan.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-
-                <section className="py-10 md:py-12 border-y border-[#E8E0D2] bg-[#F6F1E7]">
-                    <div className="max-w-5xl mx-auto px-6 md:px-10">
                         <h2 className="font-serif text-3xl md:text-4xl text-[#1F2925] mb-6">
                             Frequently Asked Questions
                         </h2>
