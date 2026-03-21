@@ -291,32 +291,6 @@ export default function WellnessPage() {
             ))}
 
 
-            {/* Operating Hours */}
-            <section className="py-20 px-6 md:px-12 bg-[#E8E2D9]">
-                <div className="max-w-4xl mx-auto">
-                    <div className="text-center mb-12">
-                        <h2 className="text-3xl font-serif text-[#1C1C1C] tracking-wide">Operating Hours</h2>
-                    </div>
-
-                    <div className="grid md:grid-cols-3 gap-8 text-center">
-                        <div className="bg-white p-8">
-                            <h3 className="text-lg font-serif text-[#1C1C1C] mb-4">The Spa</h3>
-                            <p className="text-[#403A35]">9:00 AM - 9:00 PM</p>
-                            <p className="text-sm text-[#6B645C] mt-2">Daily</p>
-                        </div>
-                        <div className="bg-white p-8">
-                            <h3 className="text-lg font-serif text-[#1C1C1C] mb-4">Fitness Centre</h3>
-                            <p className="text-[#403A35]">6:00 AM - 10:00 PM</p>
-                            <p className="text-sm text-[#6B645C] mt-2">Daily</p>
-                        </div>
-                        <div className="bg-white p-8">
-                            <h3 className="text-lg font-serif text-[#1C1C1C] mb-4">Infinity Pool</h3>
-                            <p className="text-[#403A35]">7:00 AM - 8:00 PM</p>
-                            <p className="text-sm text-[#6B645C] mt-2">Daily</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
 
             {/* CTA Section */}
             <section className="py-20 px-6 md:px-12 bg-[#0A4D4E]">
