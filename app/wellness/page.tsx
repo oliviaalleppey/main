@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 
@@ -68,18 +68,34 @@ const wellnessServices = [
 
 
 export default function WellnessPage() {
+    const [activeService, setActiveService] = useState('spa');
+
     useEffect(() => {
-        // Smooth scroll to section on page load if hash exists
-        const hash = window.location.hash.replace('#', '');
-        if (hash) {
-            const element = document.getElementById(hash);
-            if (element) {
-                setTimeout(() => {
-                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 100);
+        const validServiceIds = new Set(wellnessServices.map((service) => service.id));
+
+        const applyHashSelection = () => {
+            const hash = window.location.hash.replace('#', '').trim();
+            if (hash && validServiceIds.has(hash)) {
+                setActiveService(hash);
             }
-        }
+        };
+
+        applyHashSelection();
+        window.addEventListener('hashchange', applyHashSelection);
+        return () => window.removeEventListener('hashchange', applyHashSelection);
     }, []);
+
+    const handleServiceSelect = (serviceId: string) => {
+        setActiveService(serviceId);
+        window.history.replaceState(null, '', `#${serviceId}`);
+        // Smooth scroll to the section
+        setTimeout(() => {
+            const element = document.getElementById(serviceId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 50);
+    };
 
     return (
         <main className="min-h-screen bg-[#F6F1E8] font-sans">
@@ -181,13 +197,16 @@ export default function WellnessPage() {
                 <div className="max-w-6xl mx-auto px-6">
                     <div className="flex justify-center gap-4 md:gap-8 overflow-x-auto">
                         {wellnessServices.map((service) => (
-                            <a
+                            <button
                                 key={service.id}
-                                href={`#${service.id}`}
-                                className="px-4 py-2 text-sm uppercase tracking-wider whitespace-nowrap transition-all text-[#59544D] hover:text-[#1C1C1C]"
+                                onClick={() => handleServiceSelect(service.id)}
+                                className={`px-4 py-2 text-sm uppercase tracking-wider whitespace-nowrap transition-all ${activeService === service.id
+                                    ? 'text-[#0A4D4E] border-b-2 border-[#0A4D4E]'
+                                    : 'text-[#59544D] hover:text-[#1C1C1C]'
+                                    }`}
                             >
                                 {service.title}
-                            </a>
+                            </button>
                         ))}
                     </div>
                 </div>
@@ -198,7 +217,7 @@ export default function WellnessPage() {
                 <section
                     key={service.id}
                     id={service.id}
-                    className="py-20 px-6 md:px-12"
+                    className={`py-20 px-6 md:px-12 ${activeService === service.id ? 'block' : 'hidden'}`}
                 >
                     <div className="max-w-6xl mx-auto">
                         <div className="grid md:grid-cols-2 gap-12 items-center">
