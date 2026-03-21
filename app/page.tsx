@@ -3,11 +3,9 @@ import CompactIntro from '@/components/home/compact-intro';
 import AmenitiesGallery from '@/components/home/amenities-gallery';
 import RoomShowcase from '@/components/home/room-showcase';
 import DiningHighlight from '@/components/home/dining-highlight';
-import PhotoCarousel from '@/components/home/photo-carousel';
 import ExperiencesStrip from '@/components/home/experiences-strip';
 import BrandMarquee from '@/components/home/brand-marquee';
 import EditorialStory from '@/components/home/editorial-story';
-import Testimonials from '@/components/home/testimonials';
 
 export const revalidate = 60;
 
@@ -31,9 +29,6 @@ export default function Home() {
 
       {/* Brand Stats + Gold Ticker */}
       <BrandMarquee />
-
-      {/* Guest Testimonials */}
-      <Testimonials />
 
       {/* Culinary Excellence */}
       <DiningHighlight />
