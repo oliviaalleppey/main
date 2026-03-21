@@ -54,27 +54,27 @@ const celebrationStyles: CelebrationStyle[] = [
 
 const venueList: VenueInfo[] = [
     {
-        name: 'Backwater Lawn',
+        name: 'Grand Ballroom',
         image: '',
-        capacity: 'Up to 180',
-        area: '6,000 sq ft',
-        description: 'Sunset-facing ceremony lawn with soft ambient lighting and open-sky aisle setup.',
-        bestFor: 'Varmala, cocktail evening, phera mandap',
-    },
-    {
-        name: 'Olivia Grand Hall',
-        image: '',
-        capacity: 'Up to 400',
-        area: '8,500 sq ft',
-        description: 'An elegant indoor venue for formal receptions, stage events, and weather-safe celebrations.',
+        capacity: 'Up to 550 Guest',
+        area: '5500 sq ft',
+        description: 'the Grand Ballroom comfortably hosts up to 500 guests.With refined interiors, flexible layouts, and seamless service support, it i s ideal for weddings, receptions, large conferences, and milestone events where scale meets sophistication.',
         bestFor: 'Reception, sangeet, large guest dining',
     },
     {
-        name: 'Canal Terrace',
+        name: 'Forum Hall',
         image: '',
-        capacity: 'Up to 120',
+        capacity: 'Up to 180 Guest',
+        area: '2000 sq ft',
+        description: 'Perfect for intimate celebrations and corporate gatherings, Forum Hall accommodates up to 200 guests. Thoughtfully designed for comfort and functionality, it offers a refined setting for conferences, social events, and private functions with effortless flow and privacy.',
+        bestFor: 'Varmala, cocktail evening, phera mandap',
+    },
+    {
+        name: 'Pool Side Venue',
+        image: '',
+        capacity: 'Up to 200 Guest',
         area: '3,200 sq ft',
-        description: 'A refined semi-outdoor venue with water views, ideal for welcome dinners and brunches.',
+        description: 'Set against the tranquil backdrop o f the water, the Poolside venue hosts up to 200 guests and can b e transformed to suit the spirit of your occasion—be it a sunset soirée, cocktail evening, mehndi, o r themed celebration. The open-air ambience allows for creative décor, lighting, and customised layouts',
         bestFor: 'Mehendi, welcome dinner, farewell brunch',
     },
 ];
@@ -183,17 +183,18 @@ export default function WeddingPage() {
                                 Real Wedding Operations, Wrapped In Luxury Hospitality
                             </h2>
                             <p className="text-[#3E4D46]/80 leading-relaxed mb-6">
-                                We build the day around real service logic: guest flow, vendor timing, room readiness, weather fallback,
-                                and function transitions. That means the celebration feels effortless because the operations are tight.
-                            </p>
+                                At Olivia, Every banquet marks the beginning of a legacy. Curated with soulful flavours, graceful details,
+                                and effortless service, each celebration honours tradition while
+                                embraces timeless luxury. Surrounded by care, warmth, and family,
+                                you are free to be present - to be a guest</p>
                             <div className="grid sm:grid-cols-2 gap-3">
                                 {[
+                                    'Backup plan for weather and delays',
+                                    'Menu tasting and finalisation',
                                     'Single point wedding manager',
                                     'Venue and guest movement plan',
                                     'Family check-in and hospitality desk',
-                                    'Function wise setup windows',
-                                    'Menu tasting and finalisation',
-                                    'Backup plan for weather and delays',
+                                    'Ceremony and function coordination',
                                 ].map((item) => (
                                     <div key={item} className="border border-[#E7DFD0] bg-[#FCFAF5] px-4 py-3 text-sm text-[#35453E]">
                                         {item}
