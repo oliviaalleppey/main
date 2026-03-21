@@ -66,26 +66,6 @@ const wellnessServices = [
     },
 ];
 
-const wellnessPackages = [
-    {
-        name: 'Serene Escape',
-        duration: 'Half Day',
-        price: '₹15,000',
-        includes: ['90-min Signature Massage', 'Access to Pool & Steam', 'Healthy Lunch', 'Yoga Session'],
-    },
-    {
-        name: 'Renewal Journey',
-        duration: 'Full Day',
-        price: '₹28,000',
-        includes: ['Ayurvedic Consultation', 'Two Spa Treatments', 'All Meals', 'Yoga & Meditation', 'Pool Access'],
-    },
-    {
-        name: 'Ultimate Wellness',
-        duration: '3 Days',
-        price: '₹75,000',
-        includes: ['Personalized Wellness Plan', 'Daily Spa Treatments', 'Private Yoga Sessions', 'All Meals', 'Accommodation'],
-    },
-];
 
 export default function WellnessPage() {
     const [activeService, setActiveService] = useState('spa');
@@ -310,38 +290,6 @@ export default function WellnessPage() {
                 </section>
             ))}
 
-            {/* Wellness Packages */}
-            <section className="py-20 px-6 md:px-12 bg-white">
-                <div className="max-w-6xl mx-auto">
-                    <div className="text-center mb-16">
-                        <p className="text-[#7A5E28] text-sm tracking-[0.3em] uppercase mb-4">Curated Experiences</p>
-                        <h2 className="text-4xl md:text-5xl font-serif text-[#1C1C1C] tracking-wide">Wellness Packages</h2>
-                    </div>
-
-                    <div className="grid md:grid-cols-3 gap-8">
-                        {wellnessPackages.map((pkg, idx) => (
-                            <div key={idx} className="border border-gray-200 p-8 hover:border-[#C9A961] transition-colors group">
-                                <p className="text-[#7A5E28] text-sm tracking-wider mb-2">{pkg.duration}</p>
-                                <h3 className="text-2xl font-serif text-[#1C1C1C] mb-4">{pkg.name}</h3>
-                                <p className="text-3xl font-serif text-[#0A4D4E] mb-6">{pkg.price}</p>
-                                <ul className="space-y-3 mb-8">
-                                    {pkg.includes.map((item, i) => (
-                                        <li key={i} className="flex items-center gap-3 text-[#403A35]">
-                                            <svg className="w-4 h-4 text-[#7A5E28]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                            </svg>
-                                            {item}
-                                        </li>
-                                    ))}
-                                </ul>
-                                <button className="w-full bg-[#0A4D4E] text-white py-4 text-sm uppercase tracking-[0.2em] hover:bg-[#15443B] transition-colors">
-                                    Book Now
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
 
             {/* Operating Hours */}
             <section className="py-20 px-6 md:px-12 bg-[#E8E2D9]">
