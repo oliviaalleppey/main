@@ -148,8 +148,8 @@ export default function WeddingPage() {
                         <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_25%_30%,rgba(231,212,173,0.18)_0%,rgba(231,212,173,0)_60%)]" />
                     </motion.div>
 
-                    <div className="relative z-10 h-full flex items-center justify-center text-center px-6">
-                        <div className="max-w-4xl">
+                    <div className="relative z-10 h-full flex items-center justify-center text-center px-4 md:px-6 w-full">
+                        <div className="w-full max-w-[1800px]">
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -167,25 +167,27 @@ export default function WeddingPage() {
                                 initial={{ opacity: 0, y: 25 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.8, delay: 0.4 }}
-                                className="text-[3.5rem] sm:text-[5rem] md:text-[7rem] lg:text-[8rem] font-serif font-medium text-white mb-5 tracking-[-0.02em] leading-none whitespace-nowrap [text-shadow:0_2px_22px_rgba(0,0,0,0.55)]"
+                                className="text-[10.5vw] sm:text-[10vw] md:text-[9vw] lg:text-[8vw] xl:text-[7.5vw] w-full font-serif font-medium text-white mb-3 tracking-[-0.02em] leading-[0.9] whitespace-nowrap [text-shadow:0_2px_22px_rgba(0,0,0,0.55)]"
                             >
                                 Celebrations at Olivia
                             </motion.h1>
+
+                            <motion.p
+                                initial={{ opacity: 0, y: 15 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.8, delay: 0.6 }}
+                                className="text-white text-sm md:text-base tracking-wide mb-6"
+                            >
+                                Plan your bespoke wedding at Olivia
+                            </motion.p>
 
                             <motion.div
                                 initial={{ opacity: 0, y: 15 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.8, delay: 0.8 }}
-                                className="flex flex-col sm:flex-row gap-3 justify-center"
                             >
                                 <Link
-                                    href="/contact?type=wedding"
-                                    className="border border-white/90 bg-white text-[#2D3933] px-6 py-2.5 text-[10px] tracking-[0.22em] uppercase font-semibold shadow-[0_18px_40px_-28px_rgba(0,0,0,0.65)] hover:bg-white/95 transition-colors duration-300"
-                                >
-                                    Plan Consultation
-                                </Link>
-                                <Link
-                                    href="#wedding-venues"
+                                    href="/conference-events"
                                     className="border border-white/85 bg-black/20 text-white px-6 py-2.5 text-[10px] tracking-[0.22em] uppercase font-semibold backdrop-blur-sm hover:bg-black/30 transition-colors duration-300"
                                 >
                                     Explore Venues
