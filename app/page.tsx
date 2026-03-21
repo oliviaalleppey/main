@@ -32,14 +32,14 @@ export default function Home() {
       {/* Brand Stats + Gold Ticker */}
       <BrandMarquee />
 
+      {/* Guest Testimonials */}
+      <Testimonials />
+
       {/* Culinary Excellence */}
       <DiningHighlight />
 
       {/* Editorial Story */}
       <EditorialStory />
-
-      {/* Guest Testimonials */}
-      <Testimonials />
 
     </main>
   );
