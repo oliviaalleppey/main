@@ -167,7 +167,7 @@ export default function WeddingPage() {
                                 initial={{ opacity: 0, y: 25 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.8, delay: 0.4 }}
-                                className="text-[2.5rem] sm:text-[3.5rem] md:text-[5rem] lg:text-[6rem] font-serif font-medium text-white mb-5 tracking-[-0.02em] leading-[0.92] [text-shadow:0_2px_22px_rgba(0,0,0,0.55)]"
+                                className="text-[3rem] sm:text-[4rem] md:text-[6rem] lg:text-[7rem] font-serif font-medium text-white mb-5 tracking-[-0.02em] leading-[0.92] [text-shadow:0_2px_22px_rgba(0,0,0,0.55)]"
                             >
                                 Celebrations at Olivia
                             </motion.h1>
@@ -200,7 +200,7 @@ export default function WeddingPage() {
                         <Fact label="Celebration Size" value="25 - 750 Guests" />
                         <Fact label="Venue Options" value="Indoor + Outdoor" />
                         <Fact label="Response Time" value="Instant clarification" />
-                        <Fact label="Location" value="Olivia ALleppey" />
+                        <Fact label="Location" value="Olivia Alleppey" />
                     </div>
                 </section>
 
