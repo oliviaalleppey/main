@@ -1,27 +1,12 @@
+'use client';
+
+import { useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
 import StickyBookButton from '@/components/sticky-book-button';
 import WhatsAppWidget from '@/components/whatsapp-widget';
-import Link from 'next/link';
-import Image from 'next/image';
 import EventInquiryForm from '@/components/conference/event-inquiry-form';
-import {
-    ArrowRight,
-    Building2,
-    CalendarClock,
-    Clapperboard,
-    Download,
-    LayoutGrid,
-    MapPin,
-    Mic2,
-    Paintbrush,
-    PhoneCall,
-    Presentation,
-    Projector,
-    Ruler,
-    Sparkles,
-    Users,
-    Utensils,
-    Wifi,
-} from 'lucide-react';
+import { ArrowRight, MapPin, PhoneCall, CalendarClock } from 'lucide-react';
 
 type VenueLayout = {
     theatre: string;
@@ -50,8 +35,9 @@ const venues: Venue[] = [
     {
         name: 'Grand BallRoom',
         slug: 'grand-ballroom',
-        image: '',
-        description: 'Pillarless flagship venue designed for high-impact conferences and celebration-scale events.',
+        image: '/images/conference/hero.png',
+        description:
+            'Pillarless flagship venue designed for high-impact conferences and celebration-scale events. With refined interiors, flexible layouts, and seamless service support, it is ideal for weddings, receptions, large conferences, and milestone events where scale meets sophistication.',
         bestFor: 'Conferences, weddings, gala evenings',
         dimensions: { length: '95', width: '53', height: '13' },
         area: '5035',
@@ -66,8 +52,9 @@ const venues: Venue[] = [
     {
         name: 'Grand BallRoom 1',
         slug: 'grand-ballroom-1',
-        image: '',
-        description: 'Divisible section of the ballroom for focused sessions and medium-format gatherings.',
+        image: '/images/conference/meeting-room.png',
+        description:
+            'Divisible section of the ballroom for focused sessions and medium-format gatherings. Thoughtfully designed for comfort and functionality, it offers a refined setting for conferences, social events, and private functions.',
         bestFor: 'Meetings, seminars, corporate sessions',
         dimensions: { length: '53', width: '33', height: '13' },
         area: '1749',
@@ -82,8 +69,9 @@ const venues: Venue[] = [
     {
         name: 'Grand BallRoom 2',
         slug: 'grand-ballroom-2',
-        image: '',
-        description: 'Balanced format venue suitable for workshops, leadership meets, and conference tracks.',
+        image: '/images/conference/meeting-room.png',
+        description:
+            'Balanced format venue suitable for workshops, leadership meets, and conference tracks. The open layout allows for creative décor, lighting, and customised configurations.',
         bestFor: 'Conferences, workshops, breakouts',
         dimensions: { length: '53', width: '35', height: '13' },
         area: '1855',
@@ -98,8 +86,9 @@ const venues: Venue[] = [
     {
         name: 'Grand BallRoom 3',
         slug: 'grand-ballroom-3',
-        image: '',
-        description: 'Flexible ballroom section built for training batches and presentation-led sessions.',
+        image: '/images/conference/meeting-room.png',
+        description:
+            'Flexible ballroom section built for training batches and presentation-led sessions. Ideal for structured learning environments and interactive workshops.',
         bestFor: 'Training sessions, presentations',
         dimensions: { length: '53', width: '27', height: '13' },
         area: '1431',
@@ -114,8 +103,9 @@ const venues: Venue[] = [
     {
         name: 'Forum',
         slug: 'forum',
-        image: '',
-        description: 'Mid-scale conference venue that balances capacity with focused business interaction.',
+        image: '/images/conference/meeting-room.png',
+        description:
+            'Mid-scale conference venue that balances capacity with focused business interaction. Perfect for conferences that require intimacy with structure, strategy meets, and high-level corporate sessions.',
         bestFor: 'Mid-size conferences, strategy meets',
         dimensions: { length: '61', width: '33', height: '9' },
         area: '2013',
@@ -130,8 +120,9 @@ const venues: Venue[] = [
     {
         name: 'Forum 1',
         slug: 'forum-1',
-        image: '',
-        description: 'Compact breakout venue for private workshops and internal planning sessions.',
+        image: '/images/conference/meeting-room.png',
+        description:
+            'Compact breakout venue for private workshops and internal planning sessions. Designed with focus in mind, Forum 1 provides an environment where ideas flow naturally.',
         bestFor: 'Workshops, meetings',
         dimensions: { length: '33', width: '20', height: '9' },
         area: '660',
@@ -146,8 +137,9 @@ const venues: Venue[] = [
     {
         name: 'Forum 2',
         slug: 'forum-2',
-        image: '',
-        description: 'Breakout-focused space with straightforward layouts for productive work sessions.',
+        image: '/images/conference/meeting-room.png',
+        description:
+            'Breakout-focused space with straightforward layouts for productive work sessions. Forum 2 offers the ideal environment for committee meetings and focused team collaboration.',
         bestFor: 'Breakouts, committee meetings',
         dimensions: { length: '33', width: '20', height: '9' },
         area: '660',
@@ -162,8 +154,9 @@ const venues: Venue[] = [
     {
         name: 'Forum 3',
         slug: 'forum-3',
-        image: '',
-        description: 'Private-format meeting room suited for decision rooms and leadership briefings.',
+        image: '/images/conference/meeting-room.png',
+        description:
+            'Private-format meeting room suited for decision rooms and leadership briefings. An intimate space that encourages high-level conversation and strategic thinking.',
         bestFor: 'Leadership meetings, workshops',
         dimensions: { length: '42', width: '21', height: '9' },
         area: '882',
@@ -178,8 +171,9 @@ const venues: Venue[] = [
     {
         name: 'Poolside',
         slug: 'poolside',
-        image: '',
-        description: 'Outdoor venue for social evenings, celebrations, and curated hospitality-led events.',
+        image: '/images/conference/hero.png',
+        description:
+            'Outdoor venue for social evenings, celebrations, and curated hospitality-led events. Set against the tranquil backdrop of the water, the Poolside venue can be transformed to suit the spirit of any occasion — be it a sunset soirée, cocktail evening, or themed celebration.',
         bestFor: 'Outdoor celebrations, dinners, networking',
         dimensions: { length: '—', width: '—', height: '—' },
         area: 'As per event needs',
@@ -193,49 +187,6 @@ const venues: Venue[] = [
     },
 ];
 
-const eventTypes = [
-    { label: 'Corporate Conferences', icon: Presentation },
-    { label: 'Seminars & Workshops', icon: Building2 },
-    { label: 'Destination Weddings', icon: Sparkles },
-    { label: 'Private Celebrations', icon: CalendarClock },
-    { label: 'Product Launches', icon: Clapperboard },
-    { label: 'Networking Events', icon: Users },
-];
-
-const facilities = [
-    { label: 'High-Speed WiFi', icon: Wifi },
-    { label: 'Projector & AV System', icon: Projector },
-    { label: 'Stage Setup', icon: Mic2 },
-    { label: 'Banquet Catering', icon: Utensils },
-    { label: 'Coffee Break Service', icon: CalendarClock },
-    { label: 'Event Planning Support', icon: LayoutGrid },
-    { label: 'Custom Seating Layouts', icon: Ruler },
-    { label: 'Decor & Lighting', icon: Paintbrush },
-];
-
-const eventPackages = [
-    {
-        name: 'Corporate Package',
-        includes: ['Meeting hall allocation', 'Projector and screen setup', 'Buffet lunch service', 'Coffee break arrangement'],
-    },
-    {
-        name: 'Conference Package',
-        includes: ['Venue zoning by session type', 'Stage and audio coordination', 'Foyer tea/coffee setup', 'Event flow support from team'],
-    },
-    {
-        name: 'Wedding Celebration Package',
-        includes: ['BallRoom or Poolside setup', 'Decor planning support', 'Banquet execution coordination', 'Stage and lighting alignment'],
-    },
-];
-
-const galleryItems = [
-    { title: 'Grand BallRoom - Theatre Setup', image: '' },
-    { title: 'Forum - Classroom Setup', image: '' },
-    { title: 'Wedding Celebration Layout', image: '' },
-    { title: 'Poolside Evening Dinner', image: '' },
-    { title: 'Conference Stage Arrangement', image: '' },
-];
-
 function formatArea(area: string) {
     return /^\d+$/.test(area) ? `${Number(area).toLocaleString('en-IN')} sq ft` : area;
 }
@@ -245,12 +196,36 @@ function formatGuestLabel(theatre: string) {
     return theatre;
 }
 
+const topLevelVenues = [
+    {
+        name: 'Grand BallRoom',
+        slug: 'grand-ballroom',
+        subItems: [
+            { label: 'Cluster', slug: 'grand-ballroom-1' },
+            { label: 'Theatre', slug: 'grand-ballroom-2' },
+        ],
+    },
+    {
+        name: 'Forum',
+        slug: 'forum',
+        subItems: [
+            { label: 'Cluster', slug: 'forum-1' },
+            { label: 'Theatre', slug: 'forum-2' },
+        ],
+    },
+    { name: 'Board Room', slug: 'forum-3', subItems: [] },
+    { name: 'Pool Side', slug: 'poolside', subItems: [] },
+];
+
 export default function ConferenceEventsPage() {
-    const featuredVenue = venues[0];
+    const [activeSlug, setActiveSlug] = useState<string>('grand-ballroom');
+
+    const activeVenue = venues.find((v) => v.slug === activeSlug) ?? venues[0];
 
     return (
         <>
             <main className="min-h-screen bg-[#F8F6F1] text-[#1D1D1D]">
+                {/* Hero */}
                 <section className="relative h-[44vh] md:h-[52vh] w-full overflow-hidden">
                     <div className="absolute inset-0 z-0">
                         <div className="absolute inset-0 bg-[linear-gradient(135deg,#1C2622_0%,#2B3A34_38%,#1B2421_100%)]" />
@@ -268,7 +243,7 @@ export default function ConferenceEventsPage() {
                         </div>
 
                         <h1 className="text-[3rem] sm:text-[4rem] md:text-[6rem] lg:text-[8rem] font-serif font-medium text-white mb-5 tracking-[-0.03em] leading-[0.92] [text-shadow:0_2px_22px_rgba(0,0,0,0.55)]">
-                            Conference & Events
+                            Conference &amp; Events
                         </h1>
 
                         <div className="flex gap-3">
@@ -288,260 +263,131 @@ export default function ConferenceEventsPage() {
                     </div>
                 </section>
 
-                <section className="py-12 md:py-16 px-6 md:px-10">
+                {/* Venue Selector — sidebar + image panel */}
+                <section className="py-16 md:py-20 px-6 md:px-12 lg:px-20">
                     <div className="max-w-7xl mx-auto">
-                        <h2 className="font-serif text-3xl md:text-5xl text-[#1E1D1A] tracking-tight">Venue Overview</h2>
-                        <p className="mt-3 text-[#5D5A53] text-sm md:text-base max-w-3xl">
-                            Explore each space by capacity and event fit before moving into detailed layout planning.
-                        </p>
+                        <div className="flex flex-col lg:flex-row gap-0 min-h-[520px]">
+                            {/* Left Sidebar — single unified nav list */}
+                            <aside className="lg:w-64 xl:w-72 flex-shrink-0 lg:pr-10 border-b lg:border-b-0 lg:border-r border-[#DDD5C5] pb-6 lg:pb-0 mb-6 lg:mb-0 flex flex-col justify-center">
+                                <nav className="flex flex-col">
+                                    {topLevelVenues.map((venue) => {
+                                        // This venue is "active" if it's selected directly, or one of its sub-items is selected
+                                        const isTopActive =
+                                            venue.slug === activeSlug ||
+                                            venue.subItems.some((s) => s.slug === activeSlug);
 
-                        <div className="mt-7 flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden md:grid md:grid-cols-2 xl:grid-cols-3 md:gap-5 md:overflow-visible md:pb-0">
-                            {venues.map((venue) => (
-                                <article
-                                    key={venue.slug}
-                                    className="group min-w-[84%] snap-start rounded-xl overflow-hidden border border-[#E6DECf] bg-white shadow-[0_18px_40px_-34px_rgba(20,20,20,0.55)] md:min-w-0"
-                                >
-                                    <div className={`relative h-52 overflow-hidden ${venue.image ? '' : 'bg-[#E8E2D9]'}`}>
-                                        {venue.image ? (
+                                        return (
+                                            <div key={venue.slug} className="border-b border-[#E6DDD0] last:border-b-0">
+                                                {/* Top-level venue button */}
+                                                <button
+                                                    onClick={() => setActiveSlug(venue.slug)}
+                                                    className={`text-left w-full transition-colors duration-200 ${isTopActive
+                                                        ? 'font-bold text-[#1D1D1D] text-[1.6rem] md:text-[1.9rem] leading-tight py-4'
+                                                        : 'font-semibold text-[#7A7670] hover:text-[#1D1D1D] text-sm py-4'
+                                                        }`}
+                                                >
+                                                    {venue.name}
+                                                </button>
+
+                                                {/* Sub-items — only show when this venue is active */}
+                                                {isTopActive && venue.subItems.length > 0 && (
+                                                    <div className="flex flex-col items-end gap-2 pb-4 pr-1">
+                                                        {venue.subItems.map((item) => (
+                                                            <button
+                                                                key={item.slug}
+                                                                onClick={() => setActiveSlug(item.slug)}
+                                                                className={`text-sm font-semibold transition-colors duration-200 ${activeSlug === item.slug
+                                                                    ? 'text-[#1C3A32] underline underline-offset-2'
+                                                                    : 'text-[#C9A167] hover:text-[#9A6E30]'
+                                                                    }`}
+                                                            >
+                                                                {item.label}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </nav>
+                            </aside>
+
+                            {/* Right Panel — Image + Info */}
+                            <div className="flex-1 lg:pl-10 xl:pl-14">
+                                <div className="flex flex-col gap-6">
+                                    {/* Image */}
+                                    <div className="relative w-full aspect-[16/9] overflow-hidden bg-[#E0D9CE]">
+                                        {activeVenue.image ? (
                                             <Image
-                                                src={venue.image}
-                                                alt={venue.name}
+                                                key={activeVenue.slug}
+                                                src={activeVenue.image}
+                                                alt={activeVenue.name}
                                                 fill
-                                                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                                                className="object-cover"
+                                                priority
                                             />
-                                        ) : null}
+                                        ) : (
+                                            <div className="absolute inset-0 bg-[#D6CFC4]" />
+                                        )}
                                     </div>
-                                    <div className="p-4 md:p-5">
-                                        <h3 className="font-serif text-2xl text-[#1C1C1C] leading-tight">{venue.name}</h3>
-                                        <p className="mt-1 text-[#B17D3E] text-sm font-medium">{formatGuestLabel(venue.layout.theatre)}</p>
-                                        <p className="text-sm text-[#6B6861] mt-1">{formatArea(venue.area)}</p>
-                                        <p className="mt-3 text-sm text-[#4F4D48] leading-relaxed">{venue.bestFor}</p>
+
+                                    {/* Description */}
+                                    <div>
+                                        <p className="text-[#3D3A33] text-sm md:text-base leading-relaxed">
+                                            {activeVenue.description}
+                                        </p>
+                                        <p className="mt-3 text-[#9A8060] text-sm">
+                                            Best for: {activeVenue.bestFor}
+                                        </p>
                                         <Link
-                                            href={`#${venue.slug}`}
-                                            className="mt-4 inline-flex items-center gap-2 text-[11px] tracking-[0.2em] uppercase text-[#A47436] hover:text-[#8E5F22]"
+                                            href="#event-form"
+                                            className="mt-5 inline-flex items-center gap-2 text-[11px] tracking-[0.2em] uppercase text-[#A47436] hover:text-[#8E5F22] font-semibold transition-colors"
                                         >
-                                            View Details
+                                            Inquire About This Venue
                                             <ArrowRight className="w-3.5 h-3.5" />
                                         </Link>
                                     </div>
-                                </article>
-                            ))}
-                        </div>
-                    </div>
-                </section>
 
-                <section className="py-12 md:py-16 px-6 md:px-10 bg-white border-y border-[#ECE5D8]">
-                    <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-7 md:gap-10 items-center">
-                        <div className={`relative h-[320px] md:h-[460px] rounded-xl overflow-hidden ${featuredVenue.image ? '' : 'bg-[#E8E2D9]'}`}>
-                            {featuredVenue.image ? (
-                                <Image
-                                    src={featuredVenue.image}
-                                    alt={featuredVenue.name}
-                                    fill
-                                    className="object-cover"
-                                />
-                            ) : null}
-                        </div>
-
-                        <div>
-                            <p className="text-[#B68A4A] text-[10px] tracking-[0.34em] uppercase mb-2">Featured Venue</p>
-                            <h2 className="font-serif text-3xl md:text-5xl text-[#1D1D1D] tracking-tight">{featuredVenue.name}</h2>
-                            <p className="mt-3 text-[#4F4B43] text-base leading-relaxed max-w-xl">
-                                {formatArea(featuredVenue.area)} pillarless ballroom with up to {featuredVenue.layout.theatre} theatre-style seating.
-                                Ideal for weddings, corporate summits, annual conferences and gala dining experiences.
-                            </p>
-
-                            <div className="mt-6 grid grid-cols-2 md:grid-cols-3 gap-3">
-                                {[
-                                    { label: 'Theatre', value: featuredVenue.layout.theatre },
-                                    { label: 'Cluster', value: featuredVenue.layout.cluster },
-                                    { label: 'Classroom', value: featuredVenue.layout.classroom },
-                                    { label: 'U-Shape', value: featuredVenue.layout.uShape },
-                                    { label: 'Boardroom', value: featuredVenue.layout.boardroom },
-                                ].map((item) => (
-                                    <div key={item.label} className="rounded-lg border border-[#E8E0D1] bg-[#FBF9F4] px-3 py-2.5">
-                                        <p className="text-[11px] uppercase tracking-[0.16em] text-[#7A756A]">{item.label}</p>
-                                        <p className="font-serif text-2xl text-[#1D1C19] leading-none mt-1">{item.value}</p>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <Link
-                                href="#event-form"
-                                className="mt-7 inline-flex items-center gap-2 bg-[#0A332B] text-white px-7 py-3 text-[11px] tracking-[0.2em] uppercase hover:bg-[#15443B] transition-colors"
-                            >
-                                Check Availability
-                                <ArrowRight className="w-4 h-4" />
-                            </Link>
-                        </div>
-                    </div>
-                </section>
-
-                <section className="py-12 md:py-16 px-6 md:px-10">
-                    <div className="max-w-7xl mx-auto">
-                        <h2 className="font-serif text-3xl md:text-5xl text-[#1E1D1A] tracking-tight">Interactive Venue Gallery</h2>
-                        <p className="mt-3 text-[#5D5A53] text-sm md:text-base max-w-3xl">
-                            Scroll through setup inspirations for theatre, classroom, wedding, and social event formats.
-                        </p>
-
-                        <div className="mt-7 flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden md:grid md:grid-cols-3 md:gap-4 md:overflow-visible md:pb-0">
-                            {galleryItems.map((item, index) => (
-                                <div
-                                    key={item.title}
-                                    className={`group relative min-w-[84%] snap-start overflow-hidden rounded-xl border border-[#E6DECf] h-[250px] md:min-w-0 ${index === 0 ? 'md:col-span-2 md:row-span-2 md:h-[500px]' : 'md:h-[240px]'} ${item.image ? '' : 'bg-[#E8E2D9]'}`}
-                                >
-                                    {item.image ? (
-                                        <>
-                                            <Image
-                                                src={item.image}
-                                                alt={item.title}
-                                                fill
-                                                className="object-cover transition-transform duration-700 group-hover:scale-105"
-                                            />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
-                                        </>
-                                    ) : null}
-                                    <div className="absolute left-4 right-4 bottom-4 text-white">
-                                        <p className="text-sm md:text-base font-medium">{item.title}</p>
-                                    </div>
+                                    {/* Capacity Stats — side by side below description */}
+                                    {!/As per/.test(activeVenue.layout.theatre) && (
+                                        <div className="flex flex-wrap gap-3">
+                                            {[
+                                                { label: 'Theatre', value: activeVenue.layout.theatre },
+                                                { label: 'Cluster', value: activeVenue.layout.cluster },
+                                                { label: 'Classroom', value: activeVenue.layout.classroom },
+                                                { label: 'U-Shape', value: activeVenue.layout.uShape },
+                                                { label: 'Boardroom', value: activeVenue.layout.boardroom },
+                                                { label: 'Area', value: formatArea(activeVenue.area) },
+                                            ].map((item) => (
+                                                <div key={item.label} className="border border-[#E8E0D1] bg-[#FAF8F2] px-4 py-3 min-w-[90px]">
+                                                    <p className="text-[10px] uppercase tracking-[0.16em] text-[#7A756A]">{item.label}</p>
+                                                    <p className="font-serif text-xl text-[#1D1C19] leading-none mt-1">{item.value}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
-                            ))}
+                            </div>
                         </div>
+
                     </div>
                 </section>
 
-                <section id="venue-compare" className="py-12 md:py-16 px-6 md:px-10 bg-white border-y border-[#ECE5D8]">
-                    <div className="max-w-6xl mx-auto">
-                        <h2 className="font-serif text-3xl md:text-5xl text-[#1E1D1A] tracking-tight">Venue Comparison</h2>
-                        <p className="mt-3 text-[#5D5A53] text-sm md:text-base max-w-3xl">
-                            Expand each venue card for complete dimensions and seating layout capacity.
-                        </p>
-
-                        <div className="mt-7 space-y-3">
-                            {venues.map((venue) => (
-                                <details id={venue.slug} key={venue.slug} className="group rounded-xl border border-[#E6DECf] bg-[#FCFBF8] open:bg-white">
-                                    <summary className="list-none cursor-pointer px-4 md:px-6 py-4 flex items-center justify-between gap-4">
-                                        <div>
-                                            <h3 className="font-serif text-2xl text-[#1C1C1C]">{venue.name}</h3>
-                                            <p className="text-sm text-[#6C6860]">Size: {formatArea(venue.area)} | Theatre: {venue.layout.theatre}</p>
-                                        </div>
-                                        <span className="text-[#A47436] text-xs tracking-[0.2em] uppercase group-open:hidden">Expand</span>
-                                        <span className="text-[#A47436] text-xs tracking-[0.2em] uppercase hidden group-open:inline">Collapse</span>
-                                    </summary>
-
-                                    <div className="px-4 md:px-6 pb-5 md:pb-6 border-t border-[#F0E9DB]">
-                                        <div className="pt-4 grid md:grid-cols-3 gap-4 md:gap-5">
-                                            <div className="rounded-lg border border-[#EDE5D8] bg-[#FAF8F2] p-3.5">
-                                                <p className="text-[11px] uppercase tracking-[0.16em] text-[#7A756A]">Dimensions (ft)</p>
-                                                <p className="mt-2 text-sm text-[#3C3A35]">L: {venue.dimensions.length} | W: {venue.dimensions.width} | H: {venue.dimensions.height}</p>
-                                                <p className="mt-1 text-sm text-[#3C3A35]">Area: {formatArea(venue.area)}</p>
-                                            </div>
-
-                                            <div className="md:col-span-2 grid grid-cols-2 md:grid-cols-5 gap-2">
-                                                {[
-                                                    { label: 'Theatre', value: venue.layout.theatre },
-                                                    { label: 'Cluster', value: venue.layout.cluster },
-                                                    { label: 'Classroom', value: venue.layout.classroom },
-                                                    { label: 'U-Shape', value: venue.layout.uShape },
-                                                    { label: 'Boardroom', value: venue.layout.boardroom },
-                                                ].map((layoutItem) => (
-                                                    <div key={layoutItem.label} className="rounded-lg border border-[#EDE5D8] bg-white px-3 py-2.5">
-                                                        <p className="text-[10px] uppercase tracking-[0.16em] text-[#7A756A]">{layoutItem.label}</p>
-                                                        <p className="mt-1 text-lg font-serif text-[#1D1C19] leading-none">{layoutItem.value}</p>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </details>
-                            ))}
-                        </div>
-                    </div>
-                </section>
-
-                <section className="py-12 md:py-16 px-6 md:px-10">
-                    <div className="max-w-7xl mx-auto">
-                        <h2 className="font-serif text-3xl md:text-5xl text-[#1E1D1A] tracking-tight">Event Types</h2>
-                        <div className="mt-7 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                            {eventTypes.map((item) => {
-                                const Icon = item.icon;
-                                return (
-                                    <Link
-                                        key={item.label}
-                                        href="#event-form"
-                                        className="rounded-xl border border-[#E8E0D1] bg-white p-4 md:p-5 text-center hover:border-[#C9A961] transition-colors"
-                                    >
-                                        <Icon className="w-7 h-7 mx-auto text-[#B17D3E]" />
-                                        <p className="mt-2.5 text-sm text-[#2A2A2A] leading-snug">{item.label}</p>
-                                    </Link>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </section>
-
-                <section className="py-12 md:py-16 px-6 md:px-10 bg-white border-y border-[#ECE5D8]">
-                    <div className="max-w-7xl mx-auto">
-                        <h2 className="font-serif text-3xl md:text-5xl text-[#1E1D1A] tracking-tight">Services & Facilities</h2>
-                        <div className="mt-7 grid grid-cols-2 md:grid-cols-4 gap-4">
-                            {facilities.map((item) => {
-                                const Icon = item.icon;
-                                return (
-                                    <div key={item.label} className="rounded-xl border border-[#E8E0D1] bg-[#FCFBF7] p-4 md:p-5">
-                                        <Icon className="w-6 h-6 text-[#B17D3E]" />
-                                        <p className="mt-2.5 text-sm text-[#2A2A2A]">{item.label}</p>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </section>
-
-                <section className="py-12 md:py-16 px-6 md:px-10">
-                    <div className="max-w-7xl mx-auto">
-                        <h2 className="font-serif text-3xl md:text-5xl text-[#1E1D1A] tracking-tight">Event Packages</h2>
-                        <p className="mt-3 text-[#5D5A53] text-sm md:text-base max-w-3xl">
-                            Choose a structure and our team will tailor execution details around your event format.
-                        </p>
-
-                        <div className="mt-7 flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden md:grid md:grid-cols-3 md:gap-5 md:overflow-visible md:pb-0">
-                            {eventPackages.map((pkg) => (
-                                <article key={pkg.name} className="min-w-[84%] snap-start rounded-xl border border-[#E8E0D1] bg-white p-5 md:min-w-0 md:p-6">
-                                    <h3 className="font-serif text-2xl text-[#1D1D1D]">{pkg.name}</h3>
-                                    <ul className="mt-4 space-y-2">
-                                        {pkg.includes.map((item) => (
-                                            <li key={item} className="text-sm text-[#4F4B43] flex items-start gap-2">
-                                                <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[#B17D3E]" />
-                                                <span>{item}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                    <Link
-                                        href="#event-form"
-                                        className="mt-5 inline-flex items-center gap-2 text-[11px] tracking-[0.2em] uppercase text-[#A47436] hover:text-[#8E5F22]"
-                                    >
-                                        Request Proposal
-                                        <ArrowRight className="w-3.5 h-3.5" />
-                                    </Link>
-                                </article>
-                            ))}
-                        </div>
-                    </div>
-                </section>
-
-                <section id="event-form" className="py-12 md:py-16 px-6 md:px-10 bg-white border-y border-[#ECE5D8]">
+                {/* Inquiry Form */}
+                <section id="event-form" className="py-12 md:py-16 px-6 md:px-12 lg:px-20 bg-[#F8F6F1]">
                     <div className="max-w-5xl mx-auto">
-                        <h2 className="font-serif text-3xl md:text-5xl text-[#1E1D1A] tracking-tight text-center">Plan Your Event</h2>
-                        <p className="mt-3 text-[#5D5A53] text-sm md:text-base text-center max-w-3xl mx-auto">
+                        <h2 className="font-serif text-3xl md:text-4xl text-[#1E1D1A] tracking-tight text-center">Plan Your Event</h2>
+                        <p className="mt-3 text-[#5D5A53] text-sm text-center max-w-2xl mx-auto">
                             Share your event brief and our team will suggest the right venue, layout and service plan.
                         </p>
                         <EventInquiryForm />
                     </div>
                 </section>
 
-                <section className="py-12 md:py-16 px-6 md:px-10">
-                    <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-6 md:gap-8 items-stretch">
-                        <div className="rounded-xl overflow-hidden border border-[#E6DECf] min-h-[320px]">
+                {/* Location */}
+                <section className="py-12 md:py-16 px-6 md:px-12 lg:px-20 bg-white border-t border-[#ECE5D8]">
+                    <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-6 items-stretch">
+                        <div className="overflow-hidden border border-[#E6DECf] min-h-[320px]">
                             <iframe
                                 title="Olivia Alleppey map"
                                 src="https://maps.google.com/maps?q=Olivia%20Alleppey&t=&z=13&ie=UTF8&iwloc=&output=embed"
@@ -550,8 +396,8 @@ export default function ConferenceEventsPage() {
                             />
                         </div>
 
-                        <div className="rounded-xl border border-[#E6DECf] bg-white p-6 md:p-8">
-                            <p className="text-[#B68A4A] text-[10px] tracking-[0.34em] uppercase mb-2">Location & Contact</p>
+                        <div className="border border-[#E6DECf] bg-white p-6 md:p-8">
+                            <p className="text-[#B68A4A] text-[10px] tracking-[0.34em] uppercase mb-2">Location &amp; Contact</p>
                             <h2 className="font-serif text-3xl md:text-4xl text-[#1E1D1A] tracking-tight">Event Coordination Desk</h2>
 
                             <div className="mt-5 space-y-3.5 text-sm text-[#46433D]">
