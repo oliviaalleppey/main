@@ -315,20 +315,12 @@ export default function ConferenceEventsPage() {
                             {/* Right Panel — Image + Info */}
                             <div className="flex-1 lg:pl-10 xl:pl-14">
                                 <div className="flex flex-col gap-6">
-                                    {/* Image */}
-                                    <div className="relative w-full aspect-[16/9] overflow-hidden bg-[#E0D9CE]">
-                                        {activeVenue.image ? (
-                                            <Image
-                                                key={activeVenue.slug}
-                                                src={activeVenue.image}
-                                                alt={activeVenue.name}
-                                                fill
-                                                className="object-cover"
-                                                priority
-                                            />
-                                        ) : (
-                                            <div className="absolute inset-0 bg-[#D6CFC4]" />
-                                        )}
+                                    {/* Image Placeholder */}
+                                    <div className="relative w-full aspect-[16/9] overflow-hidden bg-[#E0D9CE] flex items-center justify-center">
+                                        <div className="text-center">
+                                            <p className="text-[#6C6860] text-lg font-serif">{activeVenue.name}</p>
+                                            <p className="text-[#9A8060] text-sm mt-2">Venue Image Coming Soon</p>
+                                        </div>
                                     </div>
 
                                     {/* Description */}
