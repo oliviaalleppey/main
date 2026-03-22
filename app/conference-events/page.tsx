@@ -57,7 +57,7 @@ const venues: Venue[] = [
             'Divisible section of the ballroom for focused sessions and medium-format gatherings. Thoughtfully designed for comfort and functionality, it offers a refined setting for conferences, social events, and private functions.',
         bestFor: 'Meetings, seminars, corporate sessions',
         dimensions: { length: '53', width: '33', height: '13' },
-        area: '1749',
+        area: '5035',
         layout: {
             theatre: '170',
             cluster: '66',
@@ -74,7 +74,7 @@ const venues: Venue[] = [
             'Balanced format venue suitable for workshops, leadership meets, and conference tracks. The open layout allows for creative décor, lighting, and customised configurations.',
         bestFor: 'Conferences, workshops, breakouts',
         dimensions: { length: '53', width: '35', height: '13' },
-        area: '1855',
+        area: '5035',
         layout: {
             theatre: '170',
             cluster: '66',
@@ -108,7 +108,7 @@ const venues: Venue[] = [
             'Mid-scale conference venue that balances capacity with focused business interaction. Perfect for conferences that require intimacy with structure, strategy meets, and high-level corporate sessions.',
         bestFor: 'Mid-size conferences, strategy meets',
         dimensions: { length: '61', width: '33', height: '9' },
-        area: '2013',
+        area: '2000',
         layout: {
             theatre: '120',
             cluster: '48',
@@ -125,7 +125,7 @@ const venues: Venue[] = [
             'Compact breakout venue for private workshops and internal planning sessions. Designed with focus in mind, Forum 1 provides an environment where ideas flow naturally.',
         bestFor: 'Workshops, meetings',
         dimensions: { length: '33', width: '20', height: '9' },
-        area: '660',
+        area: '2000',
         layout: {
             theatre: '40',
             cluster: '24',
@@ -142,7 +142,7 @@ const venues: Venue[] = [
             'Breakout-focused space with straightforward layouts for productive work sessions. Forum 2 offers the ideal environment for committee meetings and focused team collaboration.',
         bestFor: 'Breakouts, committee meetings',
         dimensions: { length: '33', width: '20', height: '9' },
-        area: '660',
+        area: '2000',
         layout: {
             theatre: '40',
             cluster: '24',
@@ -159,7 +159,7 @@ const venues: Venue[] = [
             'Private-format meeting room suited for decision rooms and leadership briefings. An intimate space that encourages high-level conversation and strategic thinking.',
         bestFor: 'Leadership meetings, workshops',
         dimensions: { length: '42', width: '21', height: '9' },
-        area: '882',
+        area: '2000',
         layout: {
             theatre: '40',
             cluster: '24',
@@ -176,13 +176,13 @@ const venues: Venue[] = [
             'Outdoor venue for social evenings, celebrations, and curated hospitality-led events. Set against the tranquil backdrop of the water, the Poolside venue can be transformed to suit the spirit of any occasion — be it a sunset soirée, cocktail evening, or themed celebration.',
         bestFor: 'Outdoor celebrations, dinners, networking',
         dimensions: { length: '—', width: '—', height: '—' },
-        area: 'As per event needs',
+        area: '4000',
         layout: {
             theatre: 'As per event needs',
             cluster: 'As per event needs',
             classroom: 'As per event needs',
             uShape: 'As per event needs',
-            boardroom: 'As per event needs',
+            boardroom: '4000',
         },
     },
 ];

@@ -5,14 +5,14 @@ import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 
 const navigation = [
-    { name: 'Home', href: '/' },
-    { name: 'Rooms & Suites', href: '/rooms' },
+    { name: 'Discover', href: '/discover' },
+    { name: 'Accommodation', href: '/accommodation' },
+    { name: 'Wedding', href: '/wedding' },
+    { name: 'Conference & Events', href: '/conference-and-events' },
     { name: 'Dining', href: '/dining' },
     { name: 'Experiences', href: '/experiences' },
-    { name: 'Events & Weddings', href: '/events' },
-    { name: 'Gallery', href: '/gallery' },
-    { name: 'About', href: '/about' },
-    { name: 'Contact', href: '/contact' },
+    { name: 'Wellness', href: '/wellness' },
+    { name: 'Shop', href: '/shop' },
 ];
 
 export default function Navigation() {
