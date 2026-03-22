@@ -37,8 +37,8 @@ const venues: Venue[] = [
         slug: 'grand-ballroom',
         image: '/images/conference/hero.png',
         description:
-            'Pillarless flagship venue designed for high-impact conferences and celebration-scale events. With refined interiors, flexible layouts, and seamless service support, it is ideal for weddings, receptions, large conferences, and milestone events where scale meets sophistication.',
-        bestFor: 'Conferences, weddings, gala evenings',
+            'A flagship venue meticulously designed for high-impact corporate events and large-scale conferences. Featuring refined interiors, adaptable layouts, and seamless service support, it provides an ideal setting for conventions, product launches, corporate gatherings, and business summits where scale, precision, and sophistication come together effortlessly.',
+        bestFor: 'Conferences, corporate events, product launches',
         dimensions: { length: '95', width: '53', height: '13' },
         area: '5035',
         layout: {
@@ -173,7 +173,7 @@ const venues: Venue[] = [
         slug: 'poolside',
         image: '/images/conference/hero.png',
         description:
-            'Outdoor venue for social evenings, celebrations, and curated hospitality-led events. Set against the tranquil backdrop of the water, the Poolside venue can be transformed to suit the spirit of any occasion — be it a sunset soirée, cocktail evening, or themed celebration.',
+            'An exquisite open-air venue crafted for refined social evenings, elegant celebrations, and thoughtfully curated hospitality experiences. Framed by the serene allure of water, this sophisticated setting transforms effortlessly to reflect the essence of any occasion—be it an intimate sunset soirée, a stylish cocktail gathering, or a bespoke themed celebration.',
         bestFor: 'Outdoor celebrations, dinners, networking',
         dimensions: { length: '—', width: '—', height: '—' },
         area: '4000',

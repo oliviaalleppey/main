@@ -11,6 +11,7 @@ type InquiryFormState = {
     preferredDate: string;
     phone: string;
     message: string;
+    honeypot: string; // Spam protection - hidden field
 };
 
 const INITIAL_STATE: InquiryFormState = {
@@ -21,6 +22,7 @@ const INITIAL_STATE: InquiryFormState = {
     preferredDate: '',
     phone: '',
     message: '',
+    honeypot: '',
 };
 
 export default function EventInquiryForm() {
@@ -31,6 +33,13 @@ export default function EventInquiryForm() {
 
     const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+
+        // Honeypot spam protection - if filled, silently reject
+        if (form.honeypot) {
+            setSuccessOpen(true);
+            return;
+        }
+
         setError(null);
         setIsSubmitting(true);
 
@@ -125,6 +134,17 @@ export default function EventInquiryForm() {
                         {error}
                     </p>
                 )}
+
+                {/* Honeypot field - hidden from humans, visible to bots */}
+                <input
+                    type="text"
+                    name="website"
+                    value={form.honeypot}
+                    onChange={(e) => setForm((prev) => ({ ...prev, honeypot: e.target.value }))}
+                    className="absolute left-[-9999px] opacity-0"
+                    tabIndex={-1}
+                    autoComplete="off"
+                />
 
                 <div className="md:col-span-2 flex justify-center">
                     <button

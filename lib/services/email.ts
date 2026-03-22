@@ -4,53 +4,54 @@ let resendClient: Resend | null | undefined;
 let warnedMissingResendKey = false;
 
 function getResendClient() {
-    if (resendClient !== undefined) {
-        return resendClient;
-    }
-
-    const apiKey = process.env.RESEND_API_KEY;
-    if (!apiKey) {
-        if (!warnedMissingResendKey) {
-            console.warn('[email] RESEND_API_KEY is not configured. Email delivery is disabled.');
-            warnedMissingResendKey = true;
-        }
-        resendClient = null;
-        return resendClient;
-    }
-
-    resendClient = new Resend(apiKey);
+  if (resendClient !== undefined) {
     return resendClient;
+  }
+
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    if (!warnedMissingResendKey) {
+      console.warn('[email] RESEND_API_KEY is not configured. Email delivery is disabled.');
+      warnedMissingResendKey = true;
+    }
+    resendClient = null;
+    return resendClient;
+  }
+
+  resendClient = new Resend(apiKey);
+  return resendClient;
 }
 
 const FROM_EMAIL = process.env.HOTEL_EMAIL || 'reservation@oliviaalleppey.com';
 const HOTEL_NAME = process.env.HOTEL_NAME || 'Olivia International';
 const RESERVATION_TEAM_EMAIL = process.env.HOTEL_RESERVATION_EMAIL || 'reservation@oliviaalleppey.com';
+const FNB_EMAIL = process.env.HOTEL_FNB_EMAIL || 'fnb@oliviaalleppey.com';
 
 /**
  * Send booking confirmation email to guest
  */
 export async function sendBookingConfirmation(params: {
-    to: string;
-    guestName: string;
-    bookingNumber: string;
-    checkIn: string;
-    checkOut: string;
-    roomType: string;
-    totalAmount: number;
+  to: string;
+  guestName: string;
+  bookingNumber: string;
+  checkIn: string;
+  checkOut: string;
+  roomType: string;
+  totalAmount: number;
 }) {
-    try {
-        const resend = getResendClient();
-        if (!resend) {
-            return { skipped: true };
-        }
+  try {
+    const resend = getResendClient();
+    if (!resend) {
+      return { skipped: true };
+    }
 
-        const { to, guestName, bookingNumber, checkIn, checkOut, roomType, totalAmount } = params;
+    const { to, guestName, bookingNumber, checkIn, checkOut, roomType, totalAmount } = params;
 
-        const { data, error } = await resend.emails.send({
-            from: `${HOTEL_NAME} <${FROM_EMAIL}>`,
-            to: [to],
-            subject: `Booking Confirmation - ${bookingNumber}`,
-            html: `
+    const { data, error } = await resend.emails.send({
+      from: `${HOTEL_NAME} <${FROM_EMAIL}>`,
+      to: [to],
+      subject: `Booking Confirmation - ${bookingNumber}`,
+      html: `
         <!DOCTYPE html>
         <html>
           <head>
@@ -111,41 +112,41 @@ export async function sendBookingConfirmation(params: {
           </body>
         </html>
       `,
-        });
+    });
 
-        if (error) {
-            console.error('Error sending email:', error);
-            throw error;
-        }
-
-        return data;
-    } catch (error) {
-        console.error('Failed to send booking confirmation:', error);
-        throw new Error('Failed to send confirmation email');
+    if (error) {
+      console.error('Error sending email:', error);
+      throw error;
     }
+
+    return data;
+  } catch (error) {
+    console.error('Failed to send booking confirmation:', error);
+    throw new Error('Failed to send confirmation email');
+  }
 }
 
 /**
  * Send inquiry acknowledgment email
  */
 export async function sendInquiryAcknowledgment(params: {
-    to: string;
-    name: string;
-    type: string;
+  to: string;
+  name: string;
+  type: string;
 }) {
-    try {
-        const resend = getResendClient();
-        if (!resend) {
-            return { skipped: true };
-        }
+  try {
+    const resend = getResendClient();
+    if (!resend) {
+      return { skipped: true };
+    }
 
-        const { to, name, type } = params;
+    const { to, name, type } = params;
 
-        const { data, error } = await resend.emails.send({
-            from: `${HOTEL_NAME} <${FROM_EMAIL}>`,
-            to: [to],
-            subject: `Thank you for your ${type} inquiry`,
-            html: `
+    const { data, error } = await resend.emails.send({
+      from: `${HOTEL_NAME} <${FROM_EMAIL}>`,
+      to: [to],
+      subject: `Thank you for your ${type} inquiry`,
+      html: `
         <!DOCTYPE html>
         <html>
           <head>
@@ -177,56 +178,56 @@ export async function sendInquiryAcknowledgment(params: {
           </body>
         </html>
       `,
-        });
+    });
 
-        if (error) {
-            console.error('Error sending email:', error);
-            throw error;
-        }
-
-        return data;
-    } catch (error) {
-        console.error('Failed to send inquiry acknowledgment:', error);
-        throw new Error('Failed to send acknowledgment email');
+    if (error) {
+      console.error('Error sending email:', error);
+      throw error;
     }
+
+    return data;
+  } catch (error) {
+    console.error('Failed to send inquiry acknowledgment:', error);
+    throw new Error('Failed to send acknowledgment email');
+  }
 }
 
 /**
  * Send event inquiry details to reservations team
  */
 export async function sendEventInquiryToReservations(params: {
-    name: string;
-    company?: string;
-    email?: string;
-    phone: string;
-    eventType: string;
-    guestCount?: string;
-    preferredDate?: string;
-    message?: string;
+  name: string;
+  company?: string;
+  email?: string;
+  phone: string;
+  eventType: string;
+  guestCount?: string;
+  preferredDate?: string;
+  message?: string;
 }) {
-    try {
-        const resend = getResendClient();
-        if (!resend) {
-            return { skipped: true };
-        }
+  try {
+    const resend = getResendClient();
+    if (!resend) {
+      return { skipped: true };
+    }
 
-        const {
-            name,
-            company,
-            email,
-            phone,
-            eventType,
-            guestCount,
-            preferredDate,
-            message,
-        } = params;
+    const {
+      name,
+      company,
+      email,
+      phone,
+      eventType,
+      guestCount,
+      preferredDate,
+      message,
+    } = params;
 
-        const { data, error } = await resend.emails.send({
-            from: `${HOTEL_NAME} <${FROM_EMAIL}>`,
-            to: [RESERVATION_TEAM_EMAIL],
-            replyTo: email ? [email] : undefined,
-            subject: `New Event Inquiry - ${eventType}`,
-            html: `
+    const { data, error } = await resend.emails.send({
+      from: `${HOTEL_NAME} <${FROM_EMAIL}>`,
+      to: [RESERVATION_TEAM_EMAIL, FNB_EMAIL],
+      replyTo: email ? [email] : undefined,
+      subject: `New Event Inquiry - ${eventType}`,
+      html: `
         <!DOCTYPE html>
         <html>
           <head>
@@ -266,16 +267,16 @@ export async function sendEventInquiryToReservations(params: {
           </body>
         </html>
       `,
-        });
+    });
 
-        if (error) {
-            console.error('Error sending event inquiry email:', error);
-            throw error;
-        }
-
-        return data;
-    } catch (error) {
-        console.error('Failed to send event inquiry email:', error);
-        throw new Error('Failed to send event inquiry');
+    if (error) {
+      console.error('Error sending event inquiry email:', error);
+      throw error;
     }
+
+    return data;
+  } catch (error) {
+    console.error('Failed to send event inquiry email:', error);
+    throw new Error('Failed to send event inquiry');
+  }
 }
