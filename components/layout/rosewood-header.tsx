@@ -8,13 +8,12 @@ import { usePathname, useRouter } from 'next/navigation';
 
 const NAV_ITEMS: Array<{ label: string; href: string; activePrefixes?: string[] }> = [
     { label: 'Discover', href: '/discover' },
-    // Your site uses `/rooms` for accommodations.
     { label: 'Accommodation', href: '/rooms' },
     { label: 'Wedding', href: '/wedding' },
-    { label: 'Dining', href: '/dining' },
-    { label: 'Wellness', href: '/wellness' },
-    { label: 'Experiences', href: '/experiences' },
     { label: 'Conference & Events', href: '/conference-events' },
+    { label: 'Dining', href: '/dining' },
+    { label: 'Experiences', href: '/experiences' },
+    { label: 'Wellness', href: '/wellness' },
 ];
 
 const isNavActive = (pathname: string, item: { href: string; activePrefixes?: string[] }) => {
