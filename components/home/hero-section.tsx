@@ -142,7 +142,7 @@ export default function HeroSection() {
             <div className="absolute inset-0 flex flex-col items-center justify-center text-white z-10 text-center px-4 pb-48">
                 <p className="text-white text-xs md:text-sm uppercase tracking-[0.3em] mb-4 animate-fade-in-up"></p>
                 <h2 className="text-white text-5xl md:text-7xl lg:text-8xl font-serif mb-6 tracking-wide animate-fade-in-up delay-100 drop-shadow-lg">
-                    Experience The Experienced
+                    Experience The Inexperienced
                 </h2>
                 <p className="text-white text-sm md:text-lg font-light tracking-wider opacity-90 max-w-2xl animate-fade-in-up delay-200 drop-shadow-md">
                     Discover a world of refined elegance and timeless luxury.
