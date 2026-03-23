@@ -199,11 +199,11 @@ export async function getAvailableRoomsForSearch(
             // For any rate plans without mealPlan, derive from inclusions
             const ratePlansWithMealPlan = finalizedRatePlans.map(rp => ({
                 ...rp,
-                mealPlan: rp.mealPlan || (rp.inclusions?.some(i => i.toLowerCase().includes('breakfast') && i.toLowerCase().includes('dinner'))
+                mealPlan: rp.mealPlan || (rp.inclusions?.some((i: string) => i.toLowerCase().includes('breakfast') && i.toLowerCase().includes('dinner'))
                     ? 'MAP'
-                    : rp.inclusions?.some(i => i.toLowerCase().includes('breakfast'))
+                    : rp.inclusions?.some((i: string) => i.toLowerCase().includes('breakfast'))
                         ? 'CP'
-                        : rp.inclusions?.some(i => i.toLowerCase().includes('dinner'))
+                        : rp.inclusions?.some((i: string) => i.toLowerCase().includes('dinner'))
                             ? 'MAP'
                             : 'EP')
             }));
