@@ -154,7 +154,7 @@ export default function RosewoodFooter() {
                         </div>
 
                         <p className="mt-5 text-[10px] uppercase tracking-widest text-[#5E5851] text-center">
-                            © 2026 Olivia Hotel Group. All Rights Reserved.
+                            © 2026 Olivia International. All Rights Reserved.
                         </p>
                     </div>
                 </div>
