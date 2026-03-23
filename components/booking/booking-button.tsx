@@ -56,9 +56,9 @@ export function BookingButton({
     return (
         <div className="space-y-1.5 md:space-y-2 relative">
             {!disabled && effectiveMaxRooms > 1 && (
-                <div className="rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm mb-1">
+                <div className="rounded-xl border border-gray-200 bg-white px-2 md:px-3 py-1.5 md:py-2 shadow-sm mb-1">
                     <div className="flex items-center justify-between">
-                        <span className="text-[11px] text-[#8A8F82] font-semibold">Quantity</span>
+                        <span className="text-[10px] md:text-[11px] text-[#8A8F82] font-semibold">Quantity</span>
                         <div className="flex items-center gap-3">
                             <button
                                 type="button"
@@ -85,7 +85,7 @@ export function BookingButton({
             <Button
                 onClick={handleSelect}
                 disabled={isPending || disabled}
-                className="w-full bg-[#1C2822] text-white h-12 rounded-xl text-[14px] font-bold transition-all shadow-md active:scale-[0.98] hover:bg-[#2A3B32]"
+                className="w-full bg-[#1C2822] text-white h-10 md:h-12 rounded-xl text-[13px] md:text-[14px] font-bold transition-all shadow-md active:scale-[0.98] hover:bg-[#2A3B32]"
             >
                 {isPending
                     ? <Loader2 className="w-4 h-4 animate-spin" />

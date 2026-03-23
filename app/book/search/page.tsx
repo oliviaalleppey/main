@@ -347,26 +347,26 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                                                 </div>
                                             </div>
 
-                                            <div className="w-full lg:w-[250px] shrink-0 rounded-[28px] border border-[#DCE2D2] bg-[#F9FAF6] p-5 md:p-6 flex flex-col justify-between">
+                                            <div className="w-full lg:w-[250px] shrink-0 rounded-2xl md:rounded-[28px] border border-[#DCE2D2] bg-[#F9FAF6] p-3.5 md:p-6 flex flex-col justify-between mt-1 lg:mt-0">
                                                 <div>
-                                                    <p className="text-[10px] uppercase tracking-[0.2em] text-[#8A8F82] font-bold mb-2">STARTING FROM</p>
-                                                    <div className="flex items-baseline gap-1.5 mb-3">
-                                                        <span className="text-[34px] font-sans font-bold tracking-tight text-[#1C2822]">{formatCurrency(result.price)}</span>
-                                                        <span className="text-[13px] text-[#8A8F82] font-semibold">/ night</span>
+                                                    <p className="text-[9px] md:text-[10px] uppercase tracking-[0.2em] text-[#8A8F82] font-bold mb-1 md:mb-2">STARTING FROM</p>
+                                                    <div className="flex items-baseline gap-1.5 mb-1.5 md:mb-3">
+                                                        <span className="text-[24px] md:text-[34px] leading-none font-sans font-bold tracking-tight text-[#1C2822]">{formatCurrency(result.price)}</span>
+                                                        <span className="text-[11px] md:text-[13px] text-[#8A8F82] font-semibold">/ night</span>
                                                     </div>
                                                     
-                                                    <div className="space-y-1.5 mb-5 pt-0.5">
-                                                        <div className="flex justify-between items-center text-[12px] font-semibold text-[#5C6156]">
-                                                            <span>Stay total (per room):</span>
+                                                    <div className="space-y-1 md:space-y-1.5 mb-3 md:mb-5 pt-0.5">
+                                                        <div className="flex justify-between items-center text-[11px] md:text-[12px] font-semibold text-[#5C6156]">
+                                                            <span>Stay total:</span>
                                                             <span className="text-[#1C2822]">{formatCurrency(result.totalPrice)}</span>
                                                         </div>
                                                     </div>
                                                 </div>
 
-                                                <div className="flex flex-col gap-3">
+                                                <div className="flex flex-col gap-2 md:gap-3">
                                                     <Link
                                                         href={`/rooms/${result.roomType.slug}`}
-                                                        className="inline-flex items-center justify-center rounded-xl border border-[#DCE2D2] px-6 h-12 text-[13px] font-bold text-[#1C2822] transition-all hover:bg-white hover:border-[#1C2822]"
+                                                        className="inline-flex items-center justify-center rounded-xl border border-[#DCE2D2] px-4 md:px-6 h-10 md:h-12 text-[12px] md:text-[13px] font-bold text-[#1C2822] transition-all hover:bg-white hover:border-[#1C2822]"
                                                     >
                                                         View Room
                                                     </Link>
