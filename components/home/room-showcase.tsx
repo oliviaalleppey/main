@@ -102,7 +102,7 @@ export default async function RoomShowcase() {
                                 <div className="flex items-center justify-between mt-auto pt-2">
                                     <Link
                                         href={`/book/search?room=${room.link.replace('/rooms/', '')}`}
-                                        className="px-4 py-2 md:px-6 md:py-2.5 rounded-full border border-[#07221D] text-[#1C1C1C] text-[10px] md:text-sm font-bold hover:bg-[#15443B] hover:border-[#15443B] hover:text-white transition-all uppercase tracking-wide whitespace-nowrap"
+                                        className="px-4 py-2 md:px-6 md:py-2.5 rounded-full bg-[#0A332B] text-white text-[10px] md:text-sm font-bold hover:bg-[#15443B] transition-all uppercase tracking-wide whitespace-nowrap"
                                     >
                                         Book Now
                                     </Link>

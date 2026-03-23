@@ -11,11 +11,10 @@ interface FrontendLayoutProps {
 export default function FrontendLayout({ children }: FrontendLayoutProps) {
     const pathname = usePathname();
     const isAdmin = pathname?.startsWith('/admin');
+    const isInvoice = pathname?.includes('/invoice');
 
-    // Also exclude if it's a standalone separate layout (optional, but sticking to admin for now)
-    // If you have specific auth pages that shouldn't have headers, add them here.
-
-    if (isAdmin) {
+    // Exclude header/footer for admin panel or print-optimized invoice pages
+    if (isAdmin || isInvoice) {
         return <>{children}</>;
     }
 

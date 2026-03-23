@@ -127,6 +127,9 @@ export default function RosewoodHeader() {
                         {session ? (
                             <div className="flex items-center gap-4">
                                 <span>Welcome, {session.user?.name}</span>
+                                <Link href="/my-bookings" className="hover:opacity-70 transition-opacity font-bold">
+                                    My Bookings
+                                </Link>
                                 <button onClick={() => signOut()} className="hover:opacity-70 transition-opacity">
                                     Sign Out
                                 </button>
@@ -315,7 +318,10 @@ export default function RosewoodHeader() {
                             {session ? (
                                 <>
                                     <p className="text-gray-900">Welcome, {session.user?.name}</p>
-                                    <button onClick={() => signOut()} className="block hover:opacity-70 transition-opacity">
+                                    <Link href="/my-bookings" onClick={() => setIsMobileMenuOpen(false)} className="block font-semibold mt-2">
+                                        My Bookings
+                                    </Link>
+                                    <button onClick={() => signOut()} className="block hover:opacity-70 transition-opacity mt-2">
                                         Sign Out
                                     </button>
                                 </>

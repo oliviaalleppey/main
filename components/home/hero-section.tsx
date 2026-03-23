@@ -29,18 +29,16 @@ export default function HeroSection() {
     useEffect(() => {
         async function fetchImages() {
             try {
-                // Dynamic import to avoid server-side issues if needed, or just standard fetch
-                // We'll use a server action wrapper or direct fetch if we made an API
-                // But since we have a server action, let's call it via an API route or pass it down?
-                // Actually, server actions can be called directly in Client Components.
                 const { getHeroImages } = await import('@/lib/db/actions/settings-actions');
                 const dynamicImages = await getHeroImages();
-                if (dynamicImages && dynamicImages.length > 0) {
-                    // Filter out the first image
-                    setHeroImages(dynamicImages.slice(1));
+                // Only update if we get valid images with URLs
+                if (dynamicImages && dynamicImages.length > 0 && dynamicImages[0]?.url) {
+                    setHeroImages(dynamicImages);
                 }
+                // Otherwise, keep the default HERO_IMAGES
             } catch (error) {
                 console.error("Failed to fetch hero images", error);
+                // Keep default HERO_IMAGES on error
             }
         }
         fetchImages();
@@ -144,7 +142,7 @@ export default function HeroSection() {
             <div className="absolute inset-0 flex flex-col items-center justify-center text-white z-10 text-center px-4 pb-48">
                 <p className="text-white text-xs md:text-sm uppercase tracking-[0.3em] mb-4 animate-fade-in-up"></p>
                 <h2 className="text-white text-5xl md:text-7xl lg:text-8xl font-serif mb-6 tracking-wide animate-fade-in-up delay-100 drop-shadow-lg">
-                    Experience The Inexperinced
+                    Experience The Experienced
                 </h2>
                 <p className="text-white text-sm md:text-lg font-light tracking-wider opacity-90 max-w-2xl animate-fade-in-up delay-200 drop-shadow-md">
                     Discover a world of refined elegance and timeless luxury.
