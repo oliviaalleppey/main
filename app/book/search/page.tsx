@@ -131,8 +131,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
     return (
         <div className="min-h-screen bg-[#F4F5F0] pb-12 md:pb-20">
-            <div className="border-b border-[#E4E8DD] bg-gradient-to-b from-[#FAFAF5] via-[#F7F8F2] to-[#F4F5F0]">
-                <div className="max-w-[1400px] mx-auto px-3 md:px-6 py-4 md:py-10">
+            <div className="sticky top-[56px] lg:top-[76px] z-30 border-b border-[#E4E8DD] bg-gradient-to-b from-[#FAFAF5] via-[#F7F8F2] to-[#F4F5F0] shadow-sm">
+                <div className="max-w-[1400px] mx-auto px-3 md:px-6 py-4 md:py-6">
                     <SearchStayEditor
                         initialCheckIn={checkInDate}
                         initialCheckOut={checkOutDate}
