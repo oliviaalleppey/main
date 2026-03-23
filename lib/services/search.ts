@@ -1,5 +1,5 @@
 import { db } from '../db';
-import { roomTypes, roomInventory, ratePlans } from '../db/schema';
+import { roomTypes, roomInventory, ratePlans, pricingRules } from '../db/schema';
 import { eq, and, gte, lte } from 'drizzle-orm';
 import { BOOKING_FLOW_MODE } from '@/lib/config/booking-flow-mode';
 import { mapCrsRoomTypeMatchesInternal } from '@/lib/config/crs';
@@ -99,6 +99,16 @@ export async function getAvailableRoomsForSearch(
             lte(roomInventory.date, checkOutStr)
         ));
 
+    // Fetch active generic pricing rules (seasonal % adjustments)
+    const activePricingRules = await db
+        .select()
+        .from(pricingRules)
+        .where(and(
+            eq(pricingRules.isActive, true),
+            lte(pricingRules.startDate, checkOutStr),
+            gte(pricingRules.endDate, checkInStr)
+        ));
+
     // Fetch all active local rate plans for later mapping
     const localRatePlans = await db.query.ratePlans.findMany({
         where: eq(ratePlans.isActive, true)
@@ -136,15 +146,32 @@ export async function getAvailableRoomsForSearch(
             const extraChildren = Math.max(0, childrenPerRoom - remainingCoveredGuests);
             const extraPersonSurchargePerNight = (extraAdults * (type.extraAdultPrice ?? 0)) + (extraChildren * (type.extraChildPrice ?? 0));
 
-            // Calculate total price day-by-day honoring local overrides
+            // Applicable dynamic pricing rules
+            const applicableRules = activePricingRules
+                .filter(rule => rule.roomTypeId === null || rule.roomTypeId === type.id)
+                .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+
+            // Calculate total price day-by-day honoring local overrides and seasonal rules
             let totalPrice = 0;
             const current = new Date(checkIn);
             for (let i = 0; i < nights; i++) {
                 const dateStr = current.toISOString().split('T')[0];
                 const override = overrideMap.get(`${type.id}_${dateStr}`);
 
-                // Nightly Base is either Override or API Base. Then ADD the extra person surcharge explicitly.
-                const nightlyBase = override !== undefined ? override : baseCrsPrice;
+                // Nightly Base is either Override or API Base.
+                let nightlyBase = override !== undefined ? override : baseCrsPrice;
+
+                const activeRule = applicableRules.find(rule => 
+                    dateStr >= rule.startDate && 
+                    dateStr <= rule.endDate && 
+                    nights >= (rule.minimumStay ?? 1)
+                );
+
+                if (activeRule) {
+                    nightlyBase = Math.round(nightlyBase * (activeRule.priceModifier / 100));
+                }
+
+                // ADD the extra person surcharge explicitly.
                 totalPrice += (nightlyBase + extraPersonSurchargePerNight);
 
                 current.setDate(current.getDate() + 1);

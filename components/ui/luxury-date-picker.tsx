@@ -47,29 +47,27 @@ export function LuxuryDatePicker({
         }
     }, [date]);
 
-    // Custom day click — implements the 3-click cycle:
-    // Stage checkIn  → 1st click sets check-in only
-    // Stage checkOut → 2nd click sets check-out (must be after check-in), or resets if same/before
-    // After both dates set, 3rd click resets to new check-in
-    const handleDayClick = (day: Date) => {
-        const clickedDay = startOfDay(day);
+    // Handle custom tab-based range selection
+    const handleSelect = (suggestedRange: DateRange | undefined, selectedDay: Date) => {
+        const clickedDay = startOfDay(selectedDay);
 
         if (selectionStage === 'checkIn') {
-            // 1st click (or after reset): set check-in
-            setSelectedDate({ from: clickedDay, to: undefined });
+            // If they clicked a check-in date that is after the current check-out, clear check-out
+            const newTo = selectedDate?.to && clickedDay < selectedDate.to ? selectedDate.to : undefined;
+            setSelectedDate({ from: clickedDay, to: newTo });
             setSelectionStage('checkOut');
         } else {
             // selectionStage === 'checkOut'
-            if (selectedDate?.from && clickedDay > selectedDate.from) {
-                // 2nd click: valid check-out
-                setSelectedDate({ from: selectedDate.from, to: clickedDay });
-                // Stay in 'checkOut' — next click will reset (3rd click)
-                // But we track that both are set; next click should reset
-                setSelectionStage('checkIn'); // 3rd click will act as new check-in
-            } else {
-                // Clicked same day or before check-in → reset to this new check-in
+            if (!selectedDate?.from || clickedDay < selectedDate.from) {
+                // If they clicked a date BEFORE the check-in date while in check-out mode,
+                // smartly assume they meant to change the check-in date instead.
                 setSelectedDate({ from: clickedDay, to: undefined });
                 setSelectionStage('checkOut');
+            } else {
+                // Valid check-out date selected
+                setSelectedDate({ from: selectedDate.from, to: clickedDay });
+                // We leave the stage alone or switch to checkIn. Typically, switch to checkIn to allow starting over.
+                setSelectionStage('checkIn');
             }
         }
     };
@@ -118,19 +116,25 @@ export function LuxuryDatePicker({
             <div className="mb-4 md:mb-6 border-b border-gray-200 pb-4 md:pb-6">
                 <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 md:gap-5">
                     <div className="flex flex-row items-end justify-between sm:justify-start gap-4 sm:gap-7 md:gap-9 w-full md:w-auto">
-                        <div className={`flex-1 sm:flex-none sm:min-w-[220px] pb-1 border-b-2 transition-colors ${selectionStage === 'checkIn' && (!selectedDate?.from || !selectedDate?.to) ? 'border-[#0A332B]' : 'border-transparent'}`}>
-                            <p className={`text-[10px] md:text-[12px] uppercase tracking-[0.2em] font-semibold mb-1 md:mb-2 transition-colors ${selectionStage === 'checkIn' && (!selectedDate?.from || !selectedDate?.to) ? 'text-[#0A332B]' : 'text-slate-500'}`}>Check-in</p>
+                        <button 
+                            onClick={(e) => { e.stopPropagation(); setSelectionStage('checkIn'); }}
+                            className={`text-left flex-1 sm:flex-none sm:min-w-[220px] pb-1 border-b-2 transition-colors hover:opacity-80 ${selectionStage === 'checkIn' ? 'border-[#0A332B]' : 'border-transparent cursor-pointer'}`}
+                        >
+                            <p className={`text-[10px] md:text-[12px] uppercase tracking-[0.2em] font-semibold mb-1 md:mb-2 transition-colors ${selectionStage === 'checkIn' ? 'text-[#0A332B]' : 'text-slate-500'}`}>Check-in</p>
                             <p className="text-[20px] sm:text-[32px] leading-none font-sans font-semibold tracking-[-0.02em] text-[#0A332B]">
                                 {selectedDate?.from ? format(selectedDate.from, 'd MMM yyyy') : 'Select Date'}
                             </p>
-                        </div>
+                        </button>
                         <div className="hidden sm:block h-10 md:h-14 w-px bg-gray-200" />
-                        <div className={`flex-1 sm:flex-none sm:min-w-[220px] pb-1 border-b-2 transition-colors ${selectedDate?.from && selectionStage === 'checkOut' ? 'border-[#0A332B]' : 'border-transparent'}`}>
-                            <p className={`text-[10px] md:text-[12px] uppercase tracking-[0.2em] font-semibold mb-1 md:mb-2 transition-colors ${selectedDate?.from && selectionStage === 'checkOut' ? 'text-[#0A332B]' : 'text-slate-500'}`}>Check-out</p>
+                        <button 
+                            onClick={(e) => { e.stopPropagation(); setSelectionStage('checkOut'); }}
+                            className={`text-left flex-1 sm:flex-none sm:min-w-[220px] pb-1 border-b-2 transition-colors hover:opacity-80 ${selectionStage === 'checkOut' ? 'border-[#0A332B]' : 'border-transparent cursor-pointer'}`}
+                        >
+                            <p className={`text-[10px] md:text-[12px] uppercase tracking-[0.2em] font-semibold mb-1 md:mb-2 transition-colors ${selectionStage === 'checkOut' ? 'text-[#0A332B]' : 'text-slate-500'}`}>Check-out</p>
                             <p className="text-[20px] sm:text-[32px] leading-none font-sans font-semibold tracking-[-0.02em] text-[#0A332B]">
                                 {selectedDate?.to ? format(selectedDate.to, 'd MMM yyyy') : 'Select Date'}
                             </p>
-                        </div>
+                        </button>
                     </div>
 
                     {nights > 0 && (
@@ -343,10 +347,7 @@ export function LuxuryDatePicker({
                     <DayPicker
                         mode="range"
                         selected={selectedDate}
-                        onDayClick={(day, modifiers) => {
-                            if (modifiers.disabled) return;
-                            handleDayClick(day);
-                        }}
+                        onSelect={handleSelect}
                         month={month}
                         numberOfMonths={monthsToShow}
                         hideNavigation
