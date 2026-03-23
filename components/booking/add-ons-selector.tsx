@@ -80,7 +80,7 @@ export function AddOnsSelector({ options, initialSelected, onContinue }: AddOnsS
     };
 
     return (
-        <div className="space-y-2 md:space-y-3">
+        <div className="space-y-2 md:space-y-3 pb-24 md:pb-0 relative">
             <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-2 md:p-3">
                 <div className="flex items-center justify-between gap-3 md:gap-4">
                     <div>
@@ -180,11 +180,11 @@ export function AddOnsSelector({ options, initialSelected, onContinue }: AddOnsS
                             {isPending && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                             {isPending ? 'Saving...' : addOnsTotal > 0
                                 ? 'Your enhancements are saved automatically.'
-                                : 'No enhancements selected. You can skip this and continue to payment.'}
+                                : 'No enhancements selected. You can skip this and continue to guest details.'}
                         </p>
                     )}
                 </div>
-                <div className="flex items-center gap-2 sm:self-end">
+                <div className="flex items-center gap-2 sm:self-end hidden md:flex">
                     <button
                         type="button"
                         onClick={() => {
@@ -192,11 +192,27 @@ export function AddOnsSelector({ options, initialSelected, onContinue }: AddOnsS
                                 onContinue();
                             }
                         }}
-                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-white border border-gray-300 px-4 py-2 text-[11px] md:text-xs font-semibold uppercase tracking-wider text-gray-700 hover:bg-gray-50 transition-colors"
+                        disabled={isPending}
+                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#1C2822] text-white px-5 py-2.5 text-xs font-bold uppercase tracking-wider hover:bg-[#2A3B32] transition-colors disabled:opacity-70 shadow-sm"
                     >
-                        Continue to Payment
+                        {isPending ? 'Saving...' : (addOnsTotal > 0 ? 'Continue with Add-ons' : 'Skip & Continue')}
                     </button>
                 </div>
+            </div>
+
+            {/* Mobile Floating Action Bar */}
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] md:hidden z-50 animate-in slide-in-from-bottom-full duration-300">
+                <button
+                    type="button"
+                    onClick={() => {
+                        if (onContinue) onContinue();
+                    }}
+                    disabled={isPending}
+                    className="w-full bg-[#1C2822] text-white h-12 rounded-xl text-[14px] font-bold transition-all shadow-md active:scale-[0.98] disabled:opacity-70 flex items-center justify-center gap-2"
+                >
+                    {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+                    {isPending ? 'Saving...' : (addOnsTotal > 0 ? 'Continue with Add-ons' : 'Skip & Continue')}
+                </button>
             </div>
         </div>
     );
