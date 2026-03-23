@@ -20,7 +20,7 @@ interface RoomTypeFormProps {
 export function RoomTypeForm({ initialData }: RoomTypeFormProps) {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
-
+    
     // We need local state for the amenities string to allow typing commas naturally
     const [amenitiesText, setAmenitiesText] = useState(() => {
         return initialData?.amenities ? initialData.amenities.join(', ') : '';
@@ -33,9 +33,6 @@ export function RoomTypeForm({ initialData }: RoomTypeFormProps) {
             description: initialData.description ?? undefined,
             shortDescription: initialData.shortDescription ?? undefined,
             bedType: initialData.bedType ?? undefined,
-            view: initialData.view ?? undefined,
-            checkInTime: initialData.checkInTime ?? '2:00 PM',
-            checkOutTime: initialData.checkOutTime ?? '11:00 AM',
             size: initialData.size ?? undefined,
             sizeUnit: (initialData.sizeUnit as "sqft" | "sqm") ?? 'sqft',
             amenities: initialData.amenities ?? [],
@@ -58,9 +55,6 @@ export function RoomTypeForm({ initialData }: RoomTypeFormProps) {
             extraAdultPrice: 0,
             extraChildPrice: 0,
             bedType: '',
-            view: '',
-            checkInTime: '2:00 PM',
-            checkOutTime: '11:00 AM',
             size: 0,
             sizeUnit: 'sqft',
             amenities: [],
@@ -131,7 +125,7 @@ export function RoomTypeForm({ initialData }: RoomTypeFormProps) {
                             onChange={(e) => {
                                 const val = e.target.value;
                                 setAmenitiesText(val); // Update local typed value
-
+                                
                                 // Update form value behind the scenes
                                 const arr = val.split(',').map(s => s.trim()).filter(Boolean);
                                 setValue('amenities', arr, { shouldDirty: true, shouldValidate: true });
@@ -274,21 +268,6 @@ export function RoomTypeForm({ initialData }: RoomTypeFormProps) {
                     <div>
                         <Label htmlFor="bedType">Bed Type</Label>
                         <Input id="bedType" {...register('bedType')} placeholder="e.g. King Size" className="mt-1" />
-                    </div>
-
-                    <div>
-                        <Label htmlFor="view">View</Label>
-                        <Input id="view" {...register('view')} placeholder="e.g. Lake View" className="mt-1" />
-                    </div>
-
-                    <div>
-                        <Label htmlFor="checkInTime">Check-in Time</Label>
-                        <Input id="checkInTime" {...register('checkInTime')} placeholder="e.g. 2:00 PM" className="mt-1" />
-                    </div>
-
-                    <div>
-                        <Label htmlFor="checkOutTime">Check-out Time</Label>
-                        <Input id="checkOutTime" {...register('checkOutTime')} placeholder="e.g. 11:00 AM" className="mt-1" />
                     </div>
                 </div>
 
