@@ -7,6 +7,17 @@ import { authConfig } from "./auth.config"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
     adapter: DrizzleAdapter(db),
+    logger: {
+        error(error) {
+            // Silently handle common session decryption errors that often occur
+            // when cookies are stale or secrets have changed.
+            if (error.name === "JWTSessionError" || error.message.includes("JWTSessionError")) {
+                console.warn("[auth] Session decryption failed (likely expired/invalid cookie). Falling back to anonymous.");
+                return;
+            }
+            console.error("[auth][error]", error);
+        }
+    },
     ...authConfig,
     callbacks: {
         ...authConfig.callbacks,

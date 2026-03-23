@@ -27,6 +27,7 @@ export function SearchStayEditor({
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+    const [isCollapsed, setIsCollapsed] = useState(true);
 
     const [date, setDate] = useState<DateRange | undefined>({
         from: initialCheckIn,
@@ -61,23 +62,59 @@ export function SearchStayEditor({
     return (
         <div className="relative">
             {/* Mobile: redesigned layout */}
-            <div className="md:hidden bg-white rounded-3xl border border-gray-200 shadow-xl overflow-hidden p-4">
-                <p className="text-[11px] uppercase tracking-[0.28em] text-gray-400 font-semibold">Update your stay</p>
-
-                <button
-                    onClick={() => setIsDatePickerOpen(true)}
-                    className="mt-3 w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3.5 text-left hover:bg-white transition-colors"
-                >
-                    <p className="text-[10px] uppercase tracking-[0.26em] text-gray-400 font-bold">Stay period</p>
-                    <div className="mt-2 flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-2.5 text-[16px] font-semibold text-[#0F172A]">
-                            <span>{date?.from ? format(date.from, 'EEE, dd MMM') : 'Check-in'}</span>
-                            <span className="text-gray-300">→</span>
-                            <span>{date?.to ? format(date.to, 'EEE, dd MMM') : 'Check-out'}</span>
+            <div className="md:hidden">
+                {isCollapsed ? (
+                    <button
+                        onClick={() => setIsCollapsed(false)}
+                        className="w-full bg-white rounded-2xl border border-gray-200 shadow-sm p-4 flex items-center justify-between group active:scale-[0.99] transition-all"
+                    >
+                        <div className="flex items-center gap-4">
+                            <div className="flex flex-col items-start">
+                                <span className="text-[10px] uppercase tracking-[0.2em] text-gray-400 font-bold mb-1">Your Stay</span>
+                                <div className="flex items-center gap-2 text-sm font-semibold text-[#0F172A]">
+                                    <span>{date?.from ? format(date.from, 'd MMM') : 'Check-in'}</span>
+                                    <span className="text-gray-300">→</span>
+                                    <span>{date?.to ? format(date.to, 'd MMM') : 'Check-out'}</span>
+                                </div>
+                            </div>
+                            <div className="h-8 w-[1px] bg-gray-100" />
+                            <div className="flex flex-col items-start">
+                                <span className="text-[10px] uppercase tracking-[0.2em] text-gray-400 font-bold mb-1">Guests</span>
+                                <span className="text-sm font-semibold text-[#0F172A]">
+                                    {guests.adults + guests.children} {guests.adults + guests.children === 1 ? 'Guest' : 'Guests'}
+                                </span>
+                            </div>
                         </div>
-                        <ChevronDown className="w-5 h-5 text-gray-400" />
-                    </div>
-                </button>
+                        <div className="h-10 w-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
+                            <ChevronDown className="w-5 h-5" />
+                        </div>
+                    </button>
+                ) : (
+                    <div className="bg-white rounded-3xl border border-gray-200 shadow-xl overflow-hidden p-4">
+                        <div className="flex items-center justify-between mb-4">
+                            <p className="text-[11px] uppercase tracking-[0.28em] text-gray-400 font-semibold">Update your stay</p>
+                            <button 
+                                onClick={() => setIsCollapsed(true)}
+                                className="text-xs font-bold text-emerald-700 uppercase tracking-wider"
+                            >
+                                Minimize
+                            </button>
+                        </div>
+
+                        <button
+                            onClick={() => setIsDatePickerOpen(true)}
+                            className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3.5 text-left hover:bg-white transition-colors"
+                        >
+                            <p className="text-[10px] uppercase tracking-[0.26em] text-gray-400 font-bold">Stay period</p>
+                            <div className="mt-2 flex items-center justify-between gap-3">
+                                <div className="flex items-center gap-2.5 text-[16px] font-semibold text-[#0F172A]">
+                                    <span>{date?.from ? format(date.from, 'EEE, dd MMM') : 'Check-in'}</span>
+                                    <span className="text-gray-300">→</span>
+                                    <span>{date?.to ? format(date.to, 'EEE, dd MMM') : 'Check-out'}</span>
+                                </div>
+                                <ChevronDown className="w-5 h-5 text-gray-400" />
+                            </div>
+                        </button>
 
                 <div className="mt-4 space-y-2.5">
                     {[
@@ -133,14 +170,16 @@ export function SearchStayEditor({
                     ))}
                 </div>
 
-                <button
-                    onClick={handleUpdate}
-                    disabled={isPending}
-                    className="mt-4 w-full h-12 bg-[#0A332B] hover:bg-[#15443B] disabled:opacity-70 text-white rounded-2xl text-sm font-bold uppercase tracking-widest transition-all shadow-[0_18px_40px_-22px_rgba(10,51,43,0.55)] flex items-center justify-center gap-2"
-                >
-                    {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-                    {isPending ? 'Updating...' : 'Update results'}
-                </button>
+                        <button
+                            onClick={handleUpdate}
+                            disabled={isPending}
+                            className="mt-4 w-full h-12 bg-[#0A332B] hover:bg-[#15443B] disabled:opacity-70 text-white rounded-2xl text-sm font-bold uppercase tracking-widest transition-all shadow-[0_18px_40px_-22px_rgba(10,51,43,0.55)] flex items-center justify-center gap-2"
+                        >
+                            {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                            {isPending ? 'Updating...' : 'Update results'}
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* Desktop/tablet: keep existing layout */}

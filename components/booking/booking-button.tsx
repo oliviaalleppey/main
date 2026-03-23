@@ -56,31 +56,28 @@ export function BookingButton({
     return (
         <div className="space-y-1.5 md:space-y-2 relative">
             {!disabled && effectiveMaxRooms > 1 && (
-                <div className="rounded-lg border border-gray-200 bg-white px-2.5 md:px-3 py-2">
-                    <p className="text-[10px] uppercase tracking-[0.15em] text-gray-500 mb-1">Rooms</p>
-                    <div className="flex items-center justify-between gap-2">
-                        <div className="inline-flex items-center gap-2">
+                <div className="rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm mb-1">
+                    <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-[#8A8F82] font-semibold">Quantity</span>
+                        <div className="flex items-center gap-3">
                             <button
                                 type="button"
                                 onClick={() => setRoomCount((prev) => Math.max(1, prev - 1))}
-                                className="h-6 w-6 md:h-7 md:w-7 rounded-full border border-gray-300 text-xs md:text-sm font-semibold text-gray-700 hover:bg-gray-100 transition-colors"
+                                className="h-7 w-7 rounded-full border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-50 hover:border-gray-200 transition-all"
                             >
                                 -
                             </button>
-                            <span className="min-w-14 md:min-w-16 text-center text-xs md:text-sm font-semibold text-gray-900">
-                                {roomCount} room{roomCount > 1 ? 's' : ''}
+                            <span className="min-w-6 text-center text-[13px] font-bold text-[#1C2822]">
+                                {roomCount}
                             </span>
                             <button
                                 type="button"
                                 onClick={() => setRoomCount((prev) => Math.min(effectiveMaxRooms, prev + 1))}
-                                className="h-6 w-6 md:h-7 md:w-7 rounded-full border border-gray-300 text-xs md:text-sm font-semibold text-gray-700 hover:bg-gray-100 transition-colors"
+                                className="h-7 w-7 rounded-full border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-50 hover:border-gray-200 transition-all"
                             >
                                 +
                             </button>
                         </div>
-                        <span className="text-[10px] text-gray-500">
-                            up to {effectiveMaxRooms}
-                        </span>
                     </div>
                 </div>
             )}
@@ -88,10 +85,10 @@ export function BookingButton({
             <Button
                 onClick={handleSelect}
                 disabled={isPending || disabled}
-                className="w-full bg-[#1C1C1C] text-white px-4 md:px-8 py-3.5 md:py-6 rounded-md md:rounded-none text-sm md:text-base hover:bg-[#E95D20] transition-colors shadow-md md:shadow-lg min-w-0 md:min-w-[160px]"
+                className="w-full bg-[#1C2822] text-white h-12 rounded-xl text-[14px] font-bold transition-all shadow-md active:scale-[0.98] hover:bg-[#2A3B32]"
             >
                 {isPending
-                    ? <Loader2 className="w-5 h-5 animate-spin" />
+                    ? <Loader2 className="w-4 h-4 animate-spin" />
                     : (disabled
                         ? disabledLabel
                         : roomCount > 1

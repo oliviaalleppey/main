@@ -12,6 +12,7 @@ import {
     DollarSign,
     ChevronRight,
     Sparkles,
+    Tag,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -20,6 +21,7 @@ const NAV_ITEMS = [
     { href: '/admin/availability', label: 'Availability', icon: Clock },
     { href: '/admin/pricing', label: 'Pricing', icon: DollarSign },
     { href: '/admin/rooms/types', label: 'Room Types', icon: BedDouble },
+    { href: '/admin/rooms/rate-plans', label: 'Rate Plans', icon: Tag },
     { href: '/admin/add-ons', label: 'Add-ons', icon: Sparkles },
     { href: '/admin/settings', label: 'Site Appearance', icon: Settings },
 ];

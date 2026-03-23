@@ -44,9 +44,9 @@ export async function getAvailableRoomsForSearch(
     const maxHotelGuests = Math.max(...allRoomTypes.map(t => t.maxGuests ?? 0));
 
     if (adultsPerRoom > maxHotelAdults || childrenPerRoom > maxHotelChildren || (adultsPerRoom + childrenPerRoom) > maxHotelGuests) {
-        return { 
-            rooms: [], 
-            error: `We're sorry! Rooms at this property can accommodate up to ${maxHotelAdults} adults, ${maxHotelChildren} children, and ${maxHotelGuests} total guests per room. Please split your search into multiple rooms to accommodate your group.` 
+        return {
+            rooms: [],
+            error: `We're sorry! Rooms at this property can accommodate up to ${maxHotelAdults} adults, ${maxHotelChildren} children, and ${maxHotelGuests} total guests per room. Please split your search into multiple rooms to accommodate your group.`
         };
     }
 
@@ -89,7 +89,7 @@ export async function getAvailableRoomsForSearch(
 
     const checkInStr = checkIn.toISOString().split('T')[0];
     const checkOutStr = checkOut.toISOString().split('T')[0];
-    
+
     // Fetch local pricing overrides for the exact search window
     const inventoryOverrides = await db
         .select()
@@ -98,7 +98,7 @@ export async function getAvailableRoomsForSearch(
             gte(roomInventory.date, checkInStr),
             lte(roomInventory.date, checkOutStr)
         ));
-        
+
     // Fetch all active local rate plans for later mapping
     const localRatePlans = await db.query.ratePlans.findMany({
         where: eq(ratePlans.isActive, true)
@@ -142,14 +142,14 @@ export async function getAvailableRoomsForSearch(
             for (let i = 0; i < nights; i++) {
                 const dateStr = current.toISOString().split('T')[0];
                 const override = overrideMap.get(`${type.id}_${dateStr}`);
-                
+
                 // Nightly Base is either Override or API Base. Then ADD the extra person surcharge explicitly.
                 const nightlyBase = override !== undefined ? override : baseCrsPrice;
                 totalPrice += (nightlyBase + extraPersonSurchargePerNight);
 
                 current.setDate(current.getDate() + 1);
             }
-            
+
             const pricePerNight = Math.round(totalPrice / nights);
             const taxRateDecimal = ((type as { taxRate?: number }).taxRate ?? 12) / 100;
             const taxes = Math.round(totalPrice * taxRateDecimal);
@@ -168,7 +168,7 @@ export async function getAvailableRoomsForSearch(
                     if (rp.inclusionsDescription) {
                         inclusions.push(...rp.inclusionsDescription.split(',').map(s => s.trim()).filter(Boolean));
                     }
-                    
+
                     return {
                         id: rp.id,
                         name: rp.name,
@@ -178,6 +178,14 @@ export async function getAvailableRoomsForSearch(
                         description: rp.description || '',
                         inclusions: inclusions,
                         cancellationPolicy: rp.cancellationPolicy?.replace('_', ' ') || 'moderate',
+                        // Derive mealPlan from inclusions for frontend display
+                        mealPlan: inclusions.some(i => i.toLowerCase().includes('breakfast') && i.toLowerCase().includes('dinner'))
+                            ? 'MAP'
+                            : inclusions.some(i => i.toLowerCase().includes('breakfast'))
+                                ? 'CP'
+                                : inclusions.some(i => i.toLowerCase().includes('dinner'))
+                                    ? 'MAP'
+                                    : 'EP',
                         // Extend interface dynamically for frontend UI decorators
                         isDefault: rp.isDefault,
                         basePriceModifier: rp.basePriceModifier,
@@ -188,6 +196,18 @@ export async function getAvailableRoomsForSearch(
             // Fallback to CRS rate plans if NO local rate plans exist at all
             const finalizedRatePlans = roomRatePlans.length > 0 ? roomRatePlans : apiRoom.ratePlans;
 
+            // For any rate plans without mealPlan, derive from inclusions
+            const ratePlansWithMealPlan = finalizedRatePlans.map(rp => ({
+                ...rp,
+                mealPlan: rp.mealPlan || (rp.inclusions?.some(i => i.toLowerCase().includes('breakfast') && i.toLowerCase().includes('dinner'))
+                    ? 'MAP'
+                    : rp.inclusions?.some(i => i.toLowerCase().includes('breakfast'))
+                        ? 'CP'
+                        : rp.inclusions?.some(i => i.toLowerCase().includes('dinner'))
+                            ? 'MAP'
+                            : 'EP')
+            }));
+
             results.push({
                 roomType: type,
                 price: pricePerNight,
@@ -196,7 +216,7 @@ export async function getAvailableRoomsForSearch(
                 breakdown: [],
                 available: true,
                 availableRooms: apiRoom.availableCount,
-                ratePlans: finalizedRatePlans,
+                ratePlans: ratePlansWithMealPlan,
                 bookable: true,
             });
         }

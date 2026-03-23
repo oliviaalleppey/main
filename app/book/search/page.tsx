@@ -18,13 +18,12 @@ import { BookingButton } from '@/components/booking/booking-button';
 import { SearchStayEditor } from '@/components/booking/search-stay-editor';
 import { formatRoomName } from '@/lib/utils';
 
-type SortKey = 'recommended' | 'price-asc' | 'size-desc' | 'guests-desc';
+type SortKey = 'recommended' | 'price-asc' | 'size-desc';
 
 const SORT_OPTIONS: { key: SortKey; label: string }[] = [
     { key: 'recommended', label: 'Recommended' },
     { key: 'price-asc', label: 'Lowest Price' },
     { key: 'size-desc', label: 'Largest Room' },
-    { key: 'guests-desc', label: 'Max Guests' },
 ];
 
 const MEAL_PLAN_LABELS: Record<string, string> = {
@@ -106,8 +105,6 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 return a.price - b.price;
             case 'size-desc':
                 return (b.roomType.size || 0) - (a.roomType.size || 0) || a.price - b.price;
-            case 'guests-desc':
-                return b.roomType.maxGuests - a.roomType.maxGuests || a.price - b.price;
             case 'recommended':
             default:
                 if (a.bookable !== b.bookable) {
@@ -150,7 +147,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 <div className="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-3 md:gap-5 mb-4 md:mb-7">
                     <div>
                         <h2 className="text-[24px] md:text-[30px] leading-tight font-serif text-[#1C2822]">
-                            {isValidDates ? `${sortedRooms.length} Room Types Available` : 'Please select valid dates'}
+                            {isValidDates ? `${sortedRooms.length} Room Type${sortedRooms.length === 1 ? '' : 's'} Available` : 'Please select valid dates'}
                         </h2>
                         <p className="text-xs md:text-sm text-gray-600 mt-1 md:mt-2">
                             Compare room size, occupancy, meal plan, cancellation and live pricing before you continue.
@@ -215,97 +212,118 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                         const roomSizeLabel = result.roomType.size
                             ? `${result.roomType.size} ${result.roomType.sizeUnit}`
                             : 'Size on request';
-                        const maxSelectableRooms = Math.max(1, Math.min(result.availableRooms, safeAdults));
+                        const maxSelectableRooms = Math.max(1, result.availableRooms);
                         const defaultRoomCount = Math.min(maxSelectableRooms, safeRooms);
 
                         return (
                             <div
                                 key={result.roomType.id}
-                                className="group overflow-hidden rounded-2xl md:rounded-3xl border border-[#DFE4D8] bg-white shadow-[0_14px_34px_-30px_rgba(15,23,42,0.5)] transition-all duration-300 hover:shadow-[0_18px_34px_-24px_rgba(15,23,42,0.45)]"
+                                className="group overflow-hidden rounded-2xl md:rounded-3xl border border-[#DFE4D8] bg-white shadow-[0_14px_34px_-30px_rgba(15,23,42,0.5)] transition-all duration-300 hover:shadow-[0_18px_34px_-24px_rgba(15,23,42,0.45)] hover:-translate-y-1"
                             >
                                 <div className="flex flex-col xl:flex-row">
-                                    <div className="relative h-[160px] md:h-[200px] w-full overflow-hidden bg-gray-100 xl:h-[260px] xl:w-[300px]">
+                                    <div className="relative h-[180px] md:h-[220px] w-full overflow-hidden bg-gray-50 xl:h-auto xl:w-[340px]">
                                         {result.roomType.images && result.roomType.images.length > 0 ? (
                                             <Image
                                                 src={result.roomType.images[0]}
                                                 alt={roomName}
                                                 fill
-                                                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                                                className="object-cover transition-transform duration-1000 group-hover:scale-110"
                                             />
                                         ) : (
-                                            <div className="flex h-full items-center justify-center text-gray-400">No Image</div>
+                                            <div className="flex h-full items-center justify-center bg-[#F7F8F3] text-gray-400">
+                                                <Image src="/logo-icon.png" alt="Logo" width={40} height={40} className="opacity-20" />
+                                            </div>
                                         )}
+                                        
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                                        <div className="absolute left-3 md:left-4 top-3 md:top-4 flex flex-wrap gap-1.5 md:gap-2">
+                                        <div className="absolute left-0 top-4 flex flex-col gap-2">
                                             {sortKey === 'recommended' && index === 0 && (
-                                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-2.5 py-0.5 md:px-3 md:py-1 text-[10px] md:text-[11px] font-semibold uppercase tracking-wider text-white shadow-sm">
-                                                    <Sparkles className="w-3 h-3" />
-                                                    Top Pick
-                                                </span>
+                                                <div className="bg-[#1C2822] text-white px-4 py-1.5 rounded-r-full flex items-center gap-2 shadow-lg transform -translate-x-1 group-hover:translate-x-0 transition-transform duration-500">
+                                                    <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                                                    <span className="text-[10px] uppercase font-bold tracking-[0.2em]">Top Pick</span>
+                                                </div>
                                             )}
                                             {result.bookable && result.availableRooms <= 3 && (
-                                                <span className="rounded-full bg-[#E95D20] px-2.5 py-0.5 md:px-3 md:py-1 text-[10px] md:text-[11px] font-semibold uppercase tracking-wider text-white shadow-sm">
-                                                    Only {result.availableRooms} left
-                                                </span>
-                                            )}
-                                            {!result.bookable && (
-                                                <span className="inline-flex items-center gap-1 rounded-full bg-gray-900/80 px-2.5 py-0.5 md:px-3 md:py-1 text-[10px] md:text-[11px] font-semibold uppercase tracking-wider text-white shadow-sm">
-                                                    <Ban className="w-3 h-3" />
-                                                    Unavailable
-                                                </span>
+                                                <div className="bg-[#E95D20] text-white px-4 py-1.5 rounded-r-full flex items-center gap-2 shadow-lg transform -translate-x-1 group-hover:translate-x-0 transition-transform duration-500 delay-75">
+                                                    <span className="text-[10px] uppercase font-bold tracking-[0.2em]">Only {result.availableRooms} Left</span>
+                                                </div>
                                             )}
                                         </div>
+
+                                        {!result.bookable && (
+                                            <div className="absolute inset-0 bg-white/40 backdrop-blur-[2px] flex items-center justify-center p-6 text-center">
+                                                <div className="bg-white/90 shadow-xl rounded-2xl p-4 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                                                    <Ban className="w-6 h-6 mx-auto mb-2 text-gray-400" />
+                                                    <span className="text-[10px] uppercase font-bold tracking-[0.1em] text-gray-900 leading-tight block">Room Temporarily<br/>Unavailable</span>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
 
-                                    <div className="flex-1 p-3 md:p-4">
-                                        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 md:gap-4">
-                                            <div className="min-w-0 flex-1">
-                                                <div className="mb-2 md:mb-2 flex items-start justify-between gap-3 md:gap-4">
-                                                    <h3 className="text-[26px] md:text-[36px] leading-none font-serif text-[#1F2A24]">{roomName}</h3>
-                                                    <div className="inline-flex items-center gap-1 rounded-full border border-orange-200 bg-orange-50 px-2 py-0.5 md:px-2.5 md:py-1 text-[#E95D20]">
-                                                        <Star className="h-3.5 w-3.5 fill-current" />
-                                                        <span className="text-xs font-bold">5.0</span>
+                                        <div className="flex-1 p-4 md:p-6 lg:p-7">
+                                            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
+                                                <div className="min-w-0 flex-1 flex flex-col justify-center">
+                                                <div className="mb-3 flex items-start justify-between gap-4">
+                                                    <div>
+                                                        <h3 className="text-[28px] md:text-[38px] leading-[1.1] font-serif text-[#1C2822] mb-1">{roomName}</h3>
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="flex text-amber-500">
+                                                                {[...Array(5)].map((_, i) => <Star key={i} className="w-2.5 h-2.5 fill-current" />)}
+                                                            </div>
+                                                            <span className="text-[9px] uppercase font-bold tracking-[0.1em] text-gray-400">Excellent 5.0</span>
+                                                        </div>
                                                     </div>
                                                 </div>
 
-                                                <p className="max-w-3xl text-sm md:text-base text-gray-600 leading-relaxed mb-3 md:mb-3 line-clamp-2">
+                                                <p className="max-w-xl text-sm text-gray-500 leading-relaxed mb-6 line-clamp-2">
                                                     {result.roomType.description}
                                                 </p>
 
-                                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-2.5 mb-3 md:mb-4">
-                                                    <div className="rounded-lg md:rounded-xl border border-[#DEE4D8] bg-[#F7F8F3] px-2.5 md:px-3 py-2 md:py-2">
-                                                        <p className="mb-1 text-[11px] uppercase tracking-wide text-gray-500">Guests</p>
-                                                        <p className="inline-flex items-center gap-1.5 text-xs md:text-sm font-semibold text-gray-900">
-                                                            <Users className="w-3.5 h-3.5 text-gray-500" />
-                                                            Up to {result.roomType.maxGuests}
-                                                        </p>
+                                                <div className="mt-5 grid grid-cols-2 lg:grid-cols-4 gap-4 mb-2 border-t border-gray-100 pt-5">
+                                                    <div className="flex items-start gap-2.5">
+                                                        <div className="mt-0.5 flex-shrink-0 w-7 h-7 rounded-full bg-[#1C2822]/5 flex items-center justify-center">
+                                                            <Users className="w-3.5 h-3.5 text-[#1C2822]" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[8px] uppercase tracking-[0.15em] text-gray-400 font-bold mb-0.5">Occupancy</p>
+                                                            <p className="text-[11px] font-semibold text-[#1C2822]">{result.roomType.maxGuests} Guests</p>
+                                                        </div>
                                                     </div>
-                                                    <div className="rounded-lg md:rounded-xl border border-[#DEE4D8] bg-[#F7F8F3] px-2.5 md:px-3 py-2 md:py-2">
-                                                        <p className="mb-1 text-[11px] uppercase tracking-wide text-gray-500">Room Size</p>
-                                                        <p className="inline-flex items-center gap-1.5 text-xs md:text-sm font-semibold text-gray-900">
-                                                            <BedDouble className="w-3.5 h-3.5 text-gray-500" />
-                                                            {roomSizeLabel}
-                                                        </p>
+                                                    <div className="flex items-start gap-2.5">
+                                                        <div className="mt-0.5 flex-shrink-0 w-7 h-7 rounded-full bg-[#1C2822]/5 flex items-center justify-center">
+                                                            <BedDouble className="w-3.5 h-3.5 text-[#1C2822]" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[8px] uppercase tracking-[0.15em] text-gray-400 font-bold mb-0.5">Area</p>
+                                                            <p className="text-[11px] font-semibold text-[#1C2822]">{roomSizeLabel}</p>
+                                                        </div>
                                                     </div>
-                                                    <div className="rounded-lg md:rounded-xl border border-[#DEE4D8] bg-[#F7F8F3] px-2.5 md:px-3 py-2 md:py-2">
-                                                        <p className="mb-1 text-[11px] uppercase tracking-wide text-gray-500">Meal Plan</p>
-                                                        <p className="inline-flex items-center gap-1.5 text-xs md:text-sm font-semibold text-gray-900">
-                                                            <Coffee className="w-3.5 h-3.5 text-gray-500" />
-                                                            {mealPlan}
-                                                        </p>
+                                                    <div className="flex items-start gap-2.5">
+                                                        <div className="mt-0.5 flex-shrink-0 w-7 h-7 rounded-full bg-[#1C2822]/5 flex items-center justify-center">
+                                                            <Coffee className="w-3.5 h-3.5 text-[#1C2822]" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[8px] uppercase tracking-[0.15em] text-gray-400 font-bold mb-0.5">Board</p>
+                                                            <p className="text-[11px] font-semibold text-[#1C2822]">{mealPlan}</p>
+                                                        </div>
                                                     </div>
-                                                    <div className="rounded-lg md:rounded-xl border border-[#DEE4D8] bg-[#F7F8F3] px-2.5 md:px-3 py-2 md:py-2">
-                                                        <p className="mb-1 text-[11px] uppercase tracking-wide text-gray-500">Cancellation</p>
-                                                        <p className="inline-flex items-center gap-1.5 text-xs md:text-sm font-semibold text-gray-900 line-clamp-2">
-                                                            <Calendar className="w-3.5 h-3.5 text-gray-500" />
-                                                            {cancellationPolicy}
-                                                        </p>
+                                                    <div className="flex items-start gap-2.5">
+                                                        <div className="mt-0.5 flex-shrink-0 w-7 h-7 rounded-full bg-[#1C2822]/5 flex items-center justify-center text-gray-500">
+                                                            <Calendar className="w-3.5 h-3.5 text-[#1C2822]" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[8px] uppercase tracking-[0.15em] text-gray-400 font-bold mb-0.5">Policy</p>
+                                                            <p className="text-[11px] font-semibold text-[#1C2822]">{cancellationPolicy.includes('checkout') ? 'Flexible' : cancellationPolicy}</p>
+                                                        </div>
                                                     </div>
                                                 </div>
 
+                                                <div className="h-px bg-gray-100 mt-4 mb-5" />
+
                                                 <div className="flex flex-wrap items-center gap-1.5 md:gap-2">
                                                     {bestRatePlan?.name && (
-                                                        <span className="inline-flex items-center gap-1 rounded-full border border-blue-100 bg-blue-50 px-2 py-0.5 md:px-2.5 md:py-1 text-[11px] md:text-xs font-medium text-blue-700">
+                                                        <span className="inline-flex items-center gap-1 rounded-full border border-[#146B43]/20 bg-[#146B43]/5 px-2 py-0.5 md:px-2.5 md:py-1 text-[11px] md:text-xs font-semibold text-[#146B43]">
                                                             <Tag className="w-3 h-3" />
                                                             {bestRatePlan.name}
                                                         </span>
@@ -329,27 +347,26 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                                                 </div>
                                             </div>
 
-                                            <div className="w-full lg:w-[220px] shrink-0 rounded-xl lg:rounded-2xl border border-[#DCE2D2] bg-[#F9FAF6] p-3 md:p-3.5 lg:p-4">
-                                                <p className="text-[11px] uppercase tracking-[0.2em] text-gray-500 mb-1">Starting from</p>
-                                                <div className="text-2xl md:text-[26px] font-sans font-bold text-[#1C2822] tracking-tight">
-                                                    {formatCurrency(result.price)}
-                                                    <span className="ml-1 text-sm font-normal text-gray-500 tracking-normal">/ night</span>
+                                            <div className="w-full lg:w-[250px] shrink-0 rounded-[28px] border border-[#DCE2D2] bg-[#F9FAF6] p-5 md:p-6 flex flex-col justify-between">
+                                                <div>
+                                                    <p className="text-[10px] uppercase tracking-[0.2em] text-[#8A8F82] font-bold mb-2">STARTING FROM</p>
+                                                    <div className="flex items-baseline gap-1.5 mb-3">
+                                                        <span className="text-[34px] font-sans font-bold tracking-tight text-[#1C2822]">{formatCurrency(result.price)}</span>
+                                                        <span className="text-[13px] text-[#8A8F82] font-semibold">/ night</span>
+                                                    </div>
+                                                    
+                                                    <div className="space-y-1.5 mb-5 pt-0.5">
+                                                        <div className="flex justify-between items-center text-[12px] font-semibold text-[#5C6156]">
+                                                            <span>Stay total (per room):</span>
+                                                            <span className="text-[#1C2822]">{formatCurrency(result.totalPrice)}</span>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <p className="mt-2 text-xs text-gray-500">
-                                                    Stay total (per room): {formatCurrency(result.totalPrice)}
-                                                </p>
-                                                <p className="text-xs text-gray-500">
-                                                    Taxes & fees (per room): {formatCurrency(result.taxesAndFees)}
-                                                </p>
-                                                <p className={`mt-3 text-xs font-medium ${result.bookable ? 'text-emerald-700' : 'text-amber-700'}`}>
-                                                    {result.bookable
-                                                        ? 'Instant confirmation after payment verification'
-                                                        : (result.availabilityMessage || 'Live booking unavailable')}
-                                                </p>
-                                                <div className="mt-4 flex flex-col gap-2.5">
+
+                                                <div className="flex flex-col gap-3">
                                                     <Link
                                                         href={`/rooms/${result.roomType.slug}`}
-                                                        className="inline-flex items-center justify-center rounded-md md:rounded-lg border border-gray-300 px-3 md:px-4 py-2 md:py-2.5 text-xs md:text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100"
+                                                        className="inline-flex items-center justify-center rounded-xl border border-[#DCE2D2] px-6 h-12 text-[13px] font-bold text-[#1C2822] transition-all hover:bg-white hover:border-[#1C2822]"
                                                     >
                                                         View Room
                                                     </Link>

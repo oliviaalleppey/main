@@ -43,8 +43,12 @@ import FrontendLayout from "@/components/layout/frontend-layout";
 async function getSafeSession() {
   try {
     return await auth();
-  } catch (error) {
-    console.error("[auth] Failed to read session in RootLayout, falling back to anonymous session.", error);
+  } catch (error: any) {
+    // Suppress noise for common session decryption errors (invalid/expired cookies)
+    if (error?.name === 'JWTSessionError' || error?.message?.includes('JWTSessionError')) {
+      return null;
+    }
+    console.error("[auth] Session retrieval failed:", error);
     return null;
   }
 }

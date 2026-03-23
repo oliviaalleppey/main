@@ -299,10 +299,8 @@ export function CheckoutStepper({
             </div>
 
             {/* Sticky Order Summary Sidebar */}
-            <div className="w-full lg:w-[400px] flex-shrink-0">
-                <div className="lg:sticky lg:top-8 transition-all duration-300">
-                    {orderSummary}
-                </div>
+            <div className="w-full lg:w-[400px] flex-shrink-0 lg:sticky lg:top-32 transition-all duration-300">
+                {orderSummary}
             </div>
         </div>
     );
