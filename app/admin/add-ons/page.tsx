@@ -9,6 +9,7 @@ import {
     Check,
     X,
     ChevronDown,
+    ChevronUp,
     Building2,
     Loader2
 } from 'lucide-react';
@@ -178,6 +179,30 @@ export default function AddOnsPage() {
                 ? prev.roomTypeIds.filter(id => id !== roomTypeId)
                 : [...prev.roomTypeIds, roomTypeId]
         }));
+    };
+
+    const handleReorder = async (index: number, direction: 'up' | 'down') => {
+        const newList = [...addOns];
+        const swapIndex = direction === 'up' ? index - 1 : index + 1;
+        if (swapIndex < 0 || swapIndex >= newList.length) return;
+
+        // Swap
+        [newList[index], newList[swapIndex]] = [newList[swapIndex], newList[index]];
+
+        // Reassign sort orders sequentially
+        const reordered = newList.map((item, i) => ({ ...item, sortOrder: i + 1 }));
+        setAddOns(reordered);
+
+        // Persist to DB
+        try {
+            await fetch('/api/admin/add-ons', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(reordered.map(({ id, sortOrder }) => ({ id, sortOrder }))),
+            });
+        } catch (error) {
+            console.error('Failed to save sort order:', error);
+        }
     };
 
     return (
@@ -389,6 +414,9 @@ export default function AddOnsPage() {
                 <table className="w-full">
                     <thead className="bg-gray-50 border-b border-gray-200">
                         <tr>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-20">
+                                Order
+                            </th>
                             <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                                 Name
                             </th>
@@ -415,21 +443,41 @@ export default function AddOnsPage() {
                     <tbody className="divide-y divide-gray-200">
                         {loading ? (
                             <tr>
-                                <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
+                                <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
                                     <Loader2 className="w-5 h-5 animate-spin mx-auto" />
                                     <p className="mt-2 text-sm">Loading add-ons...</p>
                                 </td>
                             </tr>
                         ) : addOns.length === 0 ? (
                             <tr>
-                                <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
+                                <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
                                     <Sparkles className="w-8 h-8 mx-auto text-gray-300" />
                                     <p className="mt-2 text-sm">No add-ons yet. Create your first add-on!</p>
                                 </td>
                             </tr>
                         ) : (
-                            addOns.map(addOn => (
+                            addOns.map((addOn, index) => (
                                 <tr key={addOn.id} className="hover:bg-gray-50">
+                                    <td className="px-4 py-3">
+                                        <div className="flex items-center gap-0.5">
+                                            <button
+                                                onClick={() => handleReorder(index, 'up')}
+                                                disabled={index === 0}
+                                                className="p-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 disabled:opacity-20 disabled:cursor-not-allowed"
+                                                title="Move up"
+                                            >
+                                                <ChevronUp className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => handleReorder(index, 'down')}
+                                                disabled={index === addOns.length - 1}
+                                                className="p-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 disabled:opacity-20 disabled:cursor-not-allowed"
+                                                title="Move down"
+                                            >
+                                                <ChevronDown className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
                                     <td className="px-4 py-3">
                                         <div>
                                             <p className="font-medium text-gray-900">{addOn.name}</p>

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { db } from '@/lib/db';
 import { addOns, addOnRoomTypes, roomTypes } from '@/lib/db/schema';
-import { eq, asc, sql } from 'drizzle-orm';
+import { eq, asc, sql, inArray } from 'drizzle-orm';
 
 // Helper to check if table exists
 async function tableExists(tableName: string): Promise<boolean> {
@@ -235,6 +235,38 @@ export async function DELETE(request: NextRequest) {
         console.error('Failed to delete add-on:', error);
         return NextResponse.json(
             { error: 'Failed to delete add-on' },
+            { status: 500 }
+        );
+    }
+}
+
+// PATCH - Bulk update sort orders
+export async function PATCH(request: NextRequest) {
+    try {
+        const session = await auth();
+        if (!session || session.user?.role !== 'admin') {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const body = await request.json();
+        const items: { id: string; sortOrder: number }[] = body;
+
+        if (!Array.isArray(items) || items.length === 0) {
+            return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
+        }
+
+        // Update sort orders one-by-one (list is small, no need for a bulk upsert)
+        await Promise.all(
+            items.map(({ id, sortOrder }) =>
+                db.update(addOns).set({ sortOrder }).where(eq(addOns.id, id))
+            )
+        );
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error('Failed to update sort order:', error);
+        return NextResponse.json(
+            { error: 'Failed to update sort order' },
             { status: 500 }
         );
     }

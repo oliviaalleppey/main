@@ -375,59 +375,6 @@ export default function ConferenceEventsPage() {
                         <EventInquiryForm />
                     </div>
                 </section>
-
-                {/* Location */}
-                <section className="py-12 md:py-16 px-6 md:px-12 lg:px-20 bg-white border-t border-[#ECE5D8]">
-                    <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-6 items-stretch">
-                        <div className="overflow-hidden border border-[#E6DECf] min-h-[320px]">
-                            <iframe
-                                title="Olivia Alleppey map"
-                                src="https://maps.google.com/maps?q=Olivia%20Alleppey&t=&z=13&ie=UTF8&iwloc=&output=embed"
-                                className="w-full h-full min-h-[320px]"
-                                loading="lazy"
-                            />
-                        </div>
-
-                        <div className="border border-[#E6DECf] bg-white p-6 md:p-8">
-                            <p className="text-[#B68A4A] text-[10px] tracking-[0.34em] uppercase mb-2">Location &amp; Contact</p>
-                            <h2 className="font-serif text-3xl md:text-4xl text-[#1E1D1A] tracking-tight">Event Coordination Desk</h2>
-
-                            <div className="mt-5 space-y-3.5 text-sm text-[#46433D]">
-                                <p className="flex items-start gap-2.5">
-                                    <MapPin className="w-4 h-4 mt-0.5 text-[#B17D3E]" />
-                                    <span>Olivia International, Finishing Point, Punnamada, Alappuzha, Kerala - 688013, India.</span>
-                                </p>
-                                <p className="flex items-center gap-2.5">
-                                    <PhoneCall className="w-4 h-4 text-[#B17D3E]" />
-                                    <span>
-                                        +91/0 477225088, +91/0 4772250800 |{' '}
-                                        <a href="tel:+918075416514" className="hover:text-[#8E5F22]">+91 8075 416 514</a>
-                                    </span>
-                                </p>
-                                <p className="flex items-center gap-2.5">
-                                    <CalendarClock className="w-4 h-4 text-[#B17D3E]" />
-                                    <span>Reservations: 09:00 - 18:00 | Front Desk: 24/7 hrs</span>
-                                </p>
-                            </div>
-
-                            <div className="mt-6 flex flex-col sm:flex-row gap-3">
-                                <Link
-                                    href="#event-form"
-                                    className="inline-flex items-center justify-center gap-2 bg-[#B68A4A] text-white px-7 py-3 text-[11px] tracking-[0.2em] uppercase hover:bg-[#A57D44] transition-colors"
-                                >
-                                    Send Event Brief
-                                    <ArrowRight className="w-4 h-4" />
-                                </Link>
-                                <Link
-                                    href="mailto:reservation@oliviaalleppey.com"
-                                    className="inline-flex items-center justify-center gap-2 border border-[#CDBA98] text-[#7E5A2A] px-7 py-3 text-[11px] tracking-[0.2em] uppercase hover:bg-[#FBF7EE] transition-colors"
-                                >
-                                    Email Events Team
-                                </Link>
-                            </div>
-                        </div>
-                    </div>
-                </section>
             </main>
 
             <StickyBookButton />

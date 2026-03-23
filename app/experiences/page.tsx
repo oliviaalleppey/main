@@ -286,83 +286,73 @@ export default function ExperiencesPage() {
             {/* Collection */}
             <section id="experience-collection" className="mt-10 md:mt-14 scroll-mt-[calc(var(--site-header-height,88px)+24px)]">
                 <div className="max-w-7xl mx-auto px-4 md:px-6">
-                    <div className="max-w-3xl">
+                    <div>
                         <p className="text-[#9C7A45] text-[10px] tracking-[0.3em] uppercase">Signature collection</p>
-                        <h2 className="mt-2 font-serif text-[2.3rem] md:text-[4rem] leading-[0.95] text-[#2E2A24]">
-                            Curated experiences with a quieter sense of luxury.
+                        <h2 className="mt-2 font-serif text-[2.3rem] md:text-[3.2rem] leading-[1] text-[#2E2A24]">
+                            Curated experiences, quietly composed.
                         </h2>
-                        <p className="mt-3 text-[#5A5348] text-base md:text-lg leading-relaxed">
-                            The focus is not to fill every hour, but to compose the right sequence for your stay:
-                            enough discovery to feel immersed, enough stillness to feel restored.
-                        </p>
                     </div>
 
-                    <div className="mt-6 md:mt-8 space-y-8 md:space-y-10">
-                        {experiences.map((experience, index) => {
-                            const Icon = experience.icon;
-                            const isReversed = index % 2 === 1;
+                    <div className="mt-8 md:mt-10 grid md:grid-cols-2 gap-5">
+                        {experiences.map((experience) => {
                             return (
                                 <div key={experience.title}>
                                     <AnchorTargets ids={experience.ids} />
-                                    <article className="overflow-hidden rounded-[30px] border border-[#E1D7C8] bg-white shadow-[0_22px_70px_-55px_rgba(27,33,31,0.22)]">
-                                        <div className={`grid lg:grid-cols-2 ${isReversed ? 'lg:[&>div:first-child]:order-2' : ''}`}>
-                                            <div className={`relative min-h-[320px] md:min-h-[440px] ${experience.image ? '' : 'bg-[#E8E2D9]'}`}>
-                                                {experience.image ? (
-                                                    <>
-                                                        <Image src={experience.image} alt={experience.imageAlt} fill className="object-cover" />
-                                                        <div className="absolute inset-0 bg-gradient-to-t from-white/75 via-transparent to-transparent" />
-                                                    </>
-                                                ) : null}
-                                                <div className="absolute left-5 top-5 rounded-full border border-[#E6DDCE] bg-white/90 px-3 py-1.5 text-[10px] tracking-[0.24em] uppercase text-[#7C6338]">
-                                                    {experience.eyebrow}
-                                                </div>
+                                    <article className="overflow-hidden rounded-2xl border border-[#E1D7C8] bg-white">
+
+                                        {/* Image top */}
+                                        <div className={`relative h-56 md:h-72 w-full ${experience.image ? '' : 'bg-[#E8E2D9]'}`}>
+                                            {experience.image ? (
+                                                <Image src={experience.image} alt={experience.imageAlt} fill className="object-cover" />
+                                            ) : null}
+                                            <span className="absolute left-4 top-4 rounded-full border border-[#E6DDCE] bg-white/90 px-3 py-1 text-[9px] tracking-[0.22em] uppercase text-[#7C6338]">
+                                                {experience.eyebrow}
+                                            </span>
+                                        </div>
+
+                                        {/* Content */}
+                                        <div className="px-6 py-6 md:px-7 md:py-7">
+                                            <p className="text-[#9C7A45] text-[9px] tracking-[0.28em] uppercase mb-2">{experience.eyebrow}</p>
+                                            <h3 className="font-serif text-2xl md:text-[1.75rem] leading-tight text-[#2E2A24]">
+                                                {experience.title}
+                                            </h3>
+                                            <p className="mt-3 text-[#554E44] text-sm md:text-base leading-relaxed line-clamp-3">
+                                                {experience.description}
+                                            </p>
+
+                                            {/* Inline meta */}
+                                            <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-[#7A7066]">
+                                                <span className="flex items-center gap-1.5">
+                                                    <MapPin className="w-3 h-3 text-[#B68845] shrink-0" />
+                                                    {experience.location}
+                                                </span>
+                                                <span className="text-[#D8C0A0]">·</span>
+                                                <span className="flex items-center gap-1.5">
+                                                    <Clock3 className="w-3 h-3 text-[#B68845] shrink-0" />
+                                                    {experience.timing}
+                                                </span>
+                                                <span className="text-[#D8C0A0]">·</span>
+                                                <span className="flex items-center gap-1.5">
+                                                    <CalendarDays className="w-3 h-3 text-[#B68845] shrink-0" />
+                                                    {experience.reservation}
+                                                </span>
                                             </div>
 
-                                            <div className="p-6 md:p-8 lg:p-10">
-                                                <span className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-[#D8C0A0] bg-[#FFF8ED] text-[#B68845]">
-                                                    <Icon className="w-5 h-5" />
-                                                </span>
-                                                <p className="mt-5 text-[#9C7A45] text-[10px] tracking-[0.28em] uppercase">{experience.eyebrow}</p>
-                                                <h3 className="mt-3 font-serif text-[2rem] md:text-[3rem] leading-[0.96] text-[#2E2A24]">
-                                                    {experience.title}
-                                                </h3>
-                                                <p className="mt-4 text-[#544E44] text-base md:text-lg leading-relaxed">
-                                                    {experience.description}
-                                                </p>
-
-                                                <div className="mt-6 grid sm:grid-cols-3 gap-3">
-                                                    <ExperienceFact icon={MapPin} label="Location" value={experience.location} />
-                                                    <ExperienceFact icon={Clock3} label="Timing" value={experience.timing} />
-                                                    <ExperienceFact icon={CalendarDays} label="Booking" value={experience.reservation} />
-                                                </div>
-
-                                                <div className="mt-6 grid sm:grid-cols-2 gap-2.5">
-                                                    {experience.highlights.map((item) => (
-                                                        <div
-                                                            key={item}
-                                                            className="rounded-xl border border-[#EEE5D7] bg-[#FBF8F2] px-3.5 py-3 text-sm text-[#4E473C] leading-relaxed"
-                                                        >
-                                                            <span className="mr-2 inline-block h-1.5 w-1.5 rounded-full bg-[#B68845]" />
-                                                            {item}
-                                                        </div>
-                                                    ))}
-                                                </div>
-
-                                                <div className="mt-8 flex flex-col sm:flex-row gap-3">
-                                                    <Link
-                                                        href="/contact"
-                                                        className="inline-flex items-center justify-center rounded-xl bg-[#0A332B] px-6 py-3 text-white text-[11px] tracking-[0.16em] uppercase hover:bg-[#15443B] transition-colors"
-                                                    >
-                                                        Plan This Experience
-                                                    </Link>
-                                                    <Link
-                                                        href="/book/search"
-                                                        className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#D9C6A7] bg-[#FFFCF7] px-6 py-3 text-[#7F6438] text-[11px] tracking-[0.16em] uppercase hover:bg-[#FAF4E8] transition-colors"
-                                                    >
-                                                        Check Stay Availability
-                                                        <ArrowRight className="w-4 h-4" />
-                                                    </Link>
-                                                </div>
+                                            {/* Buttons */}
+                                            <div className="mt-5 flex flex-col sm:flex-row gap-2.5">
+                                                <Link
+                                                    href="/contact"
+                                                    className="inline-flex items-center justify-center rounded-lg bg-[#0A332B] px-5 py-2.5 text-white text-[10px] tracking-[0.16em] uppercase hover:bg-[#15443B] transition-colors"
+                                                >
+                                                    Plan This Experience
+                                                </Link>
+                                                <Link
+                                                    href="/book/search"
+                                                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#D9C6A7] bg-[#FFFCF7] px-5 py-2.5 text-[#7F6438] text-[10px] tracking-[0.16em] uppercase hover:bg-[#FAF4E8] transition-colors"
+                                                >
+                                                    Check Availability
+                                                    <ArrowRight className="w-3.5 h-3.5" />
+                                                </Link>
                                             </div>
                                         </div>
                                     </article>
@@ -521,25 +511,5 @@ function AnchorTargets({ ids }: { ids: string[] }) {
                 <div key={id} id={id} className="scroll-mt-[calc(var(--site-header-height,88px)+24px)]" aria-hidden />
             ))}
         </>
-    );
-}
-
-function ExperienceFact({
-    icon: Icon,
-    label,
-    value,
-}: {
-    icon: LucideIcon;
-    label: string;
-    value: string;
-}) {
-    return (
-        <div className="rounded-2xl border border-[#ECE3D6] bg-[#FBF8F2] px-4 py-4">
-            <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-[#8C7249]">
-                <Icon className="w-3.5 h-3.5" />
-                {label}
-            </span>
-            <p className="mt-2 text-sm leading-relaxed text-[#4D463C]">{value}</p>
-        </div>
     );
 }
