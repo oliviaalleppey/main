@@ -108,26 +108,26 @@ export function LuxuryDatePicker({
 
     return (
         <div className={cn(
-            "bg-white rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] border border-gray-200 p-6 md:p-8 animate-in fade-in zoom-in-95 duration-200",
-            "w-[350px] md:w-[860px]", // Responsive width
+            "bg-white rounded-2xl md:rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] border border-gray-200 p-4 md:p-8 animate-in fade-in zoom-in-95 duration-200",
+            "w-[calc(100vw-32px)] sm:w-[380px] md:w-[860px]", // Responsive width
             className
         )}
             onClick={(e) => e.stopPropagation()}
         >
             {/* Header: Dates & Nights */}
-            <div className="mb-6 border-b border-gray-200 pb-6">
-                <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5">
-                    <div className="flex flex-col sm:flex-row sm:items-end gap-5 sm:gap-7 md:gap-9">
-                        <div className={`min-w-[220px] pb-1 border-b-2 transition-colors ${selectionStage === 'checkIn' && (!selectedDate?.from || !selectedDate?.to) ? 'border-[#0A332B]' : 'border-transparent'}`}>
-                            <p className={`text-[12px] uppercase tracking-[0.2em] font-semibold mb-2 transition-colors ${selectionStage === 'checkIn' && (!selectedDate?.from || !selectedDate?.to) ? 'text-[#0A332B]' : 'text-slate-500'}`}>Check-in</p>
-                            <p className="text-[32px] leading-none font-sans font-semibold tracking-[-0.02em] text-[#0A332B]">
+            <div className="mb-4 md:mb-6 border-b border-gray-200 pb-4 md:pb-6">
+                <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 md:gap-5">
+                    <div className="flex flex-row items-end justify-between sm:justify-start gap-4 sm:gap-7 md:gap-9 w-full md:w-auto">
+                        <div className={`flex-1 sm:flex-none sm:min-w-[220px] pb-1 border-b-2 transition-colors ${selectionStage === 'checkIn' && (!selectedDate?.from || !selectedDate?.to) ? 'border-[#0A332B]' : 'border-transparent'}`}>
+                            <p className={`text-[10px] md:text-[12px] uppercase tracking-[0.2em] font-semibold mb-1 md:mb-2 transition-colors ${selectionStage === 'checkIn' && (!selectedDate?.from || !selectedDate?.to) ? 'text-[#0A332B]' : 'text-slate-500'}`}>Check-in</p>
+                            <p className="text-[20px] sm:text-[32px] leading-none font-sans font-semibold tracking-[-0.02em] text-[#0A332B]">
                                 {selectedDate?.from ? format(selectedDate.from, 'd MMM yyyy') : 'Select Date'}
                             </p>
                         </div>
-                        <div className="hidden sm:block h-14 w-px bg-gray-200" />
-                        <div className={`min-w-[220px] pb-1 border-b-2 transition-colors ${selectedDate?.from && selectionStage === 'checkOut' ? 'border-[#0A332B]' : 'border-transparent'}`}>
-                            <p className={`text-[12px] uppercase tracking-[0.2em] font-semibold mb-2 transition-colors ${selectedDate?.from && selectionStage === 'checkOut' ? 'text-[#0A332B]' : 'text-slate-500'}`}>Check-out</p>
-                            <p className="text-[32px] leading-none font-sans font-semibold tracking-[-0.02em] text-[#0A332B]">
+                        <div className="hidden sm:block h-10 md:h-14 w-px bg-gray-200" />
+                        <div className={`flex-1 sm:flex-none sm:min-w-[220px] pb-1 border-b-2 transition-colors ${selectedDate?.from && selectionStage === 'checkOut' ? 'border-[#0A332B]' : 'border-transparent'}`}>
+                            <p className={`text-[10px] md:text-[12px] uppercase tracking-[0.2em] font-semibold mb-1 md:mb-2 transition-colors ${selectedDate?.from && selectionStage === 'checkOut' ? 'text-[#0A332B]' : 'text-slate-500'}`}>Check-out</p>
+                            <p className="text-[20px] sm:text-[32px] leading-none font-sans font-semibold tracking-[-0.02em] text-[#0A332B]">
                                 {selectedDate?.to ? format(selectedDate.to, 'd MMM yyyy') : 'Select Date'}
                             </p>
                         </div>
@@ -141,7 +141,7 @@ export function LuxuryDatePicker({
                 </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 mb-5">
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-3 md:mb-5">
                 <button
                     onClick={() => handlePreset(1)}
                     className="px-3 py-1.5 rounded-full text-xs font-semibold tracking-wide border border-gray-300 text-gray-800 hover:border-[#0A332B] hover:text-[#0A332B] transition-colors"
@@ -306,14 +306,14 @@ export function LuxuryDatePicker({
 
                 @media (max-width: 768px) {
                     .luxury-rdp {
-                        --rdp-day-width: 40px;
-                        --rdp-day-height: 40px;
-                        --rdp-day_button-width: 36px;
-                        --rdp-day_button-height: 36px;
+                        --rdp-day-width: 36px;
+                        --rdp-day-height: 36px;
+                        --rdp-day_button-width: 32px;
+                        --rdp-day_button-height: 32px;
+                        --rdp-nav-height: 2rem;
                     }
-
                     .luxury-rdp .rdp-caption_label {
-                        font-size: 1.4rem;
+                        font-size: 1.25rem;
                     }
                 }
             `}</style>
@@ -364,24 +364,24 @@ export function LuxuryDatePicker({
             </div>
 
             {/* Footer Actions */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-6 pt-6 border-t border-gray-200">
+            <div className="flex flex-row items-center justify-between gap-2 mt-4 md:mt-6 pt-4 md:pt-6 border-t border-gray-200">
                 <button
                     onClick={handleClear}
-                    className="text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors text-left"
+                    className="text-xs md:text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors text-left pl-1"
                 >
                     Clear Dates
                 </button>
-                <div className="flex w-full sm:w-auto items-center justify-end gap-4">
+                <div className="flex items-center justify-end gap-3 md:gap-4">
                     <button
                         onClick={onClose}
-                        className="px-2 py-2 text-sm font-bold uppercase tracking-[0.08em] text-gray-900 hover:opacity-70 transition-opacity"
+                        className="px-1 md:px-2 py-2 text-xs md:text-sm font-bold uppercase tracking-[0.08em] text-gray-900 hover:opacity-70 transition-opacity"
                     >
                         Cancel
                     </button>
                     <button
                         onClick={handleApply}
                         disabled={!selectedDate?.from || !selectedDate?.to || nights < 1}
-                        className="bg-[#0F1115] text-white min-w-[196px] px-8 py-3.5 rounded-full text-sm font-bold uppercase tracking-[0.08em] hover:bg-black transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed shadow-[0_8px_20px_-10px_rgba(0,0,0,0.55)]"
+                        className="bg-[#0F1115] text-white min-w-[120px] md:min-w-[196px] px-4 md:px-8 py-2.5 md:py-3.5 rounded-full text-xs md:text-sm font-bold uppercase tracking-[0.08em] hover:bg-black transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed shadow-[0_8px_20px_-10px_rgba(0,0,0,0.55)]"
                     >
                         Apply Dates
                     </button>
