@@ -6,11 +6,11 @@ export async function POST() {
     try {
         // Create the housekeeping_status enum if it doesn't exist
         await db.execute(sql`
-            DO $$ BEGIN
+            DO $ BEGIN
                 CREATE TYPE "public"."housekeeping_status" AS ENUM('clean', 'dirty', 'touch_up', 'inspect', 'out_of_service');
             EXCEPTION
                 WHEN duplicate_object THEN null;
-            END $$;
+            END $;
         `);
 
         // Add missing columns to rooms table
@@ -19,6 +19,14 @@ export async function POST() {
             ADD COLUMN IF NOT EXISTS "housekeeping_status" "housekeeping_status" DEFAULT 'clean',
             ADD COLUMN IF NOT EXISTS "last_cleaned_at" timestamp,
             ADD COLUMN IF NOT EXISTS "last_inspected_at" timestamp;
+        `);
+
+        // Add new columns to room_types table for View, Check-in, Check-out times
+        await db.execute(sql`
+            ALTER TABLE "room_types" 
+            ADD COLUMN IF NOT EXISTS "view" varchar(100),
+            ADD COLUMN IF NOT EXISTS "check_in_time" varchar(20) DEFAULT '2:00 PM',
+            ADD COLUMN IF NOT EXISTS "check_out_time" varchar(20) DEFAULT '11:00 AM';
         `);
 
         // Create cancellation_policy enum if it doesn't exist

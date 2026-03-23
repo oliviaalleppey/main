@@ -69,9 +69,9 @@ export default async function RoomDetailPage({ params }: { params: Promise<{ slu
         { label: 'Size', value: `${room.size} sq ft` },
         { label: 'Occupancy', value: `${room.maxGuests} Guests` },
         { label: 'Bed', value: room.bedType || 'King Bed' },
-        { label: 'View', value: 'Lake View' }, // Defaulting since view is not in DB schema yet
-        { label: 'Check-in', value: '2:00 PM' },
-        { label: 'Check-out', value: '11:00 AM' },
+        { label: 'View', value: room.view || 'Lake View' },
+        { label: 'Check-in', value: room.checkInTime || '2:00 PM' },
+        { label: 'Check-out', value: room.checkOutTime || '11:00 AM' },
     ];
 
     // Map amenities to features structure expected by AmenitiesGrid

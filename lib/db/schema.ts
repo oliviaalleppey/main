@@ -61,6 +61,9 @@ export const roomTypes = pgTable('room_types', {
     size: integer('size'), // in sq ft
     sizeUnit: varchar('size_unit', { length: 10 }).default('sqft'),
     bedType: varchar('bed_type', { length: 100 }),
+    view: varchar('view', { length: 100 }), // e.g., Lake View, Garden View
+    checkInTime: varchar('check_in_time', { length: 20 }).default('2:00 PM'),
+    checkOutTime: varchar('check_out_time', { length: 20 }).default('11:00 AM'),
     amenities: json('amenities').$type<string[]>().default([]),
     // removing json images in favor of separate table below, but keeping for backward compat if needed? 
     // actually schema shows images json. I will keep it but add the new relation table.
