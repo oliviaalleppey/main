@@ -416,7 +416,7 @@ export default async function CheckoutPage({
                     </div>
                 }
                 orderSummary={
-                    <div className="bg-white p-4 md:p-6 rounded-xl md:rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100">
+                    <div key="order-summary" className="bg-white p-4 md:p-6 rounded-xl md:rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100">
                         <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
                             <h2 className="text-lg font-medium">Your Booking Details</h2>
                             <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-700">

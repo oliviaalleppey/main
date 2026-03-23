@@ -87,7 +87,7 @@ export function CheckoutStepper({
     // Auto-scroll to active step
     useEffect(() => {
         if (typeof window === 'undefined') return;
-        
+
         const timer = setTimeout(() => {
             const el = document.getElementById(`step-${activeStep}`);
             if (el) {
@@ -105,7 +105,7 @@ export function CheckoutStepper({
             <div className="flex-1 w-full space-y-4">
                 {/* Step 1: Search */}
                 <div id="step-1" className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden transition-all">
-                    <div 
+                    <div
                         className={`px-4 py-4 md:px-5 flex items-center justify-between cursor-pointer ${activeStep === 1 ? 'bg-[#1C1C1C]' : 'bg-white'}`}
                         onClick={() => setActiveStep(1)}
                     >
@@ -140,10 +140,10 @@ export function CheckoutStepper({
                         )}
                     </AnimatePresence>
                 </div>
-                
+
                 {/* Step 2: Room */}
                 <div id="step-2" className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden transition-all">
-                    <div 
+                    <div
                         className={`px-4 py-4 md:px-5 flex items-center justify-between cursor-pointer ${activeStep === 2 ? 'bg-[#1C1C1C]' : 'bg-white'}`}
                         onClick={() => {
                             if (completedSteps.includes(1)) setActiveStep(2);
@@ -183,7 +183,7 @@ export function CheckoutStepper({
 
                 {/* Step 3: Enhance Your Stay */}
                 <div id="step-3" className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm transition-all">
-                    <div 
+                    <div
                         className={`px-4 py-4 md:px-5 flex items-center justify-between cursor-pointer ${activeStep === 3 ? 'bg-[#1C1C1C]' : 'bg-gray-50'}`}
                         onClick={() => setActiveStep(3)}
                     >
@@ -201,7 +201,7 @@ export function CheckoutStepper({
                             </button>
                         )}
                     </div>
-                    
+
                     <AnimatePresence initial={false}>
                         {activeStep === 3 && (
                             <motion.div
@@ -224,7 +224,7 @@ export function CheckoutStepper({
 
                 {/* Step 4: Guest Information */}
                 <div id="step-4" className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm transition-all">
-                    <div 
+                    <div
                         className={`px-4 py-4 md:px-5 flex items-center justify-between ${activeStep === 4 ? 'bg-[#1C1C1C]' : 'bg-gray-50'} ${completedSteps.includes(3) || hasGuestDetails ? 'cursor-pointer' : 'opacity-60 cursor-not-allowed'}`}
                         onClick={() => {
                             if (completedSteps.includes(3) || hasGuestDetails) setActiveStep(4);
@@ -244,7 +244,7 @@ export function CheckoutStepper({
                             </button>
                         )}
                     </div>
-                    
+
                     <AnimatePresence initial={false}>
                         {activeStep === 4 && (
                             <motion.div
@@ -256,7 +256,7 @@ export function CheckoutStepper({
                                 <div className="p-4 md:p-5 border-t border-gray-100">
                                     {guestInfoContent}
                                     <div className="mt-6 flex justify-end">
-                                        <button 
+                                        <button
                                             onClick={() => handleNext(5)}
                                             className="px-6 py-2.5 bg-[#1C1C1C] text-white text-sm font-semibold rounded-lg hover:bg-black transition-colors flex items-center gap-2"
                                         >
@@ -279,7 +279,7 @@ export function CheckoutStepper({
                             Payment Details
                         </h2>
                     </div>
-                    
+
                     <AnimatePresence initial={false}>
                         {activeStep === 5 && (
                             <motion.div
@@ -301,6 +301,47 @@ export function CheckoutStepper({
             {/* Sticky Order Summary Sidebar */}
             <div className="w-full lg:w-[400px] flex-shrink-0 lg:sticky lg:top-32 transition-all duration-300">
                 {orderSummary}
+
+                {/* Contextual Action Button (Desktop Optimized) */}
+                <div className="hidden lg:block mt-6 fade-in animate-in slide-in-from-bottom-4 duration-500">
+                    {activeStep === 3 && (
+                        <button
+                            onClick={() => handleNext(4)}
+                            className="w-full bg-[#0A332B] hover:bg-[#15443B] text-white py-4 mt-2 rounded-xl font-bold text-[13px] tracking-widest uppercase transition-all shadow-xl shadow-[#0A332B]/20 active:scale-[0.98]"
+                        >
+                            Book Now
+                        </button>
+                    )}
+                    {activeStep === 4 && (
+                        <button
+                            onClick={() => {
+                                const el = document.getElementById('step-4');
+                                if (el) {
+                                    const form = el.querySelector('form');
+                                    if (form) {
+                                        form.requestSubmit();
+                                    } else {
+                                        window.scrollTo({ top: el.offsetTop - 100, behavior: 'smooth' });
+                                    }
+                                }
+                            }}
+                            className="w-full bg-[#0A332B] hover:bg-[#15443B] text-white py-4 mt-2 rounded-xl font-bold text-[13px] tracking-widest uppercase transition-all shadow-xl shadow-[#0A332B]/20 active:scale-[0.98]"
+                        >
+                            Save & Continue
+                        </button>
+                    )}
+                    {activeStep === 5 && (
+                        <button
+                            onClick={() => {
+                                const el = document.getElementById('step-5');
+                                if (el) window.scrollTo({ top: el.offsetTop - 100, behavior: 'smooth' });
+                            }}
+                            className="w-full bg-[#E95D20] hover:bg-[#D44E15] text-white py-4 mt-2 rounded-xl font-bold text-[13px] tracking-widest uppercase transition-all shadow-xl shadow-[#E95D20]/20 active:scale-[0.98]"
+                        >
+                            Pay Now
+                        </button>
+                    )}
+                </div>
             </div>
         </div>
     );
