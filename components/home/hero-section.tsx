@@ -15,7 +15,7 @@ const HERO_IMAGES = [
     }
 ];
 
-export default function HeroSection() {
+export default function HeroSection({ initialMedia }: { initialMedia?: { type: 'video' | 'image', url: string } | null }) {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
     const [searchError, setSearchError] = useState<string | null>(null);
@@ -23,34 +23,16 @@ export default function HeroSection() {
     const [guests, setGuests] = useState({ adults: 2, children: 0 });
     const router = useRouter();
 
-    const [heroImages, setHeroImages] = useState(HERO_IMAGES);
+    const [heroImages] = useState(HERO_IMAGES);
 
-    // Fetch dynamic images on mount
+    // Auto-advance image every 6 seconds if no initialMedia is set
     useEffect(() => {
-        async function fetchImages() {
-            try {
-                const { getHeroImages } = await import('@/lib/db/actions/settings-actions');
-                const dynamicImages = await getHeroImages();
-                // Only update if we get valid images with URLs
-                if (dynamicImages && dynamicImages.length > 0 && dynamicImages[0]?.url) {
-                    setHeroImages(dynamicImages);
-                }
-                // Otherwise, keep the default HERO_IMAGES
-            } catch (error) {
-                console.error("Failed to fetch hero images", error);
-                // Keep default HERO_IMAGES on error
-            }
-        }
-        fetchImages();
-    }, []);
-
-    // Auto-advance image every 6 seconds (using heroImages instead of constant)
-    useEffect(() => {
+        if (initialMedia) return;
         const interval = setInterval(() => {
             setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
         }, 6000);
         return () => clearInterval(interval);
-    }, [heroImages]); // Added dependency on heroImages
+    }, [heroImages, initialMedia]);
 
     useEffect(() => {
         const onEscape = (event: KeyboardEvent) => {
@@ -103,40 +85,64 @@ export default function HeroSection() {
 
     return (
         <section className="relative h-[100vh] supports-[height:100dvh]:h-[100dvh] w-full select-none overflow-hidden bg-black">
-            {/* Background Image Carousel */}
+            {/* Background Media */}
             <AnimatePresence>
-                <motion.div
-                    key={currentImageIndex}
-                    initial={{ opacity: 0, scale: 1.1 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 1.5, ease: "easeInOut" }}
-                    className="absolute inset-0"
-                >
-                    <Image
-                        src={heroImages[currentImageIndex].url}
-                        alt={heroImages[currentImageIndex].alt}
-                        fill
-                        className="object-cover"
-                        priority
-                    />
-                    {/* Cinematic Overlay */}
-                    <div className="absolute inset-0 bg-black/30" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30" />
-                </motion.div>
+                {initialMedia?.type === 'video' ? (
+                    <motion.div
+                        key="hero-video"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 1.5, ease: "easeInOut" }}
+                        className="absolute inset-0"
+                    >
+                        <video 
+                            src={initialMedia.url} 
+                            autoPlay 
+                            loop 
+                            muted 
+                            playsInline 
+                            className="w-full h-full object-cover" 
+                        />
+                        {/* Cinematic Overlay */}
+                        <div className="absolute inset-0 bg-black/30" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30" />
+                    </motion.div>
+                ) : (
+                    <motion.div
+                        key={initialMedia ? "single-image" : currentImageIndex}
+                        initial={{ opacity: 0, scale: 1.1 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 1.5, ease: "easeInOut" }}
+                        className="absolute inset-0"
+                    >
+                        <Image
+                            src={initialMedia ? initialMedia.url : heroImages[currentImageIndex].url}
+                            alt={initialMedia ? "Olivia Alleppey" : heroImages[currentImageIndex].alt}
+                            fill
+                            className="object-cover"
+                            priority
+                        />
+                        {/* Cinematic Overlay */}
+                        <div className="absolute inset-0 bg-black/30" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30" />
+                    </motion.div>
+                )}
             </AnimatePresence>
 
-            <div className="absolute bottom-64 left-1/2 -translate-x-1/2 flex gap-3 z-20">
-                {heroImages.map((_, index) => (
-                    <button
-                        key={index}
-                        onClick={() => setCurrentImageIndex(index)}
-                        className={`h-1 rounded-full transition-all duration-300 ${index === currentImageIndex ? 'w-8 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'
-                            }`}
-                        aria-label={`Go to slide ${index + 1}`}
-                    />
-                ))}
-            </div>
+            {!initialMedia && (
+                <div className="absolute bottom-64 left-1/2 -translate-x-1/2 flex gap-3 z-20">
+                    {heroImages.map((_, index) => (
+                        <button
+                            key={index}
+                            onClick={() => setCurrentImageIndex(index)}
+                            className={`h-1 rounded-full transition-all duration-300 ${index === currentImageIndex ? 'w-8 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'
+                                }`}
+                            aria-label={`Go to slide ${index + 1}`}
+                        />
+                    ))}
+                </div>
+            )}
 
             {/* Centered Typography */}
             <div className="absolute inset-0 flex flex-col items-center justify-center text-white z-10 text-center px-4 pb-48">

@@ -6,14 +6,17 @@ import DiningHighlight from '@/components/home/dining-highlight';
 import ExperiencesStrip from '@/components/home/experiences-strip';
 import BrandMarquee from '@/components/home/brand-marquee';
 import EditorialStory from '@/components/home/editorial-story';
+import { getHeroMedia } from '@/app/admin/media/actions';
 
 export const revalidate = 60;
 
-export default function Home() {
+export default async function Home() {
+  const heroMedia = await getHeroMedia();
+
   return (
     <main className="min-h-screen bg-[#F6F1E8] font-sans">
       {/* Cinematic Hero with Floating Search */}
-      <HeroSection />
+      <HeroSection initialMedia={heroMedia} />
 
       {/* Compact Intro */}
       <CompactIntro />
