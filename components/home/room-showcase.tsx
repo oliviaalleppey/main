@@ -47,7 +47,7 @@ export default async function RoomShowcase() {
     if (!rooms.length) return null;
 
     return (
-        <section className="py-10 md:py-14 bg-[#E8E2D9]">
+        <section id="rooms" className="py-10 md:py-14 bg-[#E8E2D9]">
             <div className="container mx-auto px-4 max-w-7xl">
 
                 {/* Header */}

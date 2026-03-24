@@ -201,13 +201,13 @@ export default function RosewoodHeader() {
                     <button
                         type="button"
                         onClick={() => {
-                            const el = document.getElementById('booking-search');
+                            const el = document.getElementById('rooms');
                             if (el) {
                                 el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                history.replaceState(null, '', '#booking-search');
+                                history.replaceState(null, '', '#rooms');
                                 return;
                             }
-                            router.push('/book/search');
+                            router.push('/#rooms');
                         }}
                         className="hidden md:flex justify-center items-center bg-[#0A332B] text-white text-[11px] font-bold uppercase tracking-[0.2em] w-[165px] h-[48px] hover:bg-[#15443B] transition-colors whitespace-nowrap overflow-hidden"
                     >
@@ -277,13 +277,13 @@ export default function RosewoodHeader() {
                                 className="block w-full text-center bg-[#0A332B] text-white text-[11px] font-bold uppercase tracking-[0.2em] px-6 py-3.5 hover:bg-[#15443B] transition-colors"
                                 onClick={() => {
                                     setIsMobileMenuOpen(false);
-                                    const el = document.getElementById('booking-search');
+                                    const el = document.getElementById('rooms');
                                     if (el) {
                                         el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                        history.replaceState(null, '', '#booking-search');
+                                        history.replaceState(null, '', '#rooms');
                                         return;
                                     }
-                                    router.push('/book/search');
+                                    router.push('/#rooms');
                                 }}
                             >
                                 Reserve
