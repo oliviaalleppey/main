@@ -109,10 +109,10 @@ export default async function RoomShowcase() {
 
                                     {room.basePrice != null && (
                                         <div className="flex items-baseline justify-center gap-1.5 px-1 whitespace-nowrap">
-                                            <span className="font-serif text-[17px] md:text-xl font-bold text-[#7A5E28]">
+                                            <span className="font-serif text-[22px] md:text-xl font-bold text-[#7A5E28]">
                                                 From ₹{(room.basePrice / 100).toLocaleString('en-IN')}
                                             </span>
-                                            <span className="font-sans text-[13px] md:text-base font-bold text-[#7A7A7A]">
+                                            <span className="font-sans text-[15px] md:text-base font-bold text-[#7A7A7A]">
                                                 / night
                                             </span>
                                         </div>
