@@ -49,7 +49,7 @@ export default function RoomHero({ images }: RoomHeroProps) {
     }, [closeLightbox, goNext, goPrev, lightboxIndex]);
 
     return (
-        <section className="mb-12">
+        <section className="mb-8">
             {/* Horizontal Scrollable Carousel - Potato Head Studios Style */}
             <div className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-0 px-6 md:px-12 gap-4 pb-4">
                 {displayImages.map((image, idx) => (

@@ -190,9 +190,10 @@ export default function StickyBookingBar({ basePrice, roomSlug }: StickyBookingB
                 </div>
 
                 <div className="flex items-center gap-6 justify-center">
-                    <div className={`${isMobileView ? 'hidden xl:block' : 'hidden md:block'} text-right`}>
-                        <p className={`text-[10px] uppercase tracking-[0.2em] ${isMobileView ? 'text-[#6B645C]' : 'text-[#E7D4AD]'}`}>From</p>
-                        <p className={`text-lg font-serif ${isMobileView ? 'text-[#1C1C1C]' : 'text-white'}`}>{formatCurrency(basePrice)}<span className={`text-xs font-sans ${isMobileView ? 'text-[#59544D]' : 'text-[#B9AA90]'}`}> / night</span></p>
+                    <div className={`${isMobileView ? 'hidden xl:flex' : 'hidden md:flex'} items-baseline gap-2 mr-2`}>
+                        <span className={`text-[11px] uppercase tracking-[0.15em] font-medium ${isMobileView ? 'text-[#6B645C]' : 'text-[#E7D4AD]/80'}`}>From</span>
+                        <span className={`text-2xl font-serif tracking-tight ${isMobileView ? 'text-[#1C1C1C]' : 'text-white'}`}>{formatCurrency(basePrice)}</span>
+                        <span className={`text-[13px] font-sans font-light ${isMobileView ? 'text-[#59544D]' : 'text-[#B9AA90]'}`}>/ night</span>
                     </div>
 
                     <button
@@ -200,7 +201,7 @@ export default function StickyBookingBar({ basePrice, roomSlug }: StickyBookingB
                         disabled={!date?.from || !date?.to}
                         className={`${isMobileView ? 'bg-[#1C1C1C] hover:bg-[#333]' : 'bg-[#B68845] hover:bg-[#A97E3F]'} text-white px-8 py-3 text-sm font-medium transition-colors ${isMobileView ? 'rounded-sm shadow-md shadow-[#1C1C1C]/10' : 'rounded-lg shadow-md shadow-[#B68845]/20'} whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
-                        Search Availability
+                        Book Now
                     </button>
 
                 </div>

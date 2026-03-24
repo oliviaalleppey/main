@@ -99,7 +99,7 @@ export function AddOnsSelector({ options, initialSelected, onContinue }: AddOnsS
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
                 {options.map((option) => {
                     const quantity = quantities[option.id] || 0;
                     const typeLabel = option.type === 'per_person' ? 'per person' : 'per unit';
@@ -135,12 +135,7 @@ export function AddOnsSelector({ options, initialSelected, onContinue }: AddOnsS
                                 {option.description && (
                                     <p className="text-xs text-gray-500 mt-1 line-clamp-2">{option.description}</p>
                                 )}
-                                <div className="mt-3 text-[11px] text-gray-600 font-medium inline-flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-md self-start border border-gray-100">
-                                    <Tag className="w-3 h-3 text-gray-400" />
-                                    <span>{formatCurrency(option.price)} <span className="text-gray-400 font-normal">/ {typeLabel}</span></span>
-                                </div>
-                                
-                                <div className="mt-auto pt-5 flex items-center justify-between">
+                                <div className="mt-4 flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                         <button
                                             type="button"
@@ -161,6 +156,10 @@ export function AddOnsSelector({ options, initialSelected, onContinue }: AddOnsS
                                         >
                                             <Plus className="w-3.5 h-3.5" />
                                         </button>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="text-[13px] font-bold text-[#0A332B]">{formatCurrency(option.price)}</div>
+                                        <div className="text-[10px] text-gray-500 uppercase tracking-wider">{typeLabel}</div>
                                     </div>
                                 </div>
                             </div>

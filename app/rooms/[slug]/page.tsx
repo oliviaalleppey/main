@@ -52,8 +52,8 @@ export default async function RoomDetailPage({ params }: { params: Promise<{ slu
 
     const roomName = formatRoomName(room.name);
 
-    // Dynamic images from DB - filter out second image (index 1)
-    const allImages = room.images && room.images.length > 0
+    // Dynamic images from DB
+    const roomImages = room.images && room.images.length > 0
         ? room.images.map((src, index) => ({ id: index + 1, alt: `${roomName} view ${index + 1}`, src }))
         : [
             { id: 1, alt: 'Main room view', src: `/images/rooms/${slug}-1.jpg` },
@@ -62,8 +62,6 @@ export default async function RoomDetailPage({ params }: { params: Promise<{ slu
             { id: 4, alt: 'Room amenities', src: `/images/rooms/${slug}-4.jpg` },
             { id: 5, alt: 'Room detail', src: `/images/rooms/${slug}-5.jpg` },
         ];
-    // Remove the second image (index 1)
-    const roomImages = allImages.filter((_, index) => index !== 1);
 
     const details = [
         { label: 'Size', value: `${room.size} sq ft` },
@@ -82,17 +80,17 @@ export default async function RoomDetailPage({ params }: { params: Promise<{ slu
     }));
 
     return (
-        <main className="min-h-screen bg-[#F6F1E8] font-sans selection:bg-[#1C1C1C] selection:text-white pb-40 md:pb-0 pt-8">
+        <main className="min-h-screen bg-[#F6F1E8] font-sans selection:bg-[#1C1C1C] selection:text-white pb-40 md:pb-0 pt-0 md:pt-8">
 
             {/* Booking Search Bar */}
-            <section className="md:sticky md:top-[var(--site-header-height,80px)] z-40 max-w-[1400px] mx-auto px-4 md:px-6 mb-6 md:pt-4 pointer-events-none md:pointer-events-auto">
+            <section className="md:sticky md:top-[var(--site-header-height,80px)] z-40 max-w-[1400px] mx-auto md:px-6 md:mb-6 md:pt-4 pointer-events-none md:pointer-events-auto">
                 <div className="md:pointer-events-auto">
                     <StickyBookingBar basePrice={room.basePrice} roomSlug={slug} />
                 </div>
             </section>
 
             {/* Title Section (Above Grid) */}
-            <section className="pt-2 pb-1 px-6 md:px-12 max-w-[1400px] mx-auto">
+            <section className="pt-6 pb-6 px-6 md:px-12 max-w-[1400px] mx-auto">
                 <h1 className="font-serif text-4xl md:text-5xl tracking-tight text-[#1C1C1C] mb-1">
                     {roomName}
                 </h1>
@@ -113,11 +111,9 @@ export default async function RoomDetailPage({ params }: { params: Promise<{ slu
                 amenities={features}
             />
 
-            {/* Room Features Showcase */}
-            <RoomFeatures roomType={roomName} />
 
-            {/* Offers Carousel */}
-            <OffersCarousel />
+
+
 
             {/* FAQ Section */}
             <RoomFAQ />
