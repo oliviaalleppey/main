@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from 'react';
 import { ArrowRight, CheckCircle2, Loader2, X } from 'lucide-react';
+import CustomDatePicker from './custom-date-picker';
 
 type InquiryFormState = {
     name: string;
@@ -105,12 +106,9 @@ export default function EventInquiryForm() {
                     placeholder="Number of Guests"
                     className="h-12 border border-[#DCD3C4] bg-[#FCFBF7] px-3.5 text-sm outline-none focus:border-[#B68A4A]"
                 />
-                <input
-                    name="preferredDate"
-                    type="date"
+                <CustomDatePicker
                     value={form.preferredDate}
-                    onChange={(e) => setForm((prev) => ({ ...prev, preferredDate: e.target.value }))}
-                    className="h-14 border border-[#DCD3C4] bg-[#FCFBF7] px-3.5 text-lg outline-none focus:border-[#B68A4A] cursor-pointer"
+                    onChange={(date) => setForm((prev) => ({ ...prev, preferredDate: date }))}
                 />
                 <input
                     name="phone"
