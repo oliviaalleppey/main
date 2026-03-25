@@ -45,9 +45,9 @@ function ColorRow({
     value: string;
     onChange: (v: string) => void;
 }) {
-    const [hex, setHex] = useState(value);
+    const [hex, setHex] = useState(value ?? '');
 
-    useEffect(() => { setHex(value); }, [value]);
+    useEffect(() => { setHex(value ?? ''); }, [value]);
 
     function handleHexInput(raw: string) {
         setHex(raw);

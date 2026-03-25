@@ -172,12 +172,14 @@ function DiningCard({ outlet }: { outlet: DiningOutlet }) {
                         View Menu
                         <ArrowRight className="w-4 h-4" />
                     </Link>
-                    <a
-                        href="tel:+918075416514"
-                        className="inline-flex items-center rounded-lg bg-[var(--gold-cta)] px-4 py-2 text-white text-[11px] tracking-[0.14em] uppercase hover:bg-[var(--gold-cta-dark)] transition-colors"
-                    >
-                        Reserve Table
-                    </a>
+                    {outlet.slug !== 'in-room-dining' && (
+                        <a
+                            href="tel:+918075416514"
+                            className="inline-flex items-center rounded-lg bg-[var(--gold-cta)] px-4 py-2 text-white text-[11px] tracking-[0.14em] uppercase hover:bg-[var(--gold-cta-dark)] transition-colors"
+                        >
+                            Reserve Table
+                        </a>
+                    )}
                 </div>
             </div>
         </article>

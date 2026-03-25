@@ -46,7 +46,6 @@ const venues: Venue[] = [
             cluster: '180-200',
             classroom: '120-130',
             uShape: '60',
-            boardroom: '66',
         },
     },
     {
@@ -59,11 +58,10 @@ const venues: Venue[] = [
         dimensions: { length: '53', width: '33', height: '13' },
         area: '5035',
         layout: {
-            theatre: '170',
-            cluster: '66',
-            classroom: '42',
+            theatre: '550',
+            cluster: '196',
+            classroom: '180',
             uShape: '24',
-            boardroom: '24',
         },
     },
     {
@@ -76,11 +74,10 @@ const venues: Venue[] = [
         dimensions: { length: '53', width: '35', height: '13' },
         area: '5035',
         layout: {
-            theatre: '170',
-            cluster: '66',
-            classroom: '42',
+            theatre: '550',
+            cluster: '196',
+            classroom: '180',
             uShape: '24',
-            boardroom: '24',
         },
     },
     {
@@ -110,11 +107,10 @@ const venues: Venue[] = [
         dimensions: { length: '61', width: '33', height: '9' },
         area: '2000',
         layout: {
-            theatre: '120',
-            cluster: '48',
-            classroom: '36',
-            uShape: '34',
-            boardroom: '40',
+            theatre: '170',
+            cluster: '66',
+            classroom: '42',
+            uShape: '24',
         },
     },
     {
@@ -127,11 +123,10 @@ const venues: Venue[] = [
         dimensions: { length: '33', width: '20', height: '9' },
         area: '2000',
         layout: {
-            theatre: '40',
-            cluster: '24',
-            classroom: '28',
-            uShape: '18',
-            boardroom: '22',
+            theatre: '170',
+            cluster: '66',
+            classroom: '42',
+            uShape: '24',
         },
     },
     {
@@ -144,11 +139,10 @@ const venues: Venue[] = [
         dimensions: { length: '33', width: '20', height: '9' },
         area: '2000',
         layout: {
-            theatre: '40',
-            cluster: '24',
-            classroom: '28',
-            uShape: '18',
-            boardroom: '22',
+            theatre: '170',
+            cluster: '66',
+            classroom: '42',
+            uShape: '24',
         },
     },
     {
@@ -161,10 +155,6 @@ const venues: Venue[] = [
         dimensions: { length: '42', width: '21', height: '9' },
         area: '2000',
         layout: {
-            theatre: '40',
-            cluster: '24',
-            classroom: '28',
-            uShape: '18',
             boardroom: '22',
         },
     },
@@ -281,12 +271,20 @@ export default function ConferenceEventsPage() {
                                                 {/* Top-level venue button */}
                                                 <button
                                                     onClick={() => setActiveSlug(venue.slug)}
-                                                    className={`text-left w-full transition-colors duration-200 ${isTopActive
+                                                    className={`group text-left w-full flex items-center justify-between cursor-pointer transition-all duration-200 ${isTopActive
                                                         ? 'font-bold text-[#1D1D1D] text-[1.6rem] md:text-[1.9rem] leading-tight py-4'
                                                         : 'font-semibold text-[#7A7670] hover:text-[#1D1D1D] text-sm py-4'
                                                         }`}
                                                 >
                                                     {venue.name}
+                                                    {!isTopActive && (
+                                                        <svg
+                                                            className="w-3.5 h-3.5 flex-shrink-0 opacity-40 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-200"
+                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
+                                                        >
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                                                        </svg>
+                                                    )}
                                                 </button>
 
                                                 {/* Sub-items — only show when this venue is active */}
@@ -296,11 +294,16 @@ export default function ConferenceEventsPage() {
                                                             <button
                                                                 key={item.slug}
                                                                 onClick={() => setActiveSlug(item.slug)}
-                                                                className={`text-sm font-semibold transition-colors duration-200 ${activeSlug === item.slug
+                                                                className={`group flex items-center gap-1.5 text-sm font-semibold cursor-pointer transition-all duration-200 ${activeSlug === item.slug
                                                                     ? 'text-[#1C3A32] underline underline-offset-2'
-                                                                    : 'text-[#C9A167] hover:text-[#9A6E30]'
+                                                                    : 'text-[#C9A167] hover:text-[#9A6E30] hover:translate-x-[-2px]'
                                                                     }`}
                                                             >
+                                                                {activeSlug !== item.slug && (
+                                                                    <svg className="w-3 h-3 opacity-60 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                                                                    </svg>
+                                                                )}
                                                                 {item.label}
                                                             </button>
                                                         ))}

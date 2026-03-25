@@ -58,7 +58,7 @@ const venueList: VenueInfo[] = [
         image: '',
         capacity: 'Up to 550 Guest',
         area: '5500 sq ft',
-        description: 'the Grand Ballroom comfortably hosts up to 500 guests.With refined interiors, flexible layouts, and seamless service support, it i s ideal for weddings, receptions, large conferences, and milestone events where scale meets sophistication.',
+        description: 'the Grand Ballroom comfortably hosts up to 550 guests.With refined interiors, flexible layouts, and seamless service support, it i s ideal for weddings, receptions, large conferences, and milestone events where scale meets sophistication.',
         bestFor: 'Reception, sangeet, large guest dining',
     },
     {
@@ -66,7 +66,7 @@ const venueList: VenueInfo[] = [
         image: '',
         capacity: 'Up to 180 Guest',
         area: '2000 sq ft',
-        description: 'Perfect for intimate celebrations and corporate gatherings, Forum Hall accommodates up to 200 guests. Thoughtfully designed for comfort and functionality, it offers a refined setting for conferences, social events, and private functions with effortless flow and privacy.',
+        description: 'Perfect for intimate celebrations and corporate gatherings, Forum Hall accommodates up to 180 guests. Thoughtfully designed for comfort and functionality, it offers a refined setting for conferences, social events, and private functions with effortless flow and privacy.',
         bestFor: 'Varmala, cocktail evening, phera mandap',
     },
     {
