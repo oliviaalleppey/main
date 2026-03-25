@@ -5,13 +5,13 @@ import Image from 'next/image';
 
 export default function RosewoodFooter() {
     return (
-        <footer className="bg-[#E8E2D9] text-[#1C1C1C] pt-10 pb-6">
+        <footer className="bg-[var(--surface-soft)] text-[var(--text-dark)] pt-10 pb-6">
             <div className="max-w-7xl mx-auto px-6 md:px-12">
 
                 {/* Newsletter Section */}
-                <div className="border-b border-[#2C2C2C]/12 pb-8 mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-7">
+                <div className="border-b border-[var(--btn-dark)]/12 pb-8 mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-7">
                     <div className="max-w-md">
-                        <h3 className="text-2xl font-serif mb-3 tracking-wide text-[#1C1C1C]">Stay Connected</h3>
+                        <h3 className="text-2xl font-serif mb-3 tracking-wide text-[var(--text-dark)]">Stay Connected</h3>
                         <p className="text-[#4F4942] text-base leading-relaxed">
                             Join our mailing list to receive potential updates and exclusive offers from Olivia Global.
                         </p>
@@ -22,9 +22,9 @@ export default function RosewoodFooter() {
                             <input
                                 type="email"
                                 placeholder="Email Address"
-                                className="w-full bg-transparent outline-none text-[#1C1C1C] placeholder-[#726B64] text-base tracking-wide"
+                                className="w-full bg-transparent outline-none text-[var(--text-dark)] placeholder-[#726B64] text-base tracking-wide"
                             />
-                            <button className="rounded-xl bg-[#2C2C2C] px-5 py-2.5 text-xs uppercase tracking-[0.18em] text-white hover:bg-[#1C1C1C] transition-colors font-medium whitespace-nowrap">
+                            <button className="rounded-xl bg-[var(--btn-dark)] px-5 py-2.5 text-xs uppercase tracking-[0.18em] text-white hover:bg-[var(--text-dark)] transition-colors font-medium whitespace-nowrap">
                                 Subscribe
                             </button>
                         </form>
@@ -45,7 +45,7 @@ export default function RosewoodFooter() {
 
                             <div className="space-y-2">
                                 <p className="text-[11px] uppercase tracking-[0.24em] text-[#6B645C]">Phone</p>
-                                <a href="tel:+918075416514" className="underline decoration-[#2C2C2C]/20 hover:text-[#1C1C1C] transition-colors">
+                                <a href="tel:+918075416514" className="underline decoration-[var(--btn-dark)]/20 hover:text-[var(--text-dark)] transition-colors">
                                     +91 8075 416 514
                                 </a>
                                 <p className="text-[13px] text-[#4F4942]">
@@ -56,7 +56,7 @@ export default function RosewoodFooter() {
 
                             <p className="text-[13px] text-[#4F4942]">
                                 WhatsApp:{' '}
-                                <a href="https://wa.me/918075416514" className="underline decoration-[#2C2C2C]/20 hover:text-[#1C1C1C] transition-colors">
+                                <a href="https://wa.me/918075416514" className="underline decoration-[var(--btn-dark)]/20 hover:text-[var(--text-dark)] transition-colors">
                                     +91 8075 416 514
                                 </a>
                                 <br />
@@ -71,13 +71,13 @@ export default function RosewoodFooter() {
                         <div className="space-y-3 text-[15px] text-[#403A35]">
                             <a
                                 href="mailto:reservation@oliviaalleppey.com"
-                                className="block underline decoration-[#2C2C2C]/20 hover:text-[#1C1C1C] transition-colors"
+                                className="block underline decoration-[var(--btn-dark)]/20 hover:text-[var(--text-dark)] transition-colors"
                             >
                                 reservation@oliviaalleppey.com
                             </a>
                             <a
                                 href="mailto:mail@oliviaalleppey.com"
-                                className="block underline decoration-[#2C2C2C]/20 hover:text-[#1C1C1C] transition-colors"
+                                className="block underline decoration-[var(--btn-dark)]/20 hover:text-[var(--text-dark)] transition-colors"
                             >
                                 mail@oliviaalleppey.com
                             </a>
@@ -88,30 +88,30 @@ export default function RosewoodFooter() {
                         <div>
                             <h4 className="text-[11px] uppercase tracking-[0.28em] text-[#6B645C] mb-6">World of Olivia</h4>
                             <ul className="space-y-3 text-[15px] text-[#403A35]">
-                                <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Our Story</Link></li>
-                                <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Residences</Link></li>
-                                <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Careers</Link></li>
-                                <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Press Room</Link></li>
+                                <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">Our Story</Link></li>
+                                <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">Residences</Link></li>
+                                <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">Careers</Link></li>
+                                <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">Press Room</Link></li>
                             </ul>
                         </div>
 
                         <div>
                             <h4 className="text-[11px] uppercase tracking-[0.28em] text-[#6B645C] mb-6">Support</h4>
                             <ul className="space-y-3 text-[15px] text-[#403A35]">
-                                <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Manage Reservations</Link></li>
-                                <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Gift Cards</Link></li>
-                                <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Contact</Link></li>
-                                <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">FAQ</Link></li>
+                                <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">Manage Reservations</Link></li>
+                                <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">Gift Cards</Link></li>
+                                <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">Contact</Link></li>
+                                <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">FAQ</Link></li>
                             </ul>
                         </div>
 
                         <div className="hidden md:block">
                             <h4 className="text-[11px] uppercase tracking-[0.28em] text-[#6B645C] mb-6">Legal</h4>
                             <ul className="space-y-3 text-[15px] text-[#403A35]">
-                                <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Privacy Policy</Link></li>
-                                <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Terms of Service</Link></li>
-                                <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Accessibility</Link></li>
-                                <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Cookie Policy</Link></li>
+                                <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">Privacy Policy</Link></li>
+                                <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">Terms of Service</Link></li>
+                                <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">Accessibility</Link></li>
+                                <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">Cookie Policy</Link></li>
                             </ul>
                         </div>
                     </div>
@@ -121,15 +121,15 @@ export default function RosewoodFooter() {
                 <div className="lg:hidden mb-10">
                     <h4 className="text-[11px] uppercase tracking-[0.28em] text-[#6B645C] mb-6">Legal</h4>
                     <ul className="grid grid-cols-2 gap-y-3 text-[15px] text-[#403A35]">
-                        <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Privacy Policy</Link></li>
-                        <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Terms of Service</Link></li>
-                        <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Accessibility</Link></li>
-                        <li><Link href="#" className="hover:text-[#1C1C1C] transition-colors">Cookie Policy</Link></li>
+                        <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">Privacy Policy</Link></li>
+                        <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">Terms of Service</Link></li>
+                        <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">Accessibility</Link></li>
+                        <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">Cookie Policy</Link></li>
                     </ul>
                 </div>
 
                 {/* Brand & Copyright */}
-                <div className="pt-7 border-t border-[#2C2C2C]/12">
+                <div className="pt-7 border-t border-[var(--btn-dark)]/12">
                     <div className="flex flex-col items-center">
                         <Link href="/" aria-label="Olivia Alleppey" className="mb-3">
                             <Image
@@ -142,12 +142,12 @@ export default function RosewoodFooter() {
                         </Link>
 
                         <div className="flex items-center gap-8 text-[10px] uppercase tracking-widest text-[#5E5851]">
-                            <Link href="#" className="hover:text-[#1C1C1C] transition-colors">Facebook</Link>
+                            <Link href="#" className="hover:text-[var(--text-dark)] transition-colors">Facebook</Link>
                             <Link
                                 href="https://instagram.com/oliviaalleppey"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="hover:text-[#1C1C1C] transition-colors"
+                                className="hover:text-[var(--text-dark)] transition-colors"
                             >
                                 Instagram
                             </Link>

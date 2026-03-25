@@ -26,7 +26,7 @@ export default function CompactFeatures() {
     ];
 
     return (
-        <section className="py-20 bg-[#F6F1E8]">
+        <section className="py-20 bg-[var(--surface-cream)]">
             <div className="container mx-auto px-4 max-w-6xl">
                 <div className="text-center mb-16">
                     <h2 className="text-3xl md:text-4xl font-serif text-gray-900 mb-4 tracking-wide">CURATED EXPERIENCES</h2>
@@ -38,7 +38,7 @@ export default function CompactFeatures() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {features.map((feature, index) => (
                         <div key={index} className="group cursor-pointer">
-                            <div className={`relative h-[300px] w-full overflow-hidden mb-6 ${feature.image ? '' : 'bg-[#E8E2D9]'}`}>
+                            <div className={`relative h-[300px] w-full overflow-hidden mb-6 ${feature.image ? '' : 'bg-[var(--surface-soft)]'}`}>
                                 {feature.image ? (
                                     <Image
                                         src={feature.image}
@@ -48,7 +48,7 @@ export default function CompactFeatures() {
                                     />
                                 ) : null}
                             </div>
-                            <h3 className="text-xl font-serif text-gray-900 mb-2 group-hover:text-[#7A5E28] transition-colors">
+                            <h3 className="text-xl font-serif text-gray-900 mb-2 group-hover:text-[var(--gold-accent-dark)] transition-colors">
                                 {feature.title}
                             </h3>
                             <p className="text-sm text-gray-500 leading-relaxed mb-4 font-light">

@@ -98,7 +98,7 @@ export default function WellnessPage() {
     };
 
     return (
-        <main className="min-h-screen bg-[#F6F1E8] font-sans">
+        <main className="min-h-screen bg-[var(--surface-cream)] font-sans">
 
             {/* Hero Section - Compact style like rooms page */}
             <section className="relative h-[44vh] md:h-[52vh] w-full overflow-hidden">
@@ -109,7 +109,7 @@ export default function WellnessPage() {
                     className="absolute inset-0 z-0"
                 >
                     {/* Dark gradient background like rooms page hero */}
-                    <div className="absolute inset-0 bg-[linear-gradient(135deg,#1C2622_0%,#2B3A34_38%,#1B2421_100%)]" />
+                    <div className="absolute inset-0 bg-[linear-gradient(135deg,var(--brand-primary-deep)_0%,var(--brand-primary-dark)_38%,var(--brand-primary-deep)_100%)]" />
                     <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_25%_30%,rgba(231,212,173,0.18)_0%,rgba(231,212,173,0)_60%)]" />
                     <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/15 to-black/40" />
                 </motion.div>
@@ -163,7 +163,7 @@ export default function WellnessPage() {
             {/* Introduction */}
             <section className="py-20 px-6 md:px-12">
                 <div className="max-w-4xl mx-auto text-center">
-                    <h2 className="text-3xl md:text-4xl font-serif text-[#1C1C1C] mb-8 tracking-wide">
+                    <h2 className="text-3xl md:text-4xl font-serif text-[var(--text-dark)] mb-8 tracking-wide">
                         A Journey to Inner Peace
                     </h2>
                     <p className="text-[#403A35] text-lg leading-relaxed mb-8">
@@ -174,15 +174,15 @@ export default function WellnessPage() {
                     </p>
                     <div className="flex justify-center gap-8 text-center">
                         <div>
-                            <p className="text-4xl font-serif text-[#0A4D4E]">15+</p>
+                            <p className="text-4xl font-serif text-[var(--brand-primary)]">15+</p>
                             <p className="text-sm text-[#59544D] uppercase tracking-wider mt-2">Treatments</p>
                         </div>
                         <div>
-                            <p className="text-4xl font-serif text-[#0A4D4E]">8</p>
+                            <p className="text-4xl font-serif text-[var(--brand-primary)]">8</p>
                             <p className="text-sm text-[#59544D] uppercase tracking-wider mt-2">Expert Therapists</p>
                         </div>
                         <div>
-                            <p className="text-4xl font-serif text-[#0A4D4E]">5★</p>
+                            <p className="text-4xl font-serif text-[var(--brand-primary)]">5★</p>
                             <p className="text-sm text-[#59544D] uppercase tracking-wider mt-2">Spa Rating</p>
                         </div>
                     </div>
@@ -201,8 +201,8 @@ export default function WellnessPage() {
                                 key={service.id}
                                 onClick={() => handleServiceSelect(service.id)}
                                 className={`px-4 py-2 text-sm uppercase tracking-wider whitespace-nowrap transition-all ${activeService === service.id
-                                    ? 'text-[#0A4D4E] border-b-2 border-[#0A4D4E]'
-                                    : 'text-[#59544D] hover:text-[#1C1C1C]'
+                                    ? 'text-[var(--brand-primary)] border-b-2 border-[var(--brand-primary)]'
+                                    : 'text-[#59544D] hover:text-[var(--text-dark)]'
                                     }`}
                             >
                                 {service.title}
@@ -222,8 +222,8 @@ export default function WellnessPage() {
                     <div className="max-w-6xl mx-auto">
                         <div className="grid md:grid-cols-2 gap-12 items-center">
                             <div>
-                                <p className="text-[#7A5E28] text-sm tracking-[0.2em] uppercase mb-4">{service.subtitle}</p>
-                                <h2 className="text-4xl md:text-5xl font-serif text-[#1C1C1C] mb-6 tracking-wide">
+                                <p className="text-[var(--gold-accent-dark)] text-sm tracking-[0.2em] uppercase mb-4">{service.subtitle}</p>
+                                <h2 className="text-4xl md:text-5xl font-serif text-[var(--text-dark)] mb-6 tracking-wide">
                                     {service.title}
                                 </h2>
                                 <p className="text-[#403A35] text-lg leading-relaxed mb-8">
@@ -233,14 +233,14 @@ export default function WellnessPage() {
                                 {/* Treatments/offerings list */}
                                 {'treatments' in service && service.treatments && (
                                     <div className="space-y-4">
-                                        <h3 className="text-sm uppercase tracking-[0.2em] text-[#0A4D4E] mb-4">Signature Treatments</h3>
+                                        <h3 className="text-sm uppercase tracking-[0.2em] text-[var(--brand-primary)] mb-4">Signature Treatments</h3>
                                         {service.treatments.map((treatment, idx) => (
                                             <div key={idx} className="flex justify-between items-center py-3 border-b border-gray-200">
                                                 <div>
-                                                    <p className="text-[#1C1C1C] font-medium">{treatment.name}</p>
+                                                    <p className="text-[var(--text-dark)] font-medium">{treatment.name}</p>
                                                     <p className="text-sm text-[#59544D]">{treatment.duration}</p>
                                                 </div>
-                                                <p className="text-[#0A4D4E] font-medium">{treatment.price}</p>
+                                                <p className="text-[var(--brand-primary)] font-medium">{treatment.price}</p>
                                             </div>
                                         ))}
                                     </div>
@@ -248,14 +248,14 @@ export default function WellnessPage() {
 
                                 {'offerings' in service && service.offerings && (
                                     <div className="space-y-4">
-                                        <h3 className="text-sm uppercase tracking-[0.2em] text-[#0A4D4E] mb-4">Weekly Schedule</h3>
+                                        <h3 className="text-sm uppercase tracking-[0.2em] text-[var(--brand-primary)] mb-4">Weekly Schedule</h3>
                                         {service.offerings.map((offering, idx) => (
                                             <div key={idx} className="flex justify-between items-center py-3 border-b border-gray-200">
                                                 <div>
-                                                    <p className="text-[#1C1C1C] font-medium">{offering.name}</p>
+                                                    <p className="text-[var(--text-dark)] font-medium">{offering.name}</p>
                                                     <p className="text-sm text-[#59544D]">{offering.time}</p>
                                                 </div>
-                                                <span className="text-xs uppercase tracking-wider text-[#7A5E28] bg-[#C5A059]/10 px-3 py-1">
+                                                <span className="text-xs uppercase tracking-wider text-[var(--gold-accent-dark)] bg-[var(--gold-accent)]/10 px-3 py-1">
                                                     {offering.level}
                                                 </span>
                                             </div>
@@ -267,8 +267,8 @@ export default function WellnessPage() {
                                     <div className="grid grid-cols-2 gap-4">
                                         {service.facilities.map((facility, idx) => (
                                             <div key={idx} className="flex items-center gap-3">
-                                                <div className="w-2 h-2 bg-[#C5A059] rounded-full" />
-                                                <p className="text-[#1C1C1C]/80">{facility}</p>
+                                                <div className="w-2 h-2 bg-[var(--gold-accent)] rounded-full" />
+                                                <p className="text-[var(--text-dark)]/80">{facility}</p>
                                             </div>
                                         ))}
                                     </div>
@@ -278,8 +278,8 @@ export default function WellnessPage() {
                                     <div className="grid grid-cols-2 gap-4">
                                         {service.features.map((feature, idx) => (
                                             <div key={idx} className="flex items-center gap-3">
-                                                <div className="w-2 h-2 bg-[#C5A059] rounded-full" />
-                                                <p className="text-[#1C1C1C]/80">{feature}</p>
+                                                <div className="w-2 h-2 bg-[var(--gold-accent)] rounded-full" />
+                                                <p className="text-[var(--text-dark)]/80">{feature}</p>
                                             </div>
                                         ))}
                                     </div>
@@ -287,8 +287,8 @@ export default function WellnessPage() {
                             </div>
 
                             <div className="relative h-[500px] bg-gray-100">
-                                <div className="absolute inset-0 bg-gradient-to-t from-[#0A4D4E]/20 to-transparent" />
-                                <div className="w-full h-full bg-[#E8E2D9] flex items-center justify-center">
+                                <div className="absolute inset-0 bg-gradient-to-t from-[var(--brand-primary)]/20 to-transparent" />
+                                <div className="w-full h-full bg-[var(--surface-soft)] flex items-center justify-center">
                                     <p className="text-[#8F877F] text-sm">Image: {service.title}</p>
                                 </div>
                             </div>
@@ -300,7 +300,7 @@ export default function WellnessPage() {
 
 
             {/* CTA Section */}
-            <section className="py-20 px-6 md:px-12 bg-[#0A4D4E]">
+            <section className="py-20 px-6 md:px-12 bg-[var(--brand-primary)]">
                 <div className="max-w-4xl mx-auto text-center">
                     <h2 className="text-3xl md:text-4xl font-serif text-white mb-6 tracking-wide">
                         Begin Your Wellness Journey
@@ -311,13 +311,13 @@ export default function WellnessPage() {
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Link
                             href="#booking-search"
-                            className="bg-white text-[#0A4D4E] px-8 py-4 text-sm uppercase tracking-[0.2em] hover:bg-[#C5A059] hover:text-white transition-colors"
+                            className="bg-white text-[var(--brand-primary)] px-8 py-4 text-sm uppercase tracking-[0.2em] hover:bg-[var(--gold-accent)] hover:text-white transition-colors"
                         >
                             Reserve Now
                         </Link>
                         <a
                             href="tel:+911234567890"
-                            className="border border-white text-white px-8 py-4 text-sm uppercase tracking-[0.2em] hover:bg-white hover:text-[#0A4D4E] transition-colors"
+                            className="border border-white text-white px-8 py-4 text-sm uppercase tracking-[0.2em] hover:bg-white hover:text-[var(--brand-primary)] transition-colors"
                         >
                             Call Us
                         </a>

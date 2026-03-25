@@ -25,11 +25,11 @@ export default function EditorialSplit() {
                 {/* Content Side (Right) */}
                 <div className="flex flex-col justify-center px-8 md:px-20 py-24 bg-white">
                     <div className="max-w-xl">
-                        <span className="text-xs uppercase tracking-[0.3em] text-[#7A5E28] mb-6 block font-medium">
+                        <span className="text-xs uppercase tracking-[0.3em] text-[var(--gold-accent-dark)] mb-6 block font-medium">
                             The Olivia Experience
                         </span>
 
-                        <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif text-[#1C1C1C] leading-[1.1] mb-8">
+                        <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif text-[var(--text-dark)] leading-[1.1] mb-8">
                             A sanctuary of<br />modern luxury.
                         </h2>
 
@@ -41,7 +41,7 @@ export default function EditorialSplit() {
                         <div className="flex items-center gap-8">
                             <Link
                                 href="/about"
-                                className="group flex items-center gap-3 text-sm font-bold uppercase tracking-widest text-[#1C1C1C] hover:text-[#7A5E28] transition-colors"
+                                className="group flex items-center gap-3 text-sm font-bold uppercase tracking-widest text-[var(--text-dark)] hover:text-[var(--gold-accent-dark)] transition-colors"
                             >
                                 Read Our Story
                                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />

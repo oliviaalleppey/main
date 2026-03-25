@@ -60,17 +60,17 @@ export default function RoomContent({ title, tagline, description, details, amen
     const uniqueItems = Array.from(new Map(displayItems.map(item => [item.text, item])).values());
 
     return (
-        <section className="bg-[#F6F1E8] text-[#1C1C1C] pt-0 pb-16 px-6 md:px-12">
+        <section className="bg-[var(--surface-cream)] text-[var(--text-dark)] pt-0 pb-16 px-6 md:px-12">
             <div className="max-w-[1400px] mx-auto">
                 
                 {/* Title Section (Optional, usually omitted as Title is above the Hero Grid) */}
                 {title && (
                     <div className="mb-12 text-center">
-                        <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl tracking-tight text-[#1C1C1C] mb-4">
+                        <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl tracking-tight text-[var(--text-dark)] mb-4">
                             {title}
                         </h1>
                         {tagline && (
-                            <p className="text-xl md:text-2xl text-[#1C1C1C]/80 font-light leading-relaxed">
+                            <p className="text-xl md:text-2xl text-[var(--text-dark)]/80 font-light leading-relaxed">
                                 {tagline}
                             </p>
                         )}
@@ -88,7 +88,7 @@ export default function RoomContent({ title, tagline, description, details, amen
                                 const IconComp = getIconForString(item.iconSource);
                                 return (
                                     <div key={idx} className="flex items-center gap-3 text-[#59544D] mx-auto w-full max-w-[160px]">
-                                        <IconComp className="w-5 h-5 flex-shrink-0 text-[#1C1C1C]/80" strokeWidth={1.5} />
+                                        <IconComp className="w-5 h-5 flex-shrink-0 text-[var(--text-dark)]/80" strokeWidth={1.5} />
                                         <span className="text-[14px] font-medium leading-tight whitespace-nowrap">
                                             {item.text}
                                         </span>

@@ -68,7 +68,7 @@ export default function PhotoCarousel() {
                         className="flex gap-1 overflow-x-auto scrollbar-hide scroll-smooth px-0"
                     >
                         {topRowLooped.map((image, index) => (
-                            <div key={index} className={`relative flex-shrink-0 w-[400px] h-[250px] group overflow-hidden ${image.src ? '' : 'bg-[#E8E2D9]'}`}>
+                            <div key={index} className={`relative flex-shrink-0 w-[400px] h-[250px] group overflow-hidden ${image.src ? '' : 'bg-[var(--surface-soft)]'}`}>
                                 {image.src ? (
                                     <>
                                         <Image
@@ -114,7 +114,7 @@ export default function PhotoCarousel() {
                         className="flex gap-1 overflow-x-auto scrollbar-hide scroll-smooth"
                     >
                         {bottomRowLooped.map((image, index) => (
-                            <div key={index} className={`relative flex-shrink-0 w-[400px] h-[250px] group overflow-hidden ${image.src ? '' : 'bg-[#E8E2D9]'}`}>
+                            <div key={index} className={`relative flex-shrink-0 w-[400px] h-[250px] group overflow-hidden ${image.src ? '' : 'bg-[var(--surface-soft)]'}`}>
                                 {image.src ? (
                                     <>
                                         <Image

@@ -28,7 +28,7 @@ function SubmitButton({ submitLabel }: { submitLabel: string }) {
         <Button
             type="submit"
             disabled={pending}
-            className="w-full rounded-xl bg-[#0A332B] text-white py-3 md:py-4 text-sm font-semibold shadow-lg shadow-[#0A332B]/20 hover:bg-[#15443B] transition-colors"
+            className="w-full rounded-xl bg-[var(--brand-primary)] text-white py-3 md:py-4 text-sm font-semibold shadow-lg shadow-[var(--brand-primary)]/20 hover:bg-[var(--brand-primary-dark)] transition-colors"
         >
             {pending ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
             {submitLabel}

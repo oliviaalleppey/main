@@ -79,7 +79,7 @@ function CheckoutRoomCard({ result, isSelected }: { result: any, isSelected: boo
     const total = basePrice + taxes;
 
     return (
-        <div className={`flex flex-col bg-[#F5F5F5] transition-all duration-300 ${isSelected ? 'ring-2 ring-[#1C1C1C]' : ''}`}>
+        <div className={`flex flex-col bg-[#F5F5F5] transition-all duration-300 ${isSelected ? 'ring-2 ring-[var(--text-dark)]' : ''}`}>
             
             {/* Top Block */}
             <div className="flex flex-col lg:flex-row p-4 gap-6">
@@ -99,7 +99,7 @@ function CheckoutRoomCard({ result, isSelected }: { result: any, isSelected: boo
                         </div>
                     )}
                     {isSelected && (
-                        <div className="absolute top-3 left-3 bg-[#1C1C1C] text-white text-[11px] font-bold px-2 py-1 rounded-sm flex items-center gap-1">
+                        <div className="absolute top-3 left-3 bg-[var(--text-dark)] text-white text-[11px] font-bold px-2 py-1 rounded-sm flex items-center gap-1">
                             <Check className="w-3 h-3" /> Selected
                         </div>
                     )}
@@ -216,7 +216,7 @@ function CheckoutRoomCard({ result, isSelected }: { result: any, isSelected: boo
                                                 disabled={isPending || !result.bookable}
                                                 className={`mt-4 w-full lg:w-32 px-4 py-2.5 flex justify-center items-center text-sm font-semibold transition-all ${
                                                     !result.bookable ? 'bg-gray-200 text-gray-500 cursor-not-allowed' :
-                                                    'bg-[#1C1C1C] text-white hover:bg-black'
+                                                    'bg-[var(--text-dark)] text-white hover:bg-black'
                                                 }`}
                                             >
                                                 {selectingRateId === plan.id ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Select'}
@@ -240,7 +240,7 @@ function CheckoutRoomCard({ result, isSelected }: { result: any, isSelected: boo
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
                             {result.roomType.amenities?.map((amenity: string, idx: number) => (
                                 <div key={idx} className="flex items-start gap-2">
-                                    <Check className="w-4 h-4 text-[#1C1C1C] shrink-0 mt-0.5" />
+                                    <Check className="w-4 h-4 text-[var(--text-dark)] shrink-0 mt-0.5" />
                                     <span>{amenity}</span>
                                 </div>
                             ))}

@@ -118,20 +118,20 @@ export function LuxuryDatePicker({
                     <div className="flex flex-row items-end justify-between sm:justify-start gap-4 sm:gap-7 md:gap-9 w-full md:w-auto">
                         <button 
                             onClick={(e) => { e.stopPropagation(); setSelectionStage('checkIn'); }}
-                            className={`text-left flex-1 sm:flex-none sm:min-w-[220px] pb-1 border-b-2 transition-colors hover:opacity-80 ${selectionStage === 'checkIn' ? 'border-[#0A332B]' : 'border-transparent cursor-pointer'}`}
+                            className={`text-left flex-1 sm:flex-none sm:min-w-[220px] pb-1 border-b-2 transition-colors hover:opacity-80 ${selectionStage === 'checkIn' ? 'border-[var(--brand-primary)]' : 'border-transparent cursor-pointer'}`}
                         >
-                            <p className={`text-[10px] md:text-[12px] uppercase tracking-[0.2em] font-semibold mb-1 md:mb-2 transition-colors ${selectionStage === 'checkIn' ? 'text-[#0A332B]' : 'text-slate-500'}`}>Check-in</p>
-                            <p className="text-[20px] sm:text-[32px] leading-none font-sans font-semibold tracking-[-0.02em] text-[#0A332B]">
+                            <p className={`text-[10px] md:text-[12px] uppercase tracking-[0.2em] font-semibold mb-1 md:mb-2 transition-colors ${selectionStage === 'checkIn' ? 'text-[var(--brand-primary)]' : 'text-slate-500'}`}>Check-in</p>
+                            <p className="text-[20px] sm:text-[32px] leading-none font-sans font-semibold tracking-[-0.02em] text-[var(--brand-primary)]">
                                 {selectedDate?.from ? format(selectedDate.from, 'd MMM yyyy') : 'Select Date'}
                             </p>
                         </button>
                         <div className="hidden sm:block h-10 md:h-14 w-px bg-gray-200" />
                         <button 
                             onClick={(e) => { e.stopPropagation(); setSelectionStage('checkOut'); }}
-                            className={`text-left flex-1 sm:flex-none sm:min-w-[220px] pb-1 border-b-2 transition-colors hover:opacity-80 ${selectionStage === 'checkOut' ? 'border-[#0A332B]' : 'border-transparent cursor-pointer'}`}
+                            className={`text-left flex-1 sm:flex-none sm:min-w-[220px] pb-1 border-b-2 transition-colors hover:opacity-80 ${selectionStage === 'checkOut' ? 'border-[var(--brand-primary)]' : 'border-transparent cursor-pointer'}`}
                         >
-                            <p className={`text-[10px] md:text-[12px] uppercase tracking-[0.2em] font-semibold mb-1 md:mb-2 transition-colors ${selectionStage === 'checkOut' ? 'text-[#0A332B]' : 'text-slate-500'}`}>Check-out</p>
-                            <p className="text-[20px] sm:text-[32px] leading-none font-sans font-semibold tracking-[-0.02em] text-[#0A332B]">
+                            <p className={`text-[10px] md:text-[12px] uppercase tracking-[0.2em] font-semibold mb-1 md:mb-2 transition-colors ${selectionStage === 'checkOut' ? 'text-[var(--brand-primary)]' : 'text-slate-500'}`}>Check-out</p>
+                            <p className="text-[20px] sm:text-[32px] leading-none font-sans font-semibold tracking-[-0.02em] text-[var(--brand-primary)]">
                                 {selectedDate?.to ? format(selectedDate.to, 'd MMM yyyy') : 'Select Date'}
                             </p>
                         </button>
@@ -148,19 +148,19 @@ export function LuxuryDatePicker({
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-3 md:mb-5">
                 <button
                     onClick={() => handlePreset(1)}
-                    className="px-3 py-1.5 rounded-full text-xs font-semibold tracking-wide border border-gray-300 text-gray-800 hover:border-[#0A332B] hover:text-[#0A332B] transition-colors"
+                    className="px-3 py-1.5 rounded-full text-xs font-semibold tracking-wide border border-gray-300 text-gray-800 hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] transition-colors"
                 >
                     1 Night
                 </button>
                 <button
                     onClick={() => handlePreset(2)}
-                    className="px-3 py-1.5 rounded-full text-xs font-semibold tracking-wide border border-gray-300 text-gray-800 hover:border-[#0A332B] hover:text-[#0A332B] transition-colors"
+                    className="px-3 py-1.5 rounded-full text-xs font-semibold tracking-wide border border-gray-300 text-gray-800 hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] transition-colors"
                 >
                     2 Nights
                 </button>
                 <button
                     onClick={() => handlePreset(3)}
-                    className="px-3 py-1.5 rounded-full text-xs font-semibold tracking-wide border border-gray-300 text-gray-800 hover:border-[#0A332B] hover:text-[#0A332B] transition-colors"
+                    className="px-3 py-1.5 rounded-full text-xs font-semibold tracking-wide border border-gray-300 text-gray-800 hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] transition-colors"
                 >
                     Weekend Escape
                 </button>
@@ -170,7 +170,7 @@ export function LuxuryDatePicker({
             <style jsx global>{`
                 .luxury-rdp {
                     margin: 0 auto;
-                    --rdp-accent-color: #0A332B;
+                    --rdp-accent-color: var(--brand-primary);
                     --rdp-accent-background-color: rgba(10, 51, 43, 0.12);
                     --rdp-day-width: 44px;
                     --rdp-day-height: 44px;
@@ -257,7 +257,7 @@ export function LuxuryDatePicker({
                 }
 
                 .luxury-rdp .rdp-day_button:focus-visible {
-                    outline: 2px solid #0A332B;
+                    outline: 2px solid var(--brand-primary);
                     outline-offset: 2px;
                 }
 
@@ -268,9 +268,9 @@ export function LuxuryDatePicker({
                 .luxury-rdp .rdp-selected .rdp-day_button,
                 .luxury-rdp .rdp-range_start .rdp-day_button,
                 .luxury-rdp .rdp-range_end .rdp-day_button {
-                    background-color: #0A332B;
+                    background-color: var(--brand-primary);
                     color: #ffffff;
-                    border-color: #0A332B;
+                    border-color: var(--brand-primary);
                 }
 
                 .luxury-rdp .rdp-range_start {
@@ -288,7 +288,7 @@ export function LuxuryDatePicker({
                 .luxury-rdp .rdp-range_middle .rdp-day_button {
                     border-radius: 0;
                     background-color: transparent;
-                    color: #0A332B;
+                    color: var(--brand-primary);
                 }
 
                 .luxury-rdp .rdp-disabled .rdp-day_button {
@@ -330,7 +330,7 @@ export function LuxuryDatePicker({
                             type="button"
                             aria-label="Previous month"
                             onClick={goToPreviousMonth}
-                            className="pointer-events-auto inline-flex h-10 w-10 -translate-x-3 items-center justify-center rounded-full border border-gray-300 bg-white/95 text-gray-700 shadow-sm transition-colors hover:border-[#0A332B] hover:bg-[#0A332B] hover:text-white md:-translate-x-14"
+                            className="pointer-events-auto inline-flex h-10 w-10 -translate-x-3 items-center justify-center rounded-full border border-gray-300 bg-white/95 text-gray-700 shadow-sm transition-colors hover:border-[var(--brand-primary)] hover:bg-[var(--brand-primary)] hover:text-white md:-translate-x-14"
                         >
                             <ChevronLeft className="h-4 w-4" />
                         </button>
@@ -338,7 +338,7 @@ export function LuxuryDatePicker({
                             type="button"
                             aria-label="Next month"
                             onClick={goToNextMonth}
-                            className="pointer-events-auto inline-flex h-10 w-10 translate-x-3 items-center justify-center rounded-full border border-gray-300 bg-white/95 text-gray-700 shadow-sm transition-colors hover:border-[#0A332B] hover:bg-[#0A332B] hover:text-white md:translate-x-14"
+                            className="pointer-events-auto inline-flex h-10 w-10 translate-x-3 items-center justify-center rounded-full border border-gray-300 bg-white/95 text-gray-700 shadow-sm transition-colors hover:border-[var(--brand-primary)] hover:bg-[var(--brand-primary)] hover:text-white md:translate-x-14"
                         >
                             <ChevronRight className="h-4 w-4" />
                         </button>

@@ -45,11 +45,11 @@ export default function VenueCard({ venue }: VenueCardProps) {
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-700"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0A332B]/90 via-[#0A332B]/40 to-transparent z-10" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[var(--brand-primary)]/90 via-[var(--brand-primary)]/40 to-transparent z-10" />
 
                     {/* Featured Badge */}
                     {venue.isFeatured && (
-                        <div className="absolute top-6 right-6 z-20 bg-[#C5A059] text-[#1C1C1C] px-4 py-2 shadow-xl">
+                        <div className="absolute top-6 right-6 z-20 bg-[var(--gold-accent)] text-[var(--text-dark)] px-4 py-2 shadow-xl">
                             <div className="flex items-center gap-2">
                                 <Sparkles className="w-3 h-3" />
                                 <span className="text-xs font-medium tracking-[0.15em] uppercase">Featured</span>
@@ -59,14 +59,14 @@ export default function VenueCard({ venue }: VenueCardProps) {
 
                     {/* Venue Type Badge */}
                     <div className="absolute top-6 left-6 z-20">
-                        <span className="inline-block px-4 py-2 bg-white/95 backdrop-blur-sm text-[#1C1C1C] text-xs font-medium uppercase tracking-wider">
+                        <span className="inline-block px-4 py-2 bg-white/95 backdrop-blur-sm text-[var(--text-dark)] text-xs font-medium uppercase tracking-wider">
                             {venue.venueType.replace('_', ' ')}
                         </span>
                     </div>
 
                     {/* Bottom Content Overlay */}
                     <div className="absolute bottom-0 left-0 right-0 z-20 p-8">
-                        <h3 className="font-serif text-3xl text-white mb-3 tracking-tight group-hover:text-[#7A5E28] transition-colors duration-300">
+                        <h3 className="font-serif text-3xl text-white mb-3 tracking-tight group-hover:text-[var(--gold-accent-dark)] transition-colors duration-300">
                             {venue.name}
                         </h3>
                         <p className="text-white/95 text-sm mb-4 line-clamp-2 font-light">
@@ -77,19 +77,19 @@ export default function VenueCard({ venue }: VenueCardProps) {
                         <div className="flex flex-wrap gap-4 text-sm text-white/90">
                             {maxCapacity > 0 && (
                                 <div className="flex items-center gap-2">
-                                    <Users className="w-4 h-4 text-[#7A5E28]" />
+                                    <Users className="w-4 h-4 text-[var(--gold-accent-dark)]" />
                                     <span className="font-light">Up to {maxCapacity}</span>
                                 </div>
                             )}
                             {venue.area && (
                                 <div className="flex items-center gap-2">
-                                    <Maximize2 className="w-4 h-4 text-[#7A5E28]" />
+                                    <Maximize2 className="w-4 h-4 text-[var(--gold-accent-dark)]" />
                                     <span className="font-light">{venue.area} sqft</span>
                                 </div>
                             )}
                             {venue.location && (
                                 <div className="flex items-center gap-2">
-                                    <MapPin className="w-4 h-4 text-[#7A5E28]" />
+                                    <MapPin className="w-4 h-4 text-[var(--gold-accent-dark)]" />
                                     <span className="font-light">{venue.location}</span>
                                 </div>
                             )}
@@ -98,7 +98,7 @@ export default function VenueCard({ venue }: VenueCardProps) {
                 </div>
 
                 {/* View Details Bar */}
-                <div className="bg-[#0A332B] px-8 py-4 group-hover:bg-[#15443B] transition-colors duration-300">
+                <div className="bg-[var(--brand-primary)] px-8 py-4 group-hover:bg-[var(--brand-primary-dark)] transition-colors duration-300">
                     <div className="flex items-center justify-between text-white">
                         <span className="text-xs tracking-[0.2em] uppercase font-medium">View Details</span>
                         <svg className="w-5 h-5 group-hover:translate-x-2 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">

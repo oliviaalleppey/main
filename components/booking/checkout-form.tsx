@@ -61,7 +61,7 @@ export function CheckoutForm({ amount }: { amount: number }) {
             <div className="bg-gray-50 p-3 md:p-4 rounded-xl border border-gray-200">
                 <div className="flex items-center justify-between gap-3 mb-2 md:mb-3">
                     <div className="flex items-center gap-3">
-                        <CreditCard className="w-5 h-5 text-[#1C1C1C]" />
+                        <CreditCard className="w-5 h-5 text-[var(--text-dark)]" />
                         <span className="text-sm md:text-base font-medium">Secure Payment via Omniware</span>
                     </div>
                     <span className="rounded-full bg-white border border-gray-200 px-2.5 py-1 text-[11px] uppercase tracking-wider text-gray-600">
@@ -95,7 +95,7 @@ export function CheckoutForm({ amount }: { amount: number }) {
                     type="checkbox"
                     checked={acceptedTerms}
                     onChange={(e) => setAcceptedTerms(e.target.checked)}
-                    className="mt-1 h-4 w-4 rounded border-gray-300 text-[#1C1C1C] focus:ring-[#1C1C1C]"
+                    className="mt-1 h-4 w-4 rounded border-gray-300 text-[var(--text-dark)] focus:ring-[var(--text-dark)]"
                 />
                 <span className="text-sm text-gray-600">
                     I agree to the booking terms and cancellation policy.
@@ -105,7 +105,7 @@ export function CheckoutForm({ amount }: { amount: number }) {
             <Button
                 onClick={handlePayment}
                 disabled={isPending || !acceptedTerms}
-                className="w-full rounded-xl bg-[#0A332B] text-white py-3 md:py-4 text-sm font-semibold hover:bg-[#15443B] transition-colors shadow-lg shadow-[#0A332B]/20"
+                className="w-full rounded-xl bg-[var(--brand-primary)] text-white py-3 md:py-4 text-sm font-semibold hover:bg-[var(--brand-primary-dark)] transition-colors shadow-lg shadow-[var(--brand-primary)]/20"
             >
                 {isPending ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
                 {!isPending ? `Pay ${payLabel} via Omniware` : 'Redirecting to Payment...'}

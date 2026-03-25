@@ -59,7 +59,7 @@ export async function sendBookingConfirmation(params: {
             <style>
               body { font-family: 'Inter', Arial, sans-serif; line-height: 1.6; color: #1A1A1A; }
               .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-              .header { background: linear-gradient(135deg, #0A4D4E 0%, #0A4D4E 100%); color: #FFFEF9; padding: 30px; text-align: center; }
+              .header { background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-primary) 100%); color: #FFFEF9; padding: 30px; text-align: center; }
               .content { background: #F8F6F4; padding: 30px; }
               .booking-details { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
               .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #E8E6E3; }
@@ -154,7 +154,7 @@ export async function sendInquiryAcknowledgment(params: {
             <style>
               body { font-family: 'Inter', Arial, sans-serif; line-height: 1.6; color: #1A1A1A; }
               .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-              .header { background: linear-gradient(135deg, #0A4D4E 0%, #0A4D4E 100%); color: #FFFEF9; padding: 30px; text-align: center; }
+              .header { background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-primary) 100%); color: #FFFEF9; padding: 30px; text-align: center; }
               .content { background: #F8F6F4; padding: 30px; }
               .footer { text-align: center; padding: 20px; color: #B8AFA4; font-size: 14px; }
             </style>
@@ -235,13 +235,13 @@ export async function sendEventInquiryToReservations(params: {
             <style>
               body { font-family: 'Inter', Arial, sans-serif; line-height: 1.6; color: #1A1A1A; }
               .container { max-width: 680px; margin: 0 auto; padding: 20px; }
-              .header { background: #0A332B; color: #FFFEF9; padding: 24px 28px; }
+              .header { background: var(--brand-primary); color: #FFFEF9; padding: 24px 28px; }
               .content { background: #F8F6F4; padding: 24px 28px; }
               .card { background: #FFFFFF; border: 1px solid #ECE5D8; border-radius: 8px; padding: 18px; }
               .row { display: flex; justify-content: space-between; gap: 20px; padding: 8px 0; border-bottom: 1px solid #F2EDE4; }
               .row:last-child { border-bottom: 0; }
               .label { color: #5F5A4F; min-width: 180px; }
-              .value { color: #1C1C1C; text-align: right; font-weight: 500; }
+              .value { color: var(--text-dark); text-align: right; font-weight: 500; }
               .message { margin-top: 16px; padding: 14px; border-radius: 6px; background: #FAF8F2; border: 1px solid #ECE5D8; white-space: pre-wrap; }
             </style>
           </head>

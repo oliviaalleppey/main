@@ -33,7 +33,7 @@ export default function DiscoverPage() {
     ];
 
     return (
-        <div className="min-h-screen bg-[#F3EEE4] text-[#1C1C1C] selection:bg-[#1C1C1C] selection:text-white">
+        <div className="min-h-screen bg-[#F3EEE4] text-[var(--text-dark)] selection:bg-[var(--text-dark)] selection:text-white">
 
             {/* HERO: Compact style like rooms page */}
             <section className="relative h-[44vh] md:h-[52vh] w-full overflow-hidden">
@@ -44,7 +44,7 @@ export default function DiscoverPage() {
                     className="absolute inset-0 z-0"
                 >
                     {/* Dark gradient background like rooms page hero */}
-                    <div className="absolute inset-0 bg-[linear-gradient(135deg,#1C2622_0%,#2B3A34_38%,#1B2421_100%)]" />
+                    <div className="absolute inset-0 bg-[linear-gradient(135deg,var(--brand-primary-deep)_0%,var(--brand-primary-dark)_38%,var(--brand-primary-deep)_100%)]" />
                     <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_25%_30%,rgba(231,212,173,0.12)_0%,rgba(231,212,173,0)_60%)]" />
                 </motion.div>
 
@@ -139,7 +139,7 @@ export default function DiscoverPage() {
 
                         <div className="lg:col-span-8">
                             <div className="rounded-[34px] border border-[#E2D7C7] bg-[#FDFBF7] overflow-hidden">
-                                <div className="relative h-[320px] md:h-[420px] lg:h-[520px] bg-[#E8E2D9] flex items-center justify-center">
+                                <div className="relative h-[320px] md:h-[420px] lg:h-[520px] bg-[var(--surface-soft)] flex items-center justify-center">
                                     <p className="text-[#8D8378] text-sm">Olivia Heritage</p>
                                     <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.10)_0%,rgba(0,0,0,0)_52%,rgba(0,0,0,0.08)_100%)]" />
                                 </div>
@@ -240,9 +240,9 @@ export default function DiscoverPage() {
                         </div>
                         <Link
                             href="/experiences"
-                            className="inline-flex items-center gap-3 text-[#1C1C1C] hover:opacity-80 transition-opacity"
+                            className="inline-flex items-center gap-3 text-[var(--text-dark)] hover:opacity-80 transition-opacity"
                         >
-                            <span className="text-[11px] tracking-[0.36em] uppercase border-b border-[#BDB6AD] pb-1 hover:border-[#1C1C1C] transition-colors">
+                            <span className="text-[11px] tracking-[0.36em] uppercase border-b border-[#BDB6AD] pb-1 hover:border-[var(--text-dark)] transition-colors">
                                 View all experiences
                             </span>
                             <span aria-hidden className="text-lg leading-none">→</span>
@@ -258,15 +258,15 @@ export default function DiscoverPage() {
                                     idx === 0 ? 'lg:col-span-7' : 'lg:col-span-5',
                                 ].join(' ')}
                             >
-                                <div className="h-[240px] md:h-[290px] lg:h-[320px] bg-[#E8E2D9]" />
+                                <div className="h-[240px] md:h-[290px] lg:h-[320px] bg-[var(--surface-soft)]" />
                                 <div className="p-7 md:p-8 lg:p-10">
                                     <p className="text-[10px] tracking-[0.32em] uppercase text-[#6B645C]">{exp.subtitle}</p>
                                     <h3 className="mt-3 font-serif font-semibold text-[2.1rem] leading-tight">
                                         {exp.title}
                                     </h3>
                                     <p className="mt-3 text-[#59544D] leading-relaxed">{exp.description}</p>
-                                    <div className="mt-7 inline-flex items-center gap-3 text-[#1C1C1C] opacity-70 group-hover:opacity-100 transition-opacity">
-                                        <span className="text-[11px] tracking-[0.36em] uppercase border-b border-[#BDB6AD] pb-1 group-hover:border-[#1C1C1C] transition-colors">
+                                    <div className="mt-7 inline-flex items-center gap-3 text-[var(--text-dark)] opacity-70 group-hover:opacity-100 transition-opacity">
+                                        <span className="text-[11px] tracking-[0.36em] uppercase border-b border-[#BDB6AD] pb-1 group-hover:border-[var(--text-dark)] transition-colors">
                                             Explore
                                         </span>
                                         <span aria-hidden className="text-lg leading-none">→</span>
@@ -290,13 +290,13 @@ export default function DiscoverPage() {
                             <div className="lg:col-span-5 flex flex-col sm:flex-row lg:flex-col gap-3">
                                 <Link
                                     href="/rooms"
-                                    className="inline-flex items-center justify-center rounded-xl bg-[#1C1C1C] px-8 py-3.5 text-white text-[11px] font-semibold tracking-[0.18em] uppercase hover:bg-[#333333] transition-colors"
+                                    className="inline-flex items-center justify-center rounded-xl bg-[var(--text-dark)] px-8 py-3.5 text-white text-[11px] font-semibold tracking-[0.18em] uppercase hover:bg-[#333333] transition-colors"
                                 >
                                     View rooms
                                 </Link>
                                 <Link
                                     href="/book/search"
-                                    className="inline-flex items-center justify-center rounded-xl border border-[#CFC6BA] bg-transparent px-8 py-3.5 text-[#1C1C1C] text-[11px] tracking-[0.18em] uppercase hover:bg-white/60 transition-colors"
+                                    className="inline-flex items-center justify-center rounded-xl border border-[#CFC6BA] bg-transparent px-8 py-3.5 text-[var(--text-dark)] text-[11px] tracking-[0.18em] uppercase hover:bg-white/60 transition-colors"
                                 >
                                     Check availability
                                 </Link>

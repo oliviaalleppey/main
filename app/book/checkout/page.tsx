@@ -330,7 +330,7 @@ export default async function CheckoutPage({
     const searchError = searchPayload.error;
 
     return (
-        <div className="min-h-screen bg-[#F6F1E8] py-4 md:py-8 px-4 md:px-6">
+        <div className="min-h-screen bg-[var(--surface-cream)] py-4 md:py-8 px-4 md:px-6">
             <CheckoutStepper
                 hasGuestDetails={hasRequiredGuestDetails}
                 initialStep={initialStep}
@@ -391,7 +391,7 @@ export default async function CheckoutPage({
                 paymentContent={
                     <div>
                         <div className="mb-4">
-                            <h3 className="text-lg font-semibold text-[#1C1C1C]">Payment</h3>
+                            <h3 className="text-lg font-semibold text-[var(--text-dark)]">Payment</h3>
                             <p className="text-xs text-gray-500 mt-0.5">Final step to confirm your reservation</p>
                         </div>
                         {error && (
@@ -433,7 +433,7 @@ export default async function CheckoutPage({
                                     </div>
                                 )}
                                 <div className="min-w-0 flex-1">
-                                    <h3 className="font-serif text-lg leading-tight text-[#1C1C1C]">
+                                    <h3 className="font-serif text-lg leading-tight text-[var(--text-dark)]">
                                         {primaryRoomName}
                                         {selectedRoomTypeCount > 1 ? ` + ${selectedRoomTypeCount - 1} more type${selectedRoomTypeCount - 1 > 1 ? 's' : ''}` : ''}
                                     </h3>
@@ -496,8 +496,8 @@ export default async function CheckoutPage({
 
                         <div className="mt-5 border-t border-gray-200 pt-4">
                             <div className="flex justify-between items-center">
-                                <span className="text-[#1C1C1C] font-semibold text-[13px] uppercase tracking-[0.1em]">Total Amount</span>
-                                <span className="text-2xl font-medium text-[#1C1C1C] tracking-tight">{formatCurrency(totalPrice)}</span>
+                                <span className="text-[var(--text-dark)] font-semibold text-[13px] uppercase tracking-[0.1em]">Total Amount</span>
+                                <span className="text-2xl font-medium text-[var(--text-dark)] tracking-tight">{formatCurrency(totalPrice)}</span>
                             </div>
                         </div>
                     </div>

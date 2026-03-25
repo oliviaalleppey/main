@@ -30,7 +30,7 @@ export default function GalleryPage() {
         : galleryImages.filter(img => img.category === selectedCategory);
 
     return (
-        <main className="min-h-screen bg-[#F6F1E8] font-sans">
+        <main className="min-h-screen bg-[var(--surface-cream)] font-sans">
 
             {/* Hero Section - Compact style like rooms page */}
             <section className="relative h-[44vh] md:h-[52vh] w-full overflow-hidden">
@@ -41,7 +41,7 @@ export default function GalleryPage() {
                     className="absolute inset-0 z-0"
                 >
                     {/* Dark gradient background like rooms page hero */}
-                    <div className="absolute inset-0 bg-[linear-gradient(135deg,#1C2622_0%,#2B3A34_38%,#1B2421_100%)]" />
+                    <div className="absolute inset-0 bg-[linear-gradient(135deg,var(--brand-primary-deep)_0%,var(--brand-primary-dark)_38%,var(--brand-primary-deep)_100%)]" />
                     <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_25%_30%,rgba(231,212,173,0.18)_0%,rgba(231,212,173,0)_60%)]" />
                     <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/15 to-black/40" />
                 </motion.div>
@@ -104,8 +104,8 @@ export default function GalleryPage() {
                                 key={category}
                                 onClick={() => setSelectedCategory(category)}
                                 className={`px-6 py-3 text-sm uppercase tracking-wider transition-all ${selectedCategory === category
-                                    ? 'text-[#0A4D4E] border-b-2 border-[#0A4D4E]'
-                                    : 'text-[#59544D] hover:text-[#1C1C1C]'
+                                    ? 'text-[var(--brand-primary)] border-b-2 border-[var(--brand-primary)]'
+                                    : 'text-[#59544D] hover:text-[var(--text-dark)]'
                                     }`}
                             >
                                 {category}
@@ -126,13 +126,13 @@ export default function GalleryPage() {
                             >
                                 {/* Image */}
                                 <div className="relative h-72 bg-gray-100 mb-4 overflow-hidden">
-                                    <div className="absolute inset-0 bg-gradient-to-t from-[#0A4D4E]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-[var(--brand-primary)]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                                     <div className="w-full h-full flex items-center justify-center">
-                                        <p className="text-[#1C1C1C]/20 text-sm">Image: {image.title}</p>
+                                        <p className="text-[var(--text-dark)]/20 text-sm">Image: {image.title}</p>
                                     </div>
 
                                     {/* Overlay on Hover */}
-                                    <div className="absolute inset-0 bg-[#0A4D4E]/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <div className="absolute inset-0 bg-[var(--brand-primary)]/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                         <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
                                         </svg>
@@ -141,8 +141,8 @@ export default function GalleryPage() {
 
                                 {/* Image Info */}
                                 <div>
-                                    <p className="text-[#7A5E28] text-xs tracking-[0.2em] uppercase mb-1">{image.category}</p>
-                                    <h3 className="text-lg font-serif text-[#1C1C1C] mb-1">{image.title}</h3>
+                                    <p className="text-[var(--gold-accent-dark)] text-xs tracking-[0.2em] uppercase mb-1">{image.category}</p>
+                                    <h3 className="text-lg font-serif text-[var(--text-dark)] mb-1">{image.title}</h3>
                                     <p className="text-sm text-[#59544D]">{image.description}</p>
                                 </div>
                             </div>
@@ -158,7 +158,7 @@ export default function GalleryPage() {
             </section>
 
             {/* CTA Section */}
-            <section className="py-20 px-6 md:px-12 bg-[#0A4D4E]">
+            <section className="py-20 px-6 md:px-12 bg-[var(--brand-primary)]">
                 <div className="max-w-4xl mx-auto text-center">
                     <h2 className="text-3xl md:text-4xl font-serif text-white mb-6 tracking-wide">
                         Experience It Yourself
@@ -168,7 +168,7 @@ export default function GalleryPage() {
                     </p>
                     <a
                         href="#booking-search"
-                        className="inline-block bg-white text-[#0A4D4E] px-8 py-4 text-sm uppercase tracking-[0.2em] hover:bg-[#C5A059] hover:text-white transition-colors"
+                        className="inline-block bg-white text-[var(--brand-primary)] px-8 py-4 text-sm uppercase tracking-[0.2em] hover:bg-[var(--gold-accent)] hover:text-white transition-colors"
                     >
                         Book Your Stay
                     </a>

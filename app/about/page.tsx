@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 
 export default function AboutPage() {
     return (
-        <main className="min-h-screen bg-[#F6F1E8] font-sans">
+        <main className="min-h-screen bg-[var(--surface-cream)] font-sans">
 
 
             {/* Hero Section - Compact style like rooms page */}
@@ -17,7 +17,7 @@ export default function AboutPage() {
                     className="absolute inset-0 z-0"
                 >
                     {/* Dark gradient background like rooms page hero */}
-                    <div className="absolute inset-0 bg-[linear-gradient(135deg,#1C2622_0%,#2B3A34_38%,#1B2421_100%)]" />
+                    <div className="absolute inset-0 bg-[linear-gradient(135deg,var(--brand-primary-deep)_0%,var(--brand-primary-dark)_38%,var(--brand-primary-deep)_100%)]" />
                     <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_25%_30%,rgba(231,212,173,0.18)_0%,rgba(231,212,173,0)_60%)]" />
                     <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/15 to-black/40" />
                 </motion.div>
@@ -72,10 +72,10 @@ export default function AboutPage() {
             <section id="brand-story" className="py-24 px-6 md:px-12">
                 <div className="max-w-4xl mx-auto">
                     <div className="text-center mb-16">
-                        <h2 className="text-4xl md:text-5xl font-serif text-[#1C1C1C] mb-8 tracking-wide">
+                        <h2 className="text-4xl md:text-5xl font-serif text-[var(--text-dark)] mb-8 tracking-wide">
                             Our Story
                         </h2>
-                        <div className="w-16 h-[1px] bg-[#C5A059] mx-auto mb-8" />
+                        <div className="w-16 h-[1px] bg-[var(--gold-accent)] mx-auto mb-8" />
                     </div>
 
                     <div className="space-y-6 text-[#403A35] text-lg leading-relaxed">
@@ -114,44 +114,44 @@ export default function AboutPage() {
             <section className="py-24 px-6 md:px-12 bg-white">
                 <div className="max-w-6xl mx-auto">
                     <div className="text-center mb-16">
-                        <p className="text-[#7A5E28] text-sm tracking-[0.3em] uppercase mb-4">What Drives Us</p>
-                        <h2 className="text-4xl md:text-5xl font-serif text-[#1C1C1C] tracking-wide">Our Values</h2>
+                        <p className="text-[var(--gold-accent-dark)] text-sm tracking-[0.3em] uppercase mb-4">What Drives Us</p>
+                        <h2 className="text-4xl md:text-5xl font-serif text-[var(--text-dark)] tracking-wide">Our Values</h2>
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-8">
-                        <div className="text-center p-8 border border-[#DED6CB] hover:border-[#C5A059] transition-colors">
-                            <div className="w-16 h-16 bg-[#C5A059]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <svg className="w-8 h-8 text-[#7A5E28]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="text-center p-8 border border-[#DED6CB] hover:border-[var(--gold-accent)] transition-colors">
+                            <div className="w-16 h-16 bg-[var(--gold-accent)]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <svg className="w-8 h-8 text-[var(--gold-accent-dark)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                                 </svg>
                             </div>
-                            <h3 className="text-xl font-serif text-[#1C1C1C] mb-4">Excellence</h3>
+                            <h3 className="text-xl font-serif text-[var(--text-dark)] mb-4">Excellence</h3>
                             <p className="text-[#59544D] leading-relaxed">
                                 We strive for perfection in every aspect of our service, from the quality
                                 of our amenities to the warmth of our hospitality.
                             </p>
                         </div>
 
-                        <div className="text-center p-8 border border-[#DED6CB] hover:border-[#C5A059] transition-colors">
-                            <div className="w-16 h-16 bg-[#C5A059]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <svg className="w-8 h-8 text-[#7A5E28]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="text-center p-8 border border-[#DED6CB] hover:border-[var(--gold-accent)] transition-colors">
+                            <div className="w-16 h-16 bg-[var(--gold-accent)]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <svg className="w-8 h-8 text-[var(--gold-accent-dark)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                 </svg>
                             </div>
-                            <h3 className="text-xl font-serif text-[#1C1C1C] mb-4">Authenticity</h3>
+                            <h3 className="text-xl font-serif text-[var(--text-dark)] mb-4">Authenticity</h3>
                             <p className="text-[#59544D] leading-relaxed">
                                 We celebrate Kerala's rich heritage while embracing modern luxury,
                                 creating experiences that are both genuine and extraordinary.
                             </p>
                         </div>
 
-                        <div className="text-center p-8 border border-[#DED6CB] hover:border-[#C5A059] transition-colors">
-                            <div className="w-16 h-16 bg-[#C5A059]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <svg className="w-8 h-8 text-[#7A5E28]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="text-center p-8 border border-[#DED6CB] hover:border-[var(--gold-accent)] transition-colors">
+                            <div className="w-16 h-16 bg-[var(--gold-accent)]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <svg className="w-8 h-8 text-[var(--gold-accent-dark)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                                 </svg>
                             </div>
-                            <h3 className="text-xl font-serif text-[#1C1C1C] mb-4">Community</h3>
+                            <h3 className="text-xl font-serif text-[var(--text-dark)] mb-4">Community</h3>
                             <p className="text-[#59544D] leading-relaxed">
                                 We are committed to supporting our local community and preserving the
                                 natural beauty that surrounds us.
@@ -162,12 +162,12 @@ export default function AboutPage() {
             </section>
 
             {/* Location */}
-            <section className="py-24 px-6 md:px-12 bg-[#E8E2D9]">
+            <section className="py-24 px-6 md:px-12 bg-[var(--surface-soft)]">
                 <div className="max-w-6xl mx-auto">
                     <div className="grid md:grid-cols-2 gap-16 items-center">
                         <div>
-                            <p className="text-[#7A5E28] text-sm tracking-[0.3em] uppercase mb-4">Alappuzha, Kerala</p>
-                            <h2 className="text-4xl font-serif text-[#1C1C1C] mb-8 tracking-wide">
+                            <p className="text-[var(--gold-accent-dark)] text-sm tracking-[0.3em] uppercase mb-4">Alappuzha, Kerala</p>
+                            <h2 className="text-4xl font-serif text-[var(--text-dark)] mb-8 tracking-wide">
                                 Our Location
                             </h2>
                             <p className="text-[#403A35] text-lg leading-relaxed mb-6">
@@ -181,7 +181,7 @@ export default function AboutPage() {
                             </p>
                             <Link
                                 href="/contact"
-                                className="inline-block bg-[#0A4D4E] text-white px-8 py-4 text-sm uppercase tracking-[0.2em] hover:bg-[#15443B] transition-colors"
+                                className="inline-block bg-[var(--brand-primary)] text-white px-8 py-4 text-sm uppercase tracking-[0.2em] hover:bg-[var(--brand-primary-dark)] transition-colors"
                             >
                                 Get Directions
                             </Link>
@@ -203,7 +203,7 @@ export default function AboutPage() {
             </section>
 
             {/* CTA Section */}
-            <section className="py-20 px-6 md:px-12 bg-[#0A4D4E]">
+            <section className="py-20 px-6 md:px-12 bg-[var(--brand-primary)]">
                 <div className="max-w-4xl mx-auto text-center">
                     <h2 className="text-3xl md:text-4xl font-serif text-white mb-6 tracking-wide">
                         Experience Olivia International
@@ -213,7 +213,7 @@ export default function AboutPage() {
                     </p>
                     <Link
                         href="#booking-search"
-                        className="inline-block bg-white text-[#0A4D4E] px-8 py-4 text-sm uppercase tracking-[0.2em] hover:bg-[#C5A059] hover:text-white transition-colors"
+                        className="inline-block bg-white text-[var(--brand-primary)] px-8 py-4 text-sm uppercase tracking-[0.2em] hover:bg-[var(--gold-accent)] hover:text-white transition-colors"
                     >
                         Book Your Stay
                     </Link>

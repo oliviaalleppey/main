@@ -13,7 +13,7 @@ export function ExperiencesHero() {
                 className="absolute inset-0 z-0"
             >
                 {/* Dark gradient background like rooms page hero */}
-                <div className="absolute inset-0 bg-[linear-gradient(135deg,#1C2622_0%,#2B3A34_38%,#1B2421_100%)]" />
+                <div className="absolute inset-0 bg-[linear-gradient(135deg,var(--brand-primary-deep)_0%,var(--brand-primary-dark)_38%,var(--brand-primary-deep)_100%)]" />
                 <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_25%_30%,rgba(231,212,173,0.18)_0%,rgba(231,212,173,0)_60%)]" />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/15 to-black/40" />
             </motion.div>

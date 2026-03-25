@@ -4,7 +4,7 @@ const TICKER_TEXT = 'OLIVIA · ALLEPPEY · KERALA · LUXURY · HERITAGE · WELLN
 
 export default function BrandMarquee() {
     return (
-        <section className="bg-[#0A332B] py-5 overflow-hidden">
+        <section className="bg-[var(--brand-primary)] py-5 overflow-hidden">
             <div className="flex overflow-hidden select-none">
                 <div className="flex animate-marquee whitespace-nowrap">
                     {[...Array(4)].map((_, i) => (

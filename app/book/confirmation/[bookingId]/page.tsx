@@ -87,7 +87,7 @@ export default async function ConfirmationPage({ params }: { params: Promise<{ b
     }
 
     return (
-        <div className="min-h-screen bg-[#F6F1E8] py-20 px-6 flex items-center justify-center">
+        <div className="min-h-screen bg-[var(--surface-cream)] py-20 px-6 flex items-center justify-center">
             <div className="bg-white max-w-2xl w-full p-12 rounded-2xl shadow-sm border border-gray-100 text-center">
                 <div className="flex justify-center mb-6">
                     <div className={`w-20 h-20 ${iconBg} rounded-full flex items-center justify-center`}>
@@ -107,7 +107,7 @@ export default async function ConfirmationPage({ params }: { params: Promise<{ b
                 {(booking.status === 'confirmed') && (
                     <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 mb-8 max-w-md mx-auto relative">
                         <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">Confirmation Number</p>
-                        <p className="text-2xl font-mono font-bold text-[#1C1C1C] flex items-center justify-center gap-2">
+                        <p className="text-2xl font-mono font-bold text-[var(--text-dark)] flex items-center justify-center gap-2">
                             {confirmation?.confirmationNumber || booking.bookingNumber}
                             <Copy className="w-4 h-4 text-gray-400 cursor-pointer" />
                         </p>
@@ -149,7 +149,7 @@ export default async function ConfirmationPage({ params }: { params: Promise<{ b
                         <Button variant="outline" className="px-8 py-6 rounded-none">Return Home</Button>
                     </Link>
                     {booking.status === 'confirmed' && (
-                        <Button className="bg-[#1C1C1C] text-white px-8 py-6 rounded-none hover:bg-[#E95D20] transition-colors">
+                        <Button className="bg-[var(--text-dark)] text-white px-8 py-6 rounded-none hover:bg-[#E95D20] transition-colors">
                             Download Voucher
                         </Button>
                     )}

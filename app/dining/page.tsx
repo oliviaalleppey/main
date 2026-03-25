@@ -174,7 +174,7 @@ function DiningCard({ outlet }: { outlet: DiningOutlet }) {
                     </Link>
                     <a
                         href="tel:+918075416514"
-                        className="inline-flex items-center rounded-lg bg-[#B68845] px-4 py-2 text-white text-[11px] tracking-[0.14em] uppercase hover:bg-[#A97E3F] transition-colors"
+                        className="inline-flex items-center rounded-lg bg-[var(--gold-cta)] px-4 py-2 text-white text-[11px] tracking-[0.14em] uppercase hover:bg-[var(--gold-cta-dark)] transition-colors"
                     >
                         Reserve Table
                     </a>
@@ -193,7 +193,7 @@ function DataLine({
 }) {
     return (
         <span className="inline-flex items-center gap-1.5 text-sm md:text-base">
-            <Icon className="w-4 h-4 text-[#B68845]" />
+            <Icon className="w-4 h-4 text-[var(--gold-cta)]" />
             <span>{value}</span>
         </span>
     );

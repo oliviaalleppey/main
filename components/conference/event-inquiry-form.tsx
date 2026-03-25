@@ -150,7 +150,7 @@ export default function EventInquiryForm() {
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="inline-flex items-center gap-2 bg-[#0A332B] text-white px-8 py-3 text-[11px] tracking-[0.2em] uppercase hover:bg-[#15443B] transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                        className="inline-flex items-center gap-2 bg-[var(--brand-primary)] text-white px-8 py-3 text-[11px] tracking-[0.2em] uppercase hover:bg-[var(--brand-primary-dark)] transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
                     >
                         {isSubmitting ? (
                             <>
@@ -185,7 +185,7 @@ export default function EventInquiryForm() {
                             <X className="w-4 h-4" />
                         </button>
                         <div className="flex items-start gap-3">
-                            <CheckCircle2 className="w-8 h-8 text-[#0A332B] mt-0.5" />
+                            <CheckCircle2 className="w-8 h-8 text-[var(--brand-primary)] mt-0.5" />
                             <div>
                                 <h3 className="font-serif text-2xl text-[#1D1D1D]">Plan Sent Successfully</h3>
                                 <p className="mt-2 text-sm text-[#5A564E] leading-relaxed">
@@ -196,7 +196,7 @@ export default function EventInquiryForm() {
                         <div className="mt-5 flex justify-end">
                             <button
                                 type="button"
-                                className="inline-flex items-center gap-2 bg-[#0A332B] text-white px-5 py-2.5 text-[11px] tracking-[0.2em] uppercase hover:bg-[#15443B] transition-colors"
+                                className="inline-flex items-center gap-2 bg-[var(--brand-primary)] text-white px-5 py-2.5 text-[11px] tracking-[0.2em] uppercase hover:bg-[var(--brand-primary-dark)] transition-colors"
                                 onClick={() => setSuccessOpen(false)}
                             >
                                 Done

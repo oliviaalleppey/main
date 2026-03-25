@@ -80,7 +80,7 @@ export default async function RoomDetailPage({ params }: { params: Promise<{ slu
     }));
 
     return (
-        <main className="min-h-screen bg-[#F6F1E8] font-sans selection:bg-[#1C1C1C] selection:text-white pb-40 md:pb-0 pt-0 md:pt-8">
+        <main className="min-h-screen bg-[var(--surface-cream)] font-sans selection:bg-[var(--text-dark)] selection:text-white pb-40 md:pb-0 pt-0 md:pt-8">
 
             {/* Booking Search Bar */}
             <section className="md:sticky md:top-[var(--site-header-height,80px)] z-40 max-w-[1400px] mx-auto md:px-6 md:mb-6 md:pt-4 pointer-events-none md:pointer-events-auto">
@@ -91,7 +91,7 @@ export default async function RoomDetailPage({ params }: { params: Promise<{ slu
 
             {/* Title Section (Above Grid) */}
             <section className="pt-6 pb-6 px-6 md:px-12 max-w-[1400px] mx-auto">
-                <h1 className="font-serif text-4xl md:text-5xl tracking-tight text-[#1C1C1C] mb-1">
+                <h1 className="font-serif text-4xl md:text-5xl tracking-tight text-[var(--text-dark)] mb-1">
                     {roomName}
                 </h1>
                 <p className="text-lg text-[#59544D] font-light">

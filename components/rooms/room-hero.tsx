@@ -56,7 +56,7 @@ export default function RoomHero({ images }: RoomHeroProps) {
                     <button
                         key={image.id}
                         type="button"
-                        className="relative flex-none w-[85vw] md:w-[22vw] h-[500px] snap-center first:pl-0 group overflow-hidden cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#BCA06F]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#F6F1E8]"
+                        className="relative flex-none w-[85vw] md:w-[22vw] h-[500px] snap-center first:pl-0 group overflow-hidden cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#BCA06F]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-cream)]"
                         onClick={() => openLightbox(idx)}
                         aria-label={`Open image ${idx + 1} of ${displayImages.length}`}
                     >

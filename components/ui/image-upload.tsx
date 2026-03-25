@@ -72,7 +72,7 @@ export function ImageUpload({
                 {value.map((url, index) => (
                     <div
                         key={url}
-                        className={`relative w-[200px] h-[200px] rounded-md overflow-hidden border transition-colors ${dragOverIndex === index ? 'border-[#0A332B]' : 'border-transparent'
+                        className={`relative w-[200px] h-[200px] rounded-md overflow-hidden border transition-colors ${dragOverIndex === index ? 'border-[var(--brand-primary)]' : 'border-transparent'
                             }`}
                         draggable={!disabled && !isUploading}
                         onDragStart={(e) => {

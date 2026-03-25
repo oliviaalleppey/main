@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 
 export default function SignInPage() {
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-[#F6F1E8] font-sans p-4">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-[var(--surface-cream)] font-sans p-4">
             <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center">
                 <h1 className="text-3xl font-serif text-gray-900 tracking-wide mb-2">Olivia Admin</h1>
                 <p className="text-gray-500 mb-8">Access the hotel management dashboard</p>

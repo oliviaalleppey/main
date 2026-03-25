@@ -44,7 +44,7 @@ const comingSoonProducts = [
 
 export default function ShopPage() {
     return (
-        <main className="min-h-screen bg-[#F6F1E8] font-sans">
+        <main className="min-h-screen bg-[var(--surface-cream)] font-sans">
 
             {/* Hero Section - Compact style like rooms page */}
             <section className="relative h-[44vh] md:h-[52vh] w-full overflow-hidden">
@@ -55,7 +55,7 @@ export default function ShopPage() {
                     className="absolute inset-0 z-0"
                 >
                     {/* Dark gradient background like rooms page hero */}
-                    <div className="absolute inset-0 bg-[linear-gradient(135deg,#1C2622_0%,#2B3A34_38%,#1B2421_100%)]" />
+                    <div className="absolute inset-0 bg-[linear-gradient(135deg,var(--brand-primary-deep)_0%,var(--brand-primary-dark)_38%,var(--brand-primary-deep)_100%)]" />
                     <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_25%_30%,rgba(231,212,173,0.18)_0%,rgba(231,212,173,0)_60%)]" />
                     <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/15 to-black/40" />
                 </motion.div>
@@ -107,7 +107,7 @@ export default function ShopPage() {
             </section>
 
             {/* Coming Soon Banner */}
-            <section id="shop-collection" className="py-16 px-6 md:px-12 bg-[#C5A059]">
+            <section id="shop-collection" className="py-16 px-6 md:px-12 bg-[var(--gold-accent)]">
                 <div className="max-w-4xl mx-auto text-center">
                     <h2 className="text-2xl md:text-3xl font-serif text-white mb-4 tracking-wide">
                         Coming Soon
@@ -122,8 +122,8 @@ export default function ShopPage() {
             <section className="py-24 px-6 md:px-12">
                 <div className="max-w-6xl mx-auto">
                     <div className="text-center mb-16">
-                        <p className="text-[#7A5E28] text-sm tracking-[0.3em] uppercase mb-4">Preview</p>
-                        <h2 className="text-4xl md:text-5xl font-serif text-[#1C1C1C] tracking-wide">
+                        <p className="text-[var(--gold-accent-dark)] text-sm tracking-[0.3em] uppercase mb-4">Preview</p>
+                        <h2 className="text-4xl md:text-5xl font-serif text-[var(--text-dark)] tracking-wide">
                             What's In Store
                         </h2>
                         <p className="text-[#59544D] mt-4 max-w-2xl mx-auto">
@@ -134,20 +134,20 @@ export default function ShopPage() {
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {comingSoonProducts.map((product, idx) => (
                             <div key={idx} className="group">
-                                <div className="relative h-80 bg-[#E8E2D9] mb-6 overflow-hidden">
-                                    <div className="absolute inset-0 bg-gradient-to-t from-[#0A4D4E]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                <div className="relative h-80 bg-[var(--surface-soft)] mb-6 overflow-hidden">
+                                    <div className="absolute inset-0 bg-gradient-to-t from-[var(--brand-primary)]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                                     <div className="w-full h-full flex items-center justify-center">
-                                        <p className="text-[#1C1C1C]/20 text-sm">Product Image</p>
+                                        <p className="text-[var(--text-dark)]/20 text-sm">Product Image</p>
                                     </div>
                                     <div className="absolute top-4 left-4">
-                                        <span className="bg-[#C5A059] text-white text-xs uppercase tracking-wider px-3 py-1">
+                                        <span className="bg-[var(--gold-accent)] text-white text-xs uppercase tracking-wider px-3 py-1">
                                             {product.category}
                                         </span>
                                     </div>
                                 </div>
-                                <h3 className="text-xl font-serif text-[#1C1C1C] mb-2">{product.name}</h3>
+                                <h3 className="text-xl font-serif text-[var(--text-dark)] mb-2">{product.name}</h3>
                                 <p className="text-[#59544D] text-sm mb-3">{product.description}</p>
-                                <p className="text-[#0A4D4E] font-medium">{product.price}</p>
+                                <p className="text-[var(--brand-primary)] font-medium">{product.price}</p>
                             </div>
                         ))}
                     </div>
@@ -157,7 +157,7 @@ export default function ShopPage() {
             {/* Newsletter Signup */}
             <section className="py-24 px-6 md:px-12 bg-white">
                 <div className="max-w-2xl mx-auto text-center">
-                    <h2 className="text-3xl md:text-4xl font-serif text-[#1C1C1C] mb-6 tracking-wide">
+                    <h2 className="text-3xl md:text-4xl font-serif text-[var(--text-dark)] mb-6 tracking-wide">
                         Be the First to Know
                     </h2>
                     <p className="text-[#403A35] mb-8">
@@ -167,11 +167,11 @@ export default function ShopPage() {
                         <input
                             type="email"
                             placeholder="Enter your email"
-                            className="flex-1 px-6 py-4 border border-[#BEB4A8] focus:border-[#2C2C2C] outline-none text-sm"
+                            className="flex-1 px-6 py-4 border border-[#BEB4A8] focus:border-[var(--btn-dark)] outline-none text-sm"
                         />
                         <button
                             type="submit"
-                            className="bg-[#0A4D4E] text-white px-8 py-4 text-sm uppercase tracking-[0.2em] hover:bg-[#15443B] transition-colors whitespace-nowrap"
+                            className="bg-[var(--brand-primary)] text-white px-8 py-4 text-sm uppercase tracking-[0.2em] hover:bg-[var(--brand-primary-dark)] transition-colors whitespace-nowrap"
                         >
                             Notify Me
                         </button>
@@ -183,12 +183,12 @@ export default function ShopPage() {
             </section>
 
             {/* Gift Cards Section */}
-            <section className="py-24 px-6 md:px-12 bg-[#E8E2D9]">
+            <section className="py-24 px-6 md:px-12 bg-[var(--surface-soft)]">
                 <div className="max-w-6xl mx-auto">
                     <div className="grid md:grid-cols-2 gap-16 items-center">
                         <div>
-                            <p className="text-[#7A5E28] text-sm tracking-[0.3em] uppercase mb-4">Available Now</p>
-                            <h2 className="text-4xl md:text-5xl font-serif text-[#1C1C1C] mb-8 tracking-wide">
+                            <p className="text-[var(--gold-accent-dark)] text-sm tracking-[0.3em] uppercase mb-4">Available Now</p>
+                            <h2 className="text-4xl md:text-5xl font-serif text-[var(--text-dark)] mb-8 tracking-wide">
                                 Olivia Gift Cards
                             </h2>
                             <p className="text-[#403A35] text-lg leading-relaxed mb-6">
@@ -197,25 +197,25 @@ export default function ShopPage() {
                             </p>
                             <ul className="space-y-3 mb-8">
                                 <li className="flex items-center gap-3 text-[#403A35]">
-                                    <svg className="w-5 h-5 text-[#7A5E28]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-5 h-5 text-[var(--gold-accent-dark)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                     </svg>
                                     Available in denominations from ₹5,000 to ₹1,00,000
                                 </li>
                                 <li className="flex items-center gap-3 text-[#403A35]">
-                                    <svg className="w-5 h-5 text-[#7A5E28]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-5 h-5 text-[var(--gold-accent-dark)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                     </svg>
                                     Valid for 2 years from purchase date
                                 </li>
                                 <li className="flex items-center gap-3 text-[#403A35]">
-                                    <svg className="w-5 h-5 text-[#7A5E28]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-5 h-5 text-[var(--gold-accent-dark)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                     </svg>
                                     Beautiful presentation packaging
                                 </li>
                                 <li className="flex items-center gap-3 text-[#403A35]">
-                                    <svg className="w-5 h-5 text-[#7A5E28]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-5 h-5 text-[var(--gold-accent-dark)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                     </svg>
                                     Digital delivery available
@@ -223,7 +223,7 @@ export default function ShopPage() {
                             </ul>
                             <Link
                                 href="/contact"
-                                className="inline-block bg-[#0A4D4E] text-white px-8 py-4 text-sm uppercase tracking-[0.2em] hover:bg-[#15443B] transition-colors"
+                                className="inline-block bg-[var(--brand-primary)] text-white px-8 py-4 text-sm uppercase tracking-[0.2em] hover:bg-[var(--brand-primary-dark)] transition-colors"
                             >
                                 Inquire About Gift Cards
                             </Link>
@@ -231,8 +231,8 @@ export default function ShopPage() {
                         <div className="relative h-[400px] bg-white shadow-lg">
                             <div className="absolute inset-0 flex items-center justify-center">
                                 <div className="text-center p-8">
-                                    <p className="text-[#7A5E28] text-sm tracking-[0.3em] uppercase mb-4">Gift Card</p>
-                                    <p className="text-4xl font-serif text-[#1C1C1C] mb-2">Olivia International</p>
+                                    <p className="text-[var(--gold-accent-dark)] text-sm tracking-[0.3em] uppercase mb-4">Gift Card</p>
+                                    <p className="text-4xl font-serif text-[var(--text-dark)] mb-2">Olivia International</p>
                                     <p className="text-[#59544D] text-sm">The Gift of Luxury</p>
                                 </div>
                             </div>
@@ -244,8 +244,8 @@ export default function ShopPage() {
             {/* In-Room Amenities */}
             <section className="py-24 px-6 md:px-12">
                 <div className="max-w-4xl mx-auto text-center">
-                    <p className="text-[#7A5E28] text-sm tracking-[0.3em] uppercase mb-4">For Our Guests</p>
-                    <h2 className="text-4xl md:text-5xl font-serif text-[#1C1C1C] mb-8 tracking-wide">
+                    <p className="text-[var(--gold-accent-dark)] text-sm tracking-[0.3em] uppercase mb-4">For Our Guests</p>
+                    <h2 className="text-4xl md:text-5xl font-serif text-[var(--text-dark)] mb-8 tracking-wide">
                         In-Room Shopping
                     </h2>
                     <p className="text-[#403A35] text-lg leading-relaxed mb-8">
@@ -255,7 +255,7 @@ export default function ShopPage() {
                     </p>
                     <Link
                         href="/rooms"
-                        className="inline-block border border-[#0A4D4E] text-[#0A4D4E] px-8 py-4 text-sm uppercase tracking-[0.2em] hover:bg-[#0A4D4E] hover:text-white transition-colors"
+                        className="inline-block border border-[var(--brand-primary)] text-[var(--brand-primary)] px-8 py-4 text-sm uppercase tracking-[0.2em] hover:bg-[var(--brand-primary)] hover:text-white transition-colors"
                     >
                         Explore Our Rooms
                     </Link>
@@ -263,7 +263,7 @@ export default function ShopPage() {
             </section>
 
             {/* CTA Section */}
-            <section className="py-20 px-6 md:px-12 bg-[#0A4D4E]">
+            <section className="py-20 px-6 md:px-12 bg-[var(--brand-primary)]">
                 <div className="max-w-4xl mx-auto text-center">
                     <h2 className="text-3xl md:text-4xl font-serif text-white mb-6 tracking-wide">
                         Questions About Our Products?
@@ -274,13 +274,13 @@ export default function ShopPage() {
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <a
                             href="tel:+911234567890"
-                            className="bg-white text-[#0A4D4E] px-8 py-4 text-sm uppercase tracking-[0.2em] hover:bg-[#C5A059] hover:text-white transition-colors"
+                            className="bg-white text-[var(--brand-primary)] px-8 py-4 text-sm uppercase tracking-[0.2em] hover:bg-[var(--gold-accent)] hover:text-white transition-colors"
                         >
                             Call Us
                         </a>
                         <Link
                             href="/contact"
-                            className="border border-white text-white px-8 py-4 text-sm uppercase tracking-[0.2em] hover:bg-white hover:text-[#0A4D4E] transition-colors"
+                            className="border border-white text-white px-8 py-4 text-sm uppercase tracking-[0.2em] hover:bg-white hover:text-[var(--brand-primary)] transition-colors"
                         >
                             Email Us
                         </Link>

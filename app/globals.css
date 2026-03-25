@@ -11,10 +11,23 @@
     /* Stronger base text for readability */
 
     /* Luxury accent colors */
-    --teal-deep: 10 77 78;
-    /* Deep teal - primary brand */
+    --teal-deep: 153 30 41;
+    /* Deep red - primary brand */
     --gold: 201 169 97;
     /* Warm gold - premium accents */
+
+    /* === DYNAMIC PALETTE VARIABLES (overridden at runtime from DB) === */
+    --brand-primary: #991E29;
+    --brand-primary-dark: #7A1821;
+    --brand-primary-deep: #3D0D11;
+    --gold-accent: #C5A059;
+    --gold-accent-dark: #7A5E28;
+    --gold-cta: #B68845;
+    --gold-cta-dark: #A97E3F;
+    --surface-cream: #F6F1E8;
+    --surface-soft: #E8E2D9;
+    --text-dark: #1C1C1C;
+    --btn-dark: #2C2C2C;
 
     /* Neutral colors */
     --charcoal: 44 42 39;
@@ -105,11 +118,11 @@
   }
 
   .site-surface {
-    background: #f6f1e8;
+    background: var(--surface-cream);
   }
 
   .site-surface-soft {
-    background: #e8e2d9;
+    background: var(--surface-soft);
   }
 
   .site-text-muted {
@@ -117,30 +130,30 @@
   }
 
   .site-text-strong {
-    color: #1c1c1c;
+    color: var(--text-dark);
   }
 
   .site-accent {
-    color: #7a5e28;
+    color: var(--gold-accent-dark);
   }
 
   .site-accent-fill {
-    background: #c5a059;
-    color: #1c1c1c;
+    background: var(--gold-accent);
+    color: var(--text-dark);
   }
 
   .site-btn-primary {
-    background: #2c2c2c;
+    background: var(--btn-dark);
     color: #ffffff;
   }
 
   .site-btn-primary:hover {
-    background: #1c1c1c;
+    background: var(--text-dark);
   }
 
   .site-btn-secondary {
-    background: #c5a059;
-    color: #1c1c1c;
+    background: var(--gold-accent);
+    color: var(--text-dark);
   }
 
   .site-btn-secondary:hover {
@@ -150,7 +163,7 @@
   .site-input {
     background: #ffffff;
     border: 1px solid #bcb4aa;
-    color: #1c1c1c;
+    color: var(--text-dark);
   }
 
   .site-input::placeholder {

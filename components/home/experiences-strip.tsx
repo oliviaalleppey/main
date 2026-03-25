@@ -50,20 +50,20 @@ const EXPERIENCES = [
 
 export default function ExperiencesStrip() {
     return (
-        <section className="py-14 md:py-20 bg-[#F6F1E8] overflow-hidden">
+        <section className="py-14 md:py-20 bg-[var(--surface-cream)] overflow-hidden">
             <div className="max-w-7xl mx-auto px-6 md:px-12 mb-6 md:mb-10">
                 <div className="flex items-end justify-between">
                     <div>
-                        <span className="text-[10px] uppercase tracking-[0.35em] text-[#7A5E28] block mb-3 font-medium">
+                        <span className="text-[10px] uppercase tracking-[0.35em] text-[var(--gold-accent-dark)] block mb-3 font-medium">
                             Curated for You
                         </span>
-                        <h2 className="text-3xl md:text-4xl font-serif text-[#1C1C1C]">
+                        <h2 className="text-3xl md:text-4xl font-serif text-[var(--text-dark)]">
                             Kerala Experiences
                         </h2>
                     </div>
                     <Link
                         href="/experiences"
-                        className="hidden md:inline-flex items-center gap-2 text-xs uppercase tracking-widest text-[#1C1C1C] hover:text-[#7A5E28] transition-colors font-medium"
+                        className="hidden md:inline-flex items-center gap-2 text-xs uppercase tracking-widest text-[var(--text-dark)] hover:text-[var(--gold-accent-dark)] transition-colors font-medium"
                     >
                         View All
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -96,7 +96,7 @@ export default function ExperiencesStrip() {
                                 {exp.tag}
                             </span>
                         </div>
-                        <h3 className="font-serif text-[#1C1C1C] text-lg mb-1 group-hover:text-[#7A5E28] transition-colors">
+                        <h3 className="font-serif text-[var(--text-dark)] text-lg mb-1 group-hover:text-[var(--gold-accent-dark)] transition-colors">
                             {exp.title}
                         </h3>
                         <p className="text-[#6B645C] text-xs font-light leading-relaxed">

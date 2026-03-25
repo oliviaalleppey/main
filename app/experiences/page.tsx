@@ -235,7 +235,7 @@ const planningSteps: PlanningStep[] = [
 
 export default function ExperiencesPage() {
     return (
-        <main className="min-h-screen bg-[#FBF8F2] text-[#2C2A27] selection:bg-[#C5A059] selection:text-white">
+        <main className="min-h-screen bg-[#FBF8F2] text-[#2C2A27] selection:bg-[var(--gold-accent)] selection:text-white">
             <StickyBookButton />
             <WhatsAppWidget />
 
@@ -266,7 +266,7 @@ export default function ExperiencesPage() {
                                         className="group rounded-2xl border border-[#E6DDCF] bg-[#FFFCF7] px-4 py-4 hover:border-[#D4BB91] hover:bg-white transition-colors"
                                     >
                                         <div className="flex items-start gap-3">
-                                            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#D8C0A0] bg-white text-[#B68845]">
+                                            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#D8C0A0] bg-white text-[var(--gold-cta)]">
                                                 <Icon className="w-4 h-4" />
                                             </span>
                                             <div className="min-w-0">
@@ -301,7 +301,7 @@ export default function ExperiencesPage() {
                                     <article className="overflow-hidden rounded-2xl border border-[#E1D7C8] bg-white">
 
                                         {/* Image top */}
-                                        <div className={`relative h-56 md:h-72 w-full ${experience.image ? '' : 'bg-[#E8E2D9]'}`}>
+                                        <div className={`relative h-56 md:h-72 w-full ${experience.image ? '' : 'bg-[var(--surface-soft)]'}`}>
                                             {experience.image ? (
                                                 <Image src={experience.image} alt={experience.imageAlt} fill className="object-cover" />
                                             ) : null}
@@ -323,17 +323,17 @@ export default function ExperiencesPage() {
                                             {/* Inline meta */}
                                             <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-[#7A7066]">
                                                 <span className="flex items-center gap-1.5">
-                                                    <MapPin className="w-3 h-3 text-[#B68845] shrink-0" />
+                                                    <MapPin className="w-3 h-3 text-[var(--gold-cta)] shrink-0" />
                                                     {experience.location}
                                                 </span>
                                                 <span className="text-[#D8C0A0]">·</span>
                                                 <span className="flex items-center gap-1.5">
-                                                    <Clock3 className="w-3 h-3 text-[#B68845] shrink-0" />
+                                                    <Clock3 className="w-3 h-3 text-[var(--gold-cta)] shrink-0" />
                                                     {experience.timing}
                                                 </span>
                                                 <span className="text-[#D8C0A0]">·</span>
                                                 <span className="flex items-center gap-1.5">
-                                                    <CalendarDays className="w-3 h-3 text-[#B68845] shrink-0" />
+                                                    <CalendarDays className="w-3 h-3 text-[var(--gold-cta)] shrink-0" />
                                                     {experience.reservation}
                                                 </span>
                                             </div>
@@ -342,7 +342,7 @@ export default function ExperiencesPage() {
                                             <div className="mt-5 flex flex-col sm:flex-row gap-2.5">
                                                 <Link
                                                     href="/contact"
-                                                    className="inline-flex items-center justify-center rounded-lg bg-[#0A332B] px-5 py-2.5 text-white text-[10px] tracking-[0.16em] uppercase hover:bg-[#15443B] transition-colors"
+                                                    className="inline-flex items-center justify-center rounded-lg bg-[var(--brand-primary)] px-5 py-2.5 text-white text-[10px] tracking-[0.16em] uppercase hover:bg-[var(--brand-primary-dark)] transition-colors"
                                                 >
                                                     Plan This Experience
                                                 </Link>
@@ -381,7 +381,7 @@ export default function ExperiencesPage() {
                                             <AnchorTargets ids={[facility.id]} />
                                             <div className="rounded-[22px] border border-[#EEE5D7] bg-[#FBF8F2] px-4 md:px-5 py-4 md:py-5">
                                                 <div className="flex items-start gap-3">
-                                                    <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#D8C0A0] bg-white text-[#B68845]">
+                                                    <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#D8C0A0] bg-white text-[var(--gold-cta)]">
                                                         <Icon className="w-5 h-5" />
                                                     </span>
                                                     <div>
@@ -418,7 +418,7 @@ export default function ExperiencesPage() {
                                             className="rounded-[22px] border border-[#E8DFD1] bg-white px-4 md:px-5 py-4 md:py-5"
                                         >
                                             <div className="flex items-start gap-3">
-                                                <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#D8C0A0] bg-[#FFF8ED] text-[#B68845]">
+                                                <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#D8C0A0] bg-[#FFF8ED] text-[var(--gold-cta)]">
                                                     <Icon className="w-5 h-5" />
                                                 </span>
                                                 <div>
@@ -434,7 +434,7 @@ export default function ExperiencesPage() {
                             <div className="mt-8 flex flex-col sm:flex-row gap-3">
                                 <Link
                                     href="/contact"
-                                    className="inline-flex items-center justify-center rounded-xl bg-[#B68845] px-7 py-3 text-white text-[11px] tracking-[0.16em] uppercase hover:bg-[#A87D3F] transition-colors"
+                                    className="inline-flex items-center justify-center rounded-xl bg-[var(--gold-cta)] px-7 py-3 text-white text-[11px] tracking-[0.16em] uppercase hover:bg-[#A87D3F] transition-colors"
                                 >
                                     Contact Concierge
                                 </Link>
@@ -452,7 +452,7 @@ export default function ExperiencesPage() {
                     {/* Final CTA */}
                     <section className="mt-10 md:mt-14 overflow-hidden rounded-[30px] border border-[#DDCFBB] bg-white">
                         <div className="grid lg:grid-cols-[1.02fr_0.98fr]">
-                            <div className="min-h-[280px] md:min-h-[360px] bg-[#E8E2D9]" />
+                            <div className="min-h-[280px] md:min-h-[360px] bg-[var(--surface-soft)]" />
 
                             <div className="bg-[#FFFCF7] p-6 md:p-8 lg:p-10">
                                 <p className="text-[#9C7A45] text-[10px] tracking-[0.3em] uppercase">Tailored itinerary</p>
@@ -483,7 +483,7 @@ export default function ExperiencesPage() {
                                 <div className="mt-8 flex flex-col sm:flex-row gap-3">
                                     <Link
                                         href="/contact"
-                                        className="inline-flex items-center justify-center rounded-xl bg-[#0A332B] px-7 py-3 text-white text-[11px] tracking-[0.16em] uppercase hover:bg-[#15443B] transition-colors"
+                                        className="inline-flex items-center justify-center rounded-xl bg-[var(--brand-primary)] px-7 py-3 text-white text-[11px] tracking-[0.16em] uppercase hover:bg-[var(--brand-primary-dark)] transition-colors"
                                     >
                                         Start Planning
                                     </Link>

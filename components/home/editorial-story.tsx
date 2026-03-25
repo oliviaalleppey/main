@@ -24,7 +24,7 @@ export default function EditorialStory() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 items-stretch">
 
                     {/* Left — Large editorial photo */}
-                    <div className="relative w-full h-[420px] md:h-[500px] lg:h-auto lg:min-h-[560px] overflow-hidden group bg-[#E8E2D9]">
+                    <div className="relative w-full h-[420px] md:h-[500px] lg:h-auto lg:min-h-[560px] overflow-hidden group bg-[var(--surface-soft)]">
                         {/* Caption overlay */}
                         <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/60 to-transparent">
                             <span className="text-white/60 text-[10px] uppercase tracking-[0.3em]">
@@ -34,12 +34,12 @@ export default function EditorialStory() {
                     </div>
 
                     {/* Right — Story + Pillars */}
-                    <div className="flex flex-col justify-center lg:pl-16 py-8 md:py-12 lg:py-0 border-t lg:border-t-0 lg:border-l border-[#1C1C1C]/10">
-                        <span className="text-[10px] uppercase tracking-[0.35em] text-[#7A5E28] block mb-6 font-medium">
+                    <div className="flex flex-col justify-center lg:pl-16 py-8 md:py-12 lg:py-0 border-t lg:border-t-0 lg:border-l border-[var(--text-dark)]/10">
+                        <span className="text-[10px] uppercase tracking-[0.35em] text-[var(--gold-accent-dark)] block mb-6 font-medium">
                             Est. 2006 · Alleppey, Kerala
                         </span>
 
-                        <h2 className="text-3xl md:text-4xl font-serif text-[#1C1C1C] mb-6 leading-snug">
+                        <h2 className="text-3xl md:text-4xl font-serif text-[var(--text-dark)] mb-6 leading-snug">
                             Born from the<br />Waters of Kerala
                         </h2>
 
@@ -57,13 +57,13 @@ export default function EditorialStory() {
                             {PILLARS.map((pillar, i) => (
                                 <div key={i} className="flex gap-5 items-start group">
                                     <div className="flex-none">
-                                        <div className="w-8 h-[1px] bg-[#C5A059] mt-3 group-hover:w-12 transition-all duration-300" />
+                                        <div className="w-8 h-[1px] bg-[var(--gold-accent)] mt-3 group-hover:w-12 transition-all duration-300" />
                                     </div>
                                     <div>
-                                        <h4 className="text-sm font-semibold text-[#1C1C1C] uppercase tracking-widest mb-1">
+                                        <h4 className="text-sm font-semibold text-[var(--text-dark)] uppercase tracking-widest mb-1">
                                             {pillar.title}
                                         </h4>
-                                        <p className="text-[#1C1C1C]/55 text-sm font-light leading-relaxed">
+                                        <p className="text-[var(--text-dark)]/55 text-sm font-light leading-relaxed">
                                             {pillar.description}
                                         </p>
                                     </div>
@@ -73,7 +73,7 @@ export default function EditorialStory() {
 
                         <Link
                             href="/about"
-                            className="inline-flex items-center gap-3 text-xs uppercase tracking-widest text-[#1C1C1C] hover:text-[#7A5E28] transition-colors font-semibold group w-fit"
+                            className="inline-flex items-center gap-3 text-xs uppercase tracking-widest text-[var(--text-dark)] hover:text-[var(--gold-accent-dark)] transition-colors font-semibold group w-fit"
                         >
                             Our Full Story
                             <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

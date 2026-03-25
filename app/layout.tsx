@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Outfit, Cormorant_Garamond, Cinzel } from "next/font/google";
 import "./globals.css";
+import { auth } from "@/auth";
+import { SessionProvider } from "@/components/auth/session-provider";
+import FrontendLayout from "@/components/layout/frontend-layout";
+import { getColorPalette } from "@/lib/db/actions/settings-actions";
 
 export const dynamic = "force-dynamic";
 
@@ -36,15 +40,10 @@ export const metadata: Metadata = {
   },
 };
 
-import { auth } from "@/auth";
-import { SessionProvider } from "@/components/auth/session-provider";
-import FrontendLayout from "@/components/layout/frontend-layout";
-
 async function getSafeSession() {
   try {
     return await auth();
   } catch (error: any) {
-    // Suppress noise for common session decryption errors (invalid/expired cookies)
     if (error?.name === 'JWTSessionError' || error?.message?.includes('JWTSessionError')) {
       return null;
     }
@@ -58,10 +57,32 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await getSafeSession();
+  const [session, palette] = await Promise.all([
+    getSafeSession(),
+    getColorPalette(),
+  ]);
+
+  const paletteVars = {
+    "--brand-primary": palette.brandPrimary,
+    "--brand-primary-dark": palette.brandPrimaryDark,
+    "--brand-primary-deep": palette.brandPrimaryDeep,
+    "--gold-accent": palette.goldAccent,
+    "--gold-accent-dark": palette.goldAccentDark,
+    "--gold-cta": palette.goldCta,
+    "--gold-cta-dark": palette.goldCtaDark,
+    "--surface-cream": palette.surfaceCream,
+    "--surface-soft": palette.surfaceSoft,
+    "--text-dark": palette.textDark,
+    "--btn-dark": palette.btnDark,
+  } as React.CSSProperties;
 
   return (
-    <html lang="en" className={`${sans.variable} ${serif.variable} ${cinzel.variable}`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${sans.variable} ${serif.variable} ${cinzel.variable}`}
+      style={paletteVars}
+      suppressHydrationWarning
+    >
       <body className="font-sans subpixel-antialiased" suppressHydrationWarning>
         <SessionProvider session={session}>
           <FrontendLayout>

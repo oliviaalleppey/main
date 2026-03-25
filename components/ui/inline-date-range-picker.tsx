@@ -46,7 +46,7 @@ export function InlineDateRangePicker({
         <div className={cn("w-full", className)}>
             <style jsx global>{`
                 .admin-rdp {
-                    --rdp-accent-color: #0A332B;
+                    --rdp-accent-color: var(--brand-primary);
                     --rdp-accent-background-color: rgba(10, 51, 43, 0.12);
                     --rdp-outline: 2px solid rgba(10, 51, 43, 0.35);
                     --rdp-outline-selected: 2px solid rgba(10, 51, 43, 0.35);
@@ -100,7 +100,7 @@ export function InlineDateRangePicker({
                 .admin-rdp .rdp-selected .rdp-day_button,
                 .admin-rdp .rdp-range_start .rdp-day_button,
                 .admin-rdp .rdp-range_end .rdp-day_button {
-                    background: #0A332B;
+                    background: var(--brand-primary);
                     color: #fff;
                 }
                 .admin-rdp .rdp-range_middle {
@@ -108,7 +108,7 @@ export function InlineDateRangePicker({
                 }
                 .admin-rdp .rdp-range_middle .rdp-day_button {
                     background: transparent;
-                    color: #0A332B;
+                    color: var(--brand-primary);
                     border-radius: 0;
                 }
                 .admin-rdp .rdp-range_start,

@@ -6,11 +6,11 @@ export default function CompactIntro() {
     return (
         <section className="py-6 md:py-10 px-4 text-center bg-white">
             <div className="max-w-2xl mx-auto">
-                <span className="text-[10px] md:text-xs uppercase tracking-[0.3em] text-[#7A5E28] mb-4 block font-medium">
+                <span className="text-[10px] md:text-xs uppercase tracking-[0.3em] text-[var(--gold-accent-dark)] mb-4 block font-medium">
                     Welcome to Olivia Alleppey
                 </span>
 
-                <h2 className="text-3xl md:text-4xl font-serif text-[#1C1C1C] leading-snug mb-6">
+                <h2 className="text-3xl md:text-4xl font-serif text-[var(--text-dark)] leading-snug mb-6">
                     Backwater calm,<br className="hidden md:block" /> contemporary comfort
                 </h2>
 
@@ -20,7 +20,7 @@ export default function CompactIntro() {
 
                 <Link
                     href="/discover"
-                    className="inline-flex text-[10px] md:text-xs uppercase tracking-[0.2em] border border-[#1C1C1C]/20 px-6 py-3 hover:border-[#1C1C1C] hover:bg-[#1C1C1C] hover:text-white transition-all duration-300"
+                    className="inline-flex text-[10px] md:text-xs uppercase tracking-[0.2em] border border-[var(--text-dark)]/20 px-6 py-3 hover:border-[var(--text-dark)] hover:bg-[var(--text-dark)] hover:text-white transition-all duration-300"
                 >
                     Explore Discover
                 </Link>

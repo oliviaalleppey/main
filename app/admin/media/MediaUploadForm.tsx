@@ -65,7 +65,7 @@ export default function MediaUploadForm() {
                     <div className="w-16 h-16 bg-white rounded-full shadow-sm flex items-center justify-center mb-4 text-amber-500">
                         <UploadCloud className="w-8 h-8" />
                     </div>
-                    <p className="text-[#1C1C1C] font-medium mb-1">Click or drag media here</p>
+                    <p className="text-[var(--text-dark)] font-medium mb-1">Click or drag media here</p>
                     <p className="text-gray-500 text-sm">Supports Video (.mp4, .webm) or Image</p>
                 </>
             )}

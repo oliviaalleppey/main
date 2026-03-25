@@ -230,7 +230,7 @@ export default function AddOnsPage() {
                         });
                         setShowForm(true);
                     }}
-                    className="inline-flex items-center gap-2 rounded-lg bg-[#0A332B] px-4 py-2 text-sm font-semibold text-white hover:bg-[#15443B]"
+                    className="inline-flex items-center gap-2 rounded-lg bg-[var(--brand-primary)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--brand-primary-dark)]"
                 >
                     <Plus className="w-4 h-4" />
                     Add New Add-on
@@ -359,7 +359,7 @@ export default function AddOnsPage() {
                                             type="button"
                                             onClick={() => toggleRoomType(roomType.id)}
                                             className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${formData.roomTypeIds.includes(roomType.id)
-                                                ? 'bg-[#0A332B] text-white'
+                                                ? 'bg-[var(--brand-primary)] text-white'
                                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                                 }`}
                                         >
@@ -390,7 +390,7 @@ export default function AddOnsPage() {
                             <button
                                 type="submit"
                                 disabled={isPending}
-                                className="inline-flex items-center gap-2 rounded-lg bg-[#0A332B] px-4 py-2 text-sm font-semibold text-white hover:bg-[#15443B] disabled:opacity-60"
+                                className="inline-flex items-center gap-2 rounded-lg bg-[var(--brand-primary)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--brand-primary-dark)] disabled:opacity-60"
                             >
                                 {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
                                 {editingId ? 'Update Add-on' : 'Create Add-on'}

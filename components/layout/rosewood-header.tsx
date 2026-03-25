@@ -173,7 +173,7 @@ export default function RosewoodHeader() {
                             <Link
                                 key={item.label}
                                 href={item.href}
-                                className={`font-serif font-medium transition-colors text-[#3A342D] hover:text-[#121212] rounded-full px-3 py-1.5 ${isActive ? 'bg-[#15443B] text-white' : ''
+                                className={`font-serif font-medium transition-colors text-[#3A342D] hover:text-[#121212] rounded-full px-3 py-1.5 ${isActive ? 'bg-[var(--brand-primary-dark)] text-white' : ''
                                     } ${item.label === 'Conference & Events' ? 'text-base whitespace-nowrap' : 'text-lg'
                                     }`}
                             >
@@ -190,7 +190,7 @@ export default function RosewoodHeader() {
                 <div className="flex justify-end items-center gap-1 flex-1 xl:flex-none">
                     <a
                         href="tel:+918075416514"
-                        className="hidden md:flex justify-center items-center gap-2 bg-[#0A332B] text-white text-[11px] font-bold uppercase tracking-[0.2em] w-[165px] h-[48px] hover:bg-[#15443B] transition-colors whitespace-nowrap overflow-hidden"
+                        className="hidden md:flex justify-center items-center gap-2 bg-[var(--brand-primary)] text-white text-[11px] font-bold uppercase tracking-[0.2em] w-[165px] h-[48px] hover:bg-[var(--brand-primary-dark)] transition-colors whitespace-nowrap overflow-hidden"
                     >
                         <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
@@ -209,14 +209,14 @@ export default function RosewoodHeader() {
                             }
                             router.push('/#rooms');
                         }}
-                        className="hidden md:flex justify-center items-center bg-[#0A332B] text-white text-[11px] font-bold uppercase tracking-[0.2em] w-[165px] h-[48px] hover:bg-[#15443B] transition-colors whitespace-nowrap overflow-hidden"
+                        className="hidden md:flex justify-center items-center bg-[var(--brand-primary)] text-white text-[11px] font-bold uppercase tracking-[0.2em] w-[165px] h-[48px] hover:bg-[var(--brand-primary-dark)] transition-colors whitespace-nowrap overflow-hidden"
                     >
                         Reserve
                     </button>
 
                     <a
                         href="tel:+918075416514"
-                        className="md:hidden flex items-center gap-1.5 bg-[#0A332B] text-white text-[10px] font-bold uppercase tracking-[0.1em] px-3 py-2.5 hover:bg-[#15443B] transition-colors mr-2 whitespace-nowrap"
+                        className="md:hidden flex items-center gap-1.5 bg-[var(--brand-primary)] text-white text-[10px] font-bold uppercase tracking-[0.1em] px-3 py-2.5 hover:bg-[var(--brand-primary-dark)] transition-colors mr-2 whitespace-nowrap"
                     >
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
@@ -246,7 +246,7 @@ export default function RosewoodHeader() {
                         className="fixed inset-0 z-[60] bg-black/35 xl:hidden"
                         onClick={() => setIsMobileMenuOpen(false)}
                     />
-                    <aside className="fixed inset-y-0 right-0 z-[70] w-[86%] max-w-sm bg-[#F6F1E8] border-l border-[#D9D0C4] shadow-2xl xl:hidden overflow-y-auto">
+                    <aside className="fixed inset-y-0 right-0 z-[70] w-[86%] max-w-sm bg-[var(--surface-cream)] border-l border-[#D9D0C4] shadow-2xl xl:hidden overflow-y-auto">
                         <div className="px-6 py-5 border-b border-gray-200 flex items-center justify-between">
                             <p className="text-xs uppercase tracking-[0.2em] text-gray-500">Menu</p>
                             <button
@@ -264,7 +264,7 @@ export default function RosewoodHeader() {
                         <div className="px-6 py-5 space-y-3">
                             <a
                                 href="tel:+918075416514"
-                                className="flex items-center justify-center gap-2 w-full bg-[#0A332B] text-white text-[11px] font-bold uppercase tracking-[0.2em] px-6 py-3.5 hover:bg-[#15443B] transition-colors"
+                                className="flex items-center justify-center gap-2 w-full bg-[var(--brand-primary)] text-white text-[11px] font-bold uppercase tracking-[0.2em] px-6 py-3.5 hover:bg-[var(--brand-primary-dark)] transition-colors"
                                 onClick={() => setIsMobileMenuOpen(false)}
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -274,7 +274,7 @@ export default function RosewoodHeader() {
                             </a>
                             <button
                                 type="button"
-                                className="block w-full text-center bg-[#0A332B] text-white text-[11px] font-bold uppercase tracking-[0.2em] px-6 py-3.5 hover:bg-[#15443B] transition-colors"
+                                className="block w-full text-center bg-[var(--brand-primary)] text-white text-[11px] font-bold uppercase tracking-[0.2em] px-6 py-3.5 hover:bg-[var(--brand-primary-dark)] transition-colors"
                                 onClick={() => {
                                     setIsMobileMenuOpen(false);
                                     const el = document.getElementById('rooms');
@@ -298,7 +298,7 @@ export default function RosewoodHeader() {
                                         key={item.label}
                                         href={item.href}
                                         onClick={() => setIsMobileMenuOpen(false)}
-                                        className={`block py-3 px-3 -mx-3 rounded-lg text-[17px] font-serif border-b border-gray-100 last:border-b-0 ${isActive ? 'bg-[#15443B] text-white' : 'text-[#1C1C1C]'
+                                        className={`block py-3 px-3 -mx-3 rounded-lg text-[17px] font-serif border-b border-gray-100 last:border-b-0 ${isActive ? 'bg-[var(--brand-primary-dark)] text-white' : 'text-[var(--text-dark)]'
                                             }`}
                                     >
                                         {item.label}
@@ -308,7 +308,7 @@ export default function RosewoodHeader() {
                             <Link
                                 href="/shop"
                                 onClick={() => setIsMobileMenuOpen(false)}
-                                className="block py-3 text-[17px] font-serif text-[#1C1C1C]"
+                                className="block py-3 text-[17px] font-serif text-[var(--text-dark)]"
                             >
                                 Shop
                             </Link>

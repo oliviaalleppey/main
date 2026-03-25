@@ -175,7 +175,7 @@ export function RoomDetailClient({
             <div className="bg-white rounded-lg border border-gray-200 p-6">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 rounded-lg bg-[#0A332B] flex items-center justify-center">
+                        <div className="w-16 h-16 rounded-lg bg-[var(--brand-primary)] flex items-center justify-center">
                             <span className="text-white text-xl font-bold">{room.roomNumber}</span>
                         </div>
                         <div>
@@ -226,7 +226,7 @@ export function RoomDetailClient({
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id as typeof activeTab)}
                             className={`pb-4 px-1 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.id
-                                ? 'border-[#0A332B] text-[#0A332B]'
+                                ? 'border-[var(--brand-primary)] text-[var(--brand-primary)]'
                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                 }`}
                         >
@@ -247,7 +247,7 @@ export function RoomDetailClient({
                                 <select
                                     id="roomTypeId"
                                     {...register('roomTypeId')}
-                                    className="w-full border border-gray-300 rounded-md p-2.5 bg-white focus:ring-2 focus:ring-[#0A332B] focus:border-[#0A332B]"
+                                    className="w-full border border-gray-300 rounded-md p-2.5 bg-white focus:ring-2 focus:ring-[var(--brand-primary)] focus:border-[var(--brand-primary)]"
                                 >
                                     {roomTypes.map((type) => (
                                         <option key={type.id} value={type.id}>
@@ -264,7 +264,7 @@ export function RoomDetailClient({
                                     id="roomNumber"
                                     {...register('roomNumber')}
                                     placeholder="e.g. 101"
-                                    className="border-gray-300 focus:ring-2 focus:ring-[#0A332B] focus:border-[#0A332B]"
+                                    className="border-gray-300 focus:ring-2 focus:ring-[var(--brand-primary)] focus:border-[var(--brand-primary)]"
                                 />
                                 {errors.roomNumber && <p className="text-sm text-red-500">{errors.roomNumber.message}</p>}
                             </div>
@@ -276,7 +276,7 @@ export function RoomDetailClient({
                                     type="number"
                                     {...register('floor', { valueAsNumber: true })}
                                     placeholder="e.g. 1"
-                                    className="border-gray-300 focus:ring-2 focus:ring-[#0A332B] focus:border-[#0A332B]"
+                                    className="border-gray-300 focus:ring-2 focus:ring-[var(--brand-primary)] focus:border-[var(--brand-primary)]"
                                 />
                             </div>
 
@@ -285,7 +285,7 @@ export function RoomDetailClient({
                                 <select
                                     id="status"
                                     {...register('status')}
-                                    className="w-full border border-gray-300 rounded-md p-2.5 bg-white focus:ring-2 focus:ring-[#0A332B] focus:border-[#0A332B]"
+                                    className="w-full border border-gray-300 rounded-md p-2.5 bg-white focus:ring-2 focus:ring-[var(--brand-primary)] focus:border-[var(--brand-primary)]"
                                 >
                                     <option value="active">Active</option>
                                     <option value="inactive">Inactive</option>
@@ -300,7 +300,7 @@ export function RoomDetailClient({
                                     {...register('notes')}
                                     placeholder="Maintenance notes or other details..."
                                     rows={4}
-                                    className="border-gray-300 focus:ring-2 focus:ring-[#0A332B] focus:border-[#0A332B]"
+                                    className="border-gray-300 focus:ring-2 focus:ring-[var(--brand-primary)] focus:border-[var(--brand-primary)]"
                                 />
                             </div>
                         </div>
@@ -322,7 +322,7 @@ export function RoomDetailClient({
                                             type="button"
                                             onClick={() => setHkStatus(key)}
                                             className={`p-4 rounded-lg border-2 text-center transition-all ${hkStatus === key
-                                                ? 'border-[#0A332B] bg-[#0A332B]/5'
+                                                ? 'border-[var(--brand-primary)] bg-[var(--brand-primary)]/5'
                                                 : 'border-gray-200 hover:border-gray-300'
                                                 }`}
                                         >
@@ -384,13 +384,13 @@ export function RoomDetailClient({
                                             type="button"
                                             onClick={() => toggleAttribute(attr.id)}
                                             className={`p-4 rounded-lg border-2 text-left transition-all ${selectedAttributes.has(attr.id)
-                                                ? 'border-[#0A332B] bg-[#0A332B]/5'
+                                                ? 'border-[var(--brand-primary)] bg-[var(--brand-primary)]/5'
                                                 : 'border-gray-200 hover:border-gray-300'
                                                 }`}
                                         >
                                             <div className="flex items-center gap-2">
                                                 <span className={`w-5 h-5 rounded border flex items-center justify-center ${selectedAttributes.has(attr.id)
-                                                    ? 'bg-[#0A332B] border-[#0A332B] text-white'
+                                                    ? 'bg-[var(--brand-primary)] border-[var(--brand-primary)] text-white'
                                                     : 'border-gray-300'
                                                     }`}>
                                                     {selectedAttributes.has(attr.id) && '✓'}
@@ -422,7 +422,7 @@ export function RoomDetailClient({
                     <Button
                         type="submit"
                         disabled={isSubmitting}
-                        className="bg-[#0A332B] hover:bg-[#15443B] text-white"
+                        className="bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-dark)] text-white"
                     >
                         {isSubmitting ? 'Saving...' : 'Save Changes'}
                     </Button>

@@ -45,7 +45,7 @@ export default function RoomFAQ() {
                     <p className="text-[#B8956A] text-[10px] font-medium uppercase tracking-[0.4em] mb-6">
                         Frequently Asked
                     </p>
-                    <h2 className="font-serif text-3xl md:text-4xl text-[#2c2c2c] font-light tracking-wide">
+                    <h2 className="font-serif text-3xl md:text-4xl text-[var(--btn-dark)] font-light tracking-wide">
                         Questions & Answers
                     </h2>
                 </div>
@@ -55,14 +55,14 @@ export default function RoomFAQ() {
                     {faqs.map((faq, idx) => (
                         <div
                             key={idx}
-                            className="border border-[#2c2c2c]/10 rounded-sm overflow-hidden bg-white transition-all duration-300 hover:border-[#B8956A]/30"
+                            className="border border-[var(--btn-dark)]/10 rounded-sm overflow-hidden bg-white transition-all duration-300 hover:border-[#B8956A]/30"
                         >
                             {/* Question Button */}
                             <button
                                 onClick={() => setOpenIndex(openIndex === idx ? null : idx)}
                                 className="w-full px-6 py-5 flex items-center justify-between text-left group"
                             >
-                                <span className="font-serif text-lg text-[#2c2c2c] pr-8 group-hover:text-[#B8956A] transition-colors">
+                                <span className="font-serif text-lg text-[var(--btn-dark)] pr-8 group-hover:text-[#B8956A] transition-colors">
                                     {faq.question}
                                 </span>
                                 <svg

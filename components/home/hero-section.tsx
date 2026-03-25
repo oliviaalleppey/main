@@ -239,7 +239,7 @@ export default function HeroSection({ initialMedia }: { initialMedia?: { type: '
                     <div className="w-full md:w-auto">
                         <button
                             onClick={handleSearch}
-                            className="w-full bg-[#0A332B] hover:bg-[#15443B] text-white h-14 px-8 rounded-lg text-sm font-bold uppercase tracking-wider transition-all shadow-lg flex items-center justify-center gap-2 whitespace-nowrap"
+                            className="w-full bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-dark)] text-white h-14 px-8 rounded-lg text-sm font-bold uppercase tracking-wider transition-all shadow-lg flex items-center justify-center gap-2 whitespace-nowrap"
                         >
                             Search Availability
                         </button>

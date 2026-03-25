@@ -51,27 +51,27 @@ export default function Testimonials() {
     const t = TESTIMONIALS[current];
 
     return (
-        <section className="py-14 md:py-24 bg-[#E8E2D9]">
+        <section className="py-14 md:py-24 bg-[var(--surface-soft)]">
             <div className="max-w-5xl mx-auto px-6 md:px-12 text-center">
 
                 {/* Header */}
-                <span className="text-[10px] uppercase tracking-[0.35em] text-[#7A5E28] block mb-8 md:mb-12 font-medium">
+                <span className="text-[10px] uppercase tracking-[0.35em] text-[var(--gold-accent-dark)] block mb-8 md:mb-12 font-medium">
                     Voices of Olivia
                 </span>
 
                 {/* Large quote mark */}
-                <div className="text-7xl md:text-8xl font-serif text-[#7A5E28]/30 leading-none mb-4 select-none">"</div>
+                <div className="text-7xl md:text-8xl font-serif text-[var(--gold-accent-dark)]/30 leading-none mb-4 select-none">"</div>
 
                 {/* Quote */}
                 <blockquote
-                    className={`text-xl md:text-2xl lg:text-3xl font-serif text-[#1C1C1C] leading-relaxed mb-10 max-w-4xl mx-auto transition-opacity duration-350 ${fading ? 'opacity-0' : 'opacity-100'}`}
+                    className={`text-xl md:text-2xl lg:text-3xl font-serif text-[var(--text-dark)] leading-relaxed mb-10 max-w-4xl mx-auto transition-opacity duration-350 ${fading ? 'opacity-0' : 'opacity-100'}`}
                 >
                     {t.quote}
                 </blockquote>
 
                 {/* Attribution */}
                 <div className={`transition-opacity duration-350 ${fading ? 'opacity-0' : 'opacity-100'}`}>
-                    <p className="text-sm font-semibold text-[#1C1C1C] uppercase tracking-widest mb-1">
+                    <p className="text-sm font-semibold text-[var(--text-dark)] uppercase tracking-widest mb-1">
                         — {t.name}
                     </p>
                     <p className="text-xs text-[#7C746B] font-light tracking-wide">
@@ -86,8 +86,8 @@ export default function Testimonials() {
                             key={i}
                             onClick={() => goTo(i)}
                             className={`transition-all duration-300 rounded-full ${i === current
-                                    ? 'w-8 h-1.5 bg-[#C5A059]'
-                                    : 'w-1.5 h-1.5 bg-[#1C1C1C]/20 hover:bg-[#1C1C1C]/40'
+                                    ? 'w-8 h-1.5 bg-[var(--gold-accent)]'
+                                    : 'w-1.5 h-1.5 bg-[var(--text-dark)]/20 hover:bg-[var(--text-dark)]/40'
                                 }`}
                             aria-label={`Testimonial ${i + 1}`}
                         />

@@ -171,7 +171,7 @@ export function PricingManager({ roomTypes }: { roomTypes: RoomTypeOption[] }) {
                             <select
                                 value={roomTypeId}
                                 onChange={(e) => setRoomTypeId(e.target.value)}
-                                className="h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0A332B]/20"
+                                className="h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]/20"
                             >
                                 {roomTypes.map((type) => (
                                     <option key={type.id} value={type.id}>

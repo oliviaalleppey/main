@@ -82,7 +82,7 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
                     className="absolute inset-0 z-0"
                 >
                     {/* Placeholder background (image to be added later) */}
-                    <div className="absolute inset-0 bg-[linear-gradient(135deg,#1C2622_0%,#2B3A34_38%,#1B2421_100%)]" />
+                    <div className="absolute inset-0 bg-[linear-gradient(135deg,var(--brand-primary-deep)_0%,var(--brand-primary-dark)_38%,var(--brand-primary-deep)_100%)]" />
                     <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_25%_30%,rgba(231,212,173,0.18)_0%,rgba(231,212,173,0)_60%)]" />
                     <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/15 to-black/40" />
                 </motion.div>
@@ -157,7 +157,7 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
                                         document.getElementById(`room-${index}`)?.scrollIntoView({ behavior: 'smooth' });
                                     }}
                                     className={`relative px-4 md:px-5 py-2.5 text-[11px] md:text-xs tracking-[0.12em] uppercase whitespace-nowrap transition-colors duration-200 lg:flex-1 lg:text-center rounded-full border focus:outline-none focus-visible:ring-2 focus-visible:ring-[#BCA06F]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#FBF9F3] cursor-pointer ${activeRoom === index
-                                        ? 'bg-[#0A332B] border-[#0A332B] text-white shadow-[0_14px_30px_-22px_rgba(10,51,43,0.65)]'
+                                        ? 'bg-[var(--brand-primary)] border-[var(--brand-primary)] text-white shadow-[0_14px_30px_-22px_rgba(10,51,43,0.65)]'
                                         : 'bg-white/80 border-[#E6DDCE] text-[#2E3934] hover:bg-white hover:border-[#CFC2AD]'
                                         }`}
                                     aria-pressed={activeRoom === index}
@@ -189,7 +189,7 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
             {/* Marquee break */}
             <section className="bg-[#FAF8F3] px-6 md:px-10">
                 <div className="max-w-7xl mx-auto">
-                    <div className="border-y border-[#0F2F28] bg-[#15443B] overflow-hidden">
+                    <div className="border-y border-[#0F2F28] bg-[var(--brand-primary-dark)] overflow-hidden">
                         <div className="py-5 md:py-6">
                             <p className="text-center text-[15px] md:text-[18px] uppercase tracking-[0.42em] text-white/90 font-semibold">
                                 Signature Views
@@ -466,7 +466,7 @@ function RoomCard({ room, index }: { room: RoomViewModel; index: number }) {
                             Room From
                         </span>
                         <span className="h-4 w-px bg-black/10" aria-hidden="true" />
-                        <span className="text-[#1C1C1C] text-[1.25rem] font-serif font-[300] lining-nums tabular-nums tracking-[-0.01em] leading-none">
+                        <span className="text-[var(--text-dark)] text-[1.25rem] font-serif font-[300] lining-nums tabular-nums tracking-[-0.01em] leading-none">
                             ₹{(room.basePrice / 100).toLocaleString('en-IN')}
                         </span>
                         <span className="text-[#6B645C] text-[10px] font-medium tracking-[0.16em] uppercase">
@@ -491,7 +491,7 @@ function RoomCard({ room, index }: { room: RoomViewModel; index: number }) {
                         {String(index + 1).padStart(2, '0')} — {['Lake View', 'Canal View', 'Canal View', 'Boat Race View', 'Lake View', 'Lake View'][index] || room.view}
                     </span>
 
-                    <h3 className="text-3xl md:text-4xl lg:text-[2.55rem] font-serif text-[#1C1C1C] mb-4 leading-tight">
+                    <h3 className="text-3xl md:text-4xl lg:text-[2.55rem] font-serif text-[var(--text-dark)] mb-4 leading-tight">
                         {room.name}
                     </h3>
 
@@ -537,9 +537,9 @@ function RoomCard({ room, index }: { room: RoomViewModel; index: number }) {
                     <div className="flex items-center pt-2">
                         <Link
                             href={`/rooms/${room.slug}`}
-                            className="group relative inline-flex items-center justify-center px-8 py-3.5 border border-[#15443B] md:border-[#BCA06F] text-white md:text-[#1C1C1C] overflow-hidden transition-colors duration-300 md:hover:border-[#15443B] bg-[#15443B] md:bg-transparent"
+                            className="group relative inline-flex items-center justify-center px-8 py-3.5 border border-[var(--brand-primary-dark)] md:border-[#BCA06F] text-white md:text-[var(--text-dark)] overflow-hidden transition-colors duration-300 md:hover:border-[var(--brand-primary-dark)] bg-[var(--brand-primary-dark)] md:bg-transparent"
                         >
-                            <span className="absolute inset-0 w-full h-full bg-[#15443B] origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out z-0"></span>
+                            <span className="absolute inset-0 w-full h-full bg-[var(--brand-primary-dark)] origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out z-0"></span>
                             <span className="relative z-10 text-[11px] tracking-[0.24em] uppercase font-normal text-white md:text-[inherit] md:group-hover:text-white transition-colors duration-300">Explore &amp; Book</span>
                             <svg className="relative z-10 w-3.5 h-3.5 ml-3 transform group-hover:translate-x-1 text-white md:text-[inherit] md:group-hover:text-white transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />

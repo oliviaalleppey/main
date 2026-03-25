@@ -47,15 +47,15 @@ export default async function RoomShowcase() {
     if (!rooms.length) return null;
 
     return (
-        <section id="rooms" className="py-10 md:py-14 bg-[#E8E2D9]">
+        <section id="rooms" className="py-10 md:py-14 bg-[var(--surface-soft)]">
             <div className="container mx-auto px-4 max-w-7xl">
 
                 {/* Header */}
                 <div className="flex justify-between items-end mb-6 md:mb-8">
-                    <h2 className="text-3xl md:text-4xl font-serif text-[#1C1C1C]">Rooms</h2>
+                    <h2 className="text-3xl md:text-4xl font-serif text-[var(--text-dark)]">Rooms</h2>
                     <Link
                         href="/rooms"
-                        className="hidden md:flex items-center gap-2 text-sm font-bold text-[#1C1C1C] uppercase tracking-widest hover:opacity-70 transition-opacity"
+                        className="hidden md:flex items-center gap-2 text-sm font-bold text-[var(--text-dark)] uppercase tracking-widest hover:opacity-70 transition-opacity"
                     >
                         All Rooms
                         <ArrowRight className="w-4 h-4" />
@@ -91,10 +91,10 @@ export default async function RoomShowcase() {
 
                             {/* Content */}
                             <div className="flex flex-col flex-1 px-1">
-                                <h3 className="text-xl font-bold text-[#1C1C1C] mb-1 font-sans">
+                                <h3 className="text-xl font-bold text-[var(--text-dark)] mb-1 font-sans">
                                     {room.title}
                                 </h3>
-                                <p className="text-[#1C1C1C]/80 text-sm leading-relaxed mb-5 flex-1">
+                                <p className="text-[var(--text-dark)]/80 text-sm leading-relaxed mb-5 flex-1">
                                     {room.description}
                                 </p>
 
@@ -102,7 +102,7 @@ export default async function RoomShowcase() {
                                 <div className="flex items-center justify-between mt-auto pt-2">
                                     <Link
                                         href={`/book/search?room=${room.link.replace('/rooms/', '')}`}
-                                        className="px-4 py-2 md:px-6 md:py-2.5 rounded-full bg-[#0A332B] text-white text-[10px] md:text-sm font-bold hover:bg-[#15443B] transition-all uppercase tracking-wide whitespace-nowrap"
+                                        className="px-4 py-2 md:px-6 md:py-2.5 rounded-full bg-[var(--brand-primary)] text-white text-[10px] md:text-sm font-bold hover:bg-[var(--brand-primary-dark)] transition-all uppercase tracking-wide whitespace-nowrap"
                                     >
                                         Book Now
                                     </Link>
@@ -110,7 +110,7 @@ export default async function RoomShowcase() {
                                     {room.basePrice != null && (
                                         <div className="flex items-baseline gap-1 px-1 whitespace-nowrap">
                                             <span className="font-sans text-[12px] font-medium text-[#6B6355] uppercase tracking-wider">From</span>
-                                            <span className="font-sans text-[20px] md:text-[22px] font-bold text-[#1C1C1C] tracking-tight">
+                                            <span className="font-sans text-[20px] md:text-[22px] font-bold text-[var(--text-dark)] tracking-tight">
                                                 ₹{(room.basePrice / 100).toLocaleString('en-IN')}
                                             </span>
                                             <span className="font-sans text-[13px] font-medium text-[#9A9490]">/ night</span>
@@ -119,7 +119,7 @@ export default async function RoomShowcase() {
 
                                     <Link
                                         href={room.link}
-                                        className="flex items-center gap-1.5 md:gap-2 text-[11px] md:text-sm font-bold text-[#1C1C1C] hover:opacity-70 transition-opacity group/link whitespace-nowrap"
+                                        className="flex items-center gap-1.5 md:gap-2 text-[11px] md:text-sm font-bold text-[var(--text-dark)] hover:opacity-70 transition-opacity group/link whitespace-nowrap"
                                     >
                                         More
                                         <ArrowRight className="w-3.5 h-3.5 md:w-4 md:h-4 transition-transform group-hover/link:translate-x-1" />
@@ -135,7 +135,7 @@ export default async function RoomShowcase() {
                     <div className="mt-8 flex justify-center md:hidden">
                         <Link
                             href="/rooms"
-                            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#1C1C1C] text-white text-sm font-bold hover:bg-[#333333] transition-all uppercase tracking-wide"
+                            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[var(--text-dark)] text-white text-sm font-bold hover:bg-[#333333] transition-all uppercase tracking-wide"
                         >
                             View All Rooms
                             <ArrowRight className="w-4 h-4" />

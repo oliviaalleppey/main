@@ -258,7 +258,7 @@ export default function AmenitiesGrid({ features }: AmenitiesGridProps) {
                     <p className="text-[#B8956A] text-[10px] font-medium uppercase tracking-[0.4em] mb-6">
                         In-Room Amenities
                     </p>
-                    <h2 className="font-serif text-3xl md:text-4xl text-[#2c2c2c] font-light tracking-wide">
+                    <h2 className="font-serif text-3xl md:text-4xl text-[var(--btn-dark)] font-light tracking-wide">
                         Refined Comforts
                     </h2>
                 </div>
@@ -279,9 +279,9 @@ export default function AmenitiesGrid({ features }: AmenitiesGridProps) {
                             </div>
 
                             {/* Tooltip on Hover */}
-                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-[#2c2c2c] text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-10">
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-[var(--btn-dark)] text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-10">
                                 {feature.title}
-                                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#2c2c2c]" />
+                                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[var(--btn-dark)]" />
                             </div>
                         </div>
                     ))}

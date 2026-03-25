@@ -38,7 +38,7 @@ export default function OffersCarousel() {
                         <p className="text-[#B8956A] text-[10px] font-medium uppercase tracking-[0.4em] mb-4">
                             Exclusive Offers
                         </p>
-                        <h2 className="font-serif text-3xl md:text-4xl text-[#2c2c2c] font-light tracking-wide">
+                        <h2 className="font-serif text-3xl md:text-4xl text-[var(--btn-dark)] font-light tracking-wide">
                             Special Privileges
                         </h2>
                     </div>
@@ -87,7 +87,7 @@ export default function OffersCarousel() {
                                     <div className="w-8 h-px bg-[#B8956A]/20 mb-6" />
 
                                     {/* Title */}
-                                    <h3 className="font-serif text-xl text-[#2c2c2c] font-light mb-3 group-hover:text-[#B8956A] transition-colors duration-500">
+                                    <h3 className="font-serif text-xl text-[var(--btn-dark)] font-light mb-3 group-hover:text-[#B8956A] transition-colors duration-500">
                                         {offer.title}
                                     </h3>
 

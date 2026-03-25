@@ -43,7 +43,7 @@ export default function AmenitiesGallery() {
         <section className="py-14 md:py-24 bg-white">
             <div className="container mx-auto px-4 max-w-7xl">
                 <div className="text-center mb-8 md:mb-16">
-                    <span className="text-xs uppercase tracking-[0.3em] text-[#7A5E28] block mb-4">Wellness & Recreation</span>
+                    <span className="text-xs uppercase tracking-[0.3em] text-[var(--gold-accent-dark)] block mb-4">Wellness & Recreation</span>
                     <h2 className="text-3xl md:text-5xl font-serif text-gray-900 tracking-wide">
                         RESTORE YOUR BALANCE
                     </h2>
@@ -54,7 +54,7 @@ export default function AmenitiesGallery() {
                         <Link
                             key={index}
                             href={item.link}
-                            className={`group relative overflow-hidden rounded-sm ${item.colSpan} ${item.height} ${item.image ? '' : 'bg-[#E8E2D9]'}`}
+                            className={`group relative overflow-hidden rounded-sm ${item.colSpan} ${item.height} ${item.image ? '' : 'bg-[var(--surface-soft)]'}`}
                         >
                             {item.image ? (
                                 <>
@@ -68,7 +68,7 @@ export default function AmenitiesGallery() {
                                     <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-500" />
                                 </>
                             ) : (
-                                <div className="absolute inset-0 bg-[#E8E2D9]" />
+                                <div className="absolute inset-0 bg-[var(--surface-soft)]" />
                             )}
 
                             {/* Content */}

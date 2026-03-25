@@ -80,7 +80,7 @@ export function RoomSelectionsEditor({
                 <p className="text-[11px] uppercase tracking-[0.2em] text-gray-500">Selected Room Types</p>
                 <Link
                     href={addMoreRoomsHref}
-                    className="text-[11px] font-semibold uppercase tracking-wider text-[#1C1C1C] hover:text-[#E95D20] transition-colors"
+                    className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-dark)] hover:text-[#E95D20] transition-colors"
                 >
                     Add More
                 </Link>

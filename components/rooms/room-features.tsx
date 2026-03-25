@@ -90,7 +90,7 @@ export default function RoomFeatures({ roomType }: RoomFeaturesProps) {
                     <p className="text-[#B8956A] text-[10px] font-medium uppercase tracking-[0.4em] mb-6">
                         Room Features
                     </p>
-                    <h2 className="font-serif text-3xl md:text-4xl text-[#2c2c2c] font-light tracking-wide mb-4">
+                    <h2 className="font-serif text-3xl md:text-4xl text-[var(--btn-dark)] font-light tracking-wide mb-4">
                         Designed for Your Comfort
                     </h2>
                     <p className="text-[#59544D] text-lg max-w-2xl mx-auto">
@@ -111,7 +111,7 @@ export default function RoomFeatures({ roomType }: RoomFeaturesProps) {
                             </div>
 
                             {/* Content */}
-                            <h3 className="font-serif text-xl text-[#2c2c2c] mb-3 tracking-wide">
+                            <h3 className="font-serif text-xl text-[var(--btn-dark)] mb-3 tracking-wide">
                                 {feature.title}
                             </h3>
                             <p className="text-[#403A35] leading-relaxed text-sm">

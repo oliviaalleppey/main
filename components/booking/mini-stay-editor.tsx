@@ -155,7 +155,7 @@ export function MiniStayEditor({
             <button
                 type="button"
                 onClick={handleRecheck}
-                className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-md border border-[#1C1C1C] bg-white px-3 py-2 text-xs font-semibold uppercase tracking-wider text-[#1C1C1C] hover:bg-gray-100"
+                className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-md border border-[var(--text-dark)] bg-white px-3 py-2 text-xs font-semibold uppercase tracking-wider text-[var(--text-dark)] hover:bg-gray-100"
             >
                 <Search className="w-3.5 h-3.5" />
                 Recheck Availability

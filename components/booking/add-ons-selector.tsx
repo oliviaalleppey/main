@@ -109,7 +109,7 @@ export function AddOnsSelector({ options, initialSelected, onContinue }: AddOnsS
                         <div
                             key={option.id}
                             className={`rounded-2xl border transition-all overflow-hidden flex flex-col ${quantity > 0
-                                ? 'border-[#0A332B] ring-1 ring-[#0A332B] shadow-sm'
+                                ? 'border-[var(--brand-primary)] ring-1 ring-[var(--brand-primary)] shadow-sm'
                                 : 'border-gray-200 bg-white hover:border-gray-300'
                                 }`}
                         >
@@ -123,7 +123,7 @@ export function AddOnsSelector({ options, initialSelected, onContinue }: AddOnsS
                                     </div>
                                 )}
                                 {quantity > 0 && (
-                                    <div className="absolute top-3 right-3 bg-[#0A332B] text-white rounded-full p-1 shadow-sm">
+                                    <div className="absolute top-3 right-3 bg-[var(--brand-primary)] text-white rounded-full p-1 shadow-sm">
                                         <Check className="w-4 h-4" />
                                     </div>
                                 )}
@@ -158,7 +158,7 @@ export function AddOnsSelector({ options, initialSelected, onContinue }: AddOnsS
                                         </button>
                                     </div>
                                     <div className="text-right">
-                                        <div className="text-[13px] font-bold text-[#0A332B]">{formatCurrency(option.price)}</div>
+                                        <div className="text-[13px] font-bold text-[var(--brand-primary)]">{formatCurrency(option.price)}</div>
                                         <div className="text-[10px] text-gray-500 uppercase tracking-wider">{typeLabel}</div>
                                     </div>
                                 </div>

@@ -14,7 +14,7 @@ export default async function Home() {
   const heroMedia = await getHeroMedia();
 
   return (
-    <main className="min-h-screen bg-[#F6F1E8] font-sans">
+    <main className="min-h-screen bg-[var(--surface-cream)] font-sans">
       {/* Cinematic Hero with Floating Search */}
       <HeroSection initialMedia={heroMedia} />
 

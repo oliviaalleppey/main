@@ -173,7 +173,7 @@ export function SearchStayEditor({
                         <button
                             onClick={handleUpdate}
                             disabled={isPending}
-                            className="mt-4 w-full h-12 bg-[#0A332B] hover:bg-[#15443B] disabled:opacity-70 text-white rounded-2xl text-sm font-bold uppercase tracking-widest transition-all shadow-[0_18px_40px_-22px_rgba(10,51,43,0.55)] flex items-center justify-center gap-2"
+                            className="mt-4 w-full h-12 bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-dark)] disabled:opacity-70 text-white rounded-2xl text-sm font-bold uppercase tracking-widest transition-all shadow-[0_18px_40px_-22px_rgba(10,51,43,0.55)] flex items-center justify-center gap-2"
                         >
                             {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                             {isPending ? 'Updating...' : 'Update results'}
@@ -251,7 +251,7 @@ export function SearchStayEditor({
                         <button
                             onClick={handleUpdate}
                             disabled={isPending}
-                            className="h-12 px-8 bg-[#0A332B] hover:bg-[#15443B] disabled:opacity-70 text-white rounded-xl text-sm font-bold uppercase tracking-widest transition-all shadow-md flex items-center justify-center gap-2 ml-auto"
+                            className="h-12 px-8 bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-dark)] disabled:opacity-70 text-white rounded-xl text-sm font-bold uppercase tracking-widest transition-all shadow-md flex items-center justify-center gap-2 ml-auto"
                         >
                             {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                             {isPending ? 'Updating...' : 'Update Results'}

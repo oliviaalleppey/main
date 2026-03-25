@@ -47,7 +47,7 @@ export default async function MyBookingsPage() {
                     </div>
                     
                     <div>
-                        <h3 className="font-serif text-2xl text-[#1C1C1C]">
+                        <h3 className="font-serif text-2xl text-[var(--text-dark)]">
                             {booking.items?.[0]?.roomTypeName || 'Deluxe Room'}
                             {booking.items?.length > 1 && ` + ${booking.items.length - 1} more`}
                         </h3>
@@ -64,12 +64,12 @@ export default async function MyBookingsPage() {
                     <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
                         <div>
                             <p className="text-xs text-gray-500 uppercase tracking-wider mb-0.5">Total Amount</p>
-                            <p className="font-medium text-[#1C1C1C]">₹ {(booking.totalAmount / 100).toLocaleString('en-IN')}</p>
+                            <p className="font-medium text-[var(--text-dark)]">₹ {(booking.totalAmount / 100).toLocaleString('en-IN')}</p>
                         </div>
                         
                         <Link 
                             href={`/my-bookings/${booking.id}`} 
-                            className="inline-flex items-center justify-center gap-2 bg-[#0A332B] hover:bg-[#15443B] text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors"
+                            className="inline-flex items-center justify-center gap-2 bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-dark)] text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors"
                         >
                             View Details
                             <ChevronRight className="w-4 h-4" />
@@ -81,12 +81,12 @@ export default async function MyBookingsPage() {
     };
 
     return (
-        <main className="min-h-screen bg-[#F6F1E8] pt-28 pb-20 px-4 md:px-8">
+        <main className="min-h-screen bg-[var(--surface-cream)] pt-28 pb-20 px-4 md:px-8">
             <div className="max-w-4xl mx-auto space-y-12">
                 
                 {/* Header */}
                 <div>
-                    <h1 className="text-4xl md:text-5xl font-serif text-[#1C1C1C] mb-3">My Bookings</h1>
+                    <h1 className="text-4xl md:text-5xl font-serif text-[var(--text-dark)] mb-3">My Bookings</h1>
                     <p className="text-gray-600 font-medium">Manage your stays and view your booking history.</p>
                 </div>
 
@@ -95,11 +95,11 @@ export default async function MyBookingsPage() {
                         <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
                             <ReceiptText className="w-8 h-8 text-gray-300" />
                         </div>
-                        <h2 className="text-xl font-serif text-[#1C1C1C] mb-2">No Bookings Found</h2>
+                        <h2 className="text-xl font-serif text-[var(--text-dark)] mb-2">No Bookings Found</h2>
                         <p className="text-gray-500 mb-6">Looks like you haven't made any reservations yet.</p>
                         <Link 
                             href="/book/search" 
-                            className="inline-flex items-center justify-center bg-[#0A332B] hover:bg-[#15443B] text-white px-8 py-3 rounded-xl text-sm font-semibold tracking-wide uppercase transition-colors"
+                            className="inline-flex items-center justify-center bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-dark)] text-white px-8 py-3 rounded-xl text-sm font-semibold tracking-wide uppercase transition-colors"
                         >
                             Explore Rooms
                         </Link>
@@ -108,9 +108,9 @@ export default async function MyBookingsPage() {
                     <div className="space-y-12">
                         {upcomingBookings.length > 0 && (
                             <section>
-                                <h2 className="text-lg font-bold uppercase tracking-[0.15em] text-[#0A332B] mb-6 flex items-center gap-3">
+                                <h2 className="text-lg font-bold uppercase tracking-[0.15em] text-[var(--brand-primary)] mb-6 flex items-center gap-3">
                                     Upcoming Stays
-                                    <span className="flex-1 h-px bg-[#0A332B]/20"></span>
+                                    <span className="flex-1 h-px bg-[var(--brand-primary)]/20"></span>
                                 </h2>
                                 <div className="space-y-4">
                                     {upcomingBookings.map(renderBookingCard)}

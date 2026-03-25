@@ -23,12 +23,12 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
 
     if (!booking) {
         return (
-            <main className="min-h-screen bg-[#F6F1E8] pt-32 pb-20 px-4 flex items-center justify-center">
+            <main className="min-h-screen bg-[var(--surface-cream)] pt-32 pb-20 px-4 flex items-center justify-center">
                 <div className="text-center">
                     <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
                     <h1 className="text-2xl font-serif mb-2">Booking Not Found</h1>
                     <p className="text-gray-600 mb-6">We couldn't find this reservation in your account.</p>
-                    <Link href="/my-bookings" className="text-[#0A332B] font-bold underline underline-offset-4">Return to My Bookings</Link>
+                    <Link href="/my-bookings" className="text-[var(--brand-primary)] font-bold underline underline-offset-4">Return to My Bookings</Link>
                 </div>
             </main>
         );
@@ -42,9 +42,9 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
     const isCancelled = booking.status === 'cancelled';
 
     return (
-        <main className="min-h-screen bg-[#F6F1E8] pt-28 pb-20 px-4 md:px-8">
+        <main className="min-h-screen bg-[var(--surface-cream)] pt-28 pb-20 px-4 md:px-8">
             <div className="max-w-4xl mx-auto">
-                <Link href="/my-bookings" className="inline-flex items-center gap-2 text-sm font-bold text-[#0A332B] hover:opacity-70 transition-opacity mb-8 uppercase tracking-widest">
+                <Link href="/my-bookings" className="inline-flex items-center gap-2 text-sm font-bold text-[var(--brand-primary)] hover:opacity-70 transition-opacity mb-8 uppercase tracking-widest">
                     <ArrowLeft className="w-4 h-4" />
                     Back to Bookings
                 </Link>
@@ -53,15 +53,15 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
                     <div>
                         <div className="flex items-center gap-3 mb-3">
                             <span className="text-sm font-bold text-gray-400 tracking-widest uppercase">Booking Reference</span>
-                            <span className="bg-white border border-gray-200 px-3 py-1 rounded-sm text-sm font-bold text-[#1C1C1C] shadow-sm tracking-wider">{booking.bookingNumber}</span>
+                            <span className="bg-white border border-gray-200 px-3 py-1 rounded-sm text-sm font-bold text-[var(--text-dark)] shadow-sm tracking-wider">{booking.bookingNumber}</span>
                         </div>
-                        <h1 className="text-4xl md:text-5xl font-serif text-[#1C1C1C]">Your Reservation</h1>
+                        <h1 className="text-4xl md:text-5xl font-serif text-[var(--text-dark)]">Your Reservation</h1>
                         <p className="text-gray-600 mt-2">Placed on {format(new Date(booking.createdAt || new Date()), 'MMMM dd, yyyy')}</p>
                     </div>
 
                     <div className="flex gap-3">
                         {!isCancelled && (
-                            <Link href={`/my-bookings/${booking.id}/invoice`} target="_blank" className="flex items-center gap-2 bg-[#0A332B] hover:bg-[#15443B] text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-sm">
+                            <Link href={`/my-bookings/${booking.id}/invoice`} target="_blank" className="flex items-center gap-2 bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-dark)] text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-sm">
                                 <Download className="w-4 h-4" />
                                 Print / Download Confirmation
                             </Link>
@@ -101,25 +101,25 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
 
                         {/* Stay Information */}
                         <section className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                            <h2 className="bg-[#1C1C1C] text-white px-6 py-4 text-lg font-serif">Stay Information</h2>
+                            <h2 className="bg-[var(--text-dark)] text-white px-6 py-4 text-lg font-serif">Stay Information</h2>
                             <div className="p-6 grid grid-cols-2 md:grid-cols-4 gap-6">
                                 <div className="col-span-2 md:col-span-1 border-r border-gray-100 last:border-0 md:pr-4">
                                     <p className="text-xs uppercase tracking-widest text-gray-500 mb-1">Check-in</p>
-                                    <p className="font-bold text-[#1C1C1C] whitespace-nowrap">{format(checkInDate, 'MMM dd, yyyy')}</p>
+                                    <p className="font-bold text-[var(--text-dark)] whitespace-nowrap">{format(checkInDate, 'MMM dd, yyyy')}</p>
                                     <p className="text-sm text-gray-500 mt-1">From 2:00 PM</p>
                                 </div>
                                 <div className="col-span-2 md:col-span-1 border-r border-gray-100 last:border-0 md:pr-4">
                                     <p className="text-xs uppercase tracking-widest text-gray-500 mb-1">Check-out</p>
-                                    <p className="font-bold text-[#1C1C1C] whitespace-nowrap">{format(checkOutDate, 'MMM dd, yyyy')}</p>
+                                    <p className="font-bold text-[var(--text-dark)] whitespace-nowrap">{format(checkOutDate, 'MMM dd, yyyy')}</p>
                                     <p className="text-sm text-gray-500 mt-1">Until 12:00 PM</p>
                                 </div>
                                 <div className="col-span-2 md:col-span-1 border-r border-gray-100 last:border-0 md:pr-4">
                                     <p className="text-xs uppercase tracking-widest text-gray-500 mb-1">Duration</p>
-                                    <p className="font-bold text-[#1C1C1C]">{nights} Night{nights > 1 ? 's' : ''}</p>
+                                    <p className="font-bold text-[var(--text-dark)]">{nights} Night{nights > 1 ? 's' : ''}</p>
                                 </div>
                                 <div className="col-span-2 md:col-span-1">
                                     <p className="text-xs uppercase tracking-widest text-gray-500 mb-1">Guests</p>
-                                    <p className="font-bold text-[#1C1C1C]">{booking.adults} Adult{booking.adults > 1 ? 's' : ''}</p>
+                                    <p className="font-bold text-[var(--text-dark)]">{booking.adults} Adult{booking.adults > 1 ? 's' : ''}</p>
                                     {(booking.children || 0) > 0 && <p className="text-sm text-gray-500 mt-1">{booking.children} Child{(booking.children || 0) > 1 ? 'ren' : ''}</p>}
                                 </div>
                             </div>
@@ -133,7 +133,7 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
                                     {booking.items?.map((item: any) => (
                                         <div key={item.id} className="flex justify-between items-center py-2 border-b border-dashed border-gray-200 last:border-0">
                                             <div>
-                                                <p className="font-semibold text-[#1C1C1C]">{item.roomTypeName}</p>
+                                                <p className="font-semibold text-[var(--text-dark)]">{item.roomTypeName}</p>
                                                 <p className="text-xs text-gray-500 mt-0.5">{item.quantity} Room{item.quantity > 1 ? 's' : ''}</p>
                                             </div>
                                         </div>
@@ -145,20 +145,20 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     <div>
                                         <p className="text-gray-500 mb-0.5">Name</p>
-                                        <p className="font-medium text-[#1C1C1C]">{booking.guestName}</p>
+                                        <p className="font-medium text-[var(--text-dark)]">{booking.guestName}</p>
                                     </div>
                                     <div>
                                         <p className="text-gray-500 mb-0.5">Email</p>
-                                        <p className="font-medium text-[#1C1C1C]">{booking.guestEmail}</p>
+                                        <p className="font-medium text-[var(--text-dark)]">{booking.guestEmail}</p>
                                     </div>
                                     <div>
                                         <p className="text-gray-500 mb-0.5">Phone</p>
-                                        <p className="font-medium text-[#1C1C1C]">{booking.guestPhone}</p>
+                                        <p className="font-medium text-[var(--text-dark)]">{booking.guestPhone}</p>
                                     </div>
                                     {booking.specialRequests && (
                                         <div className="md:col-span-2 mt-2">
                                             <p className="text-gray-500 mb-0.5">Special Requests</p>
-                                            <p className="font-medium text-[#1C1C1C] italic">"{booking.specialRequests}"</p>
+                                            <p className="font-medium text-[var(--text-dark)] italic">"{booking.specialRequests}"</p>
                                         </div>
                                     )}
                                 </div>
@@ -166,7 +166,7 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
                         </section>
 
                         {/* Cancellation Policy / Help */}
-                        <section id="cancellation" className="bg-[#1C1C1C] rounded-2xl p-6 text-white shadow-xl">
+                        <section id="cancellation" className="bg-[var(--text-dark)] rounded-2xl p-6 text-white shadow-xl">
                             <h3 className="text-xl font-serif mb-3">Modifications & Cancellations</h3>
                             <p className="text-gray-300 text-sm mb-6 leading-relaxed">
                                 To ensure the highest level of service, all modifications and cancellations to your reservation are handled personally by our hospitality team. Please review our standard cancellation policy:
@@ -180,7 +180,7 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
                             <div className="bg-[#2A2A2A] rounded-xl p-5 border border-white/10">
                                 <p className="text-sm font-bold uppercase tracking-widest text-white/70 mb-4">Contact us to cancel or modify</p>
                                 <div className="flex flex-col sm:flex-row gap-4">
-                                    <a href="tel:+918075416514" className="flex items-center justify-center gap-2 bg-white text-[#1C1C1C] hover:bg-gray-100 px-5 py-3 rounded-lg text-sm font-bold transition-colors w-full sm:w-auto">
+                                    <a href="tel:+918075416514" className="flex items-center justify-center gap-2 bg-white text-[var(--text-dark)] hover:bg-gray-100 px-5 py-3 rounded-lg text-sm font-bold transition-colors w-full sm:w-auto">
                                         <PhoneCall className="w-4 h-4" />
                                         +91 80754 16514
                                     </a>
@@ -204,7 +204,7 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
                     {/* Sidebar Order Summary */}
                     <div className="lg:col-span-1">
                         <section className="bg-white rounded-2xl shadow-sm border border-gray-100 sticky top-32 overflow-hidden">
-                            <div className="bg-[#0A332B] px-6 py-4">
+                            <div className="bg-[var(--brand-primary)] px-6 py-4">
                                 <h2 className="text-white text-lg font-serif">Payment Summary</h2>
                             </div>
                             <div className="p-6 space-y-4">
@@ -220,7 +220,7 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
                                 
                                 <div className="flex justify-between text-sm">
                                     <span className="text-gray-600">Room Charges</span>
-                                    <span className="font-medium text-[#1C1C1C]">₹ {(booking.subtotal / 100).toLocaleString('en-IN')}</span>
+                                    <span className="font-medium text-[var(--text-dark)]">₹ {(booking.subtotal / 100).toLocaleString('en-IN')}</span>
                                 </div>
 
                                 {booking.addOns && booking.addOns.length > 0 && (
@@ -231,7 +231,7 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
                                                 {booking.addOns.map((addon: any) => (
                                                     <div key={addon.id} className="flex justify-between text-xs">
                                                         <span className="text-gray-600">{addon.name} x {addon.quantity}</span>
-                                                        <span className="font-medium text-[#1C1C1C]">₹ {(addon.subtotal / 100).toLocaleString('en-IN')}</span>
+                                                        <span className="font-medium text-[var(--text-dark)]">₹ {(addon.subtotal / 100).toLocaleString('en-IN')}</span>
                                                     </div>
                                                 ))}
                                             </div>
@@ -241,14 +241,14 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
 
                                 <div className="flex justify-between text-sm pt-2">
                                     <span className="text-gray-600">Taxes & Fees</span>
-                                    <span className="font-medium text-[#1C1C1C]">₹ {((booking.taxAmount || 0) / 100).toLocaleString('en-IN')}</span>
+                                    <span className="font-medium text-[var(--text-dark)]">₹ {((booking.taxAmount || 0) / 100).toLocaleString('en-IN')}</span>
                                 </div>
 
                                 <div className="h-px bg-gray-100 w-full" />
 
                                 <div className="flex justify-between items-end pt-2">
-                                    <span className="text-[#1C1C1C] font-serif text-lg">Total</span>
-                                    <span className="font-bold text-[#1C1C1C] text-xl">₹ {(booking.totalAmount / 100).toLocaleString('en-IN')}</span>
+                                    <span className="text-[var(--text-dark)] font-serif text-lg">Total</span>
+                                    <span className="font-bold text-[var(--text-dark)] text-xl">₹ {(booking.totalAmount / 100).toLocaleString('en-IN')}</span>
                                 </div>
                             </div>
                         </section>

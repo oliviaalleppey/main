@@ -106,11 +106,11 @@ export function CheckoutStepper({
                 {/* Step 1: Search */}
                 <div id="step-1" className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden transition-all">
                     <div
-                        className={`px-4 py-4 md:px-5 flex items-center justify-between cursor-pointer ${activeStep === 1 ? 'bg-[#1C1C1C]' : 'bg-white'}`}
+                        className={`px-4 py-4 md:px-5 flex items-center justify-between cursor-pointer ${activeStep === 1 ? 'bg-[var(--text-dark)]' : 'bg-white'}`}
                         onClick={() => setActiveStep(1)}
                     >
                         <div className="flex items-center gap-3">
-                            <div className={`w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold ${activeStep === 1 ? 'bg-white text-[#1C1C1C]' : 'bg-emerald-100 text-emerald-700'}`}>
+                            <div className={`w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold ${activeStep === 1 ? 'bg-white text-[var(--text-dark)]' : 'bg-emerald-100 text-emerald-700'}`}>
                                 {activeStep !== 1 ? <Check className="w-3.5 h-3.5" /> : '1'}
                             </div>
                             {activeStep === 1 ? (
@@ -120,7 +120,7 @@ export function CheckoutStepper({
                             )}
                         </div>
                         {activeStep !== 1 && (
-                            <button className="flex justify-center flex-shrink-0 items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-[#1C1C1C] transition-colors sm:ml-4 mt-3 sm:mt-0">
+                            <button className="flex justify-center flex-shrink-0 items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-[var(--text-dark)] transition-colors sm:ml-4 mt-3 sm:mt-0">
                                 <Pencil className="w-3.5 h-3.5" /> Modify
                             </button>
                         )}
@@ -144,13 +144,13 @@ export function CheckoutStepper({
                 {/* Step 2: Room */}
                 <div id="step-2" className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden transition-all">
                     <div
-                        className={`px-4 py-4 md:px-5 flex items-center justify-between cursor-pointer ${activeStep === 2 ? 'bg-[#1C1C1C]' : 'bg-white'}`}
+                        className={`px-4 py-4 md:px-5 flex items-center justify-between cursor-pointer ${activeStep === 2 ? 'bg-[var(--text-dark)]' : 'bg-white'}`}
                         onClick={() => {
                             if (completedSteps.includes(1)) setActiveStep(2);
                         }}
                     >
                         <div className="flex items-center gap-3">
-                            <div className={`w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold ${activeStep === 2 ? 'bg-white text-[#1C1C1C]' : (completedSteps.includes(2) && activeStep !== 2 ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-gray-500')}`}>
+                            <div className={`w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold ${activeStep === 2 ? 'bg-white text-[var(--text-dark)]' : (completedSteps.includes(2) && activeStep !== 2 ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-gray-500')}`}>
                                 {completedSteps.includes(2) && activeStep !== 2 ? <Check className="w-3.5 h-3.5" /> : '2'}
                             </div>
                             {activeStep === 2 ? (
@@ -160,7 +160,7 @@ export function CheckoutStepper({
                             )}
                         </div>
                         {completedSteps.includes(2) && activeStep !== 2 && (
-                            <button className="flex justify-center flex-shrink-0 items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-[#1C1C1C] transition-colors sm:ml-4 mt-3 sm:mt-0">
+                            <button className="flex justify-center flex-shrink-0 items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-[var(--text-dark)] transition-colors sm:ml-4 mt-3 sm:mt-0">
                                 <Pencil className="w-3.5 h-3.5" /> Modify
                             </button>
                         )}
@@ -184,11 +184,11 @@ export function CheckoutStepper({
                 {/* Step 3: Enhance Your Stay */}
                 <div id="step-3" className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm transition-all">
                     <div
-                        className={`px-4 py-4 md:px-5 flex items-center justify-between cursor-pointer ${activeStep === 3 ? 'bg-[#1C1C1C]' : 'bg-gray-50'}`}
+                        className={`px-4 py-4 md:px-5 flex items-center justify-between cursor-pointer ${activeStep === 3 ? 'bg-[var(--text-dark)]' : 'bg-gray-50'}`}
                         onClick={() => setActiveStep(3)}
                     >
                         <div className="flex items-center gap-3">
-                            <div className={`w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold ${activeStep === 3 ? 'bg-white text-[#1C1C1C]' : 'bg-gray-200 text-gray-500'}`}>
+                            <div className={`w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold ${activeStep === 3 ? 'bg-white text-[var(--text-dark)]' : 'bg-gray-200 text-gray-500'}`}>
                                 {completedSteps.includes(3) && activeStep !== 3 ? <Check className="w-3.5 h-3.5" /> : '3'}
                             </div>
                             <h2 className={`text-sm md:text-base font-semibold ${activeStep === 3 ? 'text-white' : 'text-gray-900'}`}>
@@ -196,7 +196,7 @@ export function CheckoutStepper({
                             </h2>
                         </div>
                         {completedSteps.includes(3) && activeStep !== 3 && (
-                            <button className="flex items-center gap-1 text-xs font-semibold text-gray-500 hover:text-[#1C1C1C] transition-colors">
+                            <button className="flex items-center gap-1 text-xs font-semibold text-gray-500 hover:text-[var(--text-dark)] transition-colors">
                                 <Pencil className="w-3 h-3" /> Modify
                             </button>
                         )}
@@ -225,13 +225,13 @@ export function CheckoutStepper({
                 {/* Step 4: Guest Information */}
                 <div id="step-4" className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm transition-all">
                     <div
-                        className={`px-4 py-4 md:px-5 flex items-center justify-between ${activeStep === 4 ? 'bg-[#1C1C1C]' : 'bg-gray-50'} ${completedSteps.includes(3) || hasGuestDetails ? 'cursor-pointer' : 'opacity-60 cursor-not-allowed'}`}
+                        className={`px-4 py-4 md:px-5 flex items-center justify-between ${activeStep === 4 ? 'bg-[var(--text-dark)]' : 'bg-gray-50'} ${completedSteps.includes(3) || hasGuestDetails ? 'cursor-pointer' : 'opacity-60 cursor-not-allowed'}`}
                         onClick={() => {
                             if (completedSteps.includes(3) || hasGuestDetails) setActiveStep(4);
                         }}
                     >
                         <div className="flex items-center gap-3">
-                            <div className={`w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold ${activeStep === 4 ? 'bg-white text-[#1C1C1C]' : 'bg-gray-200 text-gray-500'}`}>
+                            <div className={`w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold ${activeStep === 4 ? 'bg-white text-[var(--text-dark)]' : 'bg-gray-200 text-gray-500'}`}>
                                 {completedSteps.includes(4) && activeStep !== 4 ? <Check className="w-3.5 h-3.5" /> : '4'}
                             </div>
                             <h2 className={`text-sm md:text-base font-semibold ${activeStep === 4 ? 'text-white' : 'text-gray-900'}`}>
@@ -239,7 +239,7 @@ export function CheckoutStepper({
                             </h2>
                         </div>
                         {completedSteps.includes(4) && activeStep !== 4 && (
-                            <button className="flex items-center gap-1 text-xs font-semibold text-gray-500 hover:text-[#1C1C1C] transition-colors">
+                            <button className="flex items-center gap-1 text-xs font-semibold text-gray-500 hover:text-[var(--text-dark)] transition-colors">
                                 <Pencil className="w-3 h-3" /> Modify
                             </button>
                         )}
@@ -258,7 +258,7 @@ export function CheckoutStepper({
                                     <div className="mt-6 flex justify-end">
                                         <button
                                             onClick={() => handleNext(5)}
-                                            className="px-6 py-2.5 bg-[#1C1C1C] text-white text-sm font-semibold rounded-lg hover:bg-black transition-colors flex items-center gap-2"
+                                            className="px-6 py-2.5 bg-[var(--text-dark)] text-white text-sm font-semibold rounded-lg hover:bg-black transition-colors flex items-center gap-2"
                                         >
                                             Continue to Payment <ChevronRight className="w-4 h-4" />
                                         </button>
@@ -271,8 +271,8 @@ export function CheckoutStepper({
 
                 {/* Step 5: Payment */}
                 <div id="step-5" className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm transition-all mb-8">
-                    <div className={`px-4 py-4 md:px-5 flex items-center gap-3 ${activeStep === 5 ? 'bg-[#1C1C1C]' : 'bg-gray-50'} ${activeStep >= 4 || hasGuestDetails ? 'opacity-100' : 'opacity-60'}`}>
-                        <div className={`w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold ${activeStep === 5 ? 'bg-white text-[#1C1C1C]' : 'bg-gray-200 text-gray-500'}`}>
+                    <div className={`px-4 py-4 md:px-5 flex items-center gap-3 ${activeStep === 5 ? 'bg-[var(--text-dark)]' : 'bg-gray-50'} ${activeStep >= 4 || hasGuestDetails ? 'opacity-100' : 'opacity-60'}`}>
+                        <div className={`w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold ${activeStep === 5 ? 'bg-white text-[var(--text-dark)]' : 'bg-gray-200 text-gray-500'}`}>
                             5
                         </div>
                         <h2 className={`text-sm md:text-base font-semibold ${activeStep === 5 ? 'text-white' : 'text-gray-900'}`}>
@@ -307,7 +307,7 @@ export function CheckoutStepper({
                     {activeStep === 3 && (
                         <button
                             onClick={() => handleNext(4)}
-                            className="w-full bg-[#0A332B] hover:bg-[#15443B] text-white py-4 mt-2 rounded-xl font-bold text-[13px] tracking-widest uppercase transition-all shadow-xl shadow-[#0A332B]/20 active:scale-[0.98]"
+                            className="w-full bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-dark)] text-white py-4 mt-2 rounded-xl font-bold text-[13px] tracking-widest uppercase transition-all shadow-xl shadow-[var(--brand-primary)]/20 active:scale-[0.98]"
                         >
                             Book Now
                         </button>
@@ -325,7 +325,7 @@ export function CheckoutStepper({
                                     }
                                 }
                             }}
-                            className="w-full bg-[#0A332B] hover:bg-[#15443B] text-white py-4 mt-2 rounded-xl font-bold text-[13px] tracking-widest uppercase transition-all shadow-xl shadow-[#0A332B]/20 active:scale-[0.98]"
+                            className="w-full bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-dark)] text-white py-4 mt-2 rounded-xl font-bold text-[13px] tracking-widest uppercase transition-all shadow-xl shadow-[var(--brand-primary)]/20 active:scale-[0.98]"
                         >
                             Save & Continue
                         </button>
