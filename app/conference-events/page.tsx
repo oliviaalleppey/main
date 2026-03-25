@@ -46,6 +46,7 @@ const venues: Venue[] = [
             cluster: '180-200',
             classroom: '120-130',
             uShape: '60',
+            boardroom: '60',
         },
     },
     {
@@ -62,6 +63,7 @@ const venues: Venue[] = [
             cluster: '196',
             classroom: '180',
             uShape: '24',
+            boardroom: '40',
         },
     },
     {
@@ -78,6 +80,7 @@ const venues: Venue[] = [
             cluster: '196',
             classroom: '180',
             uShape: '24',
+            boardroom: '40',
         },
     },
     {
@@ -111,6 +114,7 @@ const venues: Venue[] = [
             cluster: '66',
             classroom: '42',
             uShape: '24',
+            boardroom: '30',
         },
     },
     {
@@ -127,6 +131,7 @@ const venues: Venue[] = [
             cluster: '66',
             classroom: '42',
             uShape: '24',
+            boardroom: '25',
         },
     },
     {
@@ -143,6 +148,7 @@ const venues: Venue[] = [
             cluster: '66',
             classroom: '42',
             uShape: '24',
+            boardroom: '25',
         },
     },
     {
@@ -155,6 +161,10 @@ const venues: Venue[] = [
         dimensions: { length: '42', width: '21', height: '9' },
         area: '2000',
         layout: {
+            theatre: '30',
+            cluster: '20',
+            classroom: '18',
+            uShape: '18',
             boardroom: '22',
         },
     },
