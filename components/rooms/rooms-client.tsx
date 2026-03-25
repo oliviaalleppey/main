@@ -534,7 +534,7 @@ function RoomCard({ room, index }: { room: RoomViewModel; index: number }) {
                     </div>
 
                     {/* CTA */}
-                    <div className="flex items-center pt-2">
+                    <div className="flex items-center gap-6 pt-2">
                         <Link
                             href={`/rooms/${room.slug}`}
                             className="group relative inline-flex items-center justify-center px-8 py-3.5 border border-[var(--brand-primary-dark)] md:border-[#BCA06F] text-white md:text-[var(--text-dark)] overflow-hidden transition-colors duration-300 md:hover:border-[var(--brand-primary-dark)] bg-[var(--brand-primary-dark)] md:bg-transparent"
@@ -545,6 +545,15 @@ function RoomCard({ room, index }: { room: RoomViewModel; index: number }) {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                             </svg>
                         </Link>
+
+                        {/* Price beside button */}
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-[11px] tracking-[0.22em] uppercase text-[#8D7858] font-semibold">From</span>
+                            <span className="font-sans text-[2rem] font-normal leading-none text-[#1D1C19] tracking-[-0.02em]">
+                                ₹{(room.basePrice / 100).toLocaleString('en-IN')}
+                            </span>
+                            <span className="text-[11px] tracking-[0.16em] uppercase text-[#8D7858] font-semibold">/ night</span>
+                        </div>
                     </div>
                 </div>
             </div>
