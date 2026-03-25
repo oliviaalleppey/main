@@ -449,31 +449,7 @@ function RoomCard({ room, index }: { room: RoomViewModel; index: number }) {
                     />
                 </motion.div>
 
-                {/* Price Tag - Floating Premium Style */}
-                <div className="absolute top-3 right-3 md:top-4 md:right-4 z-10">
-                    {/* Mobile: compact chip */}
-                    <div className="md:hidden rounded-full bg-black/35 text-white border border-white/20 backdrop-blur-sm px-3 py-1.5 shadow-[0_10px_24px_-18px_rgba(0,0,0,0.45)]">
-                        <span className="text-[10px] tracking-[0.22em] uppercase opacity-90">From</span>
-                        <span className="ml-2 text-[13px] font-semibold tabular-nums">
-                            ₹{(room.basePrice / 100).toLocaleString('en-IN')}
-                        </span>
-                        <span className="ml-1 text-[10px] tracking-[0.18em] uppercase opacity-80">/ night</span>
-                    </div>
 
-                    {/* Desktop: premium badge */}
-                    <div className="hidden md:flex items-center gap-3 bg-gradient-to-b from-[#FBF8F3] to-[#F3EEE5] border border-white/85 ring-1 ring-black/5 shadow-[0_16px_36px_-26px_rgba(0,0,0,0.32)] px-4 py-2.5 rounded-full">
-                        <span className="text-[#8A6B34] text-[10px] tracking-[0.32em] uppercase font-medium">
-                            Room From
-                        </span>
-                        <span className="h-4 w-px bg-black/10" aria-hidden="true" />
-                        <span className="text-[var(--text-dark)] text-[1.25rem] font-serif font-[300] lining-nums tabular-nums tracking-[-0.01em] leading-none">
-                            ₹{(room.basePrice / 100).toLocaleString('en-IN')}
-                        </span>
-                        <span className="text-[#6B645C] text-[10px] font-medium tracking-[0.16em] uppercase">
-                            / Night
-                        </span>
-                    </div>
-                </div>
 
                 {/* View Badge - Subtle Luxury */}
                 <div className="absolute bottom-6 left-6 z-10 flex items-center gap-3">
