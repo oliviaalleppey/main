@@ -165,7 +165,7 @@ const venues: Venue[] = [
             cluster: '20',
             classroom: '18',
             uShape: '18',
-            boardroom: '22',
+            boardroom: '12',
         },
     },
     {
@@ -336,7 +336,7 @@ export default function ConferenceEventsPage() {
                                         </div>
                                     </div>
 
-                                    {/* Description */}
+                                    {/* Description — shown for all venues */}
                                     <div>
                                         <p className="text-[#3D3A33] text-sm md:text-base leading-relaxed">
                                             {activeVenue.description}
@@ -353,15 +353,21 @@ export default function ConferenceEventsPage() {
                                         </Link>
                                     </div>
 
-                                    {/* Capacity Stats — side by side below description */}
-                                    {!/As per/.test(activeVenue.layout.theatre) && (
+                                    {/* Capacity Stats — Board Room shows only Boardroom capacity, others show full grid */}
+                                    {activeVenue.slug === 'forum-3' ? (
+                                        <div className="flex flex-wrap gap-3">
+                                            <div className="border border-[#E8E0D1] bg-[#FAF8F2] px-4 py-3 min-w-[90px]">
+                                                <p className="text-[10px] uppercase tracking-[0.16em] text-[#7A756A]">Boardroom</p>
+                                                <p className="font-serif text-xl text-[#1D1C19] leading-none mt-1">12</p>
+                                            </div>
+                                        </div>
+                                    ) : (!/As per/.test(activeVenue.layout.theatre) && (
                                         <div className="flex flex-wrap gap-3">
                                             {[
                                                 { label: 'Theatre', value: activeVenue.layout.theatre },
                                                 { label: 'Cluster', value: activeVenue.layout.cluster },
                                                 { label: 'Classroom', value: activeVenue.layout.classroom },
                                                 { label: 'U-Shape', value: activeVenue.layout.uShape },
-                                                { label: 'Boardroom', value: activeVenue.layout.boardroom },
                                                 { label: 'Area', value: formatArea(activeVenue.area) },
                                             ].map((item) => (
                                                 <div key={item.label} className="border border-[#E8E0D1] bg-[#FAF8F2] px-4 py-3 min-w-[90px]">
@@ -370,7 +376,7 @@ export default function ConferenceEventsPage() {
                                                 </div>
                                             ))}
                                         </div>
-                                    )}
+                                    ))}
                                 </div>
                             </div>
                         </div>

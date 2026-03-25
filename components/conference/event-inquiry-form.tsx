@@ -110,7 +110,7 @@ export default function EventInquiryForm() {
                     type="date"
                     value={form.preferredDate}
                     onChange={(e) => setForm((prev) => ({ ...prev, preferredDate: e.target.value }))}
-                    className="h-12 border border-[#DCD3C4] bg-[#FCFBF7] px-3.5 text-sm outline-none focus:border-[#B68A4A]"
+                    className="h-14 border border-[#DCD3C4] bg-[#FCFBF7] px-3.5 text-lg outline-none focus:border-[#B68A4A] cursor-pointer"
                 />
                 <input
                     name="phone"
