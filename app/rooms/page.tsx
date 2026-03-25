@@ -1,17 +1,34 @@
 import RoomsClient from "@/components/rooms/rooms-client";
 import { getRoomTypes } from "@/lib/services/room-management";
+import { db } from "@/lib/db";
+import { roomInventory } from "@/lib/db/schema";
+import { eq, and, inArray } from "drizzle-orm";
 
 export const revalidate = 0;
 
 export default async function RoomsPage() {
     const rooms = await getRoomTypes();
 
+    // Fetch today's price overrides and apply them
+    const today = new Date().toISOString().split('T')[0];
+    const roomTypeIds = rooms.map((r) => r.id);
+    const todayOverrides = roomTypeIds.length > 0
+        ? await db.select({ roomTypeId: roomInventory.roomTypeId, price: roomInventory.price })
+            .from(roomInventory)
+            .where(and(
+                eq(roomInventory.date, today),
+                inArray(roomInventory.roomTypeId, roomTypeIds),
+            ))
+        : [];
+    const overrideMap = new Map(todayOverrides.map((o) => [o.roomTypeId, o.price]));
+
     // Serialize dates to strings to avoid passing Date objects to client component
     const serializedRooms = rooms.map(room => ({
         ...room,
+        basePrice: overrideMap.get(room.id) ?? room.basePrice,
         createdAt: room.createdAt?.toISOString(),
         updatedAt: room.updatedAt?.toISOString(),
-        images: room.images || [], // Ensure images is an array
+        images: room.images || [],
     }));
 
     return (

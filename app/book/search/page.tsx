@@ -277,7 +277,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                                                 </div>
 
                                                 <p className="max-w-xl text-sm text-gray-500 leading-relaxed mb-6 line-clamp-2">
-                                                    {result.roomType.description}
+                                                    {result.roomType.shortDescription || result.roomType.description}
                                                 </p>
 
                                                 <div className="mt-5 grid grid-cols-2 lg:grid-cols-4 gap-4 mb-2 border-t border-gray-100 pt-5">

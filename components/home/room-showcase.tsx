@@ -2,8 +2,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, Share2 } from 'lucide-react';
 import { db } from '@/lib/db';
-import { roomTypes } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { roomTypes, roomInventory } from '@/lib/db/schema';
+import { eq, and, inArray } from 'drizzle-orm';
 import { formatRoomName } from '@/lib/utils';
 
 type RoomCard = {
@@ -18,6 +18,7 @@ async function getShowcaseRooms(): Promise<RoomCard[]> {
     const rows = await db.query.roomTypes.findMany({
         where: eq(roomTypes.status, 'active'),
         columns: {
+            id: true,
             name: true,
             slug: true,
             shortDescription: true,
@@ -30,14 +31,29 @@ async function getShowcaseRooms(): Promise<RoomCard[]> {
         orderBy: (table, { asc }) => [asc(table.sortOrder), asc(table.name)],
     });
 
+    // Fetch today's price overrides from roomInventory for all active room types
+    const today = new Date().toISOString().split('T')[0];
+    const roomTypeIds = rows.map((r) => r.id);
+    const todayOverrides = roomTypeIds.length > 0
+        ? await db.select({ roomTypeId: roomInventory.roomTypeId, price: roomInventory.price })
+            .from(roomInventory)
+            .where(and(
+                eq(roomInventory.date, today),
+                inArray(roomInventory.roomTypeId, roomTypeIds),
+            ))
+        : [];
+
+    const overrideMap = new Map(todayOverrides.map((o) => [o.roomTypeId, o.price]));
+
     return rows.map((row) => {
         const images = Array.isArray(row.images) ? row.images : [];
+        const todayPrice = overrideMap.get(row.id);
         return {
             title: formatRoomName(row.name),
             description: row.shortDescription || row.description || 'Experience a thoughtfully designed stay with signature Olivia comforts.',
             image: row.featuredImage || images[0] || null,
             link: `/rooms/${row.slug}`,
-            basePrice: row.basePrice ?? null,
+            basePrice: todayPrice ?? row.basePrice ?? null,
         };
     });
 }
