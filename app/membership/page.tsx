@@ -137,7 +137,7 @@ export default function MembershipPage() {
             <section id="intro" className="py-24 md:py-32 px-6 relative border-y border-white/10 bg-[#0A0A0A] bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]">
                 <div className="max-w-4xl mx-auto text-center space-y-10 md:space-y-14">
                     <p className="text-2xl md:text-4xl lg:text-5xl font-serif leading-[1.4] text-white/90">
-                        Nestled in the serene surroundings of Alappuzha, Olivia is more than a luxury hotel. It is a destination where <span className="text-[#E95D20]">refined hospitality</span>, thoughtful wellness, and contemporary comforts come together to create memorable experiences.
+                        Nestled in the serene surroundings of Alappuzha, <span className="text-[#E95D20]">Olivia</span> is more than a luxury hotel. It is a destination where <span className="text-white">refined hospitality</span>, thoughtful wellness, and contemporary comforts come together to create memorable experiences.
                     </p>
                     <p className="text-lg md:text-xl text-white/60 font-sans leading-relaxed max-w-2xl mx-auto">
                         From rejuvenating wellness facilities and curated dining to elegant stays and personalised service, every detail at Olivia is designed to help you slow down, unwind, and indulge in life&apos;s finer moments.
