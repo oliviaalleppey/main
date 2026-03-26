@@ -1,45 +1,65 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export default function EnergeticMusic() {
     const audioRef = useRef<HTMLAudioElement | null>(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [hasInteracted, setHasInteracted] = useState(false);
 
     useEffect(() => {
         const audio = audioRef.current;
         if (!audio) return;
 
-        audio.volume = 0.5; // Start at 50% volume so it's not deafening
+        audio.volume = 0.3;
 
-        // Try playing immediately
-        const playPromise = audio.play();
+        const tryPlay = () => {
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise
+                    .then(() => {
+                        setIsPlaying(true);
+                        console.log('🎵 Music started playing');
+                    })
+                    .catch((err) => {
+                        console.log('🎵 Autoplay blocked, waiting for interaction');
+                    });
+            }
+        };
 
-        if (playPromise !== undefined) {
-            playPromise.catch(() => {
-                // Autoplay was blocked by the browser. 
-                // Set up a one-time listener for the first interaction to start the music smoothly.
-                const playOnInteraction = () => {
-                    audio.play().catch(console.error); // Safe catch
-                    // Clean up listeners once playing
-                    document.removeEventListener('click', playOnInteraction);
-                    document.removeEventListener('keydown', playOnInteraction);
-                    document.removeEventListener('touchstart', playOnInteraction);
-                };
+        // Try to play immediately
+        tryPlay();
 
-                document.addEventListener('click', playOnInteraction, { once: true });
-                document.addEventListener('keydown', playOnInteraction, { once: true });
-                document.addEventListener('touchstart', playOnInteraction, { once: true });
-            });
-        }
-    }, []);
+        // Set up fallback for when user interacts with the page
+        const handleInteraction = () => {
+            if (!hasInteracted) {
+                setHasInteracted(true);
+                tryPlay();
+            }
+        };
+
+        document.addEventListener('click', handleInteraction);
+        document.addEventListener('keydown', handleInteraction);
+        document.addEventListener('touchstart', handleInteraction);
+
+        return () => {
+            document.removeEventListener('click', handleInteraction);
+            document.removeEventListener('keydown', handleInteraction);
+            document.removeEventListener('touchstart', handleInteraction);
+        };
+    }, [hasInteracted]);
 
     return (
-        <audio 
-            ref={audioRef} 
-            loop 
-            hidden 
-            className="hidden pointer-events-none"
-            src="https://raw.githubusercontent.com/mdn/webaudio-examples/master/audio-analyser/viper.mp3" 
-        />
+        <div className="fixed top-4 right-4 z-[200] opacity-50">
+            <audio
+                ref={audioRef}
+                loop
+                preload="auto"
+                src="https://raw.githubusercontent.com/mdn/webaudio-examples/master/audio-analyser/viper.mp3"
+            />
+            {isPlaying && (
+                <div className="text-xs text-white/50">🎵 Music</div>
+            )}
+        </div>
     );
 }
