@@ -12,8 +12,8 @@ const NAV_ITEMS: Array<{ label: string; href: string; activePrefixes?: string[] 
     { label: 'Wedding', href: '/wedding' },
     { label: 'Conference & Events', href: '/conference-events' },
     { label: 'Dining', href: '/dining' },
-    { label: 'Experiences', href: '/experiences' },
     { label: 'Wellness', href: '/wellness' },
+    { label: 'Membership', href: '/membership' },
 ];
 
 const isNavActive = (pathname: string, item: { href: string; activePrefixes?: string[] }) => {
@@ -144,9 +144,6 @@ export default function RosewoodHeader() {
                                 Admin Panel
                             </Link>
                         )}
-                        <Link href="/membership" className="hover:opacity-70 transition-opacity">
-                            Membership
-                        </Link>
                         <button className="hover:opacity-70 transition-opacity">English</button>
                     </div>
                 </div>
@@ -335,9 +332,6 @@ export default function RosewoodHeader() {
                                     Admin Panel
                                 </Link>
                             )}
-                            <Link href="/membership" onClick={() => setIsMobileMenuOpen(false)} className="block">
-                                Membership
-                            </Link>
                             <button className="block hover:opacity-70 transition-opacity">English</button>
                         </div>
                     </aside>
