@@ -55,7 +55,7 @@ export default function EnergeticMusic() {
                 ref={audioRef}
                 loop
                 preload="auto"
-                src="https://raw.githubusercontent.com/mdn/webaudio-examples/master/audio-analyser/viper.mp3"
+                src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
             />
             {isPlaying && (
                 <div className="text-xs text-white/50">🎵 Music</div>
