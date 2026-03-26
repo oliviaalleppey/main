@@ -165,13 +165,25 @@ function DiningCard({ outlet }: { outlet: DiningOutlet }) {
                 </p>
 
                 <div className="mt-5 flex items-center gap-3">
-                    <Link
-                        href={`/dining/${outlet.slug}`}
-                        className="inline-flex items-center gap-2 rounded-lg border border-[#DCCFB8] bg-white px-4 py-2 text-[#8D6530] text-[11px] tracking-[0.14em] uppercase hover:bg-[#F9F4EA] transition-colors"
-                    >
-                        View Menu
-                        <ArrowRight className="w-4 h-4" />
-                    </Link>
+                    {(outlet.slug === 'in-room-dining' || outlet.slug === 'finishing-point') ? (
+                        <a
+                            href="https://oliviaalleppey.com/menu.pdf"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 rounded-lg border border-[#DCCFB8] bg-white px-4 py-2 text-[#8D6530] text-[11px] tracking-[0.14em] uppercase hover:bg-[#F9F4EA] transition-colors"
+                        >
+                            View Menu
+                            <ArrowRight className="w-4 h-4" />
+                        </a>
+                    ) : (
+                        <Link
+                            href={`/dining/${outlet.slug}`}
+                            className="inline-flex items-center gap-2 rounded-lg border border-[#DCCFB8] bg-white px-4 py-2 text-[#8D6530] text-[11px] tracking-[0.14em] uppercase hover:bg-[#F9F4EA] transition-colors"
+                        >
+                            View Menu
+                            <ArrowRight className="w-4 h-4" />
+                        </Link>
+                    )}
                     {outlet.slug !== 'in-room-dining' && (
                         <a
                             href="tel:+918075416514"

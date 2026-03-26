@@ -377,7 +377,7 @@ export async function startBookingSession(
         externalRatePlanId?: string;
     },
     roomCount = 1
-) {
+): Promise<{ error: string } | void> {
     try {
         await ensureRoomTypeMinOccupancyColumn();
         const safeRoomCount = sanitizeRoomCount(roomCount);
@@ -425,7 +425,7 @@ export async function startBookingSession(
             where: eq(roomTypes.slug, roomSlug),
         });
         if (!roomType) {
-            throw new Error(`Room type not found: ${roomSlug}`);
+            return { error: `Room type not found: ${roomSlug}` };
         }
 
         const ratePlan = await db.query.ratePlans.findFirst({
@@ -433,7 +433,7 @@ export async function startBookingSession(
             orderBy: (ratePlans, { asc, desc }) => [desc(ratePlans.isDefault), asc(ratePlans.displayOrder)],
         });
         if (!ratePlan) {
-            throw new Error(`No rate plan available for room: ${roomSlug}`);
+            return { error: `No rate plan available for room: ${roomSlug}` };
         }
 
         const provider = getBookingProvider();
@@ -445,7 +445,7 @@ export async function startBookingSession(
         });
 
         if (availability.status !== 'success') {
-            throw new Error(availability.message || 'Live availability check failed.');
+            return { error: availability.message || 'Live availability check failed.' };
         }
 
         const matchedAvailability = availability.rooms.find((room) => mapCrsRoomTypeMatchesInternal({
@@ -455,7 +455,7 @@ export async function startBookingSession(
         }));
 
         if (!matchedAvailability || matchedAvailability.availableCount < safeRoomCount) {
-            throw new Error(`Only ${matchedAvailability?.availableCount || 0} room(s) available for ${formatRoomName(roomType.name)}.`);
+            return { error: `Only ${matchedAvailability?.availableCount || 0} room(s) available for ${formatRoomName(roomType.name)}.` };
         }
 
         const cartData = (session.cartData as SessionCartData | null) || {};
@@ -488,7 +488,7 @@ export async function startBookingSession(
             0
         );
         if (totalSelectedRooms > searchParams.adults + searchParams.children) {
-            throw new Error('At least one guest is required per room. Increase guests or reduce selected rooms.');
+            return { error: 'At least one guest is required per room. Please increase the number of guests or reduce the number of selected rooms.' };
         }
 
         await db.update(bookingSessions).set({
@@ -528,7 +528,7 @@ export async function startBookingSession(
             throw error;
         }
         console.error('Failed to start booking session:', error);
-        throw error; // Or redirect to error page
+        return { error: 'An unexpected error occurred while booking. Please try again.' };
     }
 }
 

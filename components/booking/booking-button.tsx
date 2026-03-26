@@ -46,7 +46,10 @@ export function BookingButton({
         setErrorMsg(null);
         startTransition(async () => {
             try {
-                await startBookingSession(roomId, searchParams, quoteSnapshot, roomCount);
+                const res = await startBookingSession(roomId, searchParams, quoteSnapshot, roomCount);
+                if (res?.error) {
+                    setErrorMsg(res.error);
+                }
             } catch (error) {
                 setErrorMsg(error instanceof Error ? error.message : 'An error occurred while selecting the room.');
             }
