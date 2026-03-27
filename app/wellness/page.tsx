@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import EventInquiryForm from '@/components/conference/event-inquiry-form';
 
 const wellnessServices = [
     {
@@ -299,29 +300,14 @@ export default function WellnessPage() {
 
 
 
-            {/* CTA Section */}
-            <section className="py-20 px-6 md:px-12 bg-[var(--brand-primary)]">
-                <div className="max-w-4xl mx-auto text-center">
-                    <h2 className="text-3xl md:text-4xl font-serif text-white mb-6 tracking-wide">
-                        Begin Your Wellness Journey
-                    </h2>
-                    <p className="text-white/92 text-lg mb-8 max-w-2xl mx-auto">
-                        Reserve your spa treatment or wellness package in advance to ensure availability during your stay.
+            {/* Inquiry Form */}
+            <section id="event-form" className="py-12 md:py-16 px-6 md:px-12 bg-[var(--surface-cream)]">
+                <div className="max-w-5xl mx-auto">
+                    <h2 className="font-serif text-3xl md:text-4xl text-[var(--text-dark)] tracking-tight text-center">Reserve Your Wellness Experience</h2>
+                    <p className="mt-3 text-[#5D5A53] text-sm text-center max-w-2xl mx-auto">
+                        Share your preferences and our wellness team will curate a personalised spa and wellness itinerary for your stay.
                     </p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Link
-                            href="#booking-search"
-                            className="bg-white text-[var(--brand-primary)] px-8 py-4 text-sm uppercase tracking-[0.2em] hover:bg-[var(--gold-accent)] hover:text-white transition-colors"
-                        >
-                            Reserve Now
-                        </Link>
-                        <a
-                            href="tel:+911234567890"
-                            className="border border-white text-white px-8 py-4 text-sm uppercase tracking-[0.2em] hover:bg-white hover:text-[var(--brand-primary)] transition-colors"
-                        >
-                            Call Us
-                        </a>
-                    </div>
+                    <EventInquiryForm />
                 </div>
             </section>
         </main>

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import NewsletterForm from './newsletter-form';
 
 export default function RosewoodFooter() {
     return (
@@ -18,16 +19,7 @@ export default function RosewoodFooter() {
                     </div>
 
                     <div className="w-full md:max-w-xl">
-                        <form className="flex items-center gap-3 rounded-2xl border border-[#BEB4A8] bg-white px-4 py-3">
-                            <input
-                                type="email"
-                                placeholder="Email Address"
-                                className="w-full bg-transparent outline-none text-[var(--text-dark)] placeholder-[#726B64] text-base tracking-wide"
-                            />
-                            <button className="rounded-xl bg-[var(--btn-dark)] px-5 py-2.5 text-xs uppercase tracking-[0.18em] text-white hover:bg-[var(--text-dark)] transition-colors font-medium whitespace-nowrap">
-                                Subscribe
-                            </button>
-                        </form>
+                        <NewsletterForm />
                     </div>
                 </div>
 
@@ -90,7 +82,7 @@ export default function RosewoodFooter() {
                             <ul className="space-y-3 text-[15px] text-[#403A35]">
                                 <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">Our Story</Link></li>
                                 <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">Residences</Link></li>
-                                <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">Careers</Link></li>
+                                <li><Link href="mailto:hr@oliviaalleppey.com" className="hover:text-[var(--text-dark)] transition-colors">Careers</Link></li>
                                 <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">Press Room</Link></li>
                             </ul>
                         </div>

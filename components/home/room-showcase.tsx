@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, Share2 } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
+import ShareButton from './share-button';
 import { db } from '@/lib/db';
 import { roomTypes, roomInventory } from '@/lib/db/schema';
 import { eq, and, inArray } from 'drizzle-orm';
@@ -100,9 +101,7 @@ export default async function RoomShowcase() {
                                     <div className="absolute inset-0 bg-gradient-to-br from-[#E8E8E4] to-[#DADAD3]" />
                                 )}
                                 {/* Share Button Overlay */}
-                                <button className="absolute top-4 right-4 p-2 bg-black/20 hover:bg-black/40 backdrop-blur-sm rounded-full text-white transition-colors">
-                                    <Share2 className="w-4 h-4" />
-                                </button>
+                                <ShareButton title={room.title} url={room.link} />
                             </div>
 
                             {/* Content */}

@@ -28,15 +28,39 @@ const cinzel = Cinzel({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://oliviaalleppey.com"),
   title: "Olivia International Hotel - Luxury 5-Star Hotel in Alappuzha, Kerala",
   description: "Experience unparalleled luxury at Olivia International Hotel, a premium 5-star property in the heart of Alappuzha, Kerala. Book your stay directly for exclusive offers.",
   keywords: ["luxury hotel", "5-star hotel", "Alappuzha hotel", "Kerala hotel", "Olivia International Hotel"],
   authors: [{ name: "Olivia International Hotel" }],
   openGraph: {
     title: "Olivia International Hotel - Luxury 5-Star Hotel in Alappuzha",
-    description: "Experience unparalleled luxury at Olivia International Hotel",
+    description: "Experience unparalleled luxury at Olivia International Hotel, a premium 5-star property in the heart of Alappuzha, Kerala.",
     type: "website",
     locale: "en_IN",
+    siteName: "Olivia International Hotel",
+    url: "https://oliviaalleppey.com",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Olivia International Hotel - Luxury in Alappuzha",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Olivia International Hotel - Luxury 5-Star Hotel in Alappuzha",
+    description: "Experience unparalleled luxury at Olivia International Hotel.",
+    images: ["/og-image.jpg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  alternates: {
+    canonical: "https://oliviaalleppey.com",
   },
 };
 

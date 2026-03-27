@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { CalendarDays, Flower2, Sparkles, Users, type LucideIcon } from 'lucide-react';
+import EventInquiryForm from '@/components/conference/event-inquiry-form';
 
 interface CelebrationStyle {
     title: string;
@@ -238,6 +239,18 @@ export default function WeddingPage() {
                 </section>
 
 
+                {/* Inquiry Form */}
+                <section id="event-form" className="py-12 md:py-16 px-6 md:px-12 lg:px-20 bg-[#FAF8F3]">
+                    <div className="max-w-5xl mx-auto">
+                        <h2 className="font-serif text-3xl md:text-4xl text-[#1F2925] tracking-tight text-center">Plan Your Wedding</h2>
+                        <p className="mt-3 text-[#5D5A53] text-sm text-center max-w-2xl mx-auto">
+                            Share your wedding vision and our team will suggest the right venue, layout and service plan.
+                        </p>
+                        <EventInquiryForm />
+                    </div>
+                </section>
+
+                {/* FAQ */}
                 <section className="py-12 md:py-14">
                     <div className="max-w-6xl mx-auto px-6 md:px-10">
                         <div className="max-w-3xl mx-auto">
@@ -259,34 +272,6 @@ export default function WeddingPage() {
                     </div>
                 </section>
 
-                <section className="py-12 md:py-14">
-                    <div className="max-w-5xl mx-auto px-6 md:px-10 text-center border border-[#E4D9C7] bg-[#FCFAF5] p-8 md:p-10">
-                        <p className="text-[#9E8152] text-[11px] tracking-[0.3em] uppercase mb-3">
-                            Ready To Begin
-                        </p>
-                        <h2 className="font-serif text-3xl md:text-5xl text-[#1F2925] mb-4">
-                            Tell Us Your Wedding Dates And Guest Range
-                        </h2>
-                        <p className="text-[#46554D] max-w-2xl mx-auto mb-7">
-                            Share your expected function dates, guest count, and room requirement. We will send a tailored wedding proposal
-                            with venue flow and indicative budget split.
-                        </p>
-                        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                            <Link
-                                href="/contact?type=wedding"
-                                className="inline-flex items-center justify-center bg-[#2A3430] text-[#F7F4EC] px-7 py-3 text-xs tracking-[0.2em] uppercase hover:bg-[#39443F] transition-colors"
-                            >
-                                Request Wedding Proposal
-                            </Link>
-                            <Link
-                                href="/contact"
-                                className="inline-flex items-center justify-center border border-[#CAB38A] text-[#384740] px-7 py-3 text-xs tracking-[0.2em] uppercase hover:bg-[#F2EADB] transition-colors"
-                            >
-                                Speak To Planning Team
-                            </Link>
-                        </div>
-                    </div>
-                </section>
             </main>
 
             <StickyBookButton />

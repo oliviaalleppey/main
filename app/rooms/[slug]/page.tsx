@@ -30,10 +30,36 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     if (!room) return { title: 'Room Not Found' };
 
     const roomName = formatRoomName(room.name);
+    const images = Array.isArray(room.images) ? room.images : [];
+    const ogImage = room.featuredImage || images[0] || '/og-image.jpg';
 
     return {
-        title: `${roomName} | Olivia Hotel`,
-        description: room.description || `Experience luxury in our ${roomName}.`,
+        title: `${roomName} | Olivia International Hotel`,
+        description: room.shortDescription || room.description || `Experience luxury in our ${roomName} at Olivia International Hotel, Alappuzha.`,
+        openGraph: {
+            title: `${roomName} | Olivia International Hotel`,
+            description: room.shortDescription || room.description || `Experience luxury in our ${roomName}.`,
+            type: "website",
+            url: `https://oliviaalleppey.com/rooms/${slug}`,
+            siteName: "Olivia International Hotel",
+            images: [
+                {
+                    url: ogImage,
+                    width: 1200,
+                    height: 630,
+                    alt: roomName,
+                },
+            ],
+        },
+        twitter: {
+            card: "summary_large_image",
+            title: `${roomName} | Olivia International Hotel`,
+            description: room.shortDescription || room.description || `Experience luxury in our ${roomName}.`,
+            images: [ogImage],
+        },
+        alternates: {
+            canonical: `https://oliviaalleppey.com/rooms/${slug}`,
+        },
     };
 }
 

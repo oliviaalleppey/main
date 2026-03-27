@@ -1,6 +1,5 @@
 import Image from 'next/image';
 import { ArrowRight, CheckCircle2, ChevronDown } from 'lucide-react';
-import EnergeticMusic from '@/components/ui/energetic-music';
 import ScrollButton from '@/components/ui/scroll-button';
 
 export const metadata = {
@@ -93,9 +92,6 @@ export default function MembershipPage() {
                 </a>
             </div>
 
-            {/* Energetic Party Music Loop */}
-            <EnergeticMusic />
-
             {/* HER0 - Dynamic full height */}
             <section className="relative min-h-screen w-full flex items-center justify-center overflow-hidden">
                 {/* Background Image with energetic slow zoom */}
@@ -118,9 +114,9 @@ export default function MembershipPage() {
                         <span className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-[#E95D20] animate-pulse"></span>
                         <span className="text-sm md:text-base font-bold tracking-[0.2em] uppercase text-white/90">Exclusive Access</span>
                     </div>
-                    <h1 className="text-5xl md:text-[5rem] lg:text-[6.5rem] xl:text-[7rem] font-serif text-white leading-[1.1] md:leading-tight mb-6 drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)] opacity-100 tracking-tight flex flex-col items-center">
-                        <span className="md:whitespace-nowrap pb-2">Olivia Lifestyle Membership</span>
-                        <span className="text-4xl md:text-6xl lg:text-[4.5rem] text-transparent bg-clip-text bg-gradient-to-r from-[#DCE2D1] to-[#8C7A6B] font-normal block mt-2 md:mt-4 tracking-normal drop-shadow-[0_5px_15px_rgba(0,0,0,0.5)]">
+                    <h1 className="text-5xl md:text-[5rem] lg:text-[6.5rem] xl:text-[7rem] font-serif text-white leading-[1.1] md:leading-none mb-6 drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)] opacity-100 tracking-tight flex flex-col items-center">
+                        <span className="md:whitespace-nowrap">Olivia Lifestyle Membership</span>
+                        <span className="text-4xl md:text-6xl lg:text-[4.5rem] text-transparent bg-clip-text bg-gradient-to-r from-[#DCE2D1] to-[#8C7A6B]  font-normal block mt-4 md:-mt-2 tracking-normal drop-shadow-[0_5px_15px_rgba(0,0,0,0.5)]">
                             For a Select Few...
                         </span>
                     </h1>
