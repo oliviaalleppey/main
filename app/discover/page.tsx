@@ -2,64 +2,269 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { useRef } from 'react';
 import { ArrowRight } from 'lucide-react';
 
 const sections = [
     {
+        id: 'accommodation',
+        label: '01',
         title: 'Accommodation',
-        subtitle: 'Rooms & Suites',
-        description: 'Thoughtfully designed lake and canal view rooms with premium amenities, perfect for a restful stay in Alappuzha.',
+        tagline: 'Where stillness is the luxury.',
+        description: 'Lake and canal view rooms with panoramic windows, curated amenities, and the quiet pace of Alappuzha.',
         href: '/rooms',
         image: 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1600&auto=format&fit=crop',
+        layout: 'split-left',
     },
     {
+        id: 'wedding',
+        label: '02',
         title: 'Wedding',
-        subtitle: 'Celebrations',
-        description: 'From intimate ceremonies to grand receptions, our venues and planning team craft unforgettable wedding experiences.',
+        tagline: 'Celebrate where nature officiates.',
+        description: 'From poolside vows to grand ballroom receptions, we design weddings around your story — not the other way around.',
         href: '/wedding',
         image: 'https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1600&auto=format&fit=crop',
+        layout: 'split-right',
     },
     {
+        id: 'conference',
+        label: '03',
         title: 'Conference & Events',
-        subtitle: 'Business Venues',
-        description: 'Versatile banquet halls, boardrooms, and outdoor spaces equipped for conferences, launches, and corporate gatherings.',
+        tagline: 'Scale meets sophistication.',
+        description: 'Versatile venues from boardrooms for 12 to ballrooms for 500 — each backed by seamless service and AV support.',
         href: '/conference-events',
         image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=1600&auto=format&fit=crop',
+        layout: 'full-bleed',
     },
     {
+        id: 'dining',
+        label: '04',
         title: 'Dining',
-        subtitle: 'Restaurants & Bars',
-        description: 'A culinary journey through Kerala flavours and global cuisine, served across multiple dining outlets.',
+        tagline: 'A palate shaped by place.',
+        description: 'Kerala spices, global techniques, and locally sourced ingredients — served across multiple signature outlets.',
         href: '/dining',
         image: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=1600&auto=format&fit=crop',
+        layout: 'split-left',
     },
     {
+        id: 'wellness',
+        label: '05',
         title: 'Wellness',
-        subtitle: 'Spa & Fitness',
-        description: 'Ayurvedic therapies, yoga sessions, and a state-of-the-art fitness centre for complete rejuvenation.',
+        tagline: 'Ancient healing, modern calm.',
+        description: 'Ayurvedic therapies, guided yoga, and a state-of-the-art fitness centre — all overlooking the backwaters.',
         href: '/wellness',
         image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=1600&auto=format&fit=crop',
+        layout: 'split-right',
     },
     {
+        id: 'membership',
+        label: '06',
         title: 'Membership',
-        subtitle: 'Lifestyle Privileges',
-        description: 'Year-round access to dining, wellness, stay, and event benefits crafted for a select few.',
+        tagline: 'For those who belong.',
+        description: 'Year-round dining, wellness, stay, and event privileges — crafted for a select circle of members.',
         href: '/membership',
         image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=1600&auto=format&fit=crop',
+        layout: 'cinematic',
     },
 ];
+
+function SplitSection({ section, index }: { section: typeof sections[0]; index: number }) {
+    const ref = useRef<HTMLDivElement>(null);
+    const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] });
+    const imageY = useTransform(scrollYProgress, [0, 1], [40, -40]);
+    const imageScale = useTransform(scrollYProgress, [0, 0.5, 1], [1.08, 1, 1.02]);
+    const isLeft = section.layout === 'split-left';
+
+    return (
+        <motion.section
+            ref={ref}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true, margin: '-100px' }}
+            transition={{ duration: 0.8 }}
+            className="relative"
+        >
+            <div className="max-w-[1400px] mx-auto px-6 md:px-12 lg:px-16">
+                <div className={`flex flex-col ${isLeft ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-0 lg:gap-0`}>
+
+                    {/* Image side */}
+                    <div className="lg:w-[58%] w-full relative overflow-hidden rounded-[32px] lg:rounded-[40px] aspect-[4/3] lg:aspect-[3/2] bg-[#E8E0D2]">
+                        <motion.div style={{ y: imageY, scale: imageScale }} className="absolute inset-0">
+                            <Image
+                                src={section.image}
+                                alt={section.title}
+                                fill
+                                className="object-cover"
+                                sizes="(max-width: 1024px) 100vw, 58vw"
+                            />
+                        </motion.div>
+                        <div className="absolute inset-0 bg-black/10" />
+                    </div>
+
+                    {/* Text side */}
+                    <div className={`lg:w-[42%] w-full ${isLeft ? 'lg:pl-14 xl:pl-20' : 'lg:pr-14 xl:pr-20'} mt-8 lg:mt-0`}>
+                        <motion.div
+                            initial={{ opacity: 0, x: isLeft ? 30 : -30 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.7, delay: 0.2 }}
+                            className="max-w-md"
+                        >
+                            <span className="text-[11px] tracking-[0.4em] uppercase text-[var(--gold-accent-dark)] font-medium">{section.label} /</span>
+                            <h2 className="mt-5 font-serif text-[2.8rem] md:text-[3.4rem] lg:text-[3.8rem] leading-[0.95] text-[var(--text-dark)] tracking-[-0.02em]">
+                                {section.title}
+                            </h2>
+                            <p className="mt-5 font-serif text-lg md:text-xl italic text-[#8C7A6B]">
+                                {section.tagline}
+                            </p>
+                            <p className="mt-5 text-[#59544D] text-[15px] leading-[1.75]">
+                                {section.description}
+                            </p>
+                            <Link
+                                href={section.href}
+                                className="mt-8 inline-flex items-center gap-3 group/link"
+                            >
+                                <span className="text-[11px] tracking-[0.35em] uppercase font-semibold text-[var(--text-dark)] border-b border-[#C4BAA8] pb-1 group-hover/link:border-[var(--brand-primary)] transition-colors">
+                                    Discover
+                                </span>
+                                <ArrowRight className="w-4 h-4 text-[var(--text-dark)] transition-transform group-hover/link:translate-x-1" />
+                            </Link>
+                        </motion.div>
+                    </div>
+                </div>
+            </div>
+        </motion.section>
+    );
+}
+
+function FullBleedSection({ section }: { section: typeof sections[0] }) {
+    const ref = useRef<HTMLDivElement>(null);
+    const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] });
+    const y = useTransform(scrollYProgress, [0, 1], [60, -60]);
+
+    return (
+        <motion.section
+            ref={ref}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true, margin: '-100px' }}
+            transition={{ duration: 0.8 }}
+            className="relative overflow-hidden"
+        >
+            <div className="relative h-[70vh] md:h-[80vh] w-full overflow-hidden">
+                <motion.div style={{ y }} className="absolute inset-[-60px]">
+                    <Image
+                        src={section.image}
+                        alt={section.title}
+                        fill
+                        className="object-cover"
+                        sizes="100vw"
+                    />
+                </motion.div>
+                <div className="absolute inset-0 bg-black/50" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/40" />
+
+                <div className="relative z-10 h-full flex items-center justify-center">
+                    <div className="text-center px-6 max-w-4xl">
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.7, delay: 0.2 }}
+                        >
+                            <span className="text-[11px] tracking-[0.4em] uppercase text-[var(--gold-accent)] font-medium">{section.label} /</span>
+                            <h2 className="mt-6 font-serif text-[3rem] sm:text-[4.5rem] md:text-[6rem] lg:text-[7rem] leading-[0.9] text-white tracking-[-0.03em] [text-shadow:0_2px_30px_rgba(0,0,0,0.5)]">
+                                {section.title}
+                            </h2>
+                            <p className="mt-6 font-serif text-xl md:text-2xl italic text-white/80">
+                                {section.tagline}
+                            </p>
+                            <p className="mt-4 text-white/70 text-[15px] leading-relaxed max-w-2xl mx-auto">
+                                {section.description}
+                            </p>
+                            <Link
+                                href={section.href}
+                                className="mt-10 inline-flex items-center gap-3 border border-white/70 px-8 py-3 text-[11px] tracking-[0.3em] uppercase font-semibold text-white hover:bg-white hover:text-[var(--text-dark)] transition-all duration-300"
+                            >
+                                Discover
+                                <ArrowRight className="w-4 h-4" />
+                            </Link>
+                        </motion.div>
+                    </div>
+                </div>
+            </div>
+        </motion.section>
+    );
+}
+
+function CinematicSection({ section }: { section: typeof sections[0] }) {
+    const ref = useRef<HTMLDivElement>(null);
+    const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] });
+    const scale = useTransform(scrollYProgress, [0, 0.5, 1], [1.15, 1, 0.95]);
+    const y = useTransform(scrollYProgress, [0, 1], [80, -80]);
+
+    return (
+        <motion.section
+            ref={ref}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true, margin: '-100px' }}
+            transition={{ duration: 1 }}
+            className="relative overflow-hidden"
+        >
+            <div className="relative h-[85vh] md:h-[95vh] w-full overflow-hidden">
+                <motion.div style={{ scale }} className="absolute inset-0">
+                    <Image
+                        src={section.image}
+                        alt={section.title}
+                        fill
+                        className="object-cover"
+                        sizes="100vw"
+                    />
+                </motion.div>
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.2)_0%,rgba(0,0,0,0.65)_100%)]" />
+
+                <div className="relative z-10 h-full flex items-end justify-center pb-16 md:pb-24">
+                    <div className="text-center px-6 max-w-3xl">
+                        <motion.div
+                            initial={{ opacity: 0, y: 40 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.9, delay: 0.3 }}
+                        >
+                            <span className="text-[11px] tracking-[0.4em] uppercase text-[var(--gold-accent)] font-medium">{section.label} /</span>
+                            <h2 className="mt-6 font-serif text-[3.5rem] sm:text-[5rem] md:text-[7rem] lg:text-[8rem] leading-[0.85] text-white tracking-[-0.04em] [text-shadow:0_4px_40px_rgba(0,0,0,0.6)]">
+                                {section.title}
+                            </h2>
+                            <p className="mt-6 font-serif text-xl md:text-2xl italic text-white/80">
+                                {section.tagline}
+                            </p>
+                            <Link
+                                href={section.href}
+                                className="mt-10 inline-flex items-center gap-3 border border-white/70 px-10 py-3.5 text-[11px] tracking-[0.3em] uppercase font-semibold text-white hover:bg-white hover:text-[var(--text-dark)] transition-all duration-300"
+                            >
+                                Discover
+                                <ArrowRight className="w-4 h-4" />
+                            </Link>
+                        </motion.div>
+                    </div>
+                </div>
+            </div>
+        </motion.section>
+    );
+}
 
 export default function DiscoverPage() {
     return (
         <main className="min-h-screen bg-[#F3EEE4] text-[var(--text-dark)] selection:bg-[var(--text-dark)] selection:text-white">
 
             {/* HERO */}
-            <section className="relative h-[44vh] md:h-[52vh] w-full overflow-hidden">
+            <section className="relative h-[50vh] md:h-[60vh] w-full overflow-hidden">
                 <motion.div
-                    initial={{ scale: 1.05 }}
+                    initial={{ scale: 1.06 }}
                     animate={{ scale: 1 }}
-                    transition={{ duration: 8, ease: 'easeOut' }}
+                    transition={{ duration: 10, ease: 'easeOut' }}
                     className="absolute inset-0 z-0"
                 >
                     <div className="absolute inset-0 bg-[linear-gradient(135deg,var(--brand-primary-deep)_0%,var(--brand-primary-dark)_38%,var(--brand-primary-deep)_100%)]" />
@@ -71,18 +276,18 @@ export default function DiscoverPage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.2 }}
-                        className="flex items-center gap-4 mb-3"
+                        className="flex items-center gap-4 mb-5"
                     >
-                        <span className="w-8 h-[1px] bg-white/80" />
-                        <p className="text-white text-[10px] tracking-[0.34em] uppercase font-light">Olivia Alleppey</p>
-                        <span className="w-8 h-[1px] bg-white/80" />
+                        <span className="w-10 h-[1px] bg-white/60" />
+                        <p className="text-white/70 text-[10px] tracking-[0.5em] uppercase font-light">Olivia Alleppey</p>
+                        <span className="w-10 h-[1px] bg-white/60" />
                     </motion.div>
 
                     <motion.h1
-                        initial={{ opacity: 0, y: 25 }}
+                        initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.4 }}
-                        className="text-[3.5rem] sm:text-[4.5rem] md:text-[6rem] lg:text-[8rem] font-serif font-medium text-white mb-5 tracking-[-0.02em] leading-[0.92] [text-shadow:0_2px_22px_rgba(0,0,0,0.55)]"
+                        transition={{ duration: 1, delay: 0.4 }}
+                        className="text-[4rem] sm:text-[5.5rem] md:text-[7rem] lg:text-[9rem] font-serif font-medium text-white tracking-[-0.03em] leading-[0.88] [text-shadow:0_4px_40px_rgba(0,0,0,0.4)]"
                     >
                         Discover
                     </motion.h1>
@@ -90,78 +295,52 @@ export default function DiscoverPage() {
                     <motion.p
                         initial={{ opacity: 0, y: 15 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.6 }}
-                        className="text-white/80 text-lg md:text-xl max-w-2xl mx-auto mb-8"
+                        transition={{ duration: 0.8, delay: 0.7 }}
+                        className="mt-6 text-white/60 text-[13px] md:text-[14px] tracking-[0.15em] uppercase max-w-xl"
                     >
-                        Luxury stays, curated celebrations, fine dining, and holistic wellness — all under one roof.
+                        Every facet of Olivia, distilled into one page
                     </motion.p>
 
                     <motion.div
-                        initial={{ opacity: 0, y: 15 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.8 }}
-                        className="flex gap-3"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 1, delay: 1.2 }}
+                        className="mt-12"
                     >
-                        <Link
-                            href="/book/search"
-                            className="border border-white/90 bg-white text-[#2D3933] px-6 py-2.5 text-[10px] tracking-[0.22em] uppercase font-semibold shadow-[0_18px_40px_-28px_rgba(0,0,0,0.65)] hover:bg-white/95 transition-colors duration-300"
-                        >
-                            Book Now
-                        </Link>
-                        <Link
-                            href="/contact"
-                            className="border border-white/85 bg-black/20 text-white px-6 py-2.5 text-[10px] tracking-[0.22em] uppercase font-semibold backdrop-blur-sm hover:bg-black/30 transition-colors duration-300"
-                        >
-                            Contact
-                        </Link>
+                        <div className="w-[1px] h-12 bg-gradient-to-b from-white/50 to-transparent mx-auto" />
                     </motion.div>
                 </div>
             </section>
 
-            {/* SECTIONS GRID */}
-            <section className="py-14 md:py-20 px-4 md:px-8">
-                <div className="max-w-7xl mx-auto">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                        {sections.map((section, idx) => (
-                            <motion.div
-                                key={section.title}
-                                initial={{ opacity: 0, y: 30 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true, margin: '-60px' }}
-                                transition={{ duration: 0.6, delay: idx * 0.1 }}
-                            >
-                                <Link
-                                    href={section.href}
-                                    className="group block rounded-[28px] border border-[#E2D7C7] bg-[#FBF8F2] overflow-hidden hover:border-[var(--brand-primary)]/30 transition-colors"
-                                >
-                                    {/* Image */}
-                                    <div className="relative aspect-[16/10] overflow-hidden bg-[#E8E0D2]">
-                                        <Image
-                                            src={section.image}
-                                            alt={section.title}
-                                            fill
-                                            className="object-cover transition-transform duration-700 group-hover:scale-105"
-                                            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                                        />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                                    </div>
+            {/* SECTION 1 — Accommodation (Split Left) */}
+            <div className="pt-20 md:pt-28 pb-16 md:pb-24">
+                <SplitSection section={sections[0]} index={0} />
+            </div>
 
-                                    {/* Content */}
-                                    <div className="p-6 md:p-8">
-                                        <p className="text-[10px] tracking-[0.3em] uppercase text-[#6B645C]">{section.subtitle}</p>
-                                        <h2 className="mt-3 font-serif text-[1.7rem] md:text-[2rem] leading-tight">{section.title}</h2>
-                                        <p className="mt-3 text-sm md:text-[15px] text-[#59544D] leading-relaxed">{section.description}</p>
-                                        <div className="mt-5 inline-flex items-center gap-2 text-[var(--text-dark)] opacity-60 group-hover:opacity-100 transition-opacity">
-                                            <span className="text-[11px] tracking-[0.28em] uppercase font-medium">Explore</span>
-                                            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                                        </div>
-                                    </div>
-                                </Link>
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
-            </section>
+            {/* SECTION 2 — Wedding (Split Right) */}
+            <div className="py-16 md:py-24 bg-[var(--surface-soft)]/30">
+                <SplitSection section={sections[1]} index={1} />
+            </div>
+
+            {/* SECTION 3 — Conference (Full Bleed) */}
+            <div className="py-0">
+                <FullBleedSection section={sections[2]} />
+            </div>
+
+            {/* SECTION 4 — Dining (Split Left) */}
+            <div className="py-16 md:py-24">
+                <SplitSection section={sections[3]} index={3} />
+            </div>
+
+            {/* SECTION 5 — Wellness (Split Right) */}
+            <div className="py-16 md:py-24 bg-[var(--surface-soft)]/30">
+                <SplitSection section={sections[4]} index={4} />
+            </div>
+
+            {/* SECTION 6 — Membership (Cinematic) */}
+            <div className="py-0">
+                <CinematicSection section={sections[5]} />
+            </div>
 
         </main>
     );
