@@ -2,7 +2,7 @@ import { db } from '@/lib/db';
 import { roomTypes, rooms } from '@/lib/db/schema';
 import { sql, eq } from 'drizzle-orm';
 import Link from 'next/link';
-import { BedDouble, ArrowLeft } from 'lucide-react';
+import { BedDouble, ArrowLeft, Calendar } from 'lucide-react';
 import { HotsoftCrsProvider } from '@/lib/providers/crs/hotsoft-crs-provider';
 import { Suspense } from 'react';
 import { AvailabilityToolbar } from './toolbar';
@@ -297,12 +297,21 @@ export default async function AdminAvailabilityPage({ searchParams }: { searchPa
                                 return (
                                     <tr key={rt.id} className="border-b last:border-0 hover:bg-gray-50/50">
                                         <td className="px-5 py-3 sticky left-0 bg-white z-10">
-                                            <div className="flex items-center gap-2">
-                                                <BedDouble className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                                                <div>
-                                                    <p className="font-medium text-gray-900 text-sm">{rt.name}</p>
-                                                    <p className="text-[11px] text-gray-400">{total} room{total !== 1 ? 's' : ''}</p>
-                                                </div>
+                                            <div className="flex items-center gap-2 group">
+                                                <Link href={`/admin/availability/${rt.id}`} className="flex items-center gap-2 flex-1">
+                                                    <BedDouble className="w-4 h-4 text-gray-400 flex-shrink-0 group-hover:text-blue-500 transition-colors" />
+                                                    <div>
+                                                        <p className="font-medium text-gray-900 text-sm group-hover:text-blue-600 transition-colors">{rt.name}</p>
+                                                        <p className="text-[11px] text-gray-400">{total} room{total !== 1 ? 's' : ''}</p>
+                                                    </div>
+                                                </Link>
+                                                <Link 
+                                                    href={`/admin/availability/${rt.id}`} 
+                                                    className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100" 
+                                                    title="View Calendar"
+                                                >
+                                                    <Calendar className="w-4 h-4" />
+                                                </Link>
                                             </div>
                                         </td>
                                         {dates.map((date) => {
