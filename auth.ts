@@ -32,10 +32,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                         token.role = dbUser.role || 'user';
                         token.id = dbUser.id;
                     }
+                    
+                    // Automatically grant admin rights to specific emails
+                    const defaultAdmins = ['it@oliviaalleppey.com', 'mail@oliviaalleppey.com'];
+                    if (defaultAdmins.includes(user.email)) {
+                        token.role = 'admin';
+                        // Also update DB asynchronously if needed, but token.role is enough for session
+                        if (dbUser && dbUser.role !== 'admin') {
+                            db.update(users).set({ role: 'admin' }).where(eq(users.email, user.email)).execute().catch(console.error);
+                        }
+                    }
                 } catch (error) {
                     console.error('Error fetching user role in JWT callback:', error);
                     // Fallback to user role if DB fails
                     token.role = 'user';
+                    
+                    if (user.email === 'it@oliviaalleppey.com' || user.email === 'mail@oliviaalleppey.com') {
+                        token.role = 'admin';
+                    }
                 }
             }
 
