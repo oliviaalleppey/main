@@ -168,7 +168,10 @@ export default function StickyBookingBar({ basePrice, roomSlug }: StickyBookingB
                             ? 'bg-white border border-[var(--text-dark)]/10 shadow-sm hover:border-[var(--text-dark)]/30'
                             : 'bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20'
                             } px-3 py-2.5 ${isMobileView ? 'rounded-sm' : 'rounded-lg'} items-center gap-3 transition-colors`}>
-                            <span className={`text-sm ${isMobileView ? 'text-[var(--text-dark)]' : 'text-white'}`}>Children</span>
+                            <div className="flex items-baseline gap-1 group-hover:opacity-80 transition-opacity">
+                                <span className={`text-sm ${isMobileView ? 'text-[var(--text-dark)]' : 'text-white'}`}>Children</span>
+                                <span className={`text-[10px] ${isMobileView ? 'text-gray-500' : 'text-white/60'}`}>(&lt; 5 yrs)</span>
+                            </div>
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={() => setGuests(p => ({ ...p, children: Math.max(0, p.children - 1) }))}

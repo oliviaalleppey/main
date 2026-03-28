@@ -219,7 +219,10 @@ export default function HeroSection({ initialMedia }: { initialMedia?: { type: '
 
                             {/* Children */}
                             <div className="flex-1 flex items-center justify-between px-2">
-                                <span className="text-sm font-medium text-gray-900">Child</span>
+                                <div className="flex items-baseline gap-1">
+                                    <span className="text-sm font-medium text-gray-900">Child</span>
+                                    <span className="text-[10px] text-gray-500 font-normal">(&lt; 5 yrs)</span>
+                                </div>
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={() => setGuests({ ...guests, children: Math.max(0, guests.children - 1) })}

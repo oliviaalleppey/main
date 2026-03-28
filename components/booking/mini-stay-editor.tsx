@@ -131,7 +131,7 @@ export function MiniStayEditor({
                     </div>
                 </div>
                 <div className="flex items-center justify-between rounded-md border border-gray-200 bg-white px-2 py-1.5">
-                    <span className="text-[10px] text-gray-500 uppercase">Children</span>
+                    <span className="text-[10px] text-gray-500 uppercase">Children <span className="lowercase tracking-normal">(&lt; 5 yrs)</span></span>
                     <div className="flex items-center gap-1">
                         <button
                             type="button"
