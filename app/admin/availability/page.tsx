@@ -92,9 +92,9 @@ async function fetchAvailability(dates: string[]): Promise<{
 function OccupancyCell({ booked, total }: { booked: number; total: number }) {
     const pct = total > 0 ? (booked / total) * 100 : 0;
 
-    let bgColor = 'bg-emerald-50';
-    let textColor = 'text-emerald-700';
-    let barColor = 'bg-emerald-400';
+    let bgColor = pct === 0 ? 'bg-emerald-50' : 'bg-blue-50';
+    let textColor = pct === 0 ? 'text-emerald-700' : 'text-blue-700';
+    let barColor = pct === 0 ? 'bg-emerald-400' : 'bg-blue-400';
 
     if (pct >= 100) {
         bgColor = 'bg-red-50';
@@ -124,8 +124,8 @@ function OccupancyCell({ booked, total }: { booked: number; total: number }) {
 function CompactOccupancyCell({ booked, total }: { booked: number; total: number }) {
     const pct = total > 0 ? (booked / total) * 100 : 0;
 
-    let bgColor = 'bg-emerald-50';
-    let textColor = 'text-emerald-700';
+    let bgColor = pct === 0 ? 'bg-emerald-50' : 'bg-blue-50';
+    let textColor = pct === 0 ? 'text-emerald-700' : 'text-blue-700';
 
     if (pct >= 100) {
         bgColor = 'bg-red-50';
@@ -147,9 +147,9 @@ function CompactOccupancyCell({ booked, total }: { booked: number; total: number
 function LargeOccupancyCell({ booked, total }: { booked: number; total: number }) {
     const pct = total > 0 ? (booked / total) * 100 : 0;
 
-    let bgColor = 'bg-emerald-50';
-    let textColor = 'text-emerald-700';
-    let barColor = 'bg-emerald-400';
+    let bgColor = pct === 0 ? 'bg-emerald-50' : 'bg-blue-50';
+    let textColor = pct === 0 ? 'text-emerald-700' : 'text-blue-700';
+    let barColor = pct === 0 ? 'bg-emerald-400' : 'bg-blue-400';
 
     if (pct >= 100) {
         bgColor = 'bg-red-50';
@@ -368,6 +368,10 @@ export default async function AdminAvailabilityPage({ searchParams }: { searchPa
                 <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded bg-emerald-400" />
                     <span>Available</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded bg-blue-400" />
+                    <span>1+ booked</span>
                 </div>
                 <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded bg-orange-400" />
