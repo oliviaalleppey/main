@@ -50,6 +50,7 @@ export async function sendBookingConfirmation(params: {
     const { data, error } = await resend.emails.send({
       from: `${HOTEL_NAME} <${FROM_EMAIL}>`,
       to: [to],
+      bcc: ['reservation@oliviaalleppey.com', 'mail@oliviaalleppey.com'],
       subject: `Booking Confirmation - ${bookingNumber}`,
       html: `
         <!DOCTYPE html>
