@@ -1,53 +1,65 @@
 import { db } from '@/lib/db';
-import { roomTypes, rooms, bookings, bookingItems } from '@/lib/db/schema';
-import { eq, sql, and, lte, gt, inArray } from 'drizzle-orm';
+import { roomTypes, rooms } from '@/lib/db/schema';
+import { sql, eq } from 'drizzle-orm';
 import Link from 'next/link';
-import { BedDouble, TrendingUp, CalendarDays, Ban, ArrowRight, Users, CheckCircle2, BookOpen, AlertTriangle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, BedDouble, ArrowLeft } from 'lucide-react';
 import { HotsoftCrsProvider } from '@/lib/providers/crs/hotsoft-crs-provider';
-import { Suspense } from 'react';
-import { DateFilter } from './date-filter';
 
-// Cache this page for 1 hour to prevent rate-limiting the Hotsoft CRS
-// (each page load = 6 API calls; without caching this exhausts the daily quota)
 export const revalidate = 3600;
 
-function formatPrice(paise: number): string {
-    return new Intl.NumberFormat('en-IN', {
-        style: 'currency',
-        currency: 'INR',
-        maximumFractionDigits: 0,
-    }).format(paise / 100);
+function getWeekDates(startDate: string): string[] {
+    const dates: string[] = [];
+    const start = new Date(startDate + 'T00:00:00');
+    for (let i = 0; i < 7; i++) {
+        const d = new Date(start);
+        d.setDate(start.getDate() + i);
+        dates.push(d.toISOString().slice(0, 10));
+    }
+    return dates;
 }
 
-function formatDate(dateStr: string): string {
-    return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-IN', {
-        weekday: 'short',
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-    });
+function formatWeekLabel(dates: string[]): string {
+    const start = new Date(dates[0] + 'T00:00:00');
+    const end = new Date(dates[6] + 'T00:00:00');
+    const opts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' };
+    const startStr = start.toLocaleDateString('en-IN', opts);
+    const endStr = end.toLocaleDateString('en-IN', { ...opts, year: 'numeric' });
+    return `${startStr} — ${endStr}`;
 }
 
-export default async function AdminAvailabilityPage({ searchParams }: { searchParams: Promise<{ checkIn?: string; checkOut?: string }> }) {
+function formatDayHeader(dateStr: string): { day: string; weekday: string } {
+    const d = new Date(dateStr + 'T00:00:00');
+    return {
+        day: d.getDate().toString(),
+        weekday: d.toLocaleDateString('en-IN', { weekday: 'short' }),
+    };
+}
+
+export default async function AdminAvailabilityPage({ searchParams }: { searchParams: Promise<{ week?: string }> }) {
     const params = await searchParams;
     const todayStr = new Date().toISOString().slice(0, 10);
-    const tomorrowStr = (() => {
-        const d = new Date();
-        d.setDate(d.getDate() + 1);
+    const weekStart = params.week || todayStr;
+    const weekDates = getWeekDates(weekStart);
+
+    // Navigate weeks
+    const prevWeek = (() => {
+        const d = new Date(weekStart + 'T00:00:00');
+        d.setDate(d.getDate() - 7);
+        return d.toISOString().slice(0, 10);
+    })();
+    const nextWeek = (() => {
+        const d = new Date(weekStart + 'T00:00:00');
+        d.setDate(d.getDate() + 7);
         return d.toISOString().slice(0, 10);
     })();
 
-    const checkInDate = params.checkIn || todayStr;
-    const checkOutDate = params.checkOut || tomorrowStr;
-
+    // Fetch room types with counts
     const roomTypesWithCounts = await db
         .select({
             id: roomTypes.id,
             name: roomTypes.name,
             slug: roomTypes.slug,
-            basePrice: roomTypes.basePrice,
             status: roomTypes.status,
-            maxGuests: roomTypes.maxGuests,
             totalRooms: sql<number>`count(${rooms.id})`,
         })
         .from(roomTypes)
@@ -55,256 +67,206 @@ export default async function AdminAvailabilityPage({ searchParams }: { searchPa
         .groupBy(roomTypes.id)
         .orderBy(roomTypes.sortOrder);
 
-    const totalRooms = roomTypesWithCounts.reduce((sum, rt) => sum + Number(rt.totalRooms), 0);
-    const activeTypes = roomTypesWithCounts.filter(rt => rt.status === 'active').length;
+    const activeRoomTypes = roomTypesWithCounts.filter(rt => rt.status === 'active');
 
-    // Fetch local DB bookings for selected date range
-    const localBookingRows = await db
-        .select({
-            roomTypeId: bookingItems.roomTypeId,
-            count: sql<number>`count(distinct ${bookings.id})`,
-        })
-        .from(bookings)
-        .innerJoin(bookingItems, eq(bookingItems.bookingId, bookings.id))
-        .where(
-            and(
-                lte(bookings.checkIn, checkOutDate),
-                gt(bookings.checkOut, checkInDate),
-                inArray(bookings.status, ['confirmed', 'completed', 'booking_requested'])
-            )
-        )
-        .groupBy(bookingItems.roomTypeId);
+    // Fetch CRS availability for each day of the week
+    // For each date, query: checkIn=date, checkOut=nextDay → gives occupancy for that night
+    const provider = new HotsoftCrsProvider();
 
-    const localBookedMap: Record<string, number> = {};
-    for (const row of localBookingRows) {
-        localBookedMap[row.roomTypeId] = Number(row.count);
-    }
-    const localTotalBooked = Object.values(localBookedMap).reduce((s, n) => s + n, 0);
+    // availabilityMap[roomSlug][date] = available count
+    const availabilityMap: Record<string, Record<string, number>> = {};
+    const crsErrors: string[] = [];
 
-    // Fetch live CRS availability for selected date range
-    let crsAvailMap: Record<string, number> = {};
-    let crsTotalBooked = 0;
-    let crsError = false;
+    await Promise.all(weekDates.map(async (date) => {
+        const nextDay = new Date(date + 'T00:00:00');
+        nextDay.setDate(nextDay.getDate() + 1);
+        const nextDayStr = nextDay.toISOString().slice(0, 10);
 
-    try {
-        const provider = new HotsoftCrsProvider();
+        try {
+            const avail = await provider.checkAvailability({
+                checkIn: date,
+                checkOut: nextDayStr,
+                adults: 2,
+                children: 0,
+            });
 
-        const avail = await provider.checkAvailability({
-            checkIn: checkInDate,
-            checkOut: checkOutDate,
-            adults: 2,
-            children: 0,
-        });
-
-        if (avail.status === 'success') {
-            for (const room of avail.rooms) {
-                crsAvailMap[room.roomTypeId] = room.availableCount;
-            }
-            for (const rt of roomTypesWithCounts) {
-                const available = crsAvailMap[rt.slug] ?? null;
-                if (available !== null) {
-                    crsTotalBooked += Math.max(0, Number(rt.totalRooms) - available);
+            if (avail.status === 'success') {
+                for (const room of avail.rooms) {
+                    if (!availabilityMap[room.roomTypeId]) {
+                        availabilityMap[room.roomTypeId] = {};
+                    }
+                    availabilityMap[room.roomTypeId][date] = room.availableCount;
                 }
+            } else {
+                crsErrors.push(date);
             }
-        } else {
-            crsError = true;
-            console.warn('[Availability] CRS returned failure:', avail.message);
+        } catch {
+            crsErrors.push(date);
         }
-    } catch (e) {
-        crsError = true;
-        console.warn('[Availability] CRS exception:', e);
-    }
+    }));
 
-    const dateLabel = `${formatDate(checkInDate)} → ${formatDate(checkOutDate)}`;
+    // Total occupancy across all room types for summary
+    let totalBooked = 0;
+    let totalInventory = 0;
+    for (const rt of activeRoomTypes) {
+        const todayAvail = availabilityMap[rt.slug]?.[todayStr];
+        if (todayAvail !== undefined) {
+            totalBooked += Math.max(0, Number(rt.totalRooms) - todayAvail);
+        }
+        totalInventory += Number(rt.totalRooms);
+    }
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-6">
             {/* Header */}
-            <div className="flex items-start justify-between">
+            <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900">Availability</h1>
-                    <p className="text-sm text-gray-500 mt-1">{dateLabel}</p>
+                    <p className="text-sm text-gray-500 mt-1">Weekly occupancy grid — shows rooms booked per night</p>
                 </div>
                 <Link
-                    href="/admin/availability/blocking"
-                    className="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-gray-700 transition-colors"
+                    href="/admin"
+                    className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
                 >
-                    <Ban className="w-4 h-4" />
-                    Block Dates
+                    <ArrowLeft className="w-4 h-4" />
+                    Back to Dashboard
                 </Link>
             </div>
 
-            {/* Date Filter */}
-            <Suspense fallback={<div className="h-10 bg-gray-100 rounded-lg animate-pulse" />}>
-                <DateFilter />
-            </Suspense>
-
-            {/* Summary Stats */}
-            <div className="grid grid-cols-4 gap-4">
-                <div className="rounded-xl border bg-white p-5 shadow-sm">
-                    <div className="flex items-center justify-between mb-3">
-                        <p className="text-sm text-gray-500 font-medium">Room Types</p>
-                        <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-                            <CalendarDays className="w-4 h-4 text-blue-600" />
-                        </div>
-                    </div>
-                    <p className="text-3xl font-bold text-gray-900">{roomTypesWithCounts.length}</p>
-                    <p className="text-xs text-gray-400 mt-1">{activeTypes} active</p>
-                </div>
-
-                <div className="rounded-xl border bg-white p-5 shadow-sm">
-                    <div className="flex items-center justify-between mb-3">
-                        <p className="text-sm text-gray-500 font-medium">Total Rooms</p>
-                        <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
-                            <BedDouble className="w-4 h-4 text-emerald-600" />
-                        </div>
-                    </div>
-                    <p className="text-3xl font-bold text-gray-900">{totalRooms}</p>
-                    <p className="text-xs text-gray-400 mt-1">Across all types</p>
-                </div>
-
-                <div className="rounded-xl border bg-white p-5 shadow-sm">
-                    <div className="flex items-center justify-between mb-3">
-                        <p className="text-sm text-gray-500 font-medium">Booked</p>
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${crsError ? 'bg-orange-50' : 'bg-orange-50'}`}>
-                            <BookOpen className="w-4 h-4 text-orange-600" />
-                        </div>
-                    </div>
-                    {crsError ? (
-                        <>
-                            <p className="text-3xl font-bold text-gray-900">{localTotalBooked}</p>
-                            <p className="text-xs text-orange-500 mt-1 flex items-center gap-1">
-                                <AlertTriangle className="w-3 h-3" /> Website only
-                            </p>
-                        </>
-                    ) : (
-                        <>
-                            <p className="text-3xl font-bold text-gray-900">{crsTotalBooked}</p>
-                            <p className="text-xs text-gray-400 mt-1">All channels (CRS)</p>
-                        </>
-                    )}
-                </div>
-
-                <div className="rounded-xl border bg-white p-5 shadow-sm">
-                    <div className="flex items-center justify-between mb-3">
-                        <p className="text-sm text-gray-500 font-medium">Highest Rate</p>
-                        <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center">
-                            <TrendingUp className="w-4 h-4 text-purple-600" />
-                        </div>
-                    </div>
-                    <p className="text-2xl font-bold text-gray-900">
-                        {formatPrice(Math.max(...roomTypesWithCounts.map(r => Number(r.basePrice))))}
-                    </p>
-                    <p className="text-xs text-gray-400 mt-1">Per night</p>
-                </div>
+            {/* Week Navigation */}
+            <div className="flex items-center gap-4">
+                <Link
+                    href={`/admin/availability?week=${prevWeek}`}
+                    className="rounded-lg border border-gray-200 p-2 hover:bg-gray-50 transition-colors"
+                >
+                    <ChevronLeft className="w-5 h-5 text-gray-600" />
+                </Link>
+                <span className="text-lg font-semibold text-gray-900 min-w-[220px] text-center">
+                    {formatWeekLabel(weekDates)}
+                </span>
+                <Link
+                    href={`/admin/availability?week=${nextWeek}`}
+                    className="rounded-lg border border-gray-200 p-2 hover:bg-gray-50 transition-colors"
+                >
+                    <ChevronRight className="w-5 h-5 text-gray-600" />
+                </Link>
+                <Link
+                    href="/admin/availability"
+                    className="ml-2 text-sm text-gray-500 hover:text-gray-900 transition-colors"
+                >
+                    Today
+                </Link>
             </div>
 
-            {/* CRS Warning Banner */}
-            {crsError && (
-                <div className="flex items-start gap-3 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3">
-                    <AlertTriangle className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />
-                    <div>
-                        <p className="text-sm font-semibold text-orange-700">CRS connection unavailable</p>
-                        <p className="text-xs text-orange-600 mt-0.5">
-                            Cannot reach Hotsoft CRS. Booked counts show <strong>website bookings only</strong> — walk-ins and OTA bookings are not included. Contact PurpleKeys if this persists.
-                        </p>
-                    </div>
+            {/* CRS Error */}
+            {crsErrors.length > 0 && (
+                <div className="rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-700">
+                    CRS unavailable for {crsErrors.length} day(s) — those columns show &quot;—&quot;
                 </div>
             )}
 
-            {/* Room Type Cards */}
-            <div>
-                <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-4">All Room Types</h2>
-                <div className="space-y-3">
-                    {roomTypesWithCounts.map((roomType) => {
-                        const crsAvailable = crsAvailMap[roomType.slug] ?? null;
-                        const booked = crsAvailable !== null
-                            ? Math.max(0, Number(roomType.totalRooms) - crsAvailable)
-                            : (localBookedMap[roomType.id] ?? null);
+            {/* Grid */}
+            <div className="rounded-xl border bg-white shadow-sm overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full">
+                        <thead>
+                            <tr className="border-b bg-gray-50">
+                                <th className="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400 w-[220px]">
+                                    Room Type
+                                </th>
+                                {weekDates.map((date) => {
+                                    const { day, weekday } = formatDayHeader(date);
+                                    const isToday = date === todayStr;
+                                    return (
+                                        <th key={date} className={`text-center px-3 py-3 min-w-[80px] ${isToday ? 'bg-gray-100' : ''}`}>
+                                            <p className="text-[11px] font-medium text-gray-400 uppercase">{weekday}</p>
+                                            <p className={`text-lg font-bold ${isToday ? 'text-gray-900' : 'text-gray-700'}`}>{day}</p>
+                                        </th>
+                                    );
+                                })}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {activeRoomTypes.map((rt) => {
+                                const total = Number(rt.totalRooms);
 
-                        return (
-                            <div
-                                key={roomType.id}
-                                className="rounded-xl border bg-white shadow-sm hover:shadow-md transition-shadow overflow-hidden"
-                            >
-                                <div className="flex items-center gap-4 p-5">
-                                    {/* Color Indicator */}
-                                    <div className="w-1.5 self-stretch rounded-full bg-emerald-400 flex-shrink-0" />
+                                return (
+                                    <tr key={rt.id} className="border-b last:border-0 hover:bg-gray-50/50">
+                                        <td className="px-5 py-3">
+                                            <div className="flex items-center gap-2">
+                                                <BedDouble className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                                                <div>
+                                                    <p className="font-medium text-gray-900 text-sm">{rt.name}</p>
+                                                    <p className="text-[11px] text-gray-400">{total} room{total !== 1 ? 's' : ''}</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        {weekDates.map((date) => {
+                                            const available = availabilityMap[rt.slug]?.[date];
+                                            const isToday = date === todayStr;
 
-                                    {/* Room Info */}
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <h3 className="font-semibold text-gray-900">{roomType.name}</h3>
-                                            {roomType.status === 'active' ? (
-                                                <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
-                                                    <CheckCircle2 className="w-3 h-3" /> Active
-                                                </span>
-                                            ) : (
-                                                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-semibold text-gray-500">
-                                                    Inactive
-                                                </span>
-                                            )}
-                                        </div>
-                                        <p className="text-xs text-gray-400 font-mono">{roomType.slug}</p>
-                                    </div>
+                                            if (available === undefined) {
+                                                return (
+                                                    <td key={date} className={`text-center px-3 py-3 ${isToday ? 'bg-gray-50' : ''}`}>
+                                                        <span className="text-gray-300 text-sm">—</span>
+                                                    </td>
+                                                );
+                                            }
 
-                                    {/* Stats */}
-                                    <div className="flex items-center gap-8 flex-shrink-0">
-                                        <div className="text-center">
-                                            <p className="text-xs text-gray-400 mb-1 flex items-center gap-1">
-                                                <BedDouble className="w-3 h-3" /> Rooms
-                                            </p>
-                                            <p className="text-lg font-bold text-gray-900">{Number(roomType.totalRooms)}</p>
-                                        </div>
-                                        <div className="text-center">
-                                            <p className="text-xs text-gray-400 mb-1 flex items-center gap-1">
-                                                <BookOpen className="w-3 h-3" /> Booked
-                                            </p>
-                                            {booked !== null ? (
-                                                <p className={`text-lg font-bold ${booked > 0 ? 'text-orange-600' : 'text-gray-400'}`}>
-                                                    {booked}
-                                                </p>
-                                            ) : (
-                                                <p className="text-lg font-bold text-gray-300">—</p>
-                                            )}
-                                        </div>
-                                        <div className="text-center">
-                                            <p className="text-xs text-gray-400 mb-1 flex items-center gap-1">
-                                                <Users className="w-3 h-3" /> Guests
-                                            </p>
-                                            <p className="text-lg font-bold text-gray-900">{roomType.maxGuests || '—'}</p>
-                                        </div>
-                                        <div className="text-center">
-                                            <p className="text-xs text-gray-400 mb-1 flex items-center gap-1">
-                                                <TrendingUp className="w-3 h-3" /> Rate
-                                            </p>
-                                            <p className="text-lg font-bold text-gray-900">
-                                                {formatPrice(Number(roomType.basePrice))}
-                                            </p>
-                                        </div>
-                                    </div>
+                                            const booked = Math.max(0, total - available);
+                                            const pct = total > 0 ? (booked / total) * 100 : 0;
 
-                                    {/* Actions */}
-                                    <div className="flex items-center gap-2 flex-shrink-0">
-                                        <Link
-                                            href={`/admin/availability/blocking?roomType=${roomType.id}`}
-                                            className="rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors flex items-center gap-1.5"
-                                        >
-                                            <Ban className="w-3.5 h-3.5" />
-                                            Block
-                                        </Link>
-                                        <Link
-                                            href={`/admin/availability/${roomType.id}`}
-                                            className="rounded-lg bg-gray-900 px-3 py-2 text-xs font-medium text-white hover:bg-gray-700 transition-colors flex items-center gap-1.5"
-                                        >
-                                            View Calendar
-                                            <ArrowRight className="w-3.5 h-3.5" />
-                                        </Link>
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
+                                            let bgColor = 'bg-emerald-50';
+                                            let textColor = 'text-emerald-700';
+                                            let barColor = 'bg-emerald-400';
+
+                                            if (pct >= 100) {
+                                                bgColor = 'bg-red-50';
+                                                textColor = 'text-red-700';
+                                                barColor = 'bg-red-400';
+                                            } else if (pct >= 50) {
+                                                bgColor = 'bg-orange-50';
+                                                textColor = 'text-orange-700';
+                                                barColor = 'bg-orange-400';
+                                            }
+
+                                            return (
+                                                <td key={date} className={`text-center px-3 py-3 ${isToday ? 'bg-gray-50' : ''}`}>
+                                                    <div className={`inline-flex flex-col items-center gap-1 rounded-lg px-3 py-1.5 ${bgColor}`}>
+                                                        <span className={`text-sm font-bold ${textColor}`}>
+                                                            {booked}/{total}
+                                                        </span>
+                                                        <div className="w-10 h-1 rounded-full bg-gray-200 overflow-hidden">
+                                                            <div
+                                                                className={`h-full rounded-full ${barColor} transition-all`}
+                                                                style={{ width: `${pct}%` }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            );
+                                        })}
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {/* Legend */}
+            <div className="flex items-center gap-6 text-xs text-gray-500">
+                <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded bg-emerald-400" />
+                    <span>Available</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded bg-orange-400" />
+                    <span>50%+ booked</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded bg-red-400" />
+                    <span>Fully booked</span>
                 </div>
             </div>
         </div>
