@@ -406,18 +406,18 @@ export class HotsoftCrsProvider implements BookingProvider {
                 const availabilityData = parsedResponse?.Hotsoft?.availability;
                 if (availabilityData) {
                     const availItems = Array.isArray(availabilityData) ? availabilityData : [availabilityData];
-                    const trackerDate = new Date(startDate);
-                    trackerDate.setHours(0,0,0,0);
                     
                     for (const item of availItems) {
-                        const dateKey = trackerDate.toISOString().slice(0, 10);
-                        const freeCount = parseInt(item.free, 10);
-                        
-                        if (!isNaN(freeCount)) {
-                            dailyAvailability[dateKey] = freeCount;
+                        const dateStr = item.Date; // Usually MM/DD/YYYY
+                        if (dateStr && typeof dateStr === 'string' && dateStr.includes('/')) {
+                            const [m, d, y] = dateStr.split('/');
+                            const dateKey = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+                            const freeCount = parseInt(item.free, 10);
+                            
+                            if (!isNaN(freeCount)) {
+                                dailyAvailability[dateKey] = freeCount;
+                            }
                         }
-
-                        trackerDate.setDate(trackerDate.getDate() + 1);
                     }
                 }
             }

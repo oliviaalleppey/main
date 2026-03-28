@@ -8,14 +8,21 @@ export const HOTSOFT_CONFIG = {
 
 // Mapping from Olivia Internal Room Slugs / IDs to Hotsoft CRS Room IDs
 export const HOTSOFT_ROOM_MAPPING: Record<string, string> = {
-    // Slug to ID mapping
-    // Hotsoft room IDs provided by PurpleKeys (Hotel ID: 9137)
+    // Simplified Keys (Legacy)
     'boat-race-suite': '91371',
     'canal-view-king': '91372',
     'canal-view-superior-family': '91373',
     'lake-view-balcony': '91374',
     'lake-view-balcony-suite': '91375',
     'lake-view-twin': '91376',
+    
+    // Direct Database Slugs -> Hotsoft IDs
+    'boat-race-finish-line-view-suite': '91371',
+    'canal-view-king-room': '91372',
+    'canal-view-superior-family-room': '91373',
+    'lake-view-balcony-rooms': '91374',
+    'lake-view-balcony-suite-room': '91375', // Fallback
+    'lake-view-twin-room': '91376',
 };
 
 // Mapping from Olivia Internal Rate Plans to Hotsoft Rate Plan Codes
