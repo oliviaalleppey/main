@@ -14,13 +14,10 @@ function getDateRange(date: string, view: string): string[] {
     const dates: string[] = [];
 
     if (view === 'week') {
-        // Start from Monday of the given date's week
-        const dayOfWeek = d.getDay();
-        const monday = new Date(d);
-        monday.setDate(d.getDate() - ((dayOfWeek + 6) % 7));
+        // Rolling 7-day window starting exactly from the given date to align with toolbar
         for (let i = 0; i < 7; i++) {
-            const dd = new Date(monday);
-            dd.setDate(monday.getDate() + i);
+            const dd = new Date(d);
+            dd.setDate(d.getDate() + i);
             dates.push(dd.toISOString().slice(0, 10));
         }
     } else if (view === 'month') {
