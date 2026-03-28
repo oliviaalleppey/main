@@ -121,6 +121,29 @@ function OccupancyCell({ booked, total }: { booked: number; total: number }) {
     );
 }
 
+function CompactOccupancyCell({ booked, total }: { booked: number; total: number }) {
+    const pct = total > 0 ? (booked / total) * 100 : 0;
+
+    let bgColor = 'bg-emerald-50';
+    let textColor = 'text-emerald-700';
+
+    if (pct >= 100) {
+        bgColor = 'bg-red-50';
+        textColor = 'text-red-700';
+    } else if (pct >= 50) {
+        bgColor = 'bg-orange-50';
+        textColor = 'text-orange-700';
+    }
+
+    return (
+        <div className={`flex items-center justify-center rounded px-1 py-1.5 ${bgColor}`}>
+            <span className={`text-[10px] sm:text-[11px] font-bold ${textColor} tracking-tight leading-none`}>
+                {booked}/{total}
+            </span>
+        </div>
+    );
+}
+
 function LargeOccupancyCell({ booked, total }: { booked: number; total: number }) {
     const pct = total > 0 ? (booked / total) * 100 : 0;
 
@@ -178,7 +201,26 @@ export default async function AdminAvailabilityPage({ searchParams }: { searchPa
     const activeRoomTypes = roomTypesWithCounts.filter(rt => rt.status === 'active');
 
     // Fetch CRS availability
-    const { availabilityMap, crsErrors } = await fetchAvailability(dates);
+    let availabilityMap: Record<string, Record<string, number>> = {};
+    let crsErrors: string[] = [];
+    let yearlyAggregates: Record<string, Record<string, { freeSum: number; days: number }>> = {};
+
+    if (view === 'year') {
+        const provider = new HotsoftCrsProvider();
+        const yearInt = new Date(dateParam + 'T00:00:00').getFullYear();
+        const activeSlugs = activeRoomTypes.map(rt => rt.slug);
+        const aggRes = await provider.getYearlyAggregates(yearInt, activeSlugs);
+        
+        if (aggRes.status === 'success' && aggRes.aggregates) {
+            yearlyAggregates = aggRes.aggregates;
+        } else {
+            crsErrors.push(String(yearInt)); // Push the year so the error banner shows something
+        }
+    } else {
+        const fetchRes = await fetchAvailability(dates);
+        availabilityMap = fetchRes.availabilityMap;
+        crsErrors = fetchRes.crsErrors;
+    }
 
     return (
         <div className="space-y-6">
@@ -189,7 +231,7 @@ export default async function AdminAvailabilityPage({ searchParams }: { searchPa
                     <p className="text-sm text-gray-500 mt-1">
                         {view === 'week' && 'Rooms booked per night — 7 day view'}
                         {view === 'month' && 'Rooms booked per night — full month view'}
-                        {view === 'year' && 'Occupancy snapshot — 1st of each month'}
+                        {view === 'year' && 'Total room nights booked per month'}
                     </p>
                 </div>
                 <Link
@@ -237,10 +279,12 @@ export default async function AdminAvailabilityPage({ searchParams }: { searchPa
                                     }
 
                                     const { day, weekday } = formatDayHeader(date);
+                                    const isViewMonth = view === 'month';
+                                    
                                     return (
-                                        <th key={date} className={`text-center px-2 py-3 min-w-[64px] ${isToday ? 'bg-gray-100' : ''}`}>
-                                            <p className="text-[10px] font-medium text-gray-400 uppercase">{weekday}</p>
-                                            <p className={`text-sm font-bold ${isToday ? 'text-gray-900' : 'text-gray-700'}`}>{day}</p>
+                                        <th key={date} className={`text-center py-2 ${isViewMonth ? 'px-1 min-w-[36px]' : 'px-2 min-w-[64px]'} ${isToday ? 'bg-gray-100' : ''}`}>
+                                            {!isViewMonth && <p className="text-[10px] font-medium text-gray-400 uppercase">{weekday}</p>}
+                                            <p className={`font-bold ${isViewMonth ? 'text-xs my-0.5' : 'text-sm'} ${isToday ? 'text-gray-900' : 'text-gray-700'}`}>{day}</p>
                                         </th>
                                     );
                                 })}
@@ -262,9 +306,31 @@ export default async function AdminAvailabilityPage({ searchParams }: { searchPa
                                             </div>
                                         </td>
                                         {dates.map((date) => {
-                                            const available = availabilityMap[rt.slug]?.[date];
                                             const isToday = date === todayStr;
 
+                                            if (view === 'year') {
+                                                const monthKey = date.slice(0, 7); // e.g., '2026-01'
+                                                const agg = yearlyAggregates[rt.slug]?.[monthKey];
+
+                                                if (!agg || agg.days === 0) {
+                                                    return (
+                                                        <td key={date} className={`text-center px-2 py-3 ${isToday ? 'bg-gray-50' : ''}`}>
+                                                            <span className="text-gray-300 text-sm">—</span>
+                                                        </td>
+                                                    );
+                                                }
+
+                                                const totalCapacityForMonth = total * agg.days;
+                                                const booked = Math.max(0, totalCapacityForMonth - agg.freeSum);
+
+                                                return (
+                                                    <td key={date} className={`text-center px-2 py-3 ${isToday ? 'bg-gray-50' : ''}`}>
+                                                        <OccupancyCell booked={booked} total={totalCapacityForMonth} />
+                                                    </td>
+                                                );
+                                            }
+
+                                            const available = availabilityMap[rt.slug]?.[date];
                                             if (available === undefined) {
                                                 return (
                                                     <td key={date} className={`text-center px-2 py-3 ${isToday ? 'bg-gray-50' : ''}`}>
@@ -275,10 +341,10 @@ export default async function AdminAvailabilityPage({ searchParams }: { searchPa
 
                                             const booked = Math.max(0, total - available);
 
-                                            if (view === 'year') {
+                                            if (view === 'month') {
                                                 return (
-                                                    <td key={date} className={`text-center px-2 py-3 ${isToday ? 'bg-gray-50' : ''}`}>
-                                                        <OccupancyCell booked={booked} total={total} />
+                                                    <td key={date} className={`text-center px-1 py-3 ${isToday ? 'bg-gray-50' : ''}`}>
+                                                        <CompactOccupancyCell booked={booked} total={total} />
                                                     </td>
                                                 );
                                             }

@@ -283,6 +283,95 @@ export class HotsoftCrsProvider implements BookingProvider {
     }
 
     /**
+     * Efficiently retrieves an entire year of availability per room type, bucketing the free room counts by month.
+     */
+    async getYearlyAggregates(year: number, roomTypesToCheck: string[]): Promise<{
+        status: 'success' | 'failure';
+        aggregates?: Record<string, Record<string, { freeSum: number; days: number }>>;
+        message?: string;
+    }> {
+        if (!HOTSOFT_CONFIG.availabilityUrl || !HOTSOFT_CONFIG.appKey || !HOTSOFT_CONFIG.hotelId) {
+            return {
+                status: 'failure',
+                message: 'Hotsoft configuration incomplete.',
+            };
+        }
+
+        const aggregates: Record<string, Record<string, { freeSum: number; days: number }>> = {};
+        let hasSuccess = false;
+        let lastError = '';
+
+        await Promise.all(roomTypesToCheck.map(async (roomType) => {
+            aggregates[roomType] = {};
+
+            const hotelDet: any = {
+                HotelId: HOTSOFT_CONFIG.hotelId,
+                RoomType: getHotsoftRoomId(roomType),
+                DtFrom: `01/01/${year}`,
+                DtTo: `31/12/${year}`,
+                AvailType: '1',
+            };
+
+            const xmlPayload = this.xmlBuilder.build({
+                Hotsoft: {
+                    Login: { AppKey: HOTSOFT_CONFIG.appKey },
+                    HOTEL_DET: hotelDet
+                }
+            });
+
+            const fullXml = `<?xml version="1.0" encoding="UTF-8"?>\n${xmlPayload}`;
+
+            try {
+                const parsedResponse = await this.postXml(HOTSOFT_CONFIG.availabilityUrl, fullXml);
+
+                if (parsedResponse?.Hotsoft?.Response?.ResponseMsg !== "Failed.") {
+                    hasSuccess = true;
+                    const availabilityData = parsedResponse?.Hotsoft?.availability;
+                    if (availabilityData) {
+                        const availItems = Array.isArray(availabilityData) ? availabilityData : [availabilityData];
+                        const trackerDate = new Date(year, 0, 1);
+                        
+                        for (const item of availItems) {
+                            const month = String(trackerDate.getMonth() + 1).padStart(2, '0');
+                            const aggKey = `${year}-${month}`; // e.g., '2026-01'
+
+                            if (!aggregates[roomType][aggKey]) {
+                                aggregates[roomType][aggKey] = { freeSum: 0, days: 0 };
+                            }
+
+                            const freeCount = parseInt(item.free, 10);
+                            if (!isNaN(freeCount)) {
+                                aggregates[roomType][aggKey].freeSum += freeCount;
+                                aggregates[roomType][aggKey].days += 1;
+                            }
+
+                            trackerDate.setDate(trackerDate.getDate() + 1);
+                        }
+                    }
+                } else if (parsedResponse?.Hotsoft?.Response?.ResponseMsg === "Failed.") {
+                    lastError = 'Hotsoft returned Failed.';
+                }
+            } catch (error) {
+                lastError = error instanceof Error ? error.message : 'Unknown Hotsoft Error';
+                console.error(`[Hotsoft] Yearly aggregate failed for room ${roomType}`, error);
+            }
+        }));
+
+        if (!hasSuccess) {
+            return {
+                status: 'failure',
+                message: lastError || 'Hotsoft API failed for all room types.',
+                aggregates
+            };
+        }
+
+        return {
+            status: 'success',
+            aggregates
+        };
+    }
+
+    /**
      * Helper to send raw XML to the Hotsoft API and parse the response
      */
     private async postXml(url: string, xmlPayload: string): Promise<any> {
