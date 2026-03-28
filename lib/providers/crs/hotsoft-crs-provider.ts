@@ -64,11 +64,18 @@ export class HotsoftCrsProvider implements BookingProvider {
         let lastError = '';
 
         await Promise.all(roomTypesToCheck.map(async (roomType) => {
+            const checkOutDate = new Date(request.checkOut + 'T00:00:00');
+            const checkInDate = new Date(request.checkIn + 'T00:00:00');
+            
+            if (checkOutDate > checkInDate) {
+                checkOutDate.setDate(checkOutDate.getDate() - 1);
+            }
+
             const hotelDet: any = {
                 HotelId: HOTSOFT_CONFIG.hotelId,
                 RoomType: getHotsoftRoomId(roomType),
                 DtFrom: formatDateToHotsoft(request.checkIn),
-                DtTo: formatDateToHotsoft(request.checkOut),
+                DtTo: formatDateToHotsoft(checkOutDate.toISOString()),
                 AvailType: '1',
             };
 
