@@ -4,10 +4,11 @@ import { eq, sql } from 'drizzle-orm';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getBookingProvider } from '@/lib/providers/crs/factory';
-import { ArrowLeft, BedDouble, Calendar, Ban, Activity } from 'lucide-react';
+import { ArrowLeft, BedDouble, Calendar, Ban, Activity, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface PageProps {
     params: Promise<{ id: string }>;
+    searchParams?: Promise<{ date?: string }>;
 }
 
 function getDates(start: Date, days: number): Date[] {
@@ -18,8 +19,9 @@ function getDates(start: Date, days: number): Date[] {
     });
 }
 
-export default async function RoomAvailabilityPage({ params }: PageProps) {
+export default async function RoomAvailabilityPage({ params, searchParams }: PageProps) {
     const { id } = await params;
+    const sParams = await searchParams;
 
     const roomType = await db.query.roomTypes.findFirst({
         where: eq(roomTypes.id, id),
@@ -34,52 +36,94 @@ export default async function RoomAvailabilityPage({ params }: PageProps) {
 
     const totalRooms = Number(roomCount[0]?.count || 0);
 
-    // Check live availability from CRS for next 30 days
     const today = new Date();
-    const next30Days = getDates(today, 30);
+    today.setHours(0,0,0,0);
+
+    const dateParam = sParams?.date;
+    let startDate = new Date(today);
+    
+    if (dateParam) {
+        startDate = new Date(dateParam + 'T00:00:00');
+        if (!isNaN(startDate.getTime())) {
+            startDate.setDate(1); // Force snap to the 1st of the month
+        } else {
+            startDate = new Date(today);
+            startDate.setDate(1);
+        }
+    } else {
+        startDate.setDate(1);
+    }
+
+    const prevDate = new Date(startDate);
+    prevDate.setMonth(prevDate.getMonth() - 6);
+    const prevStr = prevDate.toISOString().slice(0, 10);
+
+    const nextDate = new Date(startDate);
+    nextDate.setMonth(nextDate.getMonth() + 6);
+    const nextStr = nextDate.toISOString().slice(0, 10);
+
+    // Check live availability from CRS for 6 months (approx 184 days)
+    const next180Days = getDates(startDate, 184);
     const provider = getBookingProvider();
 
     type DayAvailability = { date: Date; free: number; status: 'available' | 'limited' | 'full' | 'unknown' };
     const availabilityData: DayAvailability[] = [];
 
     try {
-        for (const date of next30Days.slice(0, 14)) { // Fetch 2 weeks to be fast
-            const checkIn = date.toISOString().split('T')[0];
-            const nextDay = new Date(date);
-            nextDay.setDate(nextDay.getDate() + 1);
-            const checkOut = nextDay.toISOString().split('T')[0];
+        if ('getCalendarAvailability' in provider) {
+            const endDate = new Date(startDate);
+            endDate.setDate(endDate.getDate() + 184);
+            const dailyMap = await (provider as any).getCalendarAvailability(roomType.slug, startDate, endDate);
 
-            const result = await provider.checkAvailability({
-                checkIn,
-                checkOut,
-                adults: 1,
-                children: 0,
-                roomTypeId: roomType.slug, // Must pass slug, not UUID, since HOTSOFT_ROOM_MAPPING expects slugs
-            });
-
-            let free = 0;
-            if (result.status === 'success') {
-                const match = result.rooms.find(r =>
-                    r.roomTypeId === roomType.id ||
-                    r.roomTypeId === roomType.slug ||
-                    r.name === roomType.slug ||
-                    r.name === roomType.name
-                );
-                free = match?.availableCount ?? totalRooms;
+            for (const date of next180Days) {
+                const dateKey = date.toISOString().slice(0, 10);
+                const freeQty = dailyMap[dateKey];
+                
+                let free = totalRooms;
+                if (freeQty !== undefined) free = freeQty;
+                
+                availabilityData.push({
+                    date,
+                    free,
+                    status: free === 0 ? 'full' : free <= 2 ? 'limited' : 'available',
+                });
             }
+        } else {
+            for (const date of next180Days.slice(0, 14)) { // Fetch 2 weeks for mock
+                const checkIn = date.toISOString().split('T')[0];
+                const nextDay = new Date(date);
+                nextDay.setDate(nextDay.getDate() + 1);
+                const checkOut = nextDay.toISOString().split('T')[0];
 
-            availabilityData.push({
-                date,
-                free,
-                status: free === 0 ? 'full' : free <= 2 ? 'limited' : 'available',
-            });
-        }
-        // Fill remaining days as unknown (to avoid too many API calls)
-        for (const date of next30Days.slice(14)) {
-            availabilityData.push({ date, free: -1, status: 'unknown' });
+                const result = await provider.checkAvailability({
+                    checkIn,
+                    checkOut,
+                    adults: 1,
+                    children: 0,
+                    roomTypeId: roomType.slug,
+                });
+
+                let free = 0;
+                if (result.status === 'success') {
+                    const match = result.rooms.find(r =>
+                        r.roomTypeId === roomType.id || r.roomTypeId === roomType.slug || r.name === roomType.slug || r.name === roomType.name
+                    );
+                    free = match?.availableCount ?? totalRooms;
+                }
+
+                availabilityData.push({
+                    date,
+                    free,
+                    status: free === 0 ? 'full' : free <= 2 ? 'limited' : 'available',
+                });
+            }
+            // Fill remaining days
+            for (const date of next180Days.slice(14)) {
+                availabilityData.push({ date, free: -1, status: 'unknown' });
+            }
         }
     } catch {
-        for (const date of next30Days) {
+        for (const date of next180Days) {
             availabilityData.push({ date, free: -1, status: 'unknown' });
         }
     }
@@ -100,8 +144,33 @@ export default async function RoomAvailabilityPage({ params }: PageProps) {
                 </Link>
                 <div className="flex-1">
                     <h1 className="text-2xl font-bold text-gray-900">{roomType.name}</h1>
-                    <p className="text-sm text-gray-500 mt-0.5">Live availability — next 30 days</p>
+                    <p className="text-sm text-gray-500 mt-0.5">Live availability — 6 month view</p>
                 </div>
+                
+                <div className="flex items-center gap-2">
+                    <Link
+                        href={`/admin/availability/${id}?date=${prevStr}`}
+                        className="rounded-lg border border-gray-200 p-2 text-gray-600 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 transition-colors"
+                        title="Previous 6 Months"
+                    >
+                        <ChevronLeft className="w-4 h-4" />
+                    </Link>
+                    <Link
+                        href={`/admin/availability/${id}`}
+                        className="text-xs font-semibold text-gray-500 px-2 py-2 hover:text-gray-900 transition-colors"
+                        title="Jump to Current Month"
+                    >
+                        Today
+                    </Link>
+                    <Link
+                        href={`/admin/availability/${id}?date=${nextStr}`}
+                        className="rounded-lg border border-gray-200 p-2 text-gray-600 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 transition-colors"
+                        title="Next 6 Months"
+                    >
+                        <ChevronRight className="w-4 h-4" />
+                    </Link>
+                </div>
+
                 <Link
                     href={`/admin/availability/blocking?roomType=${id}`}
                     className="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700"
@@ -183,9 +252,16 @@ export default async function RoomAvailabilityPage({ params }: PageProps) {
                                     <p className={`text-sm font-bold ${isToday ? 'text-blue-600' : ''}`}>
                                         {day.date.getDate()}
                                     </p>
-                                    <p className="text-[10px] mt-0.5">
-                                        {day.free >= 0 ? `${day.free} free` : '—'}
+                                {day.free >= 0 ? (
+                                    <p className="text-[11px] mt-0.5 tracking-tight">
+                                        <span className={totalRooms - day.free > 0 ? "text-red-600 font-bold" : "opacity-75"}>
+                                            {totalRooms - day.free}
+                                        </span>
+                                        <span className="opacity-75"> / {totalRooms}</span>
                                     </p>
+                                ) : (
+                                    <p className="text-[10px] mt-0.5">—</p>
+                                )}
                                 </div>
                             );
                         })}

@@ -372,6 +372,63 @@ export class HotsoftCrsProvider implements BookingProvider {
     }
 
     /**
+     * Efficiently retrieves a daily map of free rooms for a specific date range.
+     * Perfect for rendering full monthly calendar grids in one API call.
+     */
+    async getCalendarAvailability(roomTypeSlug: string, startDate: Date, endDate: Date): Promise<Record<string, number>> {
+        const dailyAvailability: Record<string, number> = {};
+        
+        if (!HOTSOFT_CONFIG.availabilityUrl || !HOTSOFT_CONFIG.appKey || !HOTSOFT_CONFIG.hotelId) {
+            return dailyAvailability;
+        }
+
+        const hotelDet: any = {
+            HotelId: HOTSOFT_CONFIG.hotelId,
+            RoomType: getHotsoftRoomId(roomTypeSlug),
+            DtFrom: formatDateToHotsoft(startDate.toISOString()),
+            DtTo: formatDateToHotsoft(endDate.toISOString()),
+            AvailType: '1',
+        };
+
+        const xmlPayload = this.xmlBuilder.build({
+            Hotsoft: {
+                Login: { AppKey: HOTSOFT_CONFIG.appKey },
+                HOTEL_DET: hotelDet
+            }
+        });
+
+        const fullXml = `<?xml version="1.0" encoding="UTF-8"?>\n${xmlPayload}`;
+
+        try {
+            const parsedResponse = await this.postXml(HOTSOFT_CONFIG.availabilityUrl, fullXml);
+
+            if (parsedResponse?.Hotsoft?.Response?.ResponseMsg !== "Failed.") {
+                const availabilityData = parsedResponse?.Hotsoft?.availability;
+                if (availabilityData) {
+                    const availItems = Array.isArray(availabilityData) ? availabilityData : [availabilityData];
+                    const trackerDate = new Date(startDate);
+                    trackerDate.setHours(0,0,0,0);
+                    
+                    for (const item of availItems) {
+                        const dateKey = trackerDate.toISOString().slice(0, 10);
+                        const freeCount = parseInt(item.free, 10);
+                        
+                        if (!isNaN(freeCount)) {
+                            dailyAvailability[dateKey] = freeCount;
+                        }
+
+                        trackerDate.setDate(trackerDate.getDate() + 1);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error(`[Hotsoft] Calendar availability failed for room ${roomTypeSlug}`, error);
+        }
+
+        return dailyAvailability;
+    }
+
+    /**
      * Helper to send raw XML to the Hotsoft API and parse the response
      */
     private async postXml(url: string, xmlPayload: string): Promise<any> {
