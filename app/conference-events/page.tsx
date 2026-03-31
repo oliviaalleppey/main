@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import StickyBookButton from '@/components/sticky-book-button';
 import WhatsAppWidget from '@/components/whatsapp-widget';
@@ -19,7 +18,6 @@ type VenueLayout = {
 type Venue = {
     name: string;
     slug: string;
-    image: string;
     description: string;
     bestFor: string;
     dimensions: {
@@ -35,7 +33,6 @@ const venues: Venue[] = [
     {
         name: 'Grand BallRoom',
         slug: 'grand-ballroom',
-        image: '/images/conference/hero.png',
         description:
             'A flagship venue meticulously designed for high-impact corporate events and large-scale conferences. Featuring refined interiors, adaptable layouts, and seamless service support, it provides an ideal setting for conventions, product launches, corporate gatherings, and business summits where scale, precision, and sophistication come together effortlessly.',
         bestFor: 'Conferences, corporate events, product launches',
@@ -52,7 +49,6 @@ const venues: Venue[] = [
     {
         name: 'Grand BallRoom 1',
         slug: 'grand-ballroom-1',
-        image: '/images/conference/meeting-room.png',
         description:
             'Divisible section of the ballroom for focused sessions and medium-format gatherings. Thoughtfully designed for comfort and functionality, it offers a refined setting for conferences, social events, and private functions.',
         bestFor: 'Meetings, seminars, corporate sessions',
@@ -69,7 +65,6 @@ const venues: Venue[] = [
     {
         name: 'Grand BallRoom 2',
         slug: 'grand-ballroom-2',
-        image: '/images/conference/meeting-room.png',
         description:
             'Balanced format venue suitable for workshops, leadership meets, and conference tracks. The open layout allows for creative décor, lighting, and customised configurations.',
         bestFor: 'Conferences, workshops, breakouts',
@@ -86,7 +81,6 @@ const venues: Venue[] = [
     {
         name: 'Grand BallRoom 3',
         slug: 'grand-ballroom-3',
-        image: '/images/conference/meeting-room.png',
         description:
             'Flexible ballroom section built for training batches and presentation-led sessions. Ideal for structured learning environments and interactive workshops.',
         bestFor: 'Training sessions, presentations',
@@ -103,7 +97,6 @@ const venues: Venue[] = [
     {
         name: 'Forum',
         slug: 'forum',
-        image: '/images/conference/meeting-room.png',
         description:
             'Mid-scale conference venue that balances capacity with focused business interaction. Perfect for conferences that require intimacy with structure, strategy meets, and high-level corporate sessions.',
         bestFor: 'Mid-size conferences, strategy meets',
@@ -120,7 +113,6 @@ const venues: Venue[] = [
     {
         name: 'Forum 1',
         slug: 'forum-1',
-        image: '/images/conference/meeting-room.png',
         description:
             'Compact breakout venue for private workshops and internal planning sessions. Designed with focus in mind, Forum 1 provides an environment where ideas flow naturally.',
         bestFor: 'Workshops, meetings',
@@ -137,7 +129,6 @@ const venues: Venue[] = [
     {
         name: 'Forum 2',
         slug: 'forum-2',
-        image: '/images/conference/meeting-room.png',
         description:
             'Breakout-focused space with straightforward layouts for productive work sessions. Forum 2 offers the ideal environment for committee meetings and focused team collaboration.',
         bestFor: 'Breakouts, committee meetings',
@@ -154,7 +145,6 @@ const venues: Venue[] = [
     {
         name: 'Forum 3',
         slug: 'forum-3',
-        image: '/images/conference/meeting-room.png',
         description:
             'Private-format meeting room suited for decision rooms and leadership briefings. An intimate space that encourages high-level conversation and strategic thinking.',
         bestFor: 'Leadership meetings, workshops',
@@ -171,7 +161,6 @@ const venues: Venue[] = [
     {
         name: 'Poolside',
         slug: 'poolside',
-        image: '/images/conference/hero.png',
         description:
             'An exquisite open-air venue crafted for refined social evenings, elegant celebrations, and thoughtfully curated hospitality experiences. Framed by the serene allure of water, this sophisticated setting transforms effortlessly to reflect the essence of any occasion—be it an intimate sunset soirée, a stylish cocktail gathering, or a bespoke themed celebration.',
         bestFor: 'Outdoor celebrations, dinners, networking',
@@ -328,15 +317,9 @@ export default function ConferenceEventsPage() {
                             {/* Right Panel — Image + Info */}
                             <div className="flex-1 lg:pl-10 xl:pl-14">
                                 <div className="flex flex-col gap-6">
-                                    {/* Image */}
-                                    <div className="relative w-full aspect-[16/9] overflow-hidden bg-[#E0D9CE]">
-                                        <Image
-                                            src={activeVenue.image}
-                                            alt={activeVenue.name}
-                                            fill
-                                            className="object-cover"
-                                            sizes="(max-width: 1024px) 100vw, 70vw"
-                                        />
+                                    {/* Visual */}
+                                    <div className="relative w-full aspect-[16/9] overflow-hidden bg-gradient-to-br from-[var(--brand-primary-deep)] to-[var(--brand-primary-dark)] rounded-lg">
+                                        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(231,212,173,0.15)_0%,_transparent_60%)]" />
                                     </div>
 
                                     {/* Description — shown for all venues */}
