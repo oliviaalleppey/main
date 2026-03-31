@@ -7,6 +7,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
 const NAV_ITEMS: Array<{ label: string; href: string; activePrefixes?: string[] }> = [
+    { label: 'Home', href: '/' },
     { label: 'Discover', href: '/discover' },
     { label: 'Accommodation', href: '/rooms' },
     { label: 'Wedding', href: '/wedding' },
@@ -170,7 +171,7 @@ export default function RosewoodHeader() {
                             <Link
                                 key={item.label}
                                 href={item.href}
-                                className={`font-serif font-medium transition-colors text-[#3A342D] hover:text-[#121212] rounded-full px-3 py-1.5 ${isActive ? 'bg-[var(--brand-primary-dark)] text-white' : ''
+                                className={`font-serif font-semibold transition-colors text-[#3A342D] hover:text-[#121212] rounded-full px-3 py-1.5 ${isActive ? 'bg-[var(--brand-primary-dark)] text-white' : ''
                                     } ${item.label === 'Conference & Events' ? 'text-base whitespace-nowrap' : 'text-lg'
                                     }`}
                             >
@@ -178,10 +179,6 @@ export default function RosewoodHeader() {
                             </Link>
                         );
                     })}
-                    <Link href="/shop" className="font-serif font-medium text-lg transition-colors flex items-start gap-0.5 text-[#3A342D] hover:text-[#121212]">
-                        Shop
-                        <span className="text-[10px] leading-none mt-1">↗</span>
-                    </Link>
                 </nav>
 
                 <div className="flex justify-end items-center gap-1 flex-1 xl:flex-none">
@@ -295,20 +292,13 @@ export default function RosewoodHeader() {
                                         key={item.label}
                                         href={item.href}
                                         onClick={() => setIsMobileMenuOpen(false)}
-                                        className={`block py-3 px-3 -mx-3 rounded-lg text-[17px] font-serif border-b border-gray-100 last:border-b-0 ${isActive ? 'bg-[var(--brand-primary-dark)] text-white' : 'text-[var(--text-dark)]'
+                                        className={`block py-3 px-3 -mx-3 rounded-lg text-[17px] font-serif font-semibold border-b border-gray-100 last:border-b-0 ${isActive ? 'bg-[var(--brand-primary-dark)] text-white' : 'text-[var(--text-dark)]'
                                             }`}
                                     >
                                         {item.label}
                                     </Link>
                                 );
                             })}
-                            <Link
-                                href="/shop"
-                                onClick={() => setIsMobileMenuOpen(false)}
-                                className="block py-3 text-[17px] font-serif text-[var(--text-dark)]"
-                            >
-                                Shop
-                            </Link>
                         </nav>
 
                         <div className="px-6 py-5 space-y-3 text-sm text-gray-700">

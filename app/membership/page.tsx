@@ -97,10 +97,9 @@ export default function MembershipPage() {
                 {/* Background Image with energetic slow zoom */}
                 <div className="absolute inset-0 w-full h-full">
                     <Image
-                        src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=100&w=2800&auto=format&fit=crop"
-                        alt="Energetic party with smoke and colored lights"
+                        src="/images/home/hotellandscape.jpeg"
+                        alt="Olivia Alleppey"
                         fill
-                        unoptimized
                         className="object-cover transition-transform duration-[20000ms] ease-out hover:scale-110 scale-105"
                         priority
                     />

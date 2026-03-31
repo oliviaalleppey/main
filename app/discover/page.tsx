@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRef, useState, useCallback, useEffect } from 'react';
@@ -12,21 +11,18 @@ const EDITORIAL_STORIES = [
         subtitle: 'Accommodation',
         description: 'Lake and canal view rooms with panoramic windows and curated amenities.',
         href: '/rooms',
-        image: 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1600&auto=format&fit=crop',
     },
     {
         title: 'Celebrate where nature officiates.',
         subtitle: 'Wedding',
         description: 'From poolside vows to grand ballroom receptions, designed around your story.',
         href: '/wedding',
-        image: 'https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1600&auto=format&fit=crop',
     },
     {
         title: 'Scale meets sophistication.',
         subtitle: 'Conference & Events',
         description: 'Boardrooms for 12 to ballrooms for 500, each backed by seamless service.',
         href: '/conference-events',
-        image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=1600&auto=format&fit=crop',
     },
 ];
 
@@ -35,31 +31,26 @@ const EXPERIENCES = [
         title: 'The Spa at Olivia',
         description: 'Ayurvedic therapies and international treatments in a sanctuary of serenity.',
         href: '/wellness#spa',
-        image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=800&auto=format&fit=crop',
     },
     {
         title: 'Kerala Cuisine',
         description: 'Authentic flavours crafted with locally sourced ingredients.',
         href: '/dining',
-        image: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=800&auto=format&fit=crop',
     },
     {
         title: 'Backwater Cruises',
         description: 'Drift through the serene backwaters of Alappuzha at golden hour.',
         href: '/discover',
-        image: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?q=80&w=800&auto=format&fit=crop',
     },
     {
         title: 'Yoga & Meditation',
         description: 'Sunrise sessions overlooking the backwaters with expert practitioners.',
         href: '/wellness#yoga',
-        image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=800&auto=format&fit=crop',
     },
     {
         title: 'Lifestyle Membership',
         description: 'Year-round privileges across dining, wellness, stays, and events.',
         href: '/membership',
-        image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=800&auto=format&fit=crop',
     },
 ];
 
@@ -124,36 +115,14 @@ function HorizontalScroller({ children }: { children: React.ReactNode }) {
     );
 }
 
-function ParallaxImage({ src, alt, className }: { src: string; alt: string; className?: string }) {
-    const ref = useRef<HTMLDivElement>(null);
-    const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] });
-    const y = useTransform(scrollYProgress, [0, 1], [50, -50]);
-
-    return (
-        <div ref={ref} className={`relative overflow-hidden ${className}`}>
-            <motion.div style={{ y }} className="absolute inset-[-50px]">
-                <Image src={src} alt={alt} fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
-            </motion.div>
-        </div>
-    );
-}
-
 export default function DiscoverPage() {
     return (
         <main className="min-h-screen bg-[#FAF7F0] text-[var(--text-dark)] selection:bg-[var(--text-dark)] selection:text-white overflow-hidden">
 
             {/* === HERO: Fullscreen cinematic === */}
-            <section className="relative h-[80vh] md:h-[90vh] w-full overflow-hidden">
-                <Image
-                    src="https://images.unsplash.com/photo-1566073771259-6a8506099945?q=100&w=2800&auto=format&fit=crop"
-                    alt="Olivia Alleppey"
-                    fill
-                    priority
-                    className="object-cover"
-                    sizes="100vw"
-                />
-                <div className="absolute inset-0 bg-black/40" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30" />
+            <section className="relative h-[80vh] md:h-[90vh] w-full overflow-hidden bg-gradient-to-br from-[#1C2822] via-[#2A3B35] to-[#0F1A15]">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--brand-primary)_0%,_transparent_60%)] opacity-20" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_#8C7A6B_0%,_transparent_50%)] opacity-15" />
 
                 <div className="relative z-10 h-full flex flex-col justify-end items-start px-6 md:px-16 lg:px-24 pb-16 md:pb-24">
                     <motion.p
@@ -224,15 +193,8 @@ export default function DiscoverPage() {
                                 href={story.href}
                                 className="group flex-shrink-0 w-[85vw] md:w-[55vw] lg:w-[42vw] snap-start"
                             >
-                                <div className="relative aspect-[4/3] overflow-hidden rounded-[28px] bg-[#E8E0D2]">
-                                    <Image
-                                        src={story.image}
-                                        alt={story.title}
-                                        fill
-                                        className="object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-[1.04]"
-                                        sizes="(max-width: 768px) 85vw, 42vw"
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
+                                <div className="relative aspect-[4/3] overflow-hidden rounded-[28px] bg-gradient-to-br from-[#1C2822] to-[#2A3B35]">
+                                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--brand-primary)_0%,_transparent_60%)] opacity-15" />
                                     <div className="absolute bottom-0 left-0 p-7 md:p-9">
                                         <p className="text-[10px] tracking-[0.35em] uppercase text-white/70 mb-2">{story.subtitle}</p>
                                         <h3 className="font-serif text-[1.6rem] md:text-[2rem] text-white leading-tight max-w-sm">
@@ -254,11 +216,9 @@ export default function DiscoverPage() {
                 <div className="max-w-[1400px] mx-auto px-6 md:px-12 lg:px-16">
                     <div className="flex flex-col lg:flex-row items-center gap-0">
                         <div className="lg:w-[55%] w-full">
-                            <ParallaxImage
-                                src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1600&auto=format&fit=crop"
-                                alt="Luxury Room"
-                                className="aspect-[4/3] lg:aspect-[3/2] rounded-[32px] lg:rounded-[40px] bg-[#E8E0D2]"
-                            />
+                            <div className="aspect-[4/3] lg:aspect-[3/2] rounded-[32px] lg:rounded-[40px] bg-gradient-to-br from-[#1C2822] to-[#2A3B35] relative overflow-hidden">
+                                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_var(--brand-primary)_0%,_transparent_50%)] opacity-20" />
+                            </div>
                         </div>
                         <div className="lg:w-[45%] w-full lg:pl-16 xl:pl-24 mt-10 lg:mt-0">
                             <motion.div
@@ -291,11 +251,9 @@ export default function DiscoverPage() {
                 <div className="max-w-[1400px] mx-auto px-6 md:px-12 lg:px-16">
                     <div className="flex flex-col lg:flex-row-reverse items-center gap-0">
                         <div className="lg:w-[55%] w-full">
-                            <ParallaxImage
-                                src="https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1600&auto=format&fit=crop"
-                                alt="Wedding"
-                                className="aspect-[4/3] lg:aspect-[3/2] rounded-[32px] lg:rounded-[40px] bg-[#E8E0D2]"
-                            />
+                            <div className="aspect-[4/3] lg:aspect-[3/2] rounded-[32px] lg:rounded-[40px] bg-gradient-to-br from-[#1C2822] to-[#2A3B35] relative overflow-hidden">
+                                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--brand-primary)_0%,_transparent_50%)] opacity-20" />
+                            </div>
                         </div>
                         <div className="lg:w-[45%] w-full lg:pr-16 xl:pr-24 mt-10 lg:mt-0">
                             <motion.div
@@ -324,16 +282,8 @@ export default function DiscoverPage() {
             </section>
 
             {/* === CONFERENCE: Full-bleed cinematic === */}
-            <section className="relative h-[70vh] md:h-[80vh] w-full overflow-hidden">
-                <Image
-                    src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=100&w=2800&auto=format&fit=crop"
-                    alt="Conference & Events"
-                    fill
-                    className="object-cover"
-                    sizes="100vw"
-                />
-                <div className="absolute inset-0 bg-black/50" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/40" />
+            <section className="relative h-[70vh] md:h-[80vh] w-full overflow-hidden bg-gradient-to-br from-[#1C2822] via-[#2A3B35] to-[#0F1A15]">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--brand-primary)_0%,_transparent_60%)] opacity-15" />
 
                 <div className="relative z-10 h-full flex items-center justify-center">
                     <motion.div
@@ -383,15 +333,8 @@ export default function DiscoverPage() {
                                 href={exp.href}
                                 className="group flex-shrink-0 w-[70vw] sm:w-[50vw] md:w-[35vw] lg:w-[26vw] snap-start"
                             >
-                                <div className="relative aspect-[3/4] overflow-hidden rounded-[24px] bg-[#E8E0D2]">
-                                    <Image
-                                        src={exp.image}
-                                        alt={exp.title}
-                                        fill
-                                        className="object-cover transition-transform duration-[1s] ease-out group-hover:scale-[1.05]"
-                                        sizes="(max-width: 768px) 70vw, 26vw"
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                                <div className="relative aspect-[3/4] overflow-hidden rounded-[24px] bg-gradient-to-br from-[#1C2822] to-[#2A3B35]">
+                                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_var(--brand-primary)_0%,_transparent_50%)] opacity-15" />
                                     <div className="absolute bottom-0 left-0 p-6 md:p-7">
                                         <h3 className="font-serif text-[1.3rem] md:text-[1.5rem] text-white leading-tight mb-1">
                                             {exp.title}
@@ -413,11 +356,9 @@ export default function DiscoverPage() {
                     <div className="max-w-[1400px] mx-auto px-6 md:px-12 lg:px-16">
                         <div className="flex flex-col lg:flex-row items-center gap-0">
                             <div className="lg:w-[55%] w-full">
-                                <ParallaxImage
-                                    src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=1600&auto=format&fit=crop"
-                                    alt="Membership"
-                                    className="aspect-[4/3] lg:aspect-[3/2] rounded-[32px] lg:rounded-[40px] bg-[#E8E0D2]"
-                                />
+                                <div className="aspect-[4/3] lg:aspect-[3/2] rounded-[32px] lg:rounded-[40px] bg-gradient-to-br from-[#1C2822] to-[#2A3B35] relative overflow-hidden">
+                                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--brand-primary)_0%,_transparent_50%)] opacity-20" />
+                                </div>
                             </div>
                             <div className="lg:w-[45%] w-full lg:pl-16 xl:pl-24 mt-10 lg:mt-0">
                                 <motion.div
