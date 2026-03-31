@@ -467,7 +467,7 @@ function RoomCard({ room, index }: { room: RoomViewModel; index: number }) {
                         {String(index + 1).padStart(2, '0')} — {['Lake View', 'Canal View', 'Canal View', 'Boat Race View', 'Lake View', 'Lake View'][index] || room.view}
                     </span>
 
-                    <h3 className="text-3xl md:text-4xl lg:text-[2.55rem] font-serif text-[var(--text-dark)] mb-4 leading-tight">
+                    <h3 className="text-3xl md:text-4xl lg:text-[2.55rem] font-serif font-bold tracking-tight text-[var(--text-dark)] mb-4 leading-tight">
                         {room.name}
                     </h3>
 
@@ -523,12 +523,14 @@ function RoomCard({ room, index }: { room: RoomViewModel; index: number }) {
                         </Link>
 
                         {/* Price beside button */}
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-[11px] tracking-[0.22em] uppercase text-[#8D7858] font-semibold">From</span>
-                            <span className="font-sans text-[2rem] font-normal leading-none text-[#1D1C19] tracking-[-0.02em]">
-                                ₹{(room.basePrice / 100).toLocaleString('en-IN')}
-                            </span>
-                            <span className="text-[11px] tracking-[0.16em] uppercase text-[#8D7858] font-semibold">/ night</span>
+                        <div className="flex flex-col items-start md:items-end justify-center">
+                            <span className="text-[9px] tracking-[0.25em] uppercase text-[#8D7858] font-bold mb-0.5">Starting From</span>
+                            <div className="flex items-baseline gap-1.5">
+                                <span className="font-sans text-[2rem] md:text-[2.2rem] font-bold leading-none text-[#1D1C19] tracking-tight">
+                                    ₹{(room.basePrice / 100).toLocaleString('en-IN')}
+                                </span>
+                                <span className="text-[11px] tracking-wide text-[#8D7858] font-medium">/ night</span>
+                            </div>
                         </div>
                     </div>
                 </div>

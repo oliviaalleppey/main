@@ -104,42 +104,44 @@ export default async function RoomShowcase() {
                                 <ShareButton title={room.title} url={room.link} />
                             </div>
 
-                            {/* Content */}
-                            <div className="flex flex-col flex-1 px-1 mt-2">
-                                <h3 className="text-[22px] md:text-2xl font-serif text-[var(--text-dark)] mb-2 leading-tight">
-                                    {room.title}
-                                </h3>
-                                <p className="text-[var(--text-dark)]/70 text-[13.5px] leading-relaxed mb-6 flex-1">
-                                    {room.description}
-                                </p>
+                                {/* Content */}
+                                <div className="flex flex-col flex-1 px-1 mt-2">
+                                    <h3 className="text-[24px] md:text-[28px] font-serif font-bold tracking-tight text-[var(--text-dark)] mb-2 leading-tight">
+                                        {room.title}
+                                    </h3>
+                                    <p className="text-[var(--text-dark)]/70 text-[14px] leading-relaxed mb-6 flex-1">
+                                        {room.description}
+                                    </p>
 
-                                {/* Actions */}
-                                <div className="flex items-center justify-between mt-auto pt-2 border-t border-[var(--text-dark)]/10">
-                                    <Link
-                                        href={`/book/search?room=${room.link.replace('/rooms/', '')}`}
-                                        className="px-5 py-2 md:px-6 md:py-2.5 rounded-full bg-[var(--brand-primary)] text-white text-[10px] md:text-[11px] font-semibold hover:bg-[var(--brand-primary-dark)] transition-all uppercase tracking-widest whitespace-nowrap"
-                                    >
-                                        Book Now
-                                    </Link>
+                                    {/* Actions */}
+                                    <div className="flex items-center justify-between mt-auto pt-3 border-t border-[var(--text-dark)]/10">
+                                        <Link
+                                            href={`/book/search?room=${room.link.replace('/rooms/', '')}`}
+                                            className="px-6 py-2.5 md:px-7 md:py-3 rounded-full bg-[var(--brand-primary)] text-white text-[11px] md:text-[12px] font-bold hover:bg-[var(--brand-primary-dark)] transition-all uppercase tracking-[0.2em] whitespace-nowrap"
+                                        >
+                                            Book Now
+                                        </Link>
 
-                                    {room.basePrice != null && (
-                                        <div className="flex items-baseline gap-1.5 px-2 whitespace-nowrap">
-                                            <span className="text-[10px] font-medium text-[#8C7A6B] uppercase tracking-widest hidden sm:inline-block">From</span>
-                                            <span className="font-serif text-[20px] md:text-[22px] text-[var(--text-dark)]">
-                                                ₹{(room.basePrice / 100).toLocaleString('en-IN')}
-                                            </span>
-                                            <span className="text-[12px] text-[#8C7A6B]">/ night</span>
-                                        </div>
-                                    )}
+                                        {room.basePrice != null && (
+                                            <div className="flex flex-col items-end whitespace-nowrap px-2">
+                                                <span className="text-[9px] font-bold text-[#8C7A6B] uppercase tracking-[0.25em] mb-0.5 leading-none">Starting From</span>
+                                                <div className="flex items-baseline gap-1.5">
+                                                  <span className="font-sans font-bold text-[24px] md:text-[26px] text-[var(--text-dark)] tracking-tight">
+                                                      ₹{(room.basePrice / 100).toLocaleString('en-IN')}
+                                                  </span>
+                                                  <span className="text-[11px] text-[#8C7A6B] font-medium tracking-wide">/ night</span>
+                                                </div>
+                                            </div>
+                                        )}
 
-                                    <Link
-                                        href={room.link}
-                                        className="flex items-center gap-1.5 md:gap-2 text-[11px] md:text-[12px] font-medium tracking-widest uppercase text-[var(--text-dark)] hover:opacity-70 transition-opacity group/link whitespace-nowrap"
-                                    >
-                                        Explore
-                                        <ArrowRight className="w-3.5 h-3.5 md:w-4 md:h-4 transition-transform group-hover/link:translate-x-1" />
-                                    </Link>
-                                </div>
+                                        <Link
+                                            href={room.link}
+                                            className="flex items-center gap-1.5 md:gap-2 text-[11px] md:text-[12px] font-bold tracking-[0.2em] uppercase text-[var(--text-dark)] hover:opacity-70 transition-opacity group/link whitespace-nowrap"
+                                        >
+                                            Explore
+                                            <ArrowRight className="w-3.5 h-3.5 md:w-4 md:h-4 transition-transform group-hover/link:translate-x-1" />
+                                        </Link>
+                                    </div>
                             </div>
                         </div>
                     ))}

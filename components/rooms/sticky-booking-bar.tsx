@@ -170,7 +170,7 @@ export default function StickyBookingBar({ basePrice, roomSlug }: StickyBookingB
                             } px-3 py-2.5 ${isMobileView ? 'rounded-sm' : 'rounded-lg'} items-center gap-3 transition-colors`}>
                             <div className="flex items-baseline gap-1 group-hover:opacity-80 transition-opacity">
                                 <span className={`text-sm ${isMobileView ? 'text-[var(--text-dark)]' : 'text-white'}`}>Children</span>
-                                <span className={`text-[10px] ${isMobileView ? 'text-gray-500' : 'text-white/60'}`}>(&lt; 5 yrs)</span>
+                                <span className={`text-[10px] ${isMobileView ? 'text-gray-500' : 'text-white/60'} whitespace-nowrap`}>(&lt; 7 yrs)</span>
                             </div>
                             <div className="flex items-center gap-2">
                                 <button
@@ -193,10 +193,12 @@ export default function StickyBookingBar({ basePrice, roomSlug }: StickyBookingB
                 </div>
 
                 <div className="flex items-center gap-6 justify-center">
-                    <div className={`${isMobileView ? 'hidden xl:flex' : 'hidden md:flex'} items-baseline gap-2 mr-2`}>
-                        <span className={`text-[11px] uppercase tracking-[0.15em] font-medium ${isMobileView ? 'text-[#6B645C]' : 'text-[#E7D4AD]/80'}`}>From</span>
-                        <span className={`text-2xl font-serif tracking-tight ${isMobileView ? 'text-[var(--text-dark)]' : 'text-white'}`}>{formatCurrency(basePrice)}</span>
-                        <span className={`text-[13px] font-sans font-light ${isMobileView ? 'text-[#59544D]' : 'text-[#B9AA90]'}`}>/ night</span>
+                    <div className={`${isMobileView ? 'hidden xl:flex' : 'hidden md:flex'} flex-col items-end justify-center mr-4`}>
+                        <span className={`text-[9px] uppercase tracking-[0.25em] font-bold mb-0.5 ${isMobileView ? 'text-[#6B645C]' : 'text-[#E7D4AD]/80'}`}>Starting From</span>
+                        <div className="flex items-baseline gap-1.5">
+                            <span className={`text-[26px] font-sans font-bold tracking-tight leading-none ${isMobileView ? 'text-[var(--text-dark)]' : 'text-white'}`}>{formatCurrency(basePrice)}</span>
+                            <span className={`text-[12px] font-medium tracking-wide ${isMobileView ? 'text-[#59544D]' : 'text-[#B9AA90]'}`}>/ night</span>
+                        </div>
                     </div>
 
                     <button

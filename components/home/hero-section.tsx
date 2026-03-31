@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { format } from 'date-fns';
 import { DateRange } from 'react-day-picker';
@@ -17,6 +17,13 @@ const HERO_IMAGES = [
 
 export default function HeroSection({ initialMedia }: { initialMedia?: { type: 'video' | 'image', url: string } | null }) {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const videoRef = useRef<HTMLVideoElement>(null);
+
+    useEffect(() => {
+        if (initialMedia?.type === 'video' && videoRef.current) {
+            videoRef.current.play().catch((err) => console.log('Video autoplay blocked:', err));
+        }
+    }, [initialMedia]);
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
     const [searchError, setSearchError] = useState<string | null>(null);
     const [date, setDate] = useState<DateRange | undefined>(undefined);
@@ -95,12 +102,13 @@ export default function HeroSection({ initialMedia }: { initialMedia?: { type: '
                         transition={{ duration: 1.5, ease: "easeInOut" }}
                         className="absolute inset-0"
                     >
-                        <video 
+                        <video
+                            ref={videoRef}
                             src={initialMedia.url} 
                             autoPlay 
                             loop 
                             muted 
-                            playsInline 
+                            playsInline
                             className="w-full h-full object-cover" 
                         />
                         {/* Cinematic Overlay */}
@@ -196,7 +204,7 @@ export default function HeroSection({ initialMedia }: { initialMedia?: { type: '
                     </div>
 
                     {/* Guests Segment */}
-                    <div className="w-full md:w-[320px]">
+                    <div className="w-full md:w-[360px]">
                         <label className="text-white text-xs font-bold uppercase tracking-widest mb-2 block ml-1 shadow-black/50 drop-shadow-md">Guests</label>
                         <div className="w-full bg-white h-14 rounded-lg px-2 flex items-center shadow-lg">
                             {/* Adults */}
@@ -219,9 +227,9 @@ export default function HeroSection({ initialMedia }: { initialMedia?: { type: '
 
                             {/* Children */}
                             <div className="flex-1 flex items-center justify-between px-2">
-                                <div className="flex items-baseline gap-1">
+                                <div className="flex flex-col xl:flex-row xl:items-baseline gap-0 xl:gap-1 leading-tight">
                                     <span className="text-sm font-medium text-gray-900">Child</span>
-                                    <span className="text-[10px] text-gray-500 font-normal">(&lt; 5 yrs)</span>
+                                    <span className="text-[10px] text-gray-500 font-normal whitespace-nowrap">(&lt; 7 yrs)</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <button

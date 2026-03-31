@@ -266,7 +266,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                                                 <div className="min-w-0 flex-1 flex flex-col justify-center">
                                                 <div className="mb-3 flex items-start justify-between gap-4">
                                                     <div>
-                                                        <h3 className="text-[28px] md:text-[38px] leading-[1.1] font-serif text-[#1C2822] mb-1">{roomName}</h3>
+                                                        <h3 className="text-[28px] md:text-[38px] leading-[1.1] font-serif font-bold tracking-tight text-[#1C2822] mb-1">{roomName}</h3>
                                                         <div className="flex items-center gap-2">
                                                             <div className="flex text-amber-500">
                                                                 {[...Array(5)].map((_, i) => <Star key={i} className="w-2.5 h-2.5 fill-current" />)}

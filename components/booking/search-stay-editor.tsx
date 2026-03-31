@@ -125,7 +125,7 @@ export function SearchStayEditor({
                             inc: () => setGuests({ ...guests, adults: Math.min(8, guests.adults + 1) }),
                         },
                         {
-                            label: 'Children (< 5 yrs)',
+                            label: 'Children (< 7 yrs)',
                             value: guests.children,
                             dec: () => setGuests({ ...guests, children: Math.max(0, guests.children - 1) }),
                             inc: () => setGuests({ ...guests, children: Math.min(8, guests.children + 1) }),
@@ -214,7 +214,7 @@ export function SearchStayEditor({
                                 inc: () => setGuests({ ...guests, adults: Math.min(8, guests.adults + 1) }),
                             },
                             {
-                                label: 'Children (< 5 yrs)',
+                                label: 'Children (< 7 yrs)',
                                 value: guests.children,
                                 dec: () => setGuests({ ...guests, children: Math.max(0, guests.children - 1) }),
                                 inc: () => setGuests({ ...guests, children: Math.min(8, guests.children + 1) }),
