@@ -92,21 +92,11 @@ export default function MembershipPage() {
                 </a>
             </div>
 
-            {/* HER0 - Dynamic full height */}
-            <section className="relative min-h-screen w-full flex items-center justify-center overflow-hidden">
-                {/* Background Image with energetic slow zoom */}
-                <div className="absolute inset-0 w-full h-full">
-                    <Image
-                        src="/images/home/hotellandscape.jpeg"
-                        alt="Olivia Alleppey"
-                        fill
-                        className="object-cover transition-transform duration-[20000ms] ease-out hover:scale-110 scale-105"
-                        priority
-                    />
-                    {/* Multilayer gradient for energetic pop */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-[#0A0A0A]" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-black/80" />
-                </div>
+            {/* HERO - Dynamic full height */}
+            <section className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-[#0A0A0A]">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#1C2822] via-[#0A0A0A] to-[#2A1A0F]" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_#E95D20_0%,_transparent_50%)] opacity-10" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_#8C7A6B_0%,_transparent_50%)] opacity-10" />
 
                 <div className="relative z-10 text-center px-4 max-w-[95vw] md:max-w-7xl mx-auto mt-0 md:mt-12">
                     <div className="inline-flex items-center gap-3 px-6 py-2.5 md:py-3 border border-white/20 rounded-full bg-black/30 backdrop-blur-md mb-10 md:mb-16 -mt-10 md:-mt-20">
