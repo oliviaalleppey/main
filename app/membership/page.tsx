@@ -83,10 +83,10 @@ const TERMS = [
 
 export default function MembershipPage() {
     return (
-        <main className="min-h-screen bg-[#0A0A0A] text-[#F4F5F0] selection:bg-[#E95D20] selection:text-white pb-24 overflow-hidden relative">
+        <main className="min-h-screen bg-[#0A0A0A] text-[#F4F5F0] selection:bg-[var(--gold-accent)] selection:text-white pb-24 overflow-hidden relative">
             {/* FLOATING CENTERED CTA */}
             <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] w-max">
-                <a href="tel:+916238160231" className="inline-flex items-center justify-center gap-3 bg-[#E95D20] text-white px-8 py-4 rounded-full font-bold uppercase tracking-widest text-[13px] hover:bg-white hover:text-[#E95D20] transition-all group scale-100 hover:scale-105 active:scale-95 shadow-[0_10px_40px_rgba(233,93,32,0.4)]">
+                <a href="tel:+916238160231" className="inline-flex items-center justify-center gap-3 bg-[var(--brand-primary)] text-white px-8 py-4 rounded-full font-bold uppercase tracking-widest text-[13px] hover:bg-[var(--brand-primary-dark)] transition-all group scale-100 hover:scale-105 active:scale-95 shadow-xl">
                     Enroll Now
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </a>
@@ -94,25 +94,25 @@ export default function MembershipPage() {
 
             {/* HERO - Dynamic full height */}
             <section className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-[#0A0A0A]">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#1C2822] via-[#0A0A0A] to-[#2A1A0F]" />
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_#E95D20_0%,_transparent_50%)] opacity-10" />
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_#8C7A6B_0%,_transparent_50%)] opacity-10" />
 
-                <div className="relative z-10 text-center px-4 max-w-[95vw] md:max-w-7xl mx-auto mt-0 md:mt-12">
-                    <div className="inline-flex items-center gap-3 px-6 py-2.5 md:py-3 border border-white/20 rounded-full bg-black/30 backdrop-blur-md mb-10 md:mb-16 -mt-10 md:-mt-20">
-                        <span className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-[#E95D20] animate-pulse"></span>
-                        <span className="text-sm md:text-base font-bold tracking-[0.2em] uppercase text-white/90">Exclusive Access</span>
+
+                <div className="relative z-10 text-center px-4 max-w-[95vw] md:max-w-7xl mx-auto mt-0 min-h-[70vh] flex flex-col items-center justify-center">
+                    <div className="inline-flex items-center gap-3 px-6 py-2 border border-white/20 rounded-full mb-8 md:mb-12">
+                        <span className="text-xs md:text-sm font-bold tracking-[0.25em] uppercase text-white/90">Exclusive Access</span>
                     </div>
-                    <h1 className="text-5xl md:text-[5rem] lg:text-[6.5rem] xl:text-[7rem] font-serif text-white leading-[1.1] md:leading-none mb-6 drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)] opacity-100 tracking-tight flex flex-col items-center">
+                    
+                    <h1 className="text-5xl md:text-[5rem] lg:text-[7rem] font-serif text-white leading-tight md:leading-[1.1] mb-6 tracking-tight drop-shadow-2xl flex flex-col items-center">
                         <span className="md:whitespace-nowrap">Olivia Lifestyle Membership</span>
-                        <span className="text-4xl md:text-6xl lg:text-[4.5rem] text-transparent bg-clip-text bg-gradient-to-r from-[#DCE2D1] to-[#8C7A6B]  font-normal block mt-4 md:-mt-2 tracking-normal drop-shadow-[0_5px_15px_rgba(0,0,0,0.5)]">
+                        <span className="text-4xl md:text-6xl lg:text-[4.5rem] text-[var(--gold-accent)] font-serif italic block mt-2 md:mt-4 tracking-normal drop-shadow-md">
                             For a Select Few...
                         </span>
                     </h1>
-                    <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto font-light leading-relaxed">
+                    
+                    <p className="text-base md:text-xl text-white/80 max-w-2xl mx-auto font-light leading-relaxed mb-16 shadow-black/50 drop-shadow-md">
                         An extension of our refined hospitality, offering unparalleled privileges, year-round benefits, and seamless access across dining, stays, wellness, and events.
                     </p>
-                    <div className="flex flex-col items-center gap-6 mt-8 md:mt-12 pb-16">
+                    
+                    <div className="flex flex-col items-center gap-6 mt-12 pb-12">
                         <ScrollButton targetId="intro" />
                     </div>
                 </div>
@@ -122,7 +122,7 @@ export default function MembershipPage() {
             <section id="intro" className="py-24 md:py-32 px-6 relative border-y border-white/10 bg-[#0A0A0A] bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]">
                 <div className="max-w-4xl mx-auto text-center space-y-10 md:space-y-14">
                     <p className="text-2xl md:text-4xl lg:text-5xl font-serif leading-[1.4] text-white/90">
-                        Nestled in the serene surroundings of Alappuzha, <span className="text-[#E95D20]">Olivia</span> is more than a luxury hotel. It is a destination where <span className="text-white">refined hospitality</span>, thoughtful wellness, and contemporary comforts come together to create memorable experiences.
+                        Nestled in the serene surroundings of Alappuzha, <span className="text-[var(--gold-accent)]">Olivia</span> is more than a luxury hotel. It is a destination where <span className="text-white">refined hospitality</span>, thoughtful wellness, and contemporary comforts come together to create memorable experiences.
                     </p>
                     <p className="text-lg md:text-xl text-white/60 font-sans leading-relaxed max-w-2xl mx-auto">
                         From rejuvenating wellness facilities and curated dining to elegant stays and personalised service, every detail at Olivia is designed to help you slow down, unwind, and indulge in life&apos;s finer moments.
@@ -150,7 +150,7 @@ export default function MembershipPage() {
                         return (
                             <div
                                 key={privilege.id}
-                                className={`group relative overflow-hidden rounded-3xl min-h-[450px] md:min-h-[500px] flex flex-col justify-end ${colSpan} border border-white/10 bg-[#121212] transition-colors hover:border-[#E95D20]/50`}
+                                className={`group relative overflow-hidden rounded-3xl min-h-[450px] md:min-h-[500px] flex flex-col justify-end ${colSpan} border border-white/10 bg-[#121212] transition-colors hover:border-[var(--gold-accent)]/50`}
                             >
                                 {/* Background Image */}
                                 <div className="absolute inset-0 w-full h-full opacity-40 group-hover:opacity-60 transition-opacity duration-700">
@@ -166,7 +166,7 @@ export default function MembershipPage() {
                                 {/* Content */}
                                 <div className="relative z-10 p-8 md:p-10 lg:p-12 h-full flex flex-col justify-end transform translate-y-8 group-hover:translate-y-0 transition-transform duration-500 ease-out">
                                     <div className="mb-auto">
-                                        <div className="w-12 h-1 bg-[#E95D20] mb-6 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 delay-100" />
+                                        <div className="w-12 h-1 bg-[var(--gold-accent)] mb-6 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 delay-100" />
                                         <h3 className="text-3xl md:text-4xl font-serif text-white mb-3 shadow-black drop-shadow-lg">{privilege.title}</h3>
                                         <p className="text-[#DCE2D1] text-sm md:text-base font-medium max-w-sm mb-6 drop-shadow-md">
                                             {privilege.description}
@@ -177,7 +177,7 @@ export default function MembershipPage() {
                                     <ul className="space-y-3 opacity-60 group-hover:opacity-100 transition-opacity duration-500">
                                         {privilege.items.map((item, i) => (
                                             <li key={i} className="flex items-start gap-3 text-white/80 text-sm md:text-base">
-                                                <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-[#E95D20] mt-0.5" />
+                                                <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-[var(--gold-accent)] mt-0.5" />
                                                 <span className="leading-snug">{item}</span>
                                             </li>
                                         ))}
@@ -190,11 +190,11 @@ export default function MembershipPage() {
             </section>
 
             {/* CALL TO ACTION */}
-            <section className="py-20 text-center relative overflow-hidden">
-                <div className="absolute inset-0 bg-[#E95D20]/10 mix-blend-overlay" />
+            <section className="py-20 text-center relative overflow-hidden border-t border-white/10">
+                <div className="absolute inset-0 bg-[var(--gold-accent)]/5 mix-blend-overlay" />
                 <div className="relative z-10 flex flex-col items-center">
                     <h2 className="text-3xl md:text-5xl font-serif text-white mb-6">Experience it firsthand.</h2>
-                    <a href="tel:+916238160231" className="inline-flex items-center justify-center gap-3 bg-[#E95D20] text-white px-8 py-4 rounded-full font-bold uppercase tracking-widest text-[13px] hover:bg-white hover:text-black transition-all group scale-100 hover:scale-105 active:scale-95 shadow-xl shadow-[#E95D20]/20">
+                    <a href="tel:+916238160231" className="inline-flex items-center justify-center gap-3 bg-[var(--brand-primary)] text-white px-8 py-4 rounded-full font-bold uppercase tracking-widest text-[13px] hover:bg-white hover:text-black transition-all group scale-100 hover:scale-105 active:scale-95 shadow-xl shadow-[var(--brand-primary)]/20">
                         Enroll Now
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </a>
