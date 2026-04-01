@@ -1,6 +1,11 @@
 import Image from 'next/image';
 import { ArrowRight, CheckCircle2, ChevronDown } from 'lucide-react';
 import ScrollButton from '@/components/ui/scroll-button';
+import { MembershipEnrollmentTrigger } from '@/components/membership/membership-enrollment-trigger';
+import { Playfair_Display, DM_Sans } from 'next/font/google';
+
+const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair' });
+const dmSans = DM_Sans({ subsets: ['latin'], variable: '--font-dm-sans' });
 
 export const metadata = {
     title: 'Membership | Olivia Alleppey',
@@ -77,54 +82,48 @@ const TERMS = [
     "Pool access is permitted only during designated operating hours along with the pool regulations.",
     "Management is not responsible for the loss or damage of personal belongings.",
     "Management reserves the right to modify facilities, access, or operating hours without prior notice for safety or operational reasons.",
-    "Olivia management is committed to maintaining a safe and comfortable environment for all guests, including ensuring women’s safety across the premises.",
+    "Olivia management is committed to maintaining a safe and comfortable environment for all guests, including ensuring women's safety across the premises.",
     "Olivia management reserves the right to suspend or terminate membership without prior notice in cases of misconduct, violation of rules within the premises."
 ];
 
 export default function MembershipPage() {
     return (
-        <main className="min-h-screen bg-[#0A0A0A] text-[#F4F5F0] selection:bg-[var(--gold-accent)] selection:text-white pb-24 overflow-hidden relative">
-            {/* FLOATING CENTERED CTA */}
-            <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] w-max">
-                <a href="tel:+916238160231" className="inline-flex items-center justify-center gap-3 bg-[var(--brand-primary)] text-white px-8 py-4 rounded-full font-bold uppercase tracking-widest text-[13px] hover:bg-[var(--brand-primary-dark)] transition-all group scale-100 hover:scale-105 active:scale-95 shadow-xl">
-                    Enroll Now
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </a>
-            </div>
-
+        <main className={`${dmSans.className} min-h-screen bg-[#FAF6EF] text-[#1C1C1C] selection:bg-[#C9A84C] selection:text-white pb-24 overflow-hidden relative`}>
             {/* HERO - Dynamic full height */}
-            <section className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-[#0A0A0A]">
-
+            <section className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-[#0D4A4A]">
 
                 <div className="relative z-10 text-center px-4 max-w-[95vw] md:max-w-7xl mx-auto mt-0 min-h-[70vh] flex flex-col items-center justify-center">
                     <div className="inline-flex items-center gap-3 px-6 py-2 border border-white/20 rounded-full mb-8 md:mb-12">
                         <span className="text-xs md:text-sm font-bold tracking-[0.25em] uppercase text-white/90">Exclusive Access</span>
                     </div>
-                    
-                    <h1 className="text-5xl md:text-[5rem] lg:text-[7rem] font-serif text-white leading-tight md:leading-[1.1] mb-6 tracking-tight drop-shadow-2xl flex flex-col items-center">
+
+                    <h1 className={`${playfair.className} text-5xl md:text-[5rem] lg:text-[7rem] font-serif text-white leading-tight md:leading-[1.1] mb-6 tracking-tight drop-shadow-2xl flex flex-col items-center`}>
                         <span className="md:whitespace-nowrap">Olivia Lifestyle Membership</span>
-                        <span className="text-4xl md:text-6xl lg:text-[4.5rem] text-[var(--gold-accent)] font-serif italic block mt-2 md:mt-4 tracking-normal drop-shadow-md">
+                        <span className="text-4xl md:text-6xl lg:text-[4.5rem] text-[#C9A84C] font-serif italic block mt-2 md:mt-4 tracking-normal drop-shadow-md">
                             For a Select Few...
                         </span>
                     </h1>
-                    
+
                     <p className="text-base md:text-xl text-white/80 max-w-2xl mx-auto font-light leading-relaxed mb-16 shadow-black/50 drop-shadow-md">
                         An extension of our refined hospitality, offering unparalleled privileges, year-round benefits, and seamless access across dining, stays, wellness, and events.
                     </p>
-                    
-                    <div className="flex flex-col items-center gap-6 mt-12 pb-12">
+
+                    <div className="flex flex-col items-center gap-8 mt-12 pb-12">
+                        <MembershipEnrollmentTrigger
+                            className="bg-white text-[#0D4A4A] font-semibold px-8 py-4 hover:bg-[#0D4A4A] hover:text-white border border-white/20"
+                        />
                         <ScrollButton targetId="intro" />
                     </div>
                 </div>
             </section>
 
             {/* INTRO PHILOSOPHY SECTION */}
-            <section id="intro" className="py-24 md:py-32 px-6 relative border-y border-white/10 bg-[#0A0A0A] bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]">
+            <section id="intro" className="py-24 md:py-32 px-6 relative border-y border-[#E8E0D5] bg-white">
                 <div className="max-w-4xl mx-auto text-center space-y-10 md:space-y-14">
-                    <p className="text-2xl md:text-4xl lg:text-5xl font-serif leading-[1.4] text-white/90">
-                        Nestled in the serene surroundings of Alappuzha, <span className="text-[var(--gold-accent)]">Olivia</span> is more than a luxury hotel. It is a destination where <span className="text-white">refined hospitality</span>, thoughtful wellness, and contemporary comforts come together to create memorable experiences.
+                    <p className={`${playfair.className} text-2xl md:text-4xl lg:text-5xl font-serif leading-[1.4] text-[#0D4A4A]/90`}>
+                        Nestled in the serene surroundings of Alappuzha, <span className="text-[#C9A84C]">Olivia</span> is more than a luxury hotel. It is a destination where <span className="text-[#1C1C1C]">refined hospitality</span>, thoughtful wellness, and contemporary comforts come together to create memorable experiences.
                     </p>
-                    <p className="text-lg md:text-xl text-white/60 font-sans leading-relaxed max-w-2xl mx-auto">
+                    <p className="text-lg md:text-xl text-[#6B7280] font-sans leading-relaxed max-w-2xl mx-auto">
                         From rejuvenating wellness facilities and curated dining to elegant stays and personalised service, every detail at Olivia is designed to help you slow down, unwind, and indulge in life&apos;s finer moments.
                     </p>
                 </div>
@@ -133,8 +132,8 @@ export default function MembershipPage() {
             {/* PRIVILEGES: ENERGETIC GRID */}
             <section className="py-24 px-4 md:px-8 max-w-[1600px] mx-auto">
                 <div className="text-center mb-16 md:mb-24">
-                    <h2 className="text-4xl md:text-5xl font-serif text-white mb-4">Membership Privileges</h2>
-                    <p className="text-white/50 tracking-widest uppercase text-sm font-bold">Crafted for your lifestyle</p>
+                    <h2 className={`${playfair.className} text-4xl md:text-5xl font-serif text-[#0D4A4A] mb-4`}>Membership Privileges</h2>
+                    <p className="text-[#6B7280] tracking-widest uppercase text-sm font-bold">Crafted for your lifestyle</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 lg:gap-8">
@@ -150,7 +149,7 @@ export default function MembershipPage() {
                         return (
                             <div
                                 key={privilege.id}
-                                className={`group relative overflow-hidden rounded-3xl min-h-[450px] md:min-h-[500px] flex flex-col justify-end ${colSpan} border border-white/10 bg-[#121212] transition-colors hover:border-[var(--gold-accent)]/50`}
+                                className={`group relative overflow-hidden rounded-3xl min-h-[450px] md:min-h-[500px] flex flex-col justify-end ${colSpan} border border-[#0D4A4A]/20 bg-[#0D4A4A] transition-colors hover:border-[#C9A84C]/50`}
                             >
                                 {/* Background Image */}
                                 <div className="absolute inset-0 w-full h-full opacity-40 group-hover:opacity-60 transition-opacity duration-700">
@@ -166,8 +165,8 @@ export default function MembershipPage() {
                                 {/* Content */}
                                 <div className="relative z-10 p-8 md:p-10 lg:p-12 h-full flex flex-col justify-end transform translate-y-8 group-hover:translate-y-0 transition-transform duration-500 ease-out">
                                     <div className="mb-auto">
-                                        <div className="w-12 h-1 bg-[var(--gold-accent)] mb-6 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 delay-100" />
-                                        <h3 className="text-3xl md:text-4xl font-serif text-white mb-3 shadow-black drop-shadow-lg">{privilege.title}</h3>
+                                        <div className="w-12 h-1 bg-[#C9A84C] mb-6 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 delay-100" />
+                                        <h3 className={`${playfair.className} text-3xl md:text-4xl font-serif text-white mb-3 shadow-black drop-shadow-lg`}>{privilege.title}</h3>
                                         <p className="text-[#DCE2D1] text-sm md:text-base font-medium max-w-sm mb-6 drop-shadow-md">
                                             {privilege.description}
                                         </p>
@@ -177,7 +176,7 @@ export default function MembershipPage() {
                                     <ul className="space-y-3 opacity-60 group-hover:opacity-100 transition-opacity duration-500">
                                         {privilege.items.map((item, i) => (
                                             <li key={i} className="flex items-start gap-3 text-white/80 text-sm md:text-base">
-                                                <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-[var(--gold-accent)] mt-0.5" />
+                                                <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-[#C9A84C] mt-0.5" />
                                                 <span className="leading-snug">{item}</span>
                                             </li>
                                         ))}
@@ -190,28 +189,27 @@ export default function MembershipPage() {
             </section>
 
             {/* CALL TO ACTION */}
-            <section className="py-20 text-center relative overflow-hidden border-t border-white/10">
-                <div className="absolute inset-0 bg-[var(--gold-accent)]/5 mix-blend-overlay" />
+            <section className="py-20 text-center relative overflow-hidden border-t border-[#E8E0D5]">
+                <div className="absolute inset-0 bg-[#C9A84C]/5 mix-blend-overlay" />
                 <div className="relative z-10 flex flex-col items-center">
-                    <h2 className="text-3xl md:text-5xl font-serif text-white mb-6">Experience it firsthand.</h2>
-                    <a href="tel:+916238160231" className="inline-flex items-center justify-center gap-3 bg-[var(--brand-primary)] text-white px-8 py-4 rounded-full font-bold uppercase tracking-widest text-[13px] hover:bg-white hover:text-black transition-all group scale-100 hover:scale-105 active:scale-95 shadow-xl shadow-[var(--brand-primary)]/20">
-                        Enroll Now
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </a>
+                    <h2 className={`${playfair.className} text-3xl md:text-5xl font-serif text-[#0D4A4A] mb-6`}>Experience it firsthand.</h2>
+                    <MembershipEnrollmentTrigger
+                        className="bg-[#C9A84C] text-[#0D4A4A] font-semibold px-8 py-4 hover:bg-[#0D4A4A] hover:text-white"
+                    />
                 </div>
             </section>
 
             {/* TERMS & CONDITIONS (Accordion-style clean look) */}
-            <section className="max-w-4xl mx-auto px-6 py-16 border-t border-white/10 mt-10">
+            <section className="max-w-4xl mx-auto px-6 py-16 border-t border-[#E8E0D5] mt-10">
                 <details className="group marker:content-['']">
                     <summary className="flex items-center justify-between cursor-pointer list-none transition-colors">
-                        <h4 className="text-lg md:text-xl font-bold uppercase tracking-[0.1em] text-white">Terms & Conditions</h4>
-                        <ChevronDown className="w-6 h-6 transform group-open:rotate-180 transition-transform duration-300 text-white" />
+                        <h4 className="text-lg md:text-xl font-bold uppercase tracking-[0.1em] text-[#0D4A4A]">Terms & Conditions</h4>
+                        <ChevronDown className="w-6 h-6 transform group-open:rotate-180 transition-transform duration-300 text-[#0D4A4A]" />
                     </summary>
-                    <div className="mt-8 text-white text-sm md:text-base space-y-4">
+                    <div className="mt-8 text-[#1C1C1C] text-sm md:text-base space-y-4">
                         <ul className="list-disc pl-5 space-y-3">
                             {TERMS.map((term, i) => (
-                                <li key={i} className="leading-relaxed tracking-wide text-[#F4F5F0]">{term}</li>
+                                <li key={i} className="leading-relaxed tracking-wide text-[#6B7280]">{term}</li>
                             ))}
                         </ul>
                     </div>

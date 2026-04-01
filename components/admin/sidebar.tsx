@@ -14,6 +14,7 @@ import {
     Sparkles,
     Tag,
     Film,
+    Users,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -24,6 +25,7 @@ const NAV_ITEMS = [
     { href: '/admin/rooms/types', label: 'Room Types', icon: BedDouble },
     { href: '/admin/rooms/rate-plans', label: 'Rate Plans', icon: Tag },
     { href: '/admin/add-ons', label: 'Add-ons', icon: Sparkles },
+    { href: '/admin/memberships', label: 'Memberships', icon: Users },
     { href: '/admin/media', label: 'Media', icon: Film },
     { href: '/admin/settings', label: 'Site Appearance', icon: Settings },
 ];

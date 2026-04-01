@@ -1213,3 +1213,51 @@ export const bookingsRelations = relations(bookings, ({ one, many }) => ({
     payments: many(payments),
     history: many(bookingHistory),
 }));
+
+// ============================================
+// MEMBERSHIP ENROLLMENT
+// ============================================
+
+export const membershipStatusEnum = pgEnum('membership_status', ['pending', 'contacted', 'approved', 'rejected']);
+
+export const membershipApplications = pgTable('membership_applications', {
+    id: uuid('id').defaultRandom().primaryKey(),
+    
+    // Personal Details
+    fullName: varchar('full_name', { length: 255 }).notNull(),
+    dateOfBirth: date('date_of_birth').notNull(),
+    gender: varchar('gender', { length: 50 }),
+    nationality: varchar('nationality', { length: 100 }),
+    memberPhotographUrl: text('member_photograph_url'), // File upload URL
+    
+    // Contact Information
+    mobileNumber: varchar('mobile_number', { length: 20 }).notNull(),
+    emailAddress: varchar('email_address', { length: 255 }).notNull(),
+    alternateContactNumber: varchar('alternate_contact_number', { length: 20 }),
+    
+    // Address Details
+    residentialAddress: text('residential_address').notNull(),
+    city: varchar('city', { length: 100 }).notNull(),
+    state: varchar('state', { length: 100 }).notNull(),
+    country: varchar('country', { length: 100 }).notNull(),
+    pinCode: varchar('pin_code', { length: 20 }).notNull(),
+    
+    // Identification Details
+    idType: varchar('id_type', { length: 50 }).notNull(), // 'Aadhaar', 'Passport', 'Driving License', 'Other'
+    idNumber: varchar('id_number', { length: 255 }).notNull(),
+    
+    // Communication Preferences
+    preferredModeOfCommunication: varchar('preferred_mode', { length: 50 }), // 'Phone', 'Email', 'WhatsApp'
+    
+    // Emergency Contact
+    emergencyName: varchar('emergency_name', { length: 255 }).notNull(),
+    emergencyRelationship: varchar('emergency_relationship', { length: 100 }).notNull(),
+    emergencyContactNumber: varchar('emergency_contact_number', { length: 20 }).notNull(),
+    
+    // Tracking/Admin
+    status: membershipStatusEnum('status').default('pending'),
+    notes: text('notes'),
+    
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+});

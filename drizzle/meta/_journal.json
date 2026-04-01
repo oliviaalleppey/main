@@ -29,6 +29,13 @@
       "when": 1771607745290,
       "tag": "0003_grey_sersi",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1775031005716,
+      "tag": "0004_new_namora",
+      "breakpoints": true
     }
   ]
 }
