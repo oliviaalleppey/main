@@ -289,7 +289,7 @@ export default function WellnessPage() {
     const [activeService, setActiveService] = useState<string>('spa');
 
     useEffect(() => {
-        const validIds = new Set(wellnessServices.map((s) => s.id));
+        const validIds = new Set<string>(wellnessServices.map((s) => s.id));
         const applyHash = () => {
             const hash = window.location.hash.replace('#', '').trim();
             if (hash && validIds.has(hash)) setActiveService(hash);
