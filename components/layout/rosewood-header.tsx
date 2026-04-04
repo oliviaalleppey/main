@@ -66,7 +66,6 @@ export default function RosewoodHeader() {
 
         const handleScroll = () => {
             if (ticking) return;
-
             ticking = true;
             window.requestAnimationFrame(() => {
                 const currentScrollY = window.scrollY;
@@ -116,14 +115,33 @@ export default function RosewoodHeader() {
         };
     }, []);
 
+    const phoneIcon = (
+        <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+        </svg>
+    );
+
+    const handleReserve = () => {
+        setIsMobileMenuOpen(false);
+        const el = document.getElementById('rooms');
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            history.replaceState(null, '', '#rooms');
+            return;
+        }
+        router.push('/#rooms');
+    };
+
     return (
         <header ref={headerRef} className="sticky top-0 z-50 bg-white shadow-sm">
+
+            {/* ── Top bar (sign-in / language) — hides on scroll ── */}
             <div
-                className={`hidden md:block overflow-hidden border-gray-200/20 duration-200 ease-out ${enableTopBarAnimation ? 'transition-[height,opacity,border-color]' : ''
-                    } ${isTopBarVisible ? 'h-9 border-b opacity-100' : 'h-0 border-b-0 opacity-0 pointer-events-none'
-                    }`}
+                className={`hidden md:block overflow-hidden border-gray-200/20 duration-200 ease-out ${
+                    enableTopBarAnimation ? 'transition-[height,opacity,border-color]' : ''
+                } ${isTopBarVisible ? 'h-9 border-b opacity-100' : 'h-0 border-b-0 opacity-0 pointer-events-none'}`}
             >
-                <div className="flex justify-end items-center px-6 md:px-12 py-1.5 text-xs font-medium font-sans text-[#23201C]">
+                <div className="flex justify-end items-center px-6 md:px-10 py-1.5 text-xs font-medium font-sans text-[#23201C]">
                     <div className="flex gap-6 items-center">
                         {session ? (
                             <div className="flex items-center gap-4">
@@ -150,74 +168,89 @@ export default function RosewoodHeader() {
                 </div>
             </div>
 
-            <div className="flex items-center justify-between px-6 md:px-12 h-[68px] md:h-[80px]">
-                <div className="flex items-center flex-1 xl:flex-none xl:w-[250px]">
-                    <Link href="/" className="inline-flex h-full items-center group whitespace-nowrap" aria-label="Olivia Alleppey">
-                        <Image
-                            src="/images/olivia-logo.svg"
-                            alt="Olivia Alleppey"
-                            width={500}
-                            height={120}
-                            className="h-[75px] md:h-[85px] lg:h-[95px] w-auto max-w-[400px] md:max-w-none origin-left object-contain scale-[1.3] md:scale-[1.45] translate-x-4 md:translate-x-2 transform"
-                            priority
-                        />
-                    </Link>
-                </div>
+            {/* ── Main header row ── */}
+            {/*
+                Layout math at xl (1280px), px-10 = 80px total padding, gap-3 = 12px:
+                  Logo (shrink-0): ~250px  |  Nav (flex-1): ~766px  |  Reserve (shrink-0): ~120px
+                  80 + 250 + 12 + 766 + 12 + 120 = 1240px  ✓ fits inside 1280px
+            */}
+            <div className="flex items-center gap-3 px-6 md:px-10 h-[68px] md:h-[76px] min-w-0">
 
-                <nav className="hidden xl:flex justify-center items-center gap-4 lg:gap-6 flex-1 px-4">
+                {/* Logo */}
+                <Link
+                    href="/"
+                    className="shrink-0 flex items-center"
+                    aria-label="Olivia Alleppey"
+                >
+                    <Image
+                        src="/images/olivia-logo.svg"
+                        alt="Olivia Alleppey"
+                        width={500}
+                        height={120}
+                        className="h-[62px] md:h-[96px] w-auto object-contain"
+                        priority
+                    />
+                </Link>
+
+                {/* Desktop nav — flex-1 so it fills the middle, centered */}
+                <nav className="hidden xl:flex flex-1 justify-center items-center min-w-0 self-stretch">
                     {NAV_ITEMS.map((item) => {
                         const isActive = isNavActive(pathname, item);
                         return (
                             <Link
                                 key={item.label}
                                 href={item.href}
-                                className={`font-serif font-semibold transition-colors text-[#3A342D] hover:text-[#121212] rounded-full px-3 py-1.5 ${isActive ? 'bg-[var(--brand-primary-dark)] text-white' : ''
-                                    } ${item.label === 'Conference & Events' ? 'text-base whitespace-nowrap' : 'text-lg'
-                                    }`}
+                                className={`relative flex items-center h-full font-sans text-[15px] tracking-[0.03em] whitespace-nowrap transition-colors px-4 ${
+                                    isActive
+                                        ? 'text-[var(--brand-primary)] font-semibold'
+                                        : 'text-[#3A342D] font-medium hover:text-[#111]'
+                                }`}
                             >
                                 {item.label}
+                                {isActive && (
+                                    <span className="absolute bottom-3 left-4 right-4 h-[2px] bg-[var(--gold-accent)]" />
+                                )}
                             </Link>
                         );
                     })}
                 </nav>
 
-                <div className="flex justify-end items-center gap-1 flex-1 xl:flex-none">
+                {/* Mobile spacer — pushes right-side items to edge on mobile */}
+                <div className="flex-1 xl:hidden" />
+
+                {/* Right-side buttons */}
+                <div className="flex items-center gap-2 shrink-0">
+
+                    {/* Instant Book — desktop wide screens only (2xl) */}
                     <a
                         href="tel:+918075416514"
-                        className="hidden md:flex justify-center items-center gap-2 bg-[var(--brand-primary)] text-white text-[11px] font-bold uppercase tracking-[0.2em] w-[165px] h-[48px] hover:bg-[var(--brand-primary-dark)] transition-colors whitespace-nowrap overflow-hidden"
+                        className="hidden 2xl:flex items-center gap-2 bg-[var(--brand-primary)] text-white text-[11px] font-bold uppercase tracking-[0.2em] px-5 h-[46px] hover:bg-[var(--brand-primary-dark)] transition-colors whitespace-nowrap"
                     >
-                        <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                        </svg>
+                        {phoneIcon}
                         Instant Book
                     </a>
 
+                    {/* Reserve — desktop (xl+) */}
                     <button
                         type="button"
-                        onClick={() => {
-                            const el = document.getElementById('rooms');
-                            if (el) {
-                                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                history.replaceState(null, '', '#rooms');
-                                return;
-                            }
-                            router.push('/#rooms');
-                        }}
-                        className="hidden md:flex justify-center items-center bg-[var(--brand-primary)] text-white text-[11px] font-bold uppercase tracking-[0.2em] w-[165px] h-[48px] hover:bg-[var(--brand-primary-dark)] transition-colors whitespace-nowrap overflow-hidden"
+                        onClick={handleReserve}
+                        className="hidden xl:flex items-center justify-center bg-[var(--brand-primary)] text-white text-[11px] font-bold uppercase tracking-[0.2em] px-6 h-[46px] hover:bg-[var(--brand-primary-dark)] transition-colors whitespace-nowrap"
                     >
                         Reserve
                     </button>
 
+                    {/* Instant Book — mobile compact (below xl) */}
                     <a
                         href="tel:+918075416514"
-                        className="md:hidden flex items-center gap-1.5 bg-[var(--brand-primary)] text-white text-[10px] font-bold uppercase tracking-[0.1em] px-3 py-2.5 hover:bg-[var(--brand-primary-dark)] transition-colors mr-2 whitespace-nowrap"
+                        className="xl:hidden flex items-center gap-1.5 bg-[var(--brand-primary)] text-white text-[10px] font-bold uppercase tracking-[0.1em] px-3 py-2.5 hover:bg-[var(--brand-primary-dark)] transition-colors whitespace-nowrap"
                     >
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                         </svg>
                         Instant Book
                     </a>
 
+                    {/* Hamburger — mobile only (below xl) */}
                     <button
                         type="button"
                         onClick={() => setIsMobileMenuOpen(true)}
@@ -232,15 +265,21 @@ export default function RosewoodHeader() {
                 </div>
             </div>
 
+            {/* ── Mobile drawer ── */}
             {isMobileMenuOpen && (
                 <>
+                    {/* Backdrop */}
                     <button
                         type="button"
                         aria-label="Close menu overlay"
                         className="fixed inset-0 z-[60] bg-black/35 xl:hidden"
                         onClick={() => setIsMobileMenuOpen(false)}
                     />
+
+                    {/* Drawer */}
                     <aside className="fixed inset-y-0 right-0 z-[70] w-[86%] max-w-sm bg-[var(--surface-cream)] border-l border-[#D9D0C4] shadow-2xl xl:hidden overflow-y-auto">
+
+                        {/* Drawer header */}
                         <div className="px-6 py-5 border-b border-gray-200 flex items-center justify-between">
                             <p className="text-xs uppercase tracking-[0.2em] text-gray-500">Menu</p>
                             <button
@@ -255,35 +294,26 @@ export default function RosewoodHeader() {
                             </button>
                         </div>
 
+                        {/* CTA buttons */}
                         <div className="px-6 py-5 space-y-3">
                             <a
                                 href="tel:+918075416514"
                                 className="flex items-center justify-center gap-2 w-full bg-[var(--brand-primary)] text-white text-[11px] font-bold uppercase tracking-[0.2em] px-6 py-3.5 hover:bg-[var(--brand-primary-dark)] transition-colors"
                                 onClick={() => setIsMobileMenuOpen(false)}
                             >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                </svg>
+                                {phoneIcon}
                                 Instant Book
                             </a>
                             <button
                                 type="button"
                                 className="block w-full text-center bg-[var(--brand-primary)] text-white text-[11px] font-bold uppercase tracking-[0.2em] px-6 py-3.5 hover:bg-[var(--brand-primary-dark)] transition-colors"
-                                onClick={() => {
-                                    setIsMobileMenuOpen(false);
-                                    const el = document.getElementById('rooms');
-                                    if (el) {
-                                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                        history.replaceState(null, '', '#rooms');
-                                        return;
-                                    }
-                                    router.push('/#rooms');
-                                }}
+                                onClick={handleReserve}
                             >
                                 Reserve
                             </button>
                         </div>
 
+                        {/* Nav links */}
                         <nav className="px-6 pb-6 border-b border-gray-200 space-y-1">
                             {NAV_ITEMS.map((item) => {
                                 const isActive = isNavActive(pathname, item);
@@ -292,8 +322,11 @@ export default function RosewoodHeader() {
                                         key={item.label}
                                         href={item.href}
                                         onClick={() => setIsMobileMenuOpen(false)}
-                                        className={`block py-3 px-3 -mx-3 rounded-lg text-[17px] font-serif font-semibold border-b border-gray-100 last:border-b-0 ${isActive ? 'bg-[var(--brand-primary-dark)] text-white' : 'text-[var(--text-dark)]'
-                                            }`}
+                                        className={`block py-4 border-b border-gray-100 last:border-b-0 text-[17px] font-serif font-semibold transition-colors pl-4 ${
+                                            isActive
+                                                ? 'text-[var(--brand-primary)] border-l-[3px] border-l-[var(--gold-accent)] bg-[var(--gold-accent)]/[0.06] pl-3'
+                                                : 'text-[var(--text-dark)] border-l-[3px] border-l-transparent'
+                                        }`}
                                     >
                                         {item.label}
                                     </Link>
@@ -301,6 +334,7 @@ export default function RosewoodHeader() {
                             })}
                         </nav>
 
+                        {/* Auth / language */}
                         <div className="px-6 py-5 space-y-3 text-sm text-gray-700">
                             {session ? (
                                 <>

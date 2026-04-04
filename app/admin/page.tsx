@@ -176,7 +176,7 @@ export default async function AdminDashboard() {
                         </div>
                     </div>
                     <p className="text-3xl font-bold text-emerald-700">{confirmedBookings}</p>
-                    <p className="text-xs text-gray-400 mt-1">CRS confirmed</p>
+                    <p className="text-xs text-gray-400 mt-1">Bookings confirmed</p>
                 </div>
 
                 <div className="rounded-xl border bg-white p-5 shadow-sm">
