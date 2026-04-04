@@ -290,7 +290,7 @@ export default function DiscoverPage() {
                             >
                                 <div className="flex items-start justify-between gap-3">
                                     <div>
-                                        <p className="font-serif text-[1.3rem] text-[var(--text-dark)] leading-tight">{outlet.name}</p>
+                                        <p className="font-serif font-bold text-[1.3rem] text-[var(--text-dark)] leading-tight">{outlet.name}</p>
                                         <p className="text-[11px] tracking-[0.15em] uppercase text-[var(--gold-accent-dark)] mt-1">{outlet.type}</p>
                                     </div>
                                     {outlet.status === 'soon' && (
