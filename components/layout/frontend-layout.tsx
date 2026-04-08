@@ -1,6 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import CookieConsentBanner from './cookie-consent-banner';
 import RosewoodHeader from './rosewood-header';
 import RosewoodFooter from './rosewood-footer';
 
@@ -25,6 +26,7 @@ export default function FrontendLayout({ children }: FrontendLayoutProps) {
                 {children}
             </div>
             <RosewoodFooter />
+            <CookieConsentBanner />
         </div>
     );
 }

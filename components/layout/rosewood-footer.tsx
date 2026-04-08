@@ -100,10 +100,10 @@ export default function RosewoodFooter() {
                         <div className="hidden md:block">
                             <h4 className="text-[11px] uppercase tracking-[0.28em] text-[#6B645C] mb-6">Legal</h4>
                             <ul className="space-y-3 text-[15px] text-[#403A35]">
-                                <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">Privacy Policy</Link></li>
-                                <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">Terms of Service</Link></li>
-                                <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">Accessibility</Link></li>
-                                <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">Cookie Policy</Link></li>
+                                <li><Link href="/refund-policy" className="hover:text-[var(--text-dark)] transition-colors">Refund Policy</Link></li>
+                                <li><Link href="/privacy" className="hover:text-[var(--text-dark)] transition-colors">Privacy Policy</Link></li>
+                                <li><Link href="/terms" className="hover:text-[var(--text-dark)] transition-colors">Terms &amp; Conditions</Link></li>
+                                <li><Link href="/privacy#cookies" className="hover:text-[var(--text-dark)] transition-colors">Cookie Policy</Link></li>
                             </ul>
                         </div>
                     </div>
@@ -113,10 +113,10 @@ export default function RosewoodFooter() {
                 <div className="lg:hidden mb-10">
                     <h4 className="text-[11px] uppercase tracking-[0.28em] text-[#6B645C] mb-6">Legal</h4>
                     <ul className="grid grid-cols-2 gap-y-3 text-[15px] text-[#403A35]">
-                        <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">Privacy Policy</Link></li>
-                        <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">Terms of Service</Link></li>
-                        <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">Accessibility</Link></li>
-                        <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">Cookie Policy</Link></li>
+                        <li><Link href="/refund-policy" className="hover:text-[var(--text-dark)] transition-colors">Refund Policy</Link></li>
+                        <li><Link href="/privacy" className="hover:text-[var(--text-dark)] transition-colors">Privacy Policy</Link></li>
+                        <li><Link href="/terms" className="hover:text-[var(--text-dark)] transition-colors">Terms &amp; Conditions</Link></li>
+                        <li><Link href="/privacy#cookies" className="hover:text-[var(--text-dark)] transition-colors">Cookie Policy</Link></li>
                     </ul>
                 </div>
 
