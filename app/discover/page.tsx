@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRef, useState, useCallback, useEffect } from 'react';
@@ -255,11 +256,125 @@ export default function DiscoverPage() {
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.5, delay: i * 0.07 }}
                             >
-                                <p className="font-serif text-[2rem] md:text-[2.5rem] text-white leading-none">{stat.value}</p>
+                                <p className="font-sans font-semibold text-[2rem] md:text-[2.5rem] text-white leading-none tracking-tight">{stat.value}</p>
                                 <p className="text-[10px] tracking-[0.2em] uppercase text-white/45 mt-2">{stat.label}</p>
                             </motion.div>
                         ))}
                     </div>
+                </div>
+            </section>
+
+            {/* ── Accommodation ─────────────────────────────────────────── */}
+            <section className="w-full bg-[#FAF7F0] py-14 md:py-20 px-6 md:px-12 lg:px-16">
+                <div className="max-w-[1400px] mx-auto">
+
+                    <motion.p
+                        initial={{ opacity: 0, y: 12 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6 }}
+                        className="text-[10px] tracking-[0.45em] uppercase text-[var(--gold-accent-dark)] mb-8"
+                    >
+                        Accommodation
+                    </motion.p>
+
+                    <div className="flex flex-col lg:flex-row gap-10 lg:gap-14 items-start">
+
+                        {/* Left — stacked images */}
+                        <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.8 }}
+                            className="lg:w-[52%] w-full flex gap-3"
+                        >
+                            {/* Large primary image */}
+                            <div className="flex-[1.6] relative aspect-[3/4] overflow-hidden rounded-2xl bg-[#E8E1D6]">
+                                <Image
+                                    src="/images/balcony-room-1.jpg"
+                                    alt="Balcony Room at Olivia"
+                                    fill
+                                    className="object-cover"
+                                    sizes="(max-width: 1024px) 100vw, 40vw"
+                                />
+                            </div>
+                            {/* Two small stacked images */}
+                            <div className="flex-1 flex-col gap-3 hidden md:flex">
+                                <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-[#E8E1D6]">
+                                    <Image
+                                        src="/images/balcony-room-3.jpg"
+                                        alt="Room view"
+                                        fill
+                                        className="object-cover"
+                                        sizes="18vw"
+                                    />
+                                </div>
+                                <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-[#E8E1D6]">
+                                    <Image
+                                        src="/images/balcony-room-5.jpg"
+                                        alt="Room interior"
+                                        fill
+                                        className="object-cover"
+                                        sizes="18vw"
+                                    />
+                                </div>
+                            </div>
+                        </motion.div>
+
+                        {/* Right — content */}
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.8, delay: 0.15 }}
+                            className="lg:w-[48%] w-full flex flex-col gap-8"
+                        >
+                            <h2 className="font-serif text-[2.8rem] md:text-[3.5rem] lg:text-[4rem] leading-[0.92] tracking-[-0.03em] text-[var(--text-dark)]">
+                                Where stillness<br />is the luxury.
+                            </h2>
+                            <p className="text-[#59544D] text-[15px] leading-[1.9] max-w-md">
+                                88 rooms and suites positioned along the lake and canal shores of Alappuzha — panoramic windows, curated amenities, and the unhurried rhythm of Kerala at every turn.
+                            </p>
+
+                            {/* Room types list */}
+                            <div>
+                                {[
+                                    { type: 'Deluxe Room', view: 'Lake View', size: '32 sq m' },
+                                    { type: 'Premium Room', view: 'Canal View', size: '38 sq m' },
+                                    { type: 'Balcony Suite', view: 'Panoramic View', size: '48 sq m' },
+                                    { type: 'Luxury Suite', view: 'Lake & Garden', size: '60 sq m' },
+                                ].map((room) => (
+                                    <div key={room.type} className="flex items-center justify-between py-3.5 border-b border-[#E8E1D6]">
+                                        <div className="flex items-center gap-3">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-[var(--gold-accent)] shrink-0" />
+                                            <p className="font-serif text-[1rem] text-[var(--text-dark)]">{room.type}</p>
+                                        </div>
+                                        <div className="flex items-center gap-5">
+                                            <p className="text-[11px] uppercase tracking-[0.15em] text-[var(--gold-accent-dark)] hidden sm:block">{room.view}</p>
+                                            <p className="text-[11px] text-[#9A8A72] w-14 text-right">{room.size}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Stats + CTA */}
+                            <div className="flex gap-8 pt-5 border-t border-[#E8E1D6]">
+                                {[['88', 'Rooms'], ['5.0', 'Rating'], ['24 Hrs', 'Room Service']].map(([val, lbl]) => (
+                                    <div key={lbl}>
+                                        <p className="font-sans font-semibold text-[1.6rem] md:text-[2rem] text-[var(--text-dark)] leading-none tracking-tight">{val}</p>
+                                        <p className="text-[10px] tracking-[0.2em] uppercase text-[#9A8A72] mt-1.5">{lbl}</p>
+                                    </div>
+                                ))}
+                            </div>
+                            <Link href="/rooms" className="inline-flex items-center gap-3 group/link self-start">
+                                <span className="text-[11px] tracking-[0.35em] uppercase font-semibold text-[var(--text-dark)] border-b border-[#C4BAA8] pb-1 group-hover/link:border-[var(--brand-primary)] group-hover/link:text-[var(--brand-primary)] transition-all duration-300">
+                                    View All Rooms
+                                </span>
+                                <ArrowRight className="w-4 h-4 text-[var(--text-dark)] group-hover/link:text-[var(--brand-primary)] group-hover/link:translate-x-1 transition-all duration-300" />
+                            </Link>
+                        </motion.div>
+                    </div>
+
                 </div>
             </section>
 

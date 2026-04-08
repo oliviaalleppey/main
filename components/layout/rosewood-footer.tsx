@@ -14,7 +14,7 @@ export default function RosewoodFooter() {
                     <div className="max-w-md">
                         <h3 className="text-2xl font-serif mb-3 tracking-wide text-[var(--text-dark)]">Stay Connected</h3>
                         <p className="text-[#4F4942] text-base leading-relaxed">
-                            Join our mailing list to receive potential updates and exclusive offers from Olivia Global.
+                            Join our mailing list to receive potential updates and exclusive offers from Olivia International.
                         </p>
                     </div>
 
