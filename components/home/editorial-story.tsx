@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 const PILLARS = [
     {
@@ -18,6 +19,19 @@ const PILLARS = [
 ];
 
 export default function EditorialStory() {
+    const [editorialImage, setEditorialImage] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetch('/api/admin/media/amenities')
+            .then(res => res.json())
+            .then(data => {
+                setEditorialImage(data.editorial || null);
+            })
+            .catch(console.error)
+            .finally(() => setLoading(false));
+    }, []);
+
     return (
         <section className="py-14 md:py-24 bg-white overflow-hidden">
             <div className="max-w-7xl mx-auto px-6 md:px-12">
@@ -25,6 +39,13 @@ export default function EditorialStory() {
 
                     {/* Left — Large editorial photo */}
                     <div className="relative w-full h-[420px] md:h-[500px] lg:h-auto lg:min-h-[560px] overflow-hidden group bg-[var(--surface-soft)]">
+                        {editorialImage ? (
+                            <img src={editorialImage} alt="Olivia Alleppey Backwaters" className="w-full h-full object-cover" />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                {loading ? 'Loading...' : 'Add image in admin'}
+                            </div>
+                        )}
                         {/* Caption overlay */}
                         <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/60 to-transparent">
                             <span className="text-white/60 text-[10px] uppercase tracking-[0.3em]">

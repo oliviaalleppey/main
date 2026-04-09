@@ -7,42 +7,42 @@ const EXPERIENCES = [
     {
         title: "Backwater Cruise",
         caption: "Drift through emerald canals at golden hour",
-        image: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?q=80&w=1200&auto=format&fit=crop",
+        image: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=800&q=80",
         href: "/experiences#backwater",
         tag: "Signature"
     },
     {
         title: "Ayurveda & Spa",
         caption: "Ancient healing rituals, reimagined for today",
-        image: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=1200&auto=format&fit=crop",
+        image: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=800&q=80",
         href: "/experiences#ayurveda",
         tag: "Wellness"
     },
     {
         title: "Sunrise Yoga",
         caption: "Breathe with the backwaters each morning",
-        image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=1200&auto=format&fit=crop",
+        image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&q=80",
         href: "/experiences#yoga",
         tag: "Daily"
     },
     {
         title: "Village Walk",
         caption: "Discover the soul of Alleppey on foot",
-        image: "https://images.unsplash.com/photo-1571436954891-89f4e1b5a5f4?q=80&w=1200&auto=format&fit=crop",
+        image: "https://images.unsplash.com/photo-1571436954891-89f4e1b5a5f4?w=800&q=80",
         href: "/experiences#village",
         tag: "Cultural"
     },
     {
         title: "Kerala Cooking",
         caption: "Learn the spice stories of a timeless cuisine",
-        image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?q=80&w=1200&auto=format&fit=crop",
+        image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80",
         href: "/experiences#cooking",
         tag: "Culinary"
     },
     {
         title: "Houseboat Night",
         caption: "Sleep on still waters beneath a canopy of stars",
-        image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200&auto=format&fit=crop",
+        image: "https://images.unsplash.com/photo-1545128485-c400e7702796?w=800&q=80",
         href: "/experiences#houseboat",
         tag: "Overnight"
     },

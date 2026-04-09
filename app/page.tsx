@@ -7,7 +7,7 @@ import DiningHighlight from '@/components/home/dining-highlight';
 import ExperiencesStrip from '@/components/home/experiences-strip';
 import BrandMarquee from '@/components/home/brand-marquee';
 import EditorialStory from '@/components/home/editorial-story';
-import { getHeroMedia } from '@/app/admin/media/actions';
+import { getHeroMedia, getHomeHeroImages } from '@/app/admin/media/actions';
 
 export const revalidate = 60;
 
@@ -41,12 +41,16 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const heroMedia = await getHeroMedia();
+  const [heroMedia, homeHeroImages] = await Promise.all([
+    getHeroMedia(),
+    getHomeHeroImages(),
+  ]);
+  const heroSlides = homeHeroImages.map(img => ({ url: img.imageUrl, alt: img.title || 'Olivia International Hotel' }));
 
   return (
     <main className="min-h-screen bg-[var(--surface-cream)] font-sans">
       {/* Cinematic Hero with Floating Search */}
-      <HeroSection initialMedia={heroMedia} />
+      <HeroSection initialMedia={heroMedia} heroSlides={heroSlides} />
 
       {/* Compact Intro */}
       <CompactIntro />

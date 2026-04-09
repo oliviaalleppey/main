@@ -8,38 +8,46 @@ import { LuxuryDatePicker } from '@/components/ui/luxury-date-picker';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const HERO_IMAGES = [
-    {
-        url: "/images/home/ambal.jpeg",
-        alt: "Olivia Hotel Ambal"
-    }
+const FALLBACK_SLIDES = [
+    { url: "/images/home/ambal.jpeg", alt: "Olivia Hotel" }
 ];
 
-export default function HeroSection({ initialMedia }: { initialMedia?: { type: 'video' | 'image', url: string } | null }) {
-    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+interface HeroSlide { url: string; alt: string; }
+
+export default function HeroSection({
+    initialMedia,
+    heroSlides = [],
+}: {
+    initialMedia?: { type: 'video' | 'image', url: string } | null;
+    heroSlides?: HeroSlide[];
+}) {
+    // Use DB slides if available; otherwise fall back to hardcoded image
+    const slides: HeroSlide[] = heroSlides.length > 0 ? heroSlides : FALLBACK_SLIDES;
+    const showVideo = initialMedia?.type === 'video';
+
+    const [currentIndex, setCurrentIndex] = useState(0);
     const videoRef = useRef<HTMLVideoElement>(null);
 
     useEffect(() => {
-        if (initialMedia?.type === 'video' && videoRef.current) {
-            videoRef.current.play().catch((err) => console.log('Video autoplay blocked:', err));
+        if (showVideo && videoRef.current) {
+            videoRef.current.play().catch(() => {});
         }
-    }, [initialMedia]);
+    }, [showVideo]);
+
+    // Auto-advance carousel (skip if video)
+    useEffect(() => {
+        if (showVideo || slides.length <= 1) return;
+        const interval = setInterval(() => {
+            setCurrentIndex(prev => (prev + 1) % slides.length);
+        }, 5000);
+        return () => clearInterval(interval);
+    }, [showVideo, slides.length]);
+
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
     const [searchError, setSearchError] = useState<string | null>(null);
     const [date, setDate] = useState<DateRange | undefined>(undefined);
     const [guests, setGuests] = useState({ adults: 2, children: 0 });
     const router = useRouter();
-
-    const [heroImages] = useState(HERO_IMAGES);
-
-    // Auto-advance image every 6 seconds if no initialMedia is set
-    useEffect(() => {
-        if (initialMedia) return;
-        const interval = setInterval(() => {
-            setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
-        }, 6000);
-        return () => clearInterval(interval);
-    }, [heroImages, initialMedia]);
 
     useEffect(() => {
         const onEscape = (event: KeyboardEvent) => {
@@ -94,58 +102,56 @@ export default function HeroSection({ initialMedia }: { initialMedia?: { type: '
         <section className="relative h-[100vh] supports-[height:100dvh]:h-[100dvh] w-full select-none overflow-hidden bg-black">
             {/* Background Media */}
             <AnimatePresence>
-                {initialMedia?.type === 'video' ? (
+                {showVideo ? (
                     <motion.div
                         key="hero-video"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        transition={{ duration: 1.5, ease: "easeInOut" }}
+                        transition={{ duration: 0.8, ease: "easeInOut" }}
                         className="absolute inset-0"
                     >
                         <video
                             ref={videoRef}
-                            src={initialMedia.url} 
-                            autoPlay 
-                            loop 
-                            muted 
+                            src={initialMedia!.url}
+                            autoPlay
+                            loop
+                            muted
                             playsInline
-                            className="w-full h-full object-cover" 
+                            className="w-full h-full object-cover"
                         />
-                        {/* Cinematic Overlay */}
                         <div className="absolute inset-0 bg-black/30" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30" />
                     </motion.div>
                 ) : (
                     <motion.div
-                        key={initialMedia ? "single-image" : currentImageIndex}
-                        initial={{ opacity: 0, scale: 1.1 }}
+                        key={currentIndex}
+                        initial={{ opacity: 0, scale: 1.05 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0 }}
-                        transition={{ duration: 1.5, ease: "easeInOut" }}
+                        transition={{ duration: 0.8, ease: "easeInOut" }}
                         className="absolute inset-0"
                     >
                         <Image
-                            src={initialMedia ? initialMedia.url : heroImages[currentImageIndex].url}
-                            alt={initialMedia ? "Olivia Alleppey" : heroImages[currentImageIndex].alt}
+                            src={slides[currentIndex].url}
+                            alt={slides[currentIndex].alt}
                             fill
                             className="object-cover"
-                            priority
+                            priority={currentIndex === 0}
                         />
-                        {/* Cinematic Overlay */}
                         <div className="absolute inset-0 bg-black/30" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30" />
                     </motion.div>
                 )}
             </AnimatePresence>
 
-            {!initialMedia && (
+            {/* Carousel dot indicators (only when multiple slides) */}
+            {!showVideo && slides.length > 1 && (
                 <div className="absolute bottom-64 left-1/2 -translate-x-1/2 flex gap-3 z-20">
-                    {heroImages.map((_, index) => (
+                    {slides.map((_, index) => (
                         <button
                             key={index}
-                            onClick={() => setCurrentImageIndex(index)}
-                            className={`h-1 rounded-full transition-all duration-300 ${index === currentImageIndex ? 'w-8 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'
-                                }`}
+                            onClick={() => setCurrentIndex(index)}
+                            className={`h-1 rounded-full transition-all duration-300 ${index === currentIndex ? 'w-8 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'}`}
                             aria-label={`Go to slide ${index + 1}`}
                         />
                     ))}
