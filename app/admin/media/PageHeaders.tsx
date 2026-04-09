@@ -1,11 +1,45 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { setPageHeader, uploadMedia, deleteMedia, setAmenityImage, setDiningImage } from './actions';
+import { setPageHeader, uploadMedia, deleteMedia, setAmenityImage, setDiningImage, saveMediaUrl } from './actions';
 import { MEDIA_PAGES } from './constants';
 import { UploadCloud, Loader2, Image as ImageIcon, Video, Film, Trash2, Plus, Layers } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { upload } from '@vercel/blob/client';
+
+async function toWebPClient(file: File): Promise<File> {
+    return new Promise((resolve, reject) => {
+        const img = new window.Image();
+        const objectUrl = URL.createObjectURL(file);
+
+        img.onload = () => {
+            URL.revokeObjectURL(objectUrl);
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) { reject(new Error('Canvas not available')); return; }
+            ctx.drawImage(img, 0, 0);
+            canvas.toBlob(
+                (blob) => {
+                    if (!blob) { reject(new Error('WebP conversion failed')); return; }
+                    const webpName = file.name.replace(/\.[^.]+$/, '.webp');
+                    resolve(new File([blob], webpName, { type: 'image/webp' }));
+                },
+                'image/webp',
+                0.85,
+            );
+        };
+
+        img.onerror = () => {
+            URL.revokeObjectURL(objectUrl);
+            reject(new Error('Failed to load image'));
+        };
+
+        img.src = objectUrl;
+    });
+}
 
 interface PageHeader {
     type: 'video' | 'image';
@@ -70,10 +104,24 @@ export default function PageHeaders({ headers, homeSlides: initialHomeSlides, am
     const handleFile = async (file: File) => {
         setIsUploading(true);
         try {
-            const fd = new FormData();
-            fd.append('media', file);
-            const result = await setPageHeader(activePage, fd);
-            setLocalHeaders(prev => ({ ...prev, [activePage]: { type: result.type, url: result.url } }));
+            const isVideo = file.type.startsWith('video/');
+            
+            if (isVideo) {
+                const fd = new FormData();
+                fd.append('media', file);
+                const result = await setPageHeader(activePage, fd);
+                setLocalHeaders(prev => ({ ...prev, [activePage]: { type: result.type, url: result.url } }));
+            } else {
+                const webpFile = await toWebPClient(file);
+                const blob = await upload(webpFile.name, webpFile, {
+                    access: 'public',
+                    handleUploadUrl: '/api/upload',
+                });
+                const fd = new FormData();
+                fd.append('url', blob.url);
+                const result = await setPageHeader(activePage, fd);
+                setLocalHeaders(prev => ({ ...prev, [activePage]: { type: 'image', url: result.url } }));
+            }
             toast.success('Page header updated!');
             router.refresh();
         } catch {
@@ -87,12 +135,24 @@ export default function PageHeaders({ headers, homeSlides: initialHomeSlides, am
     const handleHomeSlideUpload = async (file: File) => {
         setIsUploading(true);
         try {
-            const fd = new FormData();
-            fd.append('media', file);
-            fd.append('category', 'home');
-            fd.append('title', file.name);
-            const result = await uploadMedia(fd);
-            setHomeSlides(prev => [...prev, { id: result.id, title: file.name, imageUrl: result.url, category: 'home' }]);
+            const isVideo = file.type.startsWith('video/');
+            
+            if (isVideo) {
+                const fd = new FormData();
+                fd.append('media', file);
+                fd.append('category', 'home');
+                fd.append('title', file.name);
+                const result = await uploadMedia(fd);
+                setHomeSlides(prev => [...prev, { id: result.id, title: file.name, imageUrl: result.url, category: 'home' }]);
+            } else {
+                const webpFile = await toWebPClient(file);
+                const blob = await upload(webpFile.name, webpFile, {
+                    access: 'public',
+                    handleUploadUrl: '/api/upload',
+                });
+                const result = await saveMediaUrl(blob.url, 'home', file.name);
+                setHomeSlides(prev => [...prev, { id: result.id, title: file.name, imageUrl: blob.url, category: 'home' }]);
+            }
             toast.success('Slide added to carousel!');
             router.refresh();
         } catch {
@@ -131,8 +191,13 @@ export default function PageHeaders({ headers, homeSlides: initialHomeSlides, am
     const handleDiningUpload = async (slug: string, file: File) => {
         setUploadingDining(slug);
         try {
+            const webpFile = await toWebPClient(file);
+            const blob = await upload(webpFile.name, webpFile, {
+                access: 'public',
+                handleUploadUrl: '/api/upload',
+            });
             const fd = new FormData();
-            fd.append('media', file);
+            fd.append('url', blob.url);
             const result = await setDiningImage(slug, fd);
             setDiningImages(prev => ({ ...prev, [slug]: result.url }));
             toast.success('Dining image updated!');
@@ -164,8 +229,13 @@ export default function PageHeaders({ headers, homeSlides: initialHomeSlides, am
     const handleAmenityUpload = async (key: string, file: File) => {
         setUploadingAmenity(key);
         try {
+            const webpFile = await toWebPClient(file);
+            const blob = await upload(webpFile.name, webpFile, {
+                access: 'public',
+                handleUploadUrl: '/api/upload',
+            });
             const fd = new FormData();
-            fd.append('media', file);
+            fd.append('url', blob.url);
             const result = await setAmenityImage(key, fd);
             setAmenityImages(prev => ({ ...prev, [key]: result.url }));
             toast.success(`${AMENITY_ITEMS.find(a => a.key === key)?.label} image updated!`);

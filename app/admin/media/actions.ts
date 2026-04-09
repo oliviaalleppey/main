@@ -385,3 +385,17 @@ export async function bulkImportMedia(urls: string[], category: string) {
     revalidatePath('/admin/media');
     return { success: true, count: values.length };
 }
+
+// Save URL as media (for client-side direct uploads)
+export async function saveMediaUrl(url: string, category: string, title: string) {
+    const result = await db.insert(galleryImages).values({
+        title: title || 'Untitled',
+        imageUrl: url,
+        category: category || 'general',
+        isActive: true,
+        sortOrder: 0,
+    }).returning();
+
+    revalidatePath('/admin/media');
+    return { success: true, url, id: result[0].id };
+}

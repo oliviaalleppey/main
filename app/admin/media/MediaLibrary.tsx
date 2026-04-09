@@ -1,11 +1,45 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { uploadMedia, bulkImportMedia, deleteMedia } from './actions';
+import { uploadMedia, bulkImportMedia, deleteMedia, saveMediaUrl } from './actions';
 import { MEDIA_CATEGORIES } from './constants';
 import { UploadCloud, Download, Trash2, Image as ImageIcon, Video, Filter, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { upload } from '@vercel/blob/client';
+
+async function toWebPClient(file: File): Promise<File> {
+    return new Promise((resolve, reject) => {
+        const img = new window.Image();
+        const objectUrl = URL.createObjectURL(file);
+
+        img.onload = () => {
+            URL.revokeObjectURL(objectUrl);
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) { reject(new Error('Canvas not available')); return; }
+            ctx.drawImage(img, 0, 0);
+            canvas.toBlob(
+                (blob) => {
+                    if (!blob) { reject(new Error('WebP conversion failed')); return; }
+                    const webpName = file.name.replace(/\.[^.]+$/, '.webp');
+                    resolve(new File([blob], webpName, { type: 'image/webp' }));
+                },
+                'image/webp',
+                0.85,
+            );
+        };
+
+        img.onerror = () => {
+            URL.revokeObjectURL(objectUrl);
+            reject(new Error('Failed to load image'));
+        };
+
+        img.src = objectUrl;
+    });
+}
 
 interface MediaItem {
     id: string;
@@ -55,12 +89,23 @@ export default function MediaLibrary({ items }: { items: MediaItem[] }) {
         }
         setIsUploading(true);
         try {
-            const fd = new FormData();
-            fd.append('media', file);
-            fd.append('category', uploadCategory);
-            fd.append('page', uploadCategory);
-            fd.append('title', uploadTitle || file.name);
-            await uploadMedia(fd);
+            const isVideo = file.type.startsWith('video/');
+            
+            if (isVideo) {
+                const fd = new FormData();
+                fd.append('media', file);
+                fd.append('category', uploadCategory);
+                fd.append('page', uploadCategory);
+                fd.append('title', uploadTitle || file.name);
+                await uploadMedia(fd);
+            } else {
+                const webpFile = await toWebPClient(file);
+                const blob = await upload(webpFile.name, webpFile, {
+                    access: 'public',
+                    handleUploadUrl: '/api/upload',
+                });
+                await saveMediaUrl(blob.url, uploadCategory, uploadTitle || file.name);
+            }
             toast.success('Uploaded successfully!');
             setUploadTitle('');
             setShowUpload(false);

@@ -4,6 +4,40 @@ import { useRef, useState } from 'react';
 import { updateRoomTypeImages, uploadRoomImageFile } from './actions';
 import { RefreshCw, Trash2, Star, ChevronUp, ChevronDown, Loader2, ImagePlus, BedDouble } from 'lucide-react';
 import { toast } from 'sonner';
+import { upload } from '@vercel/blob/client';
+
+async function toWebPClient(file: File): Promise<File> {
+    return new Promise((resolve, reject) => {
+        const img = new window.Image();
+        const objectUrl = URL.createObjectURL(file);
+
+        img.onload = () => {
+            URL.revokeObjectURL(objectUrl);
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) { reject(new Error('Canvas not available')); return; }
+            ctx.drawImage(img, 0, 0);
+            canvas.toBlob(
+                (blob) => {
+                    if (!blob) { reject(new Error('WebP conversion failed')); return; }
+                    const webpName = file.name.replace(/\.[^.]+$/, '.webp');
+                    resolve(new File([blob], webpName, { type: 'image/webp' }));
+                },
+                'image/webp',
+                0.85,
+            );
+        };
+
+        img.onerror = () => {
+            URL.revokeObjectURL(objectUrl);
+            reject(new Error('Failed to load image'));
+        };
+
+        img.src = objectUrl;
+    });
+}
 
 interface RoomType {
     id: string;
@@ -87,12 +121,14 @@ export default function RoomImages({ rooms }: Props) {
         const key = `${roomId}:${index}`;
         setUploading(key);
         try {
-            const fd = new FormData();
-            fd.append('media', file);
-            const { url } = await uploadRoomImageFile(fd);
+            const webpFile = await toWebPClient(file);
+            const blob = await upload(webpFile.name, webpFile, {
+                access: 'public',
+                handleUploadUrl: '/api/upload',
+            });
             const room = roomData.find(r => r.id === roomId)!;
             const imgs = [...(room.images ?? [])];
-            imgs[index] = url;
+            imgs[index] = blob.url;
             updateImages(roomId, imgs);
             toast.success('Image replaced!');
         } catch (err) {
