@@ -30,11 +30,12 @@ interface Props {
     pageHeaders: Record<string, PageHeader>;
     rooms: RoomType[];
     amenityImages: Record<string, string>;
+    diningImages: Record<string, string>;
 }
 
 type Tab = 'library' | 'rooms' | 'headers';
 
-export default function MediaCenter({ media, pageHeaders, rooms, amenityImages }: Props) {
+export default function MediaCenter({ media, pageHeaders, rooms, amenityImages, diningImages }: Props) {
     const [tab, setTab] = useState<Tab>('rooms');
 
     const totalRoomImages = rooms.reduce((sum, r) => sum + (r.images?.length ?? 0), 0);
@@ -79,7 +80,7 @@ export default function MediaCenter({ media, pageHeaders, rooms, amenityImages }
             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                 {tab === 'rooms' && <RoomImages rooms={rooms} />}
                 {tab === 'library' && <MediaLibrary items={media} />}
-                {tab === 'headers' && <PageHeaders headers={pageHeaders} homeSlides={media.filter(m => m.category === 'home')} amenityImages={amenityImages} />}
+                {tab === 'headers' && <PageHeaders headers={pageHeaders} homeSlides={media.filter(m => m.category === 'home')} amenityImages={amenityImages} diningImages={diningImages} />}
             </div>
         </div>
     );

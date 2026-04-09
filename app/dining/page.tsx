@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import type { ComponentType } from 'react';
+import { getDiningImages } from '@/app/admin/media/actions';
 import Image from 'next/image';
 import Link from 'next/link';
 import { DiningHero } from '@/components/dining-hero';
@@ -99,11 +100,12 @@ const outlets: DiningOutlet[] = [
     },
 ];
 
-export default function DiningPage() {
-    // All outlets in sorted order (already sorted in the array)
-    const allOutlets = outlets;
-    const operationalOutlets = outlets.filter((outlet) => outlet.status === 'operational');
-    const upcomingOutlets = outlets.filter((outlet) => outlet.status === 'upcoming');
+export default async function DiningPage() {
+    // Fetch DB images and overlay on hardcoded data (DB takes priority)
+    const dbImages = await getDiningImages();
+    const allOutlets = outlets.map(o => ({ ...o, image: dbImages[o.slug] || o.image }));
+    const operationalOutlets = allOutlets.filter((outlet) => outlet.status === 'operational');
+    const upcomingOutlets = allOutlets.filter((outlet) => outlet.status === 'upcoming');
 
     return (
         <main className="min-h-screen bg-[#F6F3EE] text-[#2C2A27]">

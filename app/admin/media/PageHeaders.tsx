@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { setPageHeader, uploadMedia, deleteMedia, setAmenityImage } from './actions';
+import { setPageHeader, uploadMedia, deleteMedia, setAmenityImage, setDiningImage } from './actions';
 import { MEDIA_PAGES } from './constants';
 import { UploadCloud, Loader2, Image as ImageIcon, Video, Film, Trash2, Plus, Layers } from 'lucide-react';
 import { toast } from 'sonner';
@@ -25,7 +25,6 @@ const AMENITY_ITEMS = [
     { key: 'spa', label: 'The Spa' },
     { key: 'yoga', label: 'Yoga & Meditation' },
     { key: 'editorial', label: 'Our Story (About Section)' },
-    { key: 'discover', label: 'Discover Page Hero' },
     { key: 'wellness_spa', label: 'Wellness - The Spa' },
     { key: 'wellness_pool', label: 'Wellness - Atrium Pool' },
     { key: 'wellness_gym', label: 'Wellness - Gym' },
@@ -33,13 +32,23 @@ const AMENITY_ITEMS = [
     { key: 'wellness_yoga', label: 'Wellness - Yoga & Meditation' },
 ];
 
+const DINING_OUTLETS = [
+    { slug: 'in-room-dining', label: 'In-Room Dining' },
+    { slug: 'finishing-point', label: 'Finishing Point' },
+    { slug: 'brew-bar', label: 'Brew & Bite' },
+    { slug: 'aqua-pool-lounge', label: 'Aqua Pool Lounge' },
+    { slug: 'club-9', label: 'Club 9' },
+    { slug: 'kaayal', label: 'Kaayal' },
+];
+
 interface Props {
     headers: Record<string, PageHeader>;
     homeSlides: MediaItem[];
     amenityImages: Record<string, string>;
+    diningImages: Record<string, string>;
 }
 
-export default function PageHeaders({ headers, homeSlides: initialHomeSlides, amenityImages: initialAmenityImages }: Props) {
+export default function PageHeaders({ headers, homeSlides: initialHomeSlides, amenityImages: initialAmenityImages, diningImages: initialDiningImages }: Props) {
     const [activeTab, setActiveTab] = useState<'pages' | 'amenities'>('pages');
     const [activePage, setActivePage] = useState('home');
     const [isDragging, setIsDragging] = useState(false);
@@ -53,6 +62,8 @@ export default function PageHeaders({ headers, homeSlides: initialHomeSlides, am
     const [localHeaders, setLocalHeaders] = useState<Record<string, PageHeader>>(headers);
     const [homeSlides, setHomeSlides] = useState<MediaItem[]>(initialHomeSlides);
     const [amenityImages, setAmenityImages] = useState<Record<string, string>>(initialAmenityImages);
+    const [diningImages, setDiningImages] = useState<Record<string, string>>(initialDiningImages);
+    const [uploadingDining, setUploadingDining] = useState<string | null>(null);
     const currentHeader = localHeaders[activePage];
 
     // Upload for non-home page headers (single image/video saved to siteSettings)
@@ -113,6 +124,38 @@ export default function PageHeaders({ headers, homeSlides: initialHomeSlides, am
             toast.error('Failed to save');
         } finally {
             setIsSavingUrl(false);
+        }
+    };
+
+    // Dining handlers
+    const handleDiningUpload = async (slug: string, file: File) => {
+        setUploadingDining(slug);
+        try {
+            const fd = new FormData();
+            fd.append('media', file);
+            const result = await setDiningImage(slug, fd);
+            setDiningImages(prev => ({ ...prev, [slug]: result.url }));
+            toast.success('Dining image updated!');
+            router.refresh();
+        } catch {
+            toast.error('Upload failed');
+        } finally {
+            setUploadingDining(null);
+        }
+    };
+
+    const handleDiningUrl = async (slug: string) => {
+        const url = (document.getElementById(`dining-url-${slug}`) as HTMLInputElement)?.value;
+        if (!url?.startsWith('http')) { toast.error('Enter a valid URL'); return; }
+        try {
+            const fd = new FormData();
+            fd.append('url', url);
+            const result = await setDiningImage(slug, fd);
+            setDiningImages(prev => ({ ...prev, [slug]: result.url }));
+            toast.success('Dining image updated!');
+            router.refresh();
+        } catch {
+            toast.error('Failed to save');
         }
     };
 
@@ -356,6 +399,7 @@ export default function PageHeaders({ headers, homeSlides: initialHomeSlides, am
                         </div>
                     ) : (
                         /* OTHER PAGES — Single header manager */
+                        <div>
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             {/* Current preview */}
                             <div>
@@ -450,6 +494,56 @@ export default function PageHeaders({ headers, homeSlides: initialHomeSlides, am
                                     </button>
                                 </div>
                             </div>
+                        </div>
+
+                        {/* DINING OUTLETS — show below the header upload when on Dining page */}
+                        {activePage === 'dining' && (
+                            <div className="mt-8 pt-8 border-t border-gray-100">
+                                <h3 className="text-sm font-semibold text-[var(--text-dark)] mb-1">Dining Outlet Images</h3>
+                                <p className="text-xs text-gray-500 mb-5">Upload images for each restaurant shown on the Dining page.</p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {DINING_OUTLETS.map(outlet => {
+                                        const imageUrl = diningImages[outlet.slug];
+                                        return (
+                                            <div key={outlet.slug} className="border border-gray-200 rounded-xl p-4">
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <h4 className="font-medium text-sm text-[var(--text-dark)]">{outlet.label}</h4>
+                                                    {imageUrl && (
+                                                        <span className="text-xs text-green-600 flex items-center gap-1">
+                                                            <span className="w-2 h-2 bg-green-500 rounded-full" />
+                                                            Image set
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className="rounded-lg overflow-hidden aspect-video bg-gray-100 mb-3">
+                                                    {imageUrl ? (
+                                                        <img src={imageUrl} alt={outlet.label} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">No image uploaded</div>
+                                                    )}
+                                                </div>
+                                                <input type="file" accept="image/*" className="hidden"
+                                                    id={`dining-file-${outlet.slug}`}
+                                                    onChange={e => { const f = e.target.files?.[0]; if (f) handleDiningUpload(outlet.slug, f); }} />
+                                                <label htmlFor={`dining-file-${outlet.slug}`}
+                                                    className="block w-full px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-sm text-center cursor-pointer transition-colors mb-3">
+                                                    {uploadingDining === outlet.slug ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Upload Image'}
+                                                </label>
+                                                <div className="flex gap-2">
+                                                    <input type="text" id={`dining-url-${outlet.slug}`}
+                                                        placeholder="Or paste image URL..."
+                                                        className="flex-1 p-2 border border-gray-200 rounded-lg text-sm focus:border-amber-400 focus:outline-none" />
+                                                    <button onClick={() => handleDiningUrl(outlet.slug)}
+                                                        className="px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-sm">
+                                                        Save
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
                         </div>
                     )}
                 </>
