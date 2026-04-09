@@ -8,10 +8,15 @@ import { revalidatePath } from 'next/cache';
 import sharp from 'sharp';
 
 async function toWebP(file: File): Promise<{ buffer: Buffer; filename: string }> {
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = await sharp(Buffer.from(arrayBuffer)).webp({ quality: 85 }).toBuffer();
-    const filename = file.name.replace(/\.[^.]+$/, '.webp');
-    return { buffer, filename };
+    try {
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = await sharp(Buffer.from(arrayBuffer)).webp({ quality: 85 }).toBuffer();
+        const filename = file.name.replace(/\.[^.]+$/, '.webp');
+        return { buffer, filename };
+    } catch (error) {
+        console.error('WebP conversion error:', error);
+        throw new Error('Failed to convert image to WebP');
+    }
 }
 
 export async function uploadHeroMedia(formData: FormData) {
@@ -74,36 +79,40 @@ export async function uploadMedia(formData: FormData) {
 
     if (!file) throw new Error('No file provided');
 
-    const isVideo = file.type.startsWith('video/');
-    const type = isVideo ? 'video' : 'image';
+    try {
+        const isVideo = file.type.startsWith('video/');
 
-    // convert images to WebP before upload
-    let uploadData: File | Buffer = file;
-    let uploadName = file.name;
-    if (!isVideo) {
-        const converted = await toWebP(file);
-        uploadData = converted.buffer;
-        uploadName = converted.filename;
+        // convert images to WebP before upload
+        let uploadData: File | Buffer = file;
+        let uploadName = file.name;
+        if (!isVideo) {
+            const converted = await toWebP(file);
+            uploadData = converted.buffer;
+            uploadName = converted.filename;
+        }
+
+        const blob = await put(uploadName, uploadData, {
+            access: 'public',
+            addRandomSuffix: true,
+            ...(!isVideo && { contentType: 'image/webp' }),
+        });
+
+        // Save to database
+        const result = await db.insert(galleryImages).values({
+            title: title || file.name,
+            imageUrl: blob.url,
+            category: category || 'general',
+            isActive: true,
+            sortOrder: 0,
+        }).returning();
+
+        revalidatePath('/admin/media');
+
+        return { success: true, url: blob.url, type: isVideo ? 'video' : 'image', id: result[0].id };
+    } catch (error) {
+        console.error('Upload media error:', error);
+        throw new Error('Failed to upload media');
     }
-
-    const blob = await put(uploadName, uploadData, {
-        access: 'public',
-        addRandomSuffix: true,
-        ...(!isVideo && { contentType: 'image/webp' }),
-    });
-
-    // Save to database
-    const result = await db.insert(galleryImages).values({
-        title: title || file.name,
-        imageUrl: blob.url,
-        category: category || 'general',
-        isActive: true,
-        sortOrder: 0,
-    }).returning();
-
-    revalidatePath('/admin/media');
-
-    return { success: true, url: blob.url, type, id: result[0].id };
 }
 
 // Get home hero images for carousel (category = 'home')
@@ -265,18 +274,34 @@ export async function setAmenityImage(amenityKey: string, formData: FormData) {
 
     let url: string;
 
-    if (file && file.size > 0) {
-        const converted = await toWebP(file);
-        const blob = await put(converted.filename, converted.buffer, {
-            access: 'public',
-            addRandomSuffix: true,
-            contentType: 'image/webp',
-        });
-        url = blob.url;
-    } else if (manualUrl?.startsWith('http')) {
-        url = manualUrl;
-    } else {
-        throw new Error('No media provided');
+    try {
+        if (file && file.size > 0) {
+            // Check if it's an image or video
+            if (file.type.startsWith('image/')) {
+                const converted = await toWebP(file);
+                const blob = await put(converted.filename, converted.buffer, {
+                    access: 'public',
+                    addRandomSuffix: true,
+                    contentType: 'image/webp',
+                });
+                url = blob.url;
+            } else if (file.type.startsWith('video/')) {
+                const blob = await put(file.name, file, {
+                    access: 'public',
+                    addRandomSuffix: true,
+                });
+                url = blob.url;
+            } else {
+                throw new Error('Unsupported file type');
+            }
+        } else if (manualUrl?.startsWith('http')) {
+            url = manualUrl;
+        } else {
+            throw new Error('No media provided');
+        }
+    } catch (error) {
+        console.error('Upload error:', error);
+        throw error;
     }
 
     const key = `amenity_${amenityKey}`;
