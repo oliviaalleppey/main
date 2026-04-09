@@ -12,14 +12,17 @@ export async function seedRealRooms() {
     console.log('🌱 Seeding REAL room inventory...');
 
     try {
-        // 0. Clean up existing data (optional, but good for clean slate)
-        console.log('Cleaning up existing rooms and types...');
-        // Note: Delete rooms first due to foreign key constraint
-        await db.delete(rooms);
-        await db.delete(roomTypes);
+        // Just insert new room types without deleting existing ones
+        // This avoids foreign key cascade issues
+        console.log('Inserting 6 real room types...');
 
-        // 1. Create Room Types
-        console.log('Creating 6 real room types...');
+        // Check if room types already exist
+        const existingRooms = await db.query.roomTypes.findMany();
+        if (existingRooms.length > 0) {
+            console.log('Room types already exist, skipping seed');
+            console.log('Current room types:', existingRooms.map(r => r.name));
+            return;
+        }
 
         const [twinRoom] = await db.insert(roomTypes).values({
             name: 'Lake View Twin Room',

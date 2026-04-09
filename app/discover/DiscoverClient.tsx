@@ -215,11 +215,19 @@ function HorizontalScroller({ children }: { children: React.ReactNode }) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-interface DiscoverClientProps {
-    headerImage?: string;
+interface RoomType {
+    name: string;
+    slug: string;
+    shortDescription: string | null;
+    images: string[] | null;
 }
 
-export default function DiscoverClient({ headerImage }: DiscoverClientProps) {
+interface DiscoverClientProps {
+    headerImage?: string;
+    rooms?: RoomType[];
+}
+
+export default function DiscoverClient({ headerImage, rooms = [] }: DiscoverClientProps) {
     return (
         <main className="min-h-screen bg-[#FAF7F0] text-[var(--text-dark)] overflow-hidden">
 
@@ -293,16 +301,20 @@ export default function DiscoverClient({ headerImage }: DiscoverClientProps) {
                     </motion.p>
 
                     <HorizontalScroller>
-                        {[1, 2, 3, 4].map((i) => (
-                            <Link key={i} href={`/rooms?type=${i}`} className="flex-none w-[280px] md:w-[320px] group">
+                        {rooms.slice(0, 6).map((room, idx) => (
+                            <Link key={idx} href={`/rooms/${room.slug}`} className="flex-none w-[280px] md:w-[320px] group">
                                 <div className="relative aspect-[4/5] overflow-hidden rounded-sm mb-4 bg-[var(--surface-soft)]">
-                                    <div className="absolute inset-0 bg-[var(--surface-soft)]" />
-                                    <div className="absolute bottom-4 left-4 text-white/80 text-[10px] tracking-[0.2em]">SUITE</div>
+                                    {room.images?.[0] ? (
+                                        <Image src={room.images[0]} alt={room.name} fill className="object-cover" />
+                                    ) : (
+                                        <div className="absolute inset-0 bg-[var(--surface-soft)]" />
+                                    )}
+                                    <div className="absolute bottom-4 left-4 text-white/80 text-[10px] tracking-[0.2em]">ROOM</div>
                                 </div>
                                 <h3 className="font-serif text-[1.25rem] text-[var(--text-dark)] mb-1 group-hover:text-[var(--gold-accent-dark)] transition-colors">
-                                    {i === 1 ? 'Deluxe Room' : i === 2 ? 'Premium Room' : i === 3 ? 'Junior Suite' : 'Executive Suite'}
+                                    {room.name}
                                 </h3>
-                                <p className="text-[var(--text-dark)]/50 text-xs">35 – 85 sq m · Garden or Lake View</p>
+                                <p className="text-[var(--text-dark)]/50 text-xs">{room.shortDescription || 'Luxury room at Olivia'}</p>
                             </Link>
                         ))}
                     </HorizontalScroller>

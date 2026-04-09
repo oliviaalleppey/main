@@ -5,7 +5,6 @@ import ShareButton from './share-button';
 import { db } from '@/lib/db';
 import { roomTypes, roomInventory } from '@/lib/db/schema';
 import { eq, and, inArray } from 'drizzle-orm';
-import { formatRoomName } from '@/lib/utils';
 
 type RoomCard = {
     title: string;
@@ -50,7 +49,7 @@ async function getShowcaseRooms(): Promise<RoomCard[]> {
         const images = Array.isArray(row.images) ? row.images : [];
         const todayPrice = overrideMap.get(row.id);
         return {
-            title: formatRoomName(row.name),
+            title: row.name,  // Use actual room name from database
             description: row.shortDescription || row.description || 'Experience a thoughtfully designed stay with signature Olivia comforts.',
             image: row.featuredImage || images[0] || null,
             link: `/rooms/${row.slug}`,
