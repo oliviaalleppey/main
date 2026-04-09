@@ -292,6 +292,7 @@ interface WellnessImages {
     wellness_gym?: string;
     wellness_steam?: string;
     wellness_yoga?: string;
+    [key: string]: string | undefined;
 }
 
 export default function WellnessPage() {
@@ -302,8 +303,21 @@ export default function WellnessPage() {
     useEffect(() => {
         fetch('/api/admin/media/amenities')
             .then(res => res.json())
-            .then(data => setImages(data))
-            .catch(console.error)
+            .then(data => {
+                // Filter to only wellness-related images
+                const filtered: WellnessImages = {};
+                if (data && typeof data === 'object') {
+                    (Object.keys(data) as string[]).forEach(key => {
+                        if (key.startsWith('wellness_') && typeof data[key] === 'string') {
+                            filtered[key] = data[key];
+                        }
+                    });
+                }
+                setImages(filtered);
+            })
+            .catch(err => {
+                console.error('Error loading wellness images:', err);
+            })
             .finally(() => setLoading(false));
     }, []);
 

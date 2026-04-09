@@ -27,9 +27,14 @@ export default function EditorialStory() {
         fetch('/api/admin/media/amenities')
             .then(res => res.json())
             .then(data => {
-                setEditorialImage(data.editorial || null);
+                // Handle different data formats safely
+                if (data && typeof data === 'object' && 'editorial' in data) {
+                    setEditorialImage(typeof data.editorial === 'string' ? data.editorial : null);
+                }
             })
-            .catch(console.error)
+            .catch(err => {
+                console.error('Error loading editorial image:', err);
+            })
             .finally(() => setLoading(false));
     }, []);
 

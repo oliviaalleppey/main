@@ -49,14 +49,30 @@ const AMENITIES = [
 export default function AmenitiesGallery() {
     const [images, setImages] = useState<AmenityImages>({});
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
 
     useEffect(() => {
         fetch('/api/admin/media/amenities')
             .then(res => res.json())
-            .then(data => setImages(data))
-            .catch(console.error)
+            .then(data => {
+                // Filter out any non-string values and ensure proper typing
+                const filtered: AmenityImages = {};
+                (Object.keys(data) as Array<keyof AmenityImages>).forEach(key => {
+                    if (typeof data[key] === 'string' && data[key]) {
+                        filtered[key] = data[key] as string;
+                    }
+                });
+                setImages(filtered);
+            })
+            .catch(err => {
+                console.error('Error loading amenity images:', err);
+                setError(true);
+            })
             .finally(() => setLoading(false));
     }, []);
+
+    // Check if images are loaded
+    const hasImages = Object.values(images).some(v => v && typeof v === 'string');
 
     return (
         <section className="py-14 md:py-24 bg-white">
@@ -94,8 +110,10 @@ export default function AmenitiesGallery() {
                                     <div className="absolute inset-0 bg-[var(--surface-soft)] flex items-center justify-center">
                                         {loading ? (
                                             <div className="w-8 h-8 border-2 border-gray-300 border-t-amber-500 rounded-full animate-spin" />
-                                        ) : (
+                                        ) : hasImages ? (
                                             <span className="text-gray-400 text-sm">Add image in admin</span>
+                                        ) : (
+                                            <span className="text-gray-400 text-sm">Image not set</span>
                                         )}
                                     </div>
                                 )}
