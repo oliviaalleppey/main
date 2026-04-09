@@ -95,8 +95,9 @@ export default function RoomImages({ rooms }: Props) {
             imgs[index] = url;
             updateImages(roomId, imgs);
             toast.success('Image replaced!');
-        } catch {
-            toast.error('Replace failed');
+        } catch (err) {
+            console.error('Upload failed:', err);
+            toast.error('Replace failed: ' + (err instanceof Error ? err.message : 'Unknown error'));
         } finally {
             setUploading(null);
         }
