@@ -246,7 +246,7 @@ export async function uploadRoomImageFile(formData: FormData): Promise<{ url: st
 }
 
 // Amenity image keys
-const AMENITY_KEYS = ['pool', 'gym', 'spa', 'yoga', 'editorial', 'discover'] as const;
+const AMENITY_KEYS = ['pool', 'gym', 'spa', 'yoga', 'editorial', 'discover', 'wellness_spa', 'wellness_pool', 'wellness_gym', 'wellness_steam', 'wellness_yoga'] as const;
 
 export async function getAmenityImages(): Promise<Record<string, string>> {
     const keys = AMENITY_KEYS.map(k => `amenity_${k}`);

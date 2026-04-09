@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight, Star } from 'lucide-react';
 import EventInquiryForm from '@/components/conference/event-inquiry-form';
 
@@ -285,8 +286,26 @@ function CategoryBlock({ category, index }: { category: TreatmentCategory; index
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
+interface WellnessImages {
+    wellness_spa?: string;
+    wellness_pool?: string;
+    wellness_gym?: string;
+    wellness_steam?: string;
+    wellness_yoga?: string;
+}
+
 export default function WellnessPage() {
     const [activeService, setActiveService] = useState<string>('spa');
+    const [images, setImages] = useState<WellnessImages>({});
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetch('/api/admin/media/amenities')
+            .then(res => res.json())
+            .then(data => setImages(data))
+            .catch(console.error)
+            .finally(() => setLoading(false));
+    }, []);
 
     useEffect(() => {
         const validIds = new Set<string>(wellnessServices.map((s) => s.id));
@@ -494,10 +513,16 @@ export default function WellnessPage() {
                                         </div>
 
                                         <div className="relative h-[460px] md:h-[540px] bg-[var(--surface-soft)] overflow-hidden">
-                                            <div className="absolute inset-0 bg-gradient-to-t from-[var(--brand-primary-deep)]/25 to-transparent" />
-                                            <div className="w-full h-full flex items-center justify-center">
-                                                <p className="text-[#8F877F] text-sm">Image: The Spa at Olivia</p>
-                                            </div>
+                                            {images.wellness_spa ? (
+                                                <Image src={images.wellness_spa} alt="The Spa at Olivia" fill className="object-cover" />
+                                            ) : (
+                                                <div className="absolute inset-0 bg-gradient-to-t from-[var(--brand-primary-deep)]/25 to-transparent" />
+                                            )}
+                                            {!images.wellness_spa && !loading && (
+                                                <div className="w-full h-full flex items-center justify-center">
+                                                    <p className="text-[#8F877F] text-sm">Add image in admin</p>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </section>
@@ -558,10 +583,22 @@ export default function WellnessPage() {
                                     </div>
 
                                     <div className="relative h-[480px] md:h-[560px] bg-[var(--surface-soft)] overflow-hidden">
-                                        <div className="absolute inset-0 bg-gradient-to-t from-[var(--brand-primary-deep)]/20 to-transparent" />
-                                        <div className="w-full h-full flex items-center justify-center">
-                                            <p className="text-[#8F877F] text-sm">Image: {activeData.title}</p>
-                                        </div>
+                                        {activeData.id === 'pool' && images.wellness_pool ? (
+                                            <Image src={images.wellness_pool} alt={activeData.title} fill className="object-cover" />
+                                        ) : activeData.id === 'gym' && images.wellness_gym ? (
+                                            <Image src={images.wellness_gym} alt={activeData.title} fill className="object-cover" />
+                                        ) : activeData.id === 'steam' && images.wellness_steam ? (
+                                            <Image src={images.wellness_steam} alt={activeData.title} fill className="object-cover" />
+                                        ) : (
+                                            <>
+                                                <div className="absolute inset-0 bg-gradient-to-t from-[var(--brand-primary-deep)]/20 to-transparent" />
+                                                {!loading && (
+                                                    <div className="w-full h-full flex items-center justify-center">
+                                                        <p className="text-[#8F877F] text-sm">Add image in admin</p>
+                                                    </div>
+                                                )}
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                             </section>
@@ -601,10 +638,18 @@ export default function WellnessPage() {
                                     </div>
 
                                     <div className="relative h-[480px] md:h-[560px] bg-[var(--surface-soft)] overflow-hidden">
-                                        <div className="absolute inset-0 bg-gradient-to-t from-[var(--brand-primary-deep)]/20 to-transparent" />
-                                        <div className="w-full h-full flex items-center justify-center">
-                                            <p className="text-[#8F877F] text-sm">Image: Yoga & Meditation</p>
-                                        </div>
+                                        {images.wellness_yoga ? (
+                                            <Image src={images.wellness_yoga} alt="Yoga & Meditation" fill className="object-cover" />
+                                        ) : (
+                                            <>
+                                                <div className="absolute inset-0 bg-gradient-to-t from-[var(--brand-primary-deep)]/20 to-transparent" />
+                                                {!loading && (
+                                                    <div className="w-full h-full flex items-center justify-center">
+                                                        <p className="text-[#8F877F] text-sm">Add image in admin</p>
+                                                    </div>
+                                                )}
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                             </section>

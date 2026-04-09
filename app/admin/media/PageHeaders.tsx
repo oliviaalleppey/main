@@ -26,6 +26,11 @@ const AMENITY_ITEMS = [
     { key: 'yoga', label: 'Yoga & Meditation' },
     { key: 'editorial', label: 'Our Story (About Section)' },
     { key: 'discover', label: 'Discover Page Hero' },
+    { key: 'wellness_spa', label: 'Wellness - The Spa' },
+    { key: 'wellness_pool', label: 'Wellness - Atrium Pool' },
+    { key: 'wellness_gym', label: 'Wellness - Gym' },
+    { key: 'wellness_steam', label: 'Wellness - Steam & Sauna' },
+    { key: 'wellness_yoga', label: 'Wellness - Yoga & Meditation' },
 ];
 
 interface Props {
