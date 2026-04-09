@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getAmenityImages } from '@/app/admin/media/actions';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
     try {
         const images = await getAmenityImages();
