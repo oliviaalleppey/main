@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { Grid, Film, BedDouble } from 'lucide-react';
+import { Grid, Film, BedDouble, Heart } from 'lucide-react';
 import MediaLibrary from './MediaLibrary';
 import PageHeaders from './PageHeaders';
 import RoomImages from './RoomImages';
+import WeddingVenues from './WeddingVenues';
 
 interface MediaItem {
     id: string;
@@ -31,11 +32,13 @@ interface Props {
     rooms: RoomType[];
     amenityImages: Record<string, string>;
     diningImages: Record<string, string>;
+    weddingVenueImages: Record<string, string>;
+    weddingSectionImages: Record<string, string>;
 }
 
-type Tab = 'library' | 'rooms' | 'headers';
+type Tab = 'library' | 'rooms' | 'headers' | 'wedding';
 
-export default function MediaCenter({ media, pageHeaders, rooms, amenityImages, diningImages }: Props) {
+export default function MediaCenter({ media, pageHeaders, rooms, amenityImages, diningImages, weddingVenueImages, weddingSectionImages }: Props) {
     const [tab, setTab] = useState<Tab>('rooms');
 
     const totalRoomImages = rooms.reduce((sum, r) => sum + (r.images?.length ?? 0), 0);
@@ -74,6 +77,10 @@ export default function MediaCenter({ media, pageHeaders, rooms, amenityImages, 
                     <Film className="w-4 h-4" />
                     Page Headers
                 </button>
+                <button onClick={() => setTab('wedding')} className={tabClass('wedding')}>
+                    <Heart className="w-4 h-4" />
+                    Wedding
+                </button>
             </div>
 
             {/* Content panel */}
@@ -81,6 +88,7 @@ export default function MediaCenter({ media, pageHeaders, rooms, amenityImages, 
                 {tab === 'rooms' && <RoomImages rooms={rooms} />}
                 {tab === 'library' && <MediaLibrary items={media} />}
                 {tab === 'headers' && <PageHeaders headers={pageHeaders} homeSlides={media.filter(m => m.category === 'home')} amenityImages={amenityImages} diningImages={diningImages} />}
+                {tab === 'wedding' && <WeddingVenues venueImages={weddingVenueImages} sectionImages={weddingSectionImages} />}
             </div>
         </div>
     );

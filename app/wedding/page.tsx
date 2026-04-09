@@ -1,12 +1,11 @@
-'use client';
-
 import StickyBookButton from '@/components/sticky-book-button';
 import WhatsAppWidget from '@/components/whatsapp-widget';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { CalendarDays, Flower2, Sparkles, Users, type LucideIcon } from 'lucide-react';
+import { Flower2, Sparkles, Users, type LucideIcon } from 'lucide-react';
 import EventInquiryForm from '@/components/conference/event-inquiry-form';
+import { getWeddingVenueImages, getWeddingSectionImages } from '@/app/admin/media/actions';
 
 interface CelebrationStyle {
     title: string;
@@ -18,8 +17,6 @@ interface CelebrationStyle {
 }
 
 interface VenueInfo {
-    name: string;
-    image: string;
     capacity: string;
     area: string;
     description: string;
@@ -55,24 +52,18 @@ const celebrationStyles: CelebrationStyle[] = [
 
 const venueList: VenueInfo[] = [
     {
-        name: 'Grand Ballroom',
-        image: '',
         capacity: 'Up to 550 Guest',
         area: '5500 sq ft',
         description: 'the Grand Ballroom comfortably hosts up to 550 guests.With refined interiors, flexible layouts, and seamless service support, it i s ideal for weddings, receptions, large conferences, and milestone events where scale meets sophistication.',
         bestFor: 'Reception, sangeet, large guest dining',
     },
     {
-        name: 'Forum Hall',
-        image: '',
         capacity: 'Up to 180 Guest',
         area: '2000 sq ft',
         description: 'Perfect for intimate celebrations and corporate gatherings, Forum Hall accommodates up to 180 guests. Thoughtfully designed for comfort and functionality, it offers a refined setting for conferences, social events, and private functions with effortless flow and privacy.',
         bestFor: 'Varmala, cocktail evening, phera mandap',
     },
     {
-        name: 'Pool Side Venue',
-        image: '',
         capacity: 'Up to 200 Guest',
         area: '3,200 sq ft',
         description: 'Set against the tranquil backdrop o f the water, the Poolside venue hosts up to 200 guests and can b e transformed to suit the spirit of your occasion—be it a sunset soirée, cocktail evening, mehndi, o r themed celebration. The open-air ambience allows for creative décor, lighting, and customised layouts',
@@ -80,6 +71,7 @@ const venueList: VenueInfo[] = [
     },
 ];
 
+const venueNames = ['Grand Ballroom', 'Forum Hall', 'Pool Side Venue'];
 
 const faqs = [
     {
@@ -100,7 +92,12 @@ const faqs = [
     },
 ];
 
-export default function WeddingPage() {
+export default async function WeddingPage() {
+    const [venueImages, sectionImages] = await Promise.all([
+        getWeddingVenueImages(),
+        getWeddingSectionImages(),
+    ]);
+
     return (
         <>
             <main className="min-h-screen bg-[#FAF8F3] text-[#26322D]">
@@ -111,7 +108,6 @@ export default function WeddingPage() {
                         transition={{ duration: 8, ease: "easeOut" }}
                         className="absolute inset-0 z-0"
                     >
-                        {/* Dark gradient background */}
                         <div className="absolute inset-0 bg-[linear-gradient(135deg,var(--brand-primary-deep)_0%,var(--brand-primary-dark)_38%,var(--brand-primary-deep)_100%)]" />
                         <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_25%_30%,rgba(231,212,173,0.18)_0%,rgba(231,212,173,0)_60%)]" />
                     </motion.div>
@@ -205,8 +201,20 @@ export default function WeddingPage() {
                         </div>
 
                         <div className="grid gap-4">
-                            <div className="relative h-56 md:h-64 rounded-sm overflow-hidden bg-[#E8E0D2]" />
-                            <div className="relative h-52 md:h-56 rounded-sm overflow-hidden bg-[#DCD4C4]" />
+                            {sectionImages.how_we_plan_1 ? (
+                                <div className="relative h-56 md:h-64 rounded-sm overflow-hidden bg-[#E8E0D2]">
+                                    <img src={sectionImages.how_we_plan_1} alt="How we plan" className="w-full h-full object-cover" />
+                                </div>
+                            ) : (
+                                <div className="relative h-56 md:h-64 rounded-sm overflow-hidden bg-[#E8E0D2]" />
+                            )}
+                            {sectionImages.how_we_plan_2 ? (
+                                <div className="relative h-52 md:h-56 rounded-sm overflow-hidden bg-[#DCD4C4]">
+                                    <img src={sectionImages.how_we_plan_2} alt="How we plan 2" className="w-full h-full object-cover" />
+                                </div>
+                            ) : (
+                                <div className="relative h-52 md:h-56 rounded-sm overflow-hidden bg-[#DCD4C4]" />
+                            )}
                         </div>
                     </div>
                 </section>
@@ -222,18 +230,26 @@ export default function WeddingPage() {
                             Spaces Designed For Wedding Flow
                         </h2>
                         <div className="grid lg:grid-cols-3 gap-5">
-                            {venueList.map((venue) => (
-                                <article key={venue.name} className="border border-[#E4D9C7] bg-[#FCFAF5] overflow-hidden">
-                                    <div className="relative h-52 bg-[#E8E0D2]" />
-                                    <div className="p-5">
-                                        <h3 className="font-serif text-2xl text-[#1F2925] mb-2">{venue.name}</h3>
-                                        <p className="text-sm text-[#43534B] mb-2">{venue.description}</p>
-                                        <p className="text-sm text-[#3A4942]">Capacity: {venue.capacity}</p>
-                                        <p className="text-sm text-[#3A4942]">Area: {venue.area}</p>
-                                        <p className="text-sm text-[#3A4942] mt-2">Best for: {venue.bestFor}</p>
-                                    </div>
-                                </article>
-                            ))}
+                            {venueList.map((venue, idx) => {
+                                const venueKey = ['grand_ballroom', 'forum_hall', 'pool_side'][idx];
+                                const imageUrl = venueImages[venueKey];
+                                return (
+                                    <article key={idx} className="border border-[#E4D9C7] bg-[#FCFAF5] overflow-hidden">
+                                        <div className="relative h-52 bg-[#E8E0D2]">
+                                            {imageUrl && (
+                                                <img src={imageUrl} alt={venueNames[idx]} className="w-full h-full object-cover" />
+                                            )}
+                                        </div>
+                                        <div className="p-5">
+                                            <h3 className="font-serif text-2xl text-[#1F2925] mb-2">{venueNames[idx]}</h3>
+                                            <p className="text-sm text-[#43534B] mb-2">{venue.description}</p>
+                                            <p className="text-sm text-[#3A4942]">Capacity: {venue.capacity}</p>
+                                            <p className="text-sm text-[#3A4942]">Area: {venue.area}</p>
+                                            <p className="text-sm text-[#3A4942] mt-2">Best for: {venue.bestFor}</p>
+                                        </div>
+                                    </article>
+                                );
+                            })}
                         </div>
                     </div>
                 </section>

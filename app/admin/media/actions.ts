@@ -399,3 +399,115 @@ export async function saveMediaUrl(url: string, category: string, title: string)
     revalidatePath('/admin/media');
     return { success: true, url, id: result[0].id };
 }
+
+// Wedding venue images
+const WEDDING_VENUES = ['grand_ballroom', 'forum_hall', 'pool_side'] as const;
+
+export async function getWeddingVenueImages(): Promise<Record<string, string>> {
+    const keys = WEDDING_VENUES.map(v => `wedding_venue_${v}`);
+    const results = await db.select().from(siteSettings).where(inArray(siteSettings.key, keys));
+    const map: Record<string, string> = {};
+    results.forEach(r => {
+        const venue = (r.key as string).replace('wedding_venue_', '');
+        map[venue] = (r.value as { url: string }).url;
+    });
+    return map;
+}
+
+export async function setWeddingVenueImage(venueKey: string, formData: FormData) {
+    const file = formData.get('media') as File | null;
+    const manualUrl = formData.get('url') as string | null;
+
+    let url: string;
+
+    try {
+        if (file && file.size > 0) {
+            if (file.type.startsWith('image/')) {
+                const converted = await toWebP(file);
+                const blob = await put(converted.filename, converted.buffer, {
+                    access: 'public',
+                    addRandomSuffix: true,
+                    contentType: 'image/webp',
+                });
+                url = blob.url;
+            } else {
+                throw new Error('Only images supported for venues');
+            }
+        } else if (manualUrl?.startsWith('http')) {
+            url = manualUrl;
+        } else {
+            throw new Error('No media provided');
+        }
+    } catch (error) {
+        console.error('Upload error:', error);
+        throw error;
+    }
+
+    const key = `wedding_venue_${venueKey}`;
+    const existing = await db.select().from(siteSettings).where(eq(siteSettings.key, key)).limit(1);
+    if (existing.length > 0) {
+        await db.update(siteSettings).set({ value: { url }, updatedAt: new Date() }).where(eq(siteSettings.key, key));
+    } else {
+        await db.insert(siteSettings).values({ key, value: { url } });
+    }
+
+    revalidatePath('/wedding');
+    revalidatePath('/admin/media');
+    return { success: true, url };
+}
+
+// Wedding "How We Plan" section images (2 images)
+const WEDDING_SECTION_IMAGES = ['how_we_plan_1', 'how_we_plan_2'] as const;
+
+export async function getWeddingSectionImages(): Promise<Record<string, string>> {
+    const keys = WEDDING_SECTION_IMAGES.map(k => `wedding_section_${k}`);
+    const results = await db.select().from(siteSettings).where(inArray(siteSettings.key, keys));
+    const map: Record<string, string> = {};
+    results.forEach(r => {
+        const key = (r.key as string).replace('wedding_section_', '');
+        map[key] = (r.value as { url: string }).url;
+    });
+    return map;
+}
+
+export async function setWeddingSectionImage(sectionKey: string, formData: FormData) {
+    const file = formData.get('media') as File | null;
+    const manualUrl = formData.get('url') as string | null;
+
+    let url: string;
+
+    try {
+        if (file && file.size > 0) {
+            if (file.type.startsWith('image/')) {
+                const converted = await toWebP(file);
+                const blob = await put(converted.filename, converted.buffer, {
+                    access: 'public',
+                    addRandomSuffix: true,
+                    contentType: 'image/webp',
+                });
+                url = blob.url;
+            } else {
+                throw new Error('Only images supported');
+            }
+        } else if (manualUrl?.startsWith('http')) {
+            url = manualUrl;
+        } else {
+            throw new Error('No media provided');
+        }
+    } catch (error) {
+        console.error('Upload error:', error);
+        throw error;
+    }
+
+    const key = `wedding_section_${sectionKey}`;
+    const existing = await db.select().from(siteSettings).where(eq(siteSettings.key, key)).limit(1);
+    if (existing.length > 0) {
+        await db.update(siteSettings).set({ value: { url }, updatedAt: new Date() }).where(eq(siteSettings.key, key));
+    } else {
+        await db.insert(siteSettings).values({ key, value: { url } });
+    }
+
+    revalidatePath('/wedding');
+    revalidatePath('/admin/media');
+    return { success: true, url };
+}
