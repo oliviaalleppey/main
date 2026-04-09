@@ -237,21 +237,27 @@ export async function uploadRoomImageFile(formData: FormData): Promise<{ url: st
     const file = formData.get('media') as File;
     if (!file || file.size === 0) throw new Error('No file provided');
 
-    const isVideo = file.type.startsWith('video/');
-    let uploadData: File | Buffer = file;
-    let uploadName = file.name;
-    if (!isVideo) {
-        const converted = await toWebP(file);
-        uploadData = converted.buffer;
-        uploadName = converted.filename;
-    }
+    try {
+        const isVideo = file.type.startsWith('video/');
+        let uploadData: File | Buffer = file;
+        let uploadName = file.name;
+        
+        if (!isVideo) {
+            const converted = await toWebP(file);
+            uploadData = converted.buffer;
+            uploadName = converted.filename;
+        }
 
-    const blob = await put(uploadName, uploadData, {
-        access: 'public',
-        addRandomSuffix: true,
-        ...(!isVideo && { contentType: 'image/webp' }),
-    });
-    return { url: blob.url };
+        const blob = await put(uploadName, uploadData, {
+            access: 'public',
+            addRandomSuffix: true,
+            ...(!isVideo && { contentType: 'image/webp' }),
+        });
+        return { url: blob.url };
+    } catch (error) {
+        console.error('Room image upload error:', error);
+        throw new Error('Failed to upload room image');
+    }
 }
 
 // Amenity image keys
