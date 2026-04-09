@@ -87,8 +87,8 @@ export default async function RoomShowcase() {
                             className={`flex flex-col group ${index >= 3 ? 'hidden md:flex' : 'flex'}`}
                         >
 
-                            {/* Image Container */}
-                            <div className="relative aspect-[4/3] overflow-hidden rounded-lg mb-6 bg-[#E5E5E5]">
+                            {/* Image Container - Clickable */}
+                            <Link href={room.link} className="relative aspect-[4/3] overflow-hidden rounded-lg mb-6 bg-[#E5E5E5] block">
                                 {room.image ? (
                                     <Image
                                         src={room.image}
@@ -100,8 +100,10 @@ export default async function RoomShowcase() {
                                     <div className="absolute inset-0 bg-gradient-to-br from-[#E8E8E4] to-[#DADAD3]" />
                                 )}
                                 {/* Share Button Overlay */}
-                                <ShareButton title={room.title} url={room.link} />
-                            </div>
+                                <div className="absolute top-3 right-3 z-10">
+                                    <ShareButton title={room.title} url={room.link} />
+                                </div>
+                            </Link>
 
                                 {/* Content */}
                                 <div className="flex flex-col flex-1 px-1 mt-2">
