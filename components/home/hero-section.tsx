@@ -119,8 +119,8 @@ export default function HeroSection({
                             playsInline
                             className="w-full h-full object-cover"
                         />
-                        <div className="absolute inset-0 bg-black/30" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30" />
+                        {/* Lighter overlay for better visibility */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-black/30" />
                     </motion.div>
                 ) : (
                     <motion.div
@@ -139,8 +139,8 @@ export default function HeroSection({
                             className="object-cover"
                             priority={currentIndex === 0}
                         />
-                        <div className="absolute inset-0 bg-black/30" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30" />
+                        {/* Lighter overlay for better image visibility */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-black/30" />
                     </motion.div>
                 )}
             </AnimatePresence>
