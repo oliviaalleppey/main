@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Images - upload to hosting separately
+public/images/*
+!public/images/*.svg
+
