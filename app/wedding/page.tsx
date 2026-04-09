@@ -1,3 +1,5 @@
+'use client';
+
 import StickyBookButton from '@/components/sticky-book-button';
 import WhatsAppWidget from '@/components/whatsapp-widget';
 import Link from 'next/link';
@@ -5,7 +7,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Flower2, Sparkles, Users, type LucideIcon } from 'lucide-react';
 import EventInquiryForm from '@/components/conference/event-inquiry-form';
-import { getWeddingVenueImages, getWeddingSectionImages } from '@/app/admin/media/actions';
+import { useState, useEffect } from 'react';
 
 interface CelebrationStyle {
     title: string;
@@ -92,11 +94,19 @@ const faqs = [
     },
 ];
 
-export default async function WeddingPage() {
-    const [venueImages, sectionImages] = await Promise.all([
-        getWeddingVenueImages(),
-        getWeddingSectionImages(),
-    ]);
+export default function WeddingPage() {
+    const [venueImages, setVenueImages] = useState<Record<string, string>>({});
+    const [sectionImages, setSectionImages] = useState<Record<string, string>>({});
+
+    useEffect(() => {
+        fetch('/api/admin/media/wedding')
+            .then(res => res.json())
+            .then(data => {
+                if (data.venueImages) setVenueImages(data.venueImages);
+                if (data.sectionImages) setSectionImages(data.sectionImages);
+            })
+            .catch(console.error);
+    }, []);
 
     return (
         <>
