@@ -87,7 +87,9 @@ export default function ExperiencesStrip() {
                                 src={exp.image}
                                 alt={exp.title}
                                 fill
+                                sizes="(max-width: 768px) 280px, 320px"
                                 className="object-cover transition-transform duration-700 group-hover:scale-110"
+                                priority={i < 3}
                             />
                             {/* Dark gradient */}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />

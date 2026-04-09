@@ -228,7 +228,7 @@ export default function DiscoverClient({ headerImage }: DiscoverClientProps) {
                 {/* Background Image */}
                 <div className="absolute inset-0">
                     {headerImage ? (
-                        <img src={headerImage} alt="Discover Olivia" className="w-full h-full object-cover" />
+                        <Image src={headerImage} alt="Discover Olivia" fill className="object-cover" priority />
                     ) : (
                         <div className="w-full h-full bg-gradient-to-br from-[#1C2822] via-[#2A3B35] to-[#0F1A15]" />
                     )}

@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
@@ -40,7 +41,7 @@ export default function EditorialStory() {
                     {/* Left — Large editorial photo */}
                     <div className="relative w-full h-[420px] md:h-[500px] lg:h-auto lg:min-h-[560px] overflow-hidden group bg-[var(--surface-soft)]">
                         {editorialImage ? (
-                            <img src={editorialImage} alt="Olivia Alleppey Backwaters" className="w-full h-full object-cover" />
+                            <Image src={editorialImage} alt="Olivia Alleppey Backwaters" fill className="object-cover" priority />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
                                 {loading ? 'Loading...' : 'Add image in admin'}
