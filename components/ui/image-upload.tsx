@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { GripVertical, ImagePlus, X, ImageOff, Loader2 } from 'lucide-react';
 import Image from 'next/image';
-import { uploadRoomImageFile } from '@/app/admin/media/actions';
+import { upload } from '@vercel/blob/client';
 import { toast } from 'sonner';
 
 function ImageWithFallback({ url }: { url: string }) {
@@ -30,6 +30,40 @@ function ImageWithFallback({ url }: { url: string }) {
     );
 }
 
+// Convert any image to WebP using canvas (runs entirely in the browser — no server size limit)
+async function toWebPClient(file: File): Promise<File> {
+    return new Promise((resolve, reject) => {
+        const img = new window.Image();
+        const objectUrl = URL.createObjectURL(file);
+
+        img.onload = () => {
+            URL.revokeObjectURL(objectUrl);
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) { reject(new Error('Canvas not available')); return; }
+            ctx.drawImage(img, 0, 0);
+            canvas.toBlob(
+                (blob) => {
+                    if (!blob) { reject(new Error('WebP conversion failed')); return; }
+                    const webpName = file.name.replace(/\.[^.]+$/, '.webp');
+                    resolve(new File([blob], webpName, { type: 'image/webp' }));
+                },
+                'image/webp',
+                0.85,
+            );
+        };
+
+        img.onerror = () => {
+            URL.revokeObjectURL(objectUrl);
+            reject(new Error('Failed to load image'));
+        };
+
+        img.src = objectUrl;
+    });
+}
+
 interface ImageUploadProps {
     value: string[];
     onChange: (value: string[]) => void;
@@ -38,10 +72,12 @@ interface ImageUploadProps {
 }
 
 export function ImageUpload({ value, onChange, onRemove, disabled }: ImageUploadProps) {
-    const [isUploading, setIsUploading] = useState(false);
+    const [uploadState, setUploadState] = useState<'idle' | 'converting' | 'uploading'>('idle');
     const fileInputRef = useRef<HTMLInputElement>(null);
     const dragFromIndexRef = useRef<number | null>(null);
     const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+    const isBusy = uploadState !== 'idle';
 
     useEffect(() => {
         if (dragOverIndex != null && dragOverIndex >= value.length) {
@@ -50,16 +86,24 @@ export function ImageUpload({ value, onChange, onRemove, disabled }: ImageUpload
     }, [dragOverIndex, value.length]);
 
     const handleFileSelected = async (file: File) => {
-        setIsUploading(true);
         try {
-            const formData = new FormData();
-            formData.append('media', file);
-            const result = await uploadRoomImageFile(formData);
-            onChange([...value, result.url]);
-        } catch {
+            // Step 1: Convert to WebP in browser
+            setUploadState('converting');
+            const webpFile = await toWebPClient(file);
+
+            // Step 2: Upload directly to Vercel Blob (bypasses serverless body size limit)
+            setUploadState('uploading');
+            const blob = await upload(webpFile.name, webpFile, {
+                access: 'public',
+                handleUploadUrl: '/api/upload',
+            });
+
+            onChange([...value, blob.url]);
+        } catch (err) {
+            console.error('Upload error:', err);
             toast.error('Upload failed. Please try again.');
         } finally {
-            setIsUploading(false);
+            setUploadState('idle');
             if (fileInputRef.current) fileInputRef.current.value = '';
         }
     };
@@ -71,6 +115,11 @@ export function ImageUpload({ value, onChange, onRemove, disabled }: ImageUpload
         next.splice(to, 0, moved);
         onChange(next);
     };
+
+    const statusLabel =
+        uploadState === 'converting' ? 'Converting to WebP...' :
+        uploadState === 'uploading'  ? 'Uploading...' :
+        null;
 
     return (
         <div>
@@ -87,23 +136,23 @@ export function ImageUpload({ value, onChange, onRemove, disabled }: ImageUpload
                         key={url}
                         className={`relative w-[200px] h-[200px] rounded-md overflow-hidden border transition-colors
                             ${dragOverIndex === index ? 'border-[var(--brand-primary)]' : 'border-transparent'}`}
-                        draggable={!disabled && !isUploading}
+                        draggable={!disabled && !isBusy}
                         onDragStart={(e) => {
-                            if (disabled || isUploading) return;
+                            if (disabled || isBusy) return;
                             dragFromIndexRef.current = index;
                             setDragOverIndex(null);
                             e.dataTransfer.effectAllowed = 'move';
                             e.dataTransfer.setData('text/plain', String(index));
                         }}
                         onDragOver={(e) => {
-                            if (disabled || isUploading) return;
+                            if (disabled || isBusy) return;
                             e.preventDefault();
                             setDragOverIndex(index);
                             e.dataTransfer.dropEffect = 'move';
                         }}
                         onDragLeave={() => setDragOverIndex(null)}
                         onDrop={(e) => {
-                            if (disabled || isUploading) return;
+                            if (disabled || isBusy) return;
                             e.preventDefault();
                             const from = dragFromIndexRef.current;
                             dragFromIndexRef.current = null;
@@ -115,7 +164,6 @@ export function ImageUpload({ value, onChange, onRemove, disabled }: ImageUpload
                             dragFromIndexRef.current = null;
                             setDragOverIndex(null);
                         }}
-                        aria-label={`Image ${index + 1} of ${value.length}. Drag to reorder.`}
                     >
                         <div className="z-10 absolute top-2 left-2">
                             <div className="inline-flex items-center gap-1 rounded-full bg-white/90 border border-gray-200 px-2 py-1 text-[10px] uppercase tracking-[0.18em] text-gray-700 shadow-sm">
@@ -129,7 +177,7 @@ export function ImageUpload({ value, onChange, onRemove, disabled }: ImageUpload
                                 onClick={() => onRemove(url)}
                                 variant="destructive"
                                 size="sm"
-                                disabled={disabled || isUploading}
+                                disabled={disabled || isBusy}
                             >
                                 <X className="h-4 w-4" />
                             </Button>
@@ -140,17 +188,17 @@ export function ImageUpload({ value, onChange, onRemove, disabled }: ImageUpload
             </div>
 
             {/* Upload button */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
                 <Button
                     type="button"
-                    disabled={disabled || isUploading}
+                    disabled={disabled || isBusy}
                     variant="secondary"
                     onClick={() => fileInputRef.current?.click()}
                 >
-                    {isUploading ? (
+                    {isBusy ? (
                         <>
                             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            Uploading...
+                            {uploadState === 'converting' ? 'Converting...' : 'Uploading...'}
                         </>
                     ) : (
                         <>
@@ -165,10 +213,10 @@ export function ImageUpload({ value, onChange, onRemove, disabled }: ImageUpload
                     className="hidden"
                     ref={fileInputRef}
                     onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelected(f); }}
-                    disabled={disabled || isUploading}
+                    disabled={disabled || isBusy}
                 />
-                {isUploading && (
-                    <p className="text-xs text-gray-400">Converting to WebP & uploading...</p>
+                {statusLabel && (
+                    <p className="text-xs text-gray-400">{statusLabel}</p>
                 )}
             </div>
         </div>
