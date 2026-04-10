@@ -149,9 +149,11 @@ export default async function ConfirmationPage({ params }: { params: Promise<{ b
                         <Button variant="outline" className="px-8 py-6 rounded-none">Return Home</Button>
                     </Link>
                     {booking.status === 'confirmed' && (
-                        <Button className="bg-[var(--text-dark)] text-white px-8 py-6 rounded-none hover:bg-[#E95D20] transition-colors">
-                            Download Voucher
-                        </Button>
+                        <Link href={`/book/invoice/${booking.id}`} target="_blank">
+                            <Button className="bg-[var(--text-dark)] text-white px-8 py-6 rounded-none hover:bg-[#E95D20] transition-colors">
+                                Download Voucher
+                            </Button>
+                        </Link>
                     )}
                 </div>
             </div>

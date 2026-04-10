@@ -541,6 +541,7 @@ export async function updateGuestDetails(formData: FormData) {
         lastName: formData.get('lastName') as string,
         email: formData.get('email') as string,
         phone: formData.get('phone') as string,
+        address: formData.get('address') as string,
         requests: formData.get('requests') as string,
     };
 

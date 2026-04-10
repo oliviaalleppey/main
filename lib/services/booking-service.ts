@@ -40,6 +40,7 @@ type GuestDetails = {
     lastName: string;
     email: string;
     phone: string;
+    address?: string;
     requests?: string;
 };
 
@@ -671,6 +672,7 @@ export class BookingService {
                 guestName: `${guestDetails.firstName} ${guestDetails.lastName}`,
                 guestEmail: guestDetails.email,
                 guestPhone: guestDetails.phone,
+                guestAddress: guestDetails.address || null,
                 specialRequests: guestDetails.requests,
                 checkIn: checkInStr,
                 checkOut: checkOutStr,

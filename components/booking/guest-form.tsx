@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { updateGuestDetails } from '@/app/book/actions';
-import { Loader2, Mail, MessageSquare, Phone, User } from 'lucide-react';
+import { Loader2, Mail, MapPin, MessageSquare, Phone, User } from 'lucide-react';
 import { useFormStatus } from 'react-dom';
 
 type GuestFormValues = {
@@ -13,6 +13,7 @@ type GuestFormValues = {
     lastName?: string;
     email?: string;
     phone?: string;
+    address?: string;
     requests?: string;
 };
 
@@ -113,6 +114,20 @@ export function GuestForm({
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div className="rounded-xl border border-gray-200 bg-gray-50 p-2 md:p-3">
+                <Label htmlFor="address" className="inline-flex items-center gap-2 text-sm">
+                    <MapPin className="w-4 h-4 text-gray-500" />
+                    Address <span className="text-gray-400 font-normal">(for invoice)</span>
+                </Label>
+                <Textarea
+                    id="address"
+                    name="address"
+                    placeholder="House / Flat No., Street, City, State, PIN"
+                    defaultValue={initialValues?.address || ''}
+                    className="mt-1.5 min-h-[60px] rounded-lg border-gray-300 bg-white text-sm"
+                />
             </div>
 
             <div className="rounded-xl border border-gray-200 bg-gray-50 p-2 md:p-3">

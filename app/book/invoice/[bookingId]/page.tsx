@@ -80,7 +80,10 @@ export default async function InvoicePage({ params }: { params: Promise<{ bookin
                     <div className="p-2">
                         <strong className="block text-blue-900 mb-1">Guest Name & Address</strong>
                         <div className="font-bold uppercase">{booking.guestName}</div>
-                        <div>(Address details not captured)</div>
+                        {booking.guestAddress
+                            ? <div className="whitespace-pre-line">{booking.guestAddress}</div>
+                            : <div className="text-gray-400">(Address not provided)</div>
+                        }
                     </div>
                     <div className="p-2">
                         <strong className="block text-blue-900 mb-1">Billing Address</strong>
