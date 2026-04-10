@@ -14,6 +14,7 @@ const FALLBACK_SLIDES = [
 
 interface HeroSlide { url: string; alt: string; }
 
+
 export default function HeroSection({
     initialMedia,
     heroSlides = [],
@@ -30,7 +31,7 @@ export default function HeroSection({
 
     useEffect(() => {
         if (showVideo && videoRef.current) {
-            videoRef.current.play().catch(() => {});
+            videoRef.current.play().catch(() => { });
         }
     }, [showVideo]);
 
@@ -160,8 +161,18 @@ export default function HeroSection({
             )}
 
             {/* Centered Typography */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-white z-10 text-center px-4 pb-48">
-                <p className="text-white text-xs md:text-sm uppercase tracking-[0.3em] mb-4 animate-fade-in-up"></p>
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-white z-10 text-center px-4 pb-4898">
+                {/* Five-star plaque */}
+                <div className="mb-6 -mt-12 animate-fade-in-up">
+                    <Image
+                        src="/images/5star.png"
+                        alt="Olivia International Alleppey — Five Star Classified"
+                        width={480}
+                        height={320}
+                        className="w-[260px] md:w-[380px] lg:w-[460px] h-auto drop-shadow-2xl"
+                        priority
+                    />
+                </div>
                 <h2 className="text-white text-5xl md:text-7xl lg:text-8xl font-serif mb-6 tracking-wide animate-fade-in-up delay-100 drop-shadow-lg">
                     Experience The Inexperienced
                 </h2>
