@@ -141,7 +141,27 @@ export default function RosewoodHeader() {
                     enableTopBarAnimation ? 'transition-[height,opacity,border-color]' : ''
                 } ${isTopBarVisible ? 'h-9 border-b opacity-100' : 'h-0 border-b-0 opacity-0 pointer-events-none'}`}
             >
-                <div className="flex justify-end items-center px-6 md:px-10 py-1.5 text-xs font-medium font-sans text-[#23201C]">
+                <div className="flex justify-between items-center px-6 md:px-10 py-1.5 text-xs font-medium font-sans text-[#23201C]">
+                    {/* ── Five-star classification ── */}
+                    <div className="flex items-center gap-2.5">
+                        <div className="flex items-center gap-1">
+                            {[0,1,2,3,4].map(i => (
+                                <svg key={i} width="13" height="13" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                                    <defs>
+                                        <linearGradient id={`mhs-${i}`} x1="20%" y1="0%" x2="80%" y2="100%">
+                                            <stop offset="0%"   stopColor="#FFF4B0" />
+                                            <stop offset="30%"  stopColor="#F0C030" />
+                                            <stop offset="65%"  stopColor="#C8900A" />
+                                            <stop offset="100%" stopColor="#7A5000" />
+                                        </linearGradient>
+                                    </defs>
+                                    <polygon points="50,5 61,35 93,36 67,56 77,86 50,68 23,86 33,56 7,36 39,35"
+                                        fill={`url(#mhs-${i})`} />
+                                </svg>
+                            ))}
+                        </div>
+                        <span className="text-[10px] tracking-[0.3em] uppercase font-medium text-[#7A6040]">Five Star Hotel</span>
+                    </div>
                     <div className="flex gap-6 items-center">
                         {session ? (
                             <div className="flex items-center gap-4">
@@ -187,7 +207,7 @@ export default function RosewoodHeader() {
                         alt="Olivia Alleppey"
                         width={500}
                         height={120}
-                        className="h-[62px] md:h-[96px] w-auto object-contain"
+                        className="h-[72px] md:h-[110px] w-auto object-contain"
                         priority
                     />
                 </Link>
