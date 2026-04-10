@@ -160,19 +160,20 @@ export default function HeroSection({
                 </div>
             )}
 
+            {/* Five-star plaque — pinned near top of hero in clear sky area */}
+            <div className="absolute top-6 md:top-10 left-0 right-0 flex justify-center z-10 animate-fade-in-up">
+                <Image
+                    src="/images/5star.png"
+                    alt="Olivia International Alleppey — Five Star Classified"
+                    width={480}
+                    height={320}
+                    className="w-[220px] md:w-[340px] lg:w-[420px] h-auto drop-shadow-2xl"
+                    priority
+                />
+            </div>
+
             {/* Centered Typography */}
             <div className="absolute inset-0 flex flex-col items-center justify-center text-white z-10 text-center px-4 pb-48">
-                {/* Five-star plaque */}
-                <div className="mb-6 animate-fade-in-up" style={{ transform: 'translateY(-40px)' }}>
-                    <Image
-                        src="/images/5star.png"
-                        alt="Olivia International Alleppey — Five Star Classified"
-                        width={480}
-                        height={320}
-                        className="w-[260px] md:w-[380px] lg:w-[460px] h-auto drop-shadow-2xl"
-                        priority
-                    />
-                </div>
                 <h2 className="text-white text-5xl md:text-7xl lg:text-8xl font-serif mb-6 tracking-wide animate-fade-in-up delay-100 drop-shadow-lg">
                     Experience The Inexperienced
                 </h2>
