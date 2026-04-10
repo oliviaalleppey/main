@@ -133,25 +133,24 @@ export default function RosewoodHeader() {
     };
 
     return (
-        <header ref={headerRef} className="sticky top-0 z-50 bg-white shadow-sm">
+        <header ref={headerRef} className="sticky top-0 z-50 bg-white shadow-sm overflow-visible">
 
             {/* ── Top bar (sign-in / language) — hides on scroll ── */}
             <div
-                className={`hidden md:block overflow-hidden border-gray-200/20 duration-200 ease-out ${
-                    enableTopBarAnimation ? 'transition-[height,opacity,border-color]' : ''
-                } ${isTopBarVisible ? 'h-9 border-b opacity-100' : 'h-0 border-b-0 opacity-0 pointer-events-none'}`}
+                className={`hidden md:block overflow-hidden border-gray-200/20 duration-200 ease-out ${enableTopBarAnimation ? 'transition-[height,opacity,border-color]' : ''
+                    } ${isTopBarVisible ? 'h-9 border-b opacity-100' : 'h-0 border-b-0 opacity-0 pointer-events-none'}`}
             >
                 <div className="flex justify-between items-center px-6 md:px-10 py-1.5 text-xs font-medium font-sans text-[#23201C]">
                     {/* ── Five-star classification ── */}
                     <div className="flex items-center gap-2.5">
                         <div className="flex items-center gap-1">
-                            {[0,1,2,3,4].map(i => (
+                            {[0, 1, 2, 3, 4].map(i => (
                                 <svg key={i} width="13" height="13" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                                     <defs>
                                         <linearGradient id={`mhs-${i}`} x1="20%" y1="0%" x2="80%" y2="100%">
-                                            <stop offset="0%"   stopColor="#FFF4B0" />
-                                            <stop offset="30%"  stopColor="#F0C030" />
-                                            <stop offset="65%"  stopColor="#C8900A" />
+                                            <stop offset="0%" stopColor="#FFF4B0" />
+                                            <stop offset="30%" stopColor="#F0C030" />
+                                            <stop offset="65%" stopColor="#C8900A" />
                                             <stop offset="100%" stopColor="#7A5000" />
                                         </linearGradient>
                                     </defs>
@@ -160,7 +159,7 @@ export default function RosewoodHeader() {
                                 </svg>
                             ))}
                         </div>
-                        <span className="text-[10px] tracking-[0.3em] uppercase font-medium text-[#7A6040]">Five Star Hotel</span>
+                        <span className="text-[10px] tracking-[0.3em] uppercase font-medium text-[#7A6040]">Five Star Classified</span>
                     </div>
                     <div className="flex gap-6 items-center">
                         {session ? (
@@ -194,9 +193,9 @@ export default function RosewoodHeader() {
                   Logo (shrink-0): ~250px  |  Nav (flex-1): ~766px  |  Reserve (shrink-0): ~120px
                   80 + 250 + 12 + 766 + 12 + 120 = 1240px  ✓ fits inside 1280px
             */}
-            <div className="flex items-center gap-3 px-6 md:px-10 h-[68px] md:h-[76px] min-w-0">
+            <div className="flex items-center gap-3 px-6 md:px-10 h-[68px] md:h-[76px] min-w-0 overflow-visible">
 
-                {/* Logo */}
+                {/* Logo — allowed to grow beyond header height without pushing the header taller */}
                 <Link
                     href="/"
                     className="shrink-0 flex items-center"
@@ -207,7 +206,7 @@ export default function RosewoodHeader() {
                         alt="Olivia Alleppey"
                         width={500}
                         height={120}
-                        className="h-[72px] md:h-[110px] w-auto object-contain"
+                        className="h-[62px] min-[390px]:h-[90px] md:h-[130px] w-auto object-contain"
                         priority
                     />
                 </Link>
@@ -220,11 +219,10 @@ export default function RosewoodHeader() {
                             <Link
                                 key={item.label}
                                 href={item.href}
-                                className={`relative flex items-center h-full font-sans text-[15px] tracking-[0.03em] whitespace-nowrap transition-colors px-4 ${
-                                    isActive
+                                className={`relative flex items-center h-full font-sans text-[15px] tracking-[0.03em] whitespace-nowrap transition-colors px-4 ${isActive
                                         ? 'text-[var(--brand-primary)] font-semibold'
                                         : 'text-[#3A342D] font-medium hover:text-[#111]'
-                                }`}
+                                    }`}
                             >
                                 {item.label}
                                 {isActive && (
@@ -342,11 +340,10 @@ export default function RosewoodHeader() {
                                         key={item.label}
                                         href={item.href}
                                         onClick={() => setIsMobileMenuOpen(false)}
-                                        className={`block py-4 border-b border-gray-100 last:border-b-0 text-[17px] font-serif font-semibold transition-colors pl-4 ${
-                                            isActive
+                                        className={`block py-4 border-b border-gray-100 last:border-b-0 text-[17px] font-serif font-semibold transition-colors pl-4 ${isActive
                                                 ? 'text-[var(--brand-primary)] border-l-[3px] border-l-[var(--gold-accent)] bg-[var(--gold-accent)]/[0.06] pl-3'
                                                 : 'text-[var(--text-dark)] border-l-[3px] border-l-transparent'
-                                        }`}
+                                            }`}
                                     >
                                         {item.label}
                                     </Link>
