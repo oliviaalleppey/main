@@ -161,9 +161,9 @@ export default function HeroSection({
             )}
 
             {/* Centered Typography */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-white z-10 text-center px-4 pb-4898">
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-white z-10 text-center px-4 pb-48">
                 {/* Five-star plaque */}
-                <div className="mb-6 -mt-12 animate-fade-in-up">
+                <div className="mb-6 animate-fade-in-up" style={{ transform: 'translateY(-40px)' }}>
                     <Image
                         src="/images/5star.png"
                         alt="Olivia International Alleppey — Five Star Classified"
