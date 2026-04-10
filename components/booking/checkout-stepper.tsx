@@ -128,6 +128,7 @@ export function CheckoutStepper({
                     <AnimatePresence initial={false}>
                         {activeStep === 1 && (
                             <motion.div
+                                key="step-1"
                                 initial={{ height: 0, opacity: 0 }}
                                 animate={{ height: 'auto', opacity: 1 }}
                                 exit={{ height: 0, opacity: 0 }}
@@ -168,6 +169,7 @@ export function CheckoutStepper({
                     <AnimatePresence initial={false}>
                         {activeStep === 2 && (
                             <motion.div
+                                key="step-2"
                                 initial={{ height: 0, opacity: 0 }}
                                 animate={{ height: 'auto', opacity: 1 }}
                                 exit={{ height: 0, opacity: 0 }}
@@ -205,6 +207,7 @@ export function CheckoutStepper({
                     <AnimatePresence initial={false}>
                         {activeStep === 3 && (
                             <motion.div
+                                key="step-3"
                                 initial={{ height: 0, opacity: 0 }}
                                 animate={{ height: 'auto', opacity: 1 }}
                                 exit={{ height: 0, opacity: 0 }}
@@ -248,6 +251,7 @@ export function CheckoutStepper({
                     <AnimatePresence initial={false}>
                         {activeStep === 4 && (
                             <motion.div
+                                key="step-4"
                                 initial={{ height: 0, opacity: 0 }}
                                 animate={{ height: 'auto', opacity: 1 }}
                                 exit={{ height: 0, opacity: 0 }}
@@ -283,6 +287,7 @@ export function CheckoutStepper({
                     <AnimatePresence initial={false}>
                         {activeStep === 5 && (
                             <motion.div
+                                key="step-5"
                                 initial={{ height: 0, opacity: 0 }}
                                 animate={{ height: 'auto', opacity: 1 }}
                                 exit={{ height: 0, opacity: 0 }}

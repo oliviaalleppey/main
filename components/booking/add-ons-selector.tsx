@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, Minus, Plus, Sparkles, Tag, Check } from 'lucide-react';
+import { Loader2, Minus, Plus, Sparkles, Tag, Check, X } from 'lucide-react';
 import { updateSessionAddOns } from '@/app/book/actions';
 import { formatCurrency } from '@/lib/services/payment';
 
@@ -31,6 +31,8 @@ export function AddOnsSelector({ options, initialSelected, onContinue }: AddOnsS
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
     const [message, setMessage] = useState<string | null>(null);
+    const [lightbox, setLightbox] = useState<{ url: string; name: string } | null>(null);
+
     const [quantities, setQuantities] = useState<Record<string, number>>(() => {
         const selectedMap = new Map(initialSelected.map((entry) => [entry.addOnId, entry.quantity]));
         return options.reduce((acc, option) => {
@@ -99,7 +101,7 @@ export function AddOnsSelector({ options, initialSelected, onContinue }: AddOnsS
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 items-start">
                 {options.map((option) => {
                     const quantity = quantities[option.id] || 0;
                     const typeLabel = option.type === 'per_person' ? 'per person' : 'per unit';
@@ -114,7 +116,10 @@ export function AddOnsSelector({ options, initialSelected, onContinue }: AddOnsS
                                 }`}
                         >
                             {/* Image Section */}
-                            <div className="relative h-40 w-full bg-gray-100 shrink-0">
+                            <div
+                                className={`relative h-28 sm:h-40 w-full bg-gray-100 shrink-0 ${option.imageUrl ? 'cursor-zoom-in' : ''}`}
+                                onClick={() => option.imageUrl && setLightbox({ url: option.imageUrl, name: option.name })}
+                            >
                                 {option.imageUrl ? (
                                     <Image src={option.imageUrl} alt={option.name} fill className="object-cover" />
                                 ) : (
@@ -130,36 +135,36 @@ export function AddOnsSelector({ options, initialSelected, onContinue }: AddOnsS
                             </div>
 
                             {/* Content Section */}
-                            <div className="p-4 flex flex-col flex-1">
-                                <h3 className="text-sm font-semibold text-gray-900">{option.name}</h3>
+                            <div className="p-2 sm:p-4 flex flex-col flex-1">
+                                <h3 className="text-xs sm:text-sm font-semibold text-gray-900 line-clamp-2">{option.name}</h3>
                                 {option.description && (
-                                    <p className="text-xs text-gray-500 mt-1 line-clamp-2">{option.description}</p>
+                                    <p className="hidden sm:block text-xs text-gray-500 mt-1 line-clamp-2">{option.description}</p>
                                 )}
-                                <div className="mt-4 flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
+                                <div className="mt-2 sm:mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                    <div className="text-left">
+                                        <div className="text-[13px] font-bold text-[var(--brand-primary)]">{formatCurrency(option.price)}</div>
+                                        <div className="text-[10px] text-gray-500 uppercase tracking-wider">{typeLabel}</div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
                                         <button
                                             type="button"
                                             onClick={() => setQuantity(option.id, quantity - 1)}
-                                            className="h-8 w-8 rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-40 flex items-center justify-center transition-colors"
+                                            className="h-7 w-7 sm:h-8 sm:w-8 rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-40 flex items-center justify-center transition-colors"
                                             disabled={isPending || quantity === 0}
                                             aria-label={`Decrease ${option.name}`}
                                         >
-                                            <Minus className="w-3.5 h-3.5" />
+                                            <Minus className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                                         </button>
                                         <span className="w-4 text-center text-sm font-bold text-gray-900 tabular-nums">{quantity}</span>
                                         <button
                                             type="button"
                                             onClick={() => setQuantity(option.id, quantity + 1)}
-                                            className="h-8 w-8 rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-40 flex items-center justify-center transition-colors"
+                                            className="h-7 w-7 sm:h-8 sm:w-8 rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-40 flex items-center justify-center transition-colors"
                                             disabled={isPending || quantity >= 10}
                                             aria-label={`Increase ${option.name}`}
                                         >
-                                            <Plus className="w-3.5 h-3.5" />
+                                            <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                                         </button>
-                                    </div>
-                                    <div className="text-right">
-                                        <div className="text-[13px] font-bold text-[var(--brand-primary)]">{formatCurrency(option.price)}</div>
-                                        <div className="text-[10px] text-gray-500 uppercase tracking-wider">{typeLabel}</div>
                                     </div>
                                 </div>
                             </div>
@@ -198,6 +203,32 @@ export function AddOnsSelector({ options, initialSelected, onContinue }: AddOnsS
                     </button>
                 </div>
             </div>
+
+            {/* Lightbox */}
+            {lightbox && (
+                <div
+                    className="fixed inset-0 z-[9999] bg-black/80 flex items-center justify-center p-4"
+                    onClick={() => setLightbox(null)}
+                >
+                    <button
+                        className="absolute top-4 right-4 text-white/80 hover:text-white bg-black/40 rounded-full p-2"
+                        onClick={() => setLightbox(null)}
+                        aria-label="Close"
+                    >
+                        <X className="w-6 h-6" />
+                    </button>
+                    <div className="relative max-w-3xl max-h-[85vh] w-full h-full" onClick={(e) => e.stopPropagation()}>
+                        <Image
+                            src={lightbox.url}
+                            alt={lightbox.name}
+                            fill
+                            className="object-contain"
+                            sizes="(max-width: 768px) 100vw, 80vw"
+                        />
+                    </div>
+                    <p className="absolute bottom-6 left-0 right-0 text-center text-white/70 text-sm">{lightbox.name}</p>
+                </div>
+            )}
 
             {/* Mobile Floating Action Bar */}
             <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] md:hidden z-50 animate-in slide-in-from-bottom-full duration-300">

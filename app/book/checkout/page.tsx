@@ -357,7 +357,7 @@ export default async function CheckoutPage({
                     />
                 }
                 roomStep={
-                    <div className="space-y-1.5 mt-1">
+                    <div key="room-step" className="space-y-1.5 mt-1">
                         {roomLineItems.length > 0 ? roomLineItems.map(item => (
                             <div key={item.room.id} className="text-sm font-semibold text-gray-900 leading-tight flex flex-col sm:flex-row sm:items-center">
                                 <span>{formatRoomName(item.room.name)}</span>
@@ -376,7 +376,7 @@ export default async function CheckoutPage({
                 availableAddOns={availableAddOns}
                 selectedAddOns={selectedAddOns}
                 guestInfoContent={
-                    <div>
+                    <div key="guest-info">
                         {showGuestDetailsError && (
                             <p className="mb-3 rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-xs text-amber-900">
                                 Please save valid guest details before payment.
@@ -389,7 +389,7 @@ export default async function CheckoutPage({
                     </div>
                 }
                 paymentContent={
-                    <div>
+                    <div key="payment-content">
                         <div className="mb-4">
                             <h3 className="text-lg font-semibold text-[var(--text-dark)]">Payment</h3>
                             <p className="text-xs text-gray-500 mt-0.5">Final step to confirm your reservation</p>

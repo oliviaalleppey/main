@@ -55,7 +55,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
     const checkInParam = getParam('checkIn');
     const checkOutParam = getParam('checkOut');
-    const adultsParam = getParam('adults') || '1';
+    const adultsParam = getParam('adults') || '2';
     const childrenParam = getParam('children') || '0';
     const roomsParam = getParam('rooms') || '1';
     const roomParam = getParam('room');
@@ -67,7 +67,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     const adults = Number.parseInt(adultsParam, 10);
     const children = Number.parseInt(childrenParam, 10);
     const requestedRooms = Number.parseInt(roomsParam, 10);
-    const safeAdults = Number.isFinite(adults) && adults > 0 ? adults : 1;
+    const safeAdults = Number.isFinite(adults) && adults > 0 ? adults : 2;
     const safeChildren = Number.isFinite(children) && children >= 0 ? children : 0;
     const safeRooms = Number.isFinite(requestedRooms) && requestedRooms > 0 ? Math.min(8, requestedRooms) : 1;
     const checkInDate = checkInParam ? new Date(checkInParam) : new Date();
