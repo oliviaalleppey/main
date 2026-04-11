@@ -709,14 +709,15 @@ export async function finalizeBookingAction(paymentDetails: {
 }
 
 /**
- * Step 1 of Easebuzz payment:
- * Creates a pending booking and returns Easebuzz form params so the frontend
- * can POST them directly to the Easebuzz payment URL.
+ * Easebuzz payment initiation:
+ * 1. Creates pending booking in DB
+ * 2. Calls Easebuzz server-side API to get an access_key
+ * 3. Returns the pay URL — frontend just does window.location = payUrl
  */
 export async function initiateEasebuzzPaymentAction(): Promise<{
     success: boolean;
     error?: string;
-    easebuzzPayload?: ReturnType<typeof EasebuzzService.buildPaymentPayload>;
+    payUrl?: string;
 }> {
     const sessionId = (await cookies()).get('booking_session')?.value;
     if (!sessionId) return { success: false, error: 'Session expired. Please search again.' };
@@ -728,7 +729,6 @@ export async function initiateEasebuzzPaymentAction(): Promise<{
     try {
         const expectedAmount = await calculateSessionPayableAmount(sessionId);
 
-        // Retrieve session guest details
         const session = await db.query.bookingSessions.findFirst({ where: eq(bookingSessions.id, sessionId) });
         if (!session) return { success: false, error: 'Session not found.' };
 
@@ -752,19 +752,20 @@ export async function initiateEasebuzzPaymentAction(): Promise<{
         const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://oliviaalleppey.com';
         const returnUrl = `${baseUrl}/api/payment/easebuzz`;
 
-        const easebuzzPayload = EasebuzzService.buildPaymentPayload({
+        // Call Easebuzz server-side to get access_key, then redirect user to pay URL
+        const { payUrl } = await EasebuzzService.initiatePayment({
             orderId: txnId,
             amount: expectedAmount,
             name: `${guestDetails.firstName} ${guestDetails.lastName || ''}`.trim(),
             email: guestDetails.email,
             phone: guestDetails.phone,
-            returnUrl: returnUrl,
+            returnUrl,
         });
 
-        // Clean up session cookie (booking is now pending Easebuzz confirmation)
+        // Clean up session cookie
         (await cookies()).delete('booking_session');
 
-        return { success: true, easebuzzPayload };
+        return { success: true, payUrl };
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Payment initiation failed.';
         console.error('Easebuzz payment initiation failed:', message);

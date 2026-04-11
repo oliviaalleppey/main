@@ -4,21 +4,23 @@ const EASEBUZZ_API_KEY = process.env.EASEBUZZ_API_KEY || '';
 const EASEBUZZ_SALT = process.env.EASEBUZZ_SALT || '';
 const EASEBUZZ_ENV = process.env.EASEBUZZ_ENV || 'test';
 
+const INITIATE_URL = EASEBUZZ_ENV === 'production'
+    ? 'https://pay.easebuzz.in/payment/initiateLink'
+    : 'https://testpay.easebuzz.in/payment/initiateLink';
+
+const PAY_BASE_URL = EASEBUZZ_ENV === 'production'
+    ? 'https://pay.easebuzz.in/pay'
+    : 'https://testpay.easebuzz.in/pay';
+
 export class EasebuzzService {
     static get isConfigured() {
         return !!EASEBUZZ_API_KEY && !!EASEBUZZ_SALT;
     }
 
-    static get baseUrl() {
-        return EASEBUZZ_ENV === 'production'
-            ? 'https://pay.easebuzz.in/payment/initiatePayment'
-            : 'https://testpay.easebuzz.in/payment/initiatePayment';
-    }
-
     /**
-     * Generate request hash for initiating payment.
-     * Easebuzz requires this EXACT field order:
-     * key|txnid|amount|productinfo|firstname|email|udf1|udf2|udf3|udf4|udf5||||||SALT
+     * Request hash sequence (from docs):
+     * key|txnid|amount|productinfo|firstname|email|udf1|udf2|udf3|udf4|udf5|udf6|udf7|udf8|udf9|udf10|salt
+     * Note: udf8, udf9, udf10 must always be empty per Easebuzz rules.
      */
     static generateRequestHash(params: {
         txnid: string;
@@ -31,6 +33,8 @@ export class EasebuzzService {
         udf3?: string;
         udf4?: string;
         udf5?: string;
+        udf6?: string;
+        udf7?: string;
     }): string {
         const hashString = [
             EASEBUZZ_API_KEY,
@@ -44,7 +48,11 @@ export class EasebuzzService {
             params.udf3 || '',
             params.udf4 || '',
             params.udf5 || '',
-            '', '', '', '', '', // udf6-udf10 empty
+            params.udf6 || '',
+            params.udf7 || '',
+            '', // udf8 — always empty
+            '', // udf9 — always empty
+            '', // udf10 — always empty
             EASEBUZZ_SALT,
         ].join('|');
 
@@ -52,19 +60,19 @@ export class EasebuzzService {
     }
 
     /**
-     * Verify response hash from Easebuzz webhook/redirect.
-     * Response hash order is REVERSED:
-     * SALT|status||udf5|udf4|udf3|udf2|udf1|email|firstname|productinfo|amount|txnid|key
+     * Reverse hash sequence for verifying webhook/redirect response:
+     * salt|udf10|udf9|udf8|udf7|udf6|udf5|udf4|udf3|udf2|udf1|email|firstname|productinfo|amount|txnid|key
      */
     static verifyResponseHash(responseParams: Record<string, string>): boolean {
         if (!responseParams.hash) return false;
 
-        const receivedHash = responseParams.hash;
-
         const hashString = [
             EASEBUZZ_SALT,
-            responseParams.status || '',
-            '',
+            '', // udf10
+            '', // udf9
+            '', // udf8
+            responseParams.udf7 || '',
+            responseParams.udf6 || '',
             responseParams.udf5 || '',
             responseParams.udf4 || '',
             responseParams.udf3 || '',
@@ -78,22 +86,25 @@ export class EasebuzzService {
             EASEBUZZ_API_KEY,
         ].join('|');
 
-        const calculatedHash = crypto.createHash('sha512').update(hashString).digest('hex');
-        return receivedHash === calculatedHash;
+        const calculated = crypto.createHash('sha512').update(hashString).digest('hex');
+        return responseParams.hash === calculated;
     }
 
-    static buildPaymentPayload(params: {
+    /**
+     * Server-side call to Easebuzz initiateLink API.
+     * Returns the hosted checkout URL to redirect the user to.
+     */
+    static async initiatePayment(params: {
         orderId: string;
         amount: number; // in paise
         name: string;
         email: string;
         phone: string;
         returnUrl: string;
-    }) {
+    }): Promise<{ accessKey: string; payUrl: string }> {
         const amountInRupees = (params.amount / 100).toFixed(2);
         const firstname = params.name.split(' ')[0] || params.name;
         const productinfo = `Booking-${params.orderId}`;
-
         const udf1 = 'olivia_hotel';
         const udf2 = 'room_booking';
         const udf3 = 'direct_booking';
@@ -109,25 +120,49 @@ export class EasebuzzService {
             udf3,
         });
 
+        const body = new URLSearchParams({
+            key: EASEBUZZ_API_KEY,
+            txnid: params.orderId,
+            amount: amountInRupees,
+            productinfo,
+            firstname,
+            email: params.email,
+            phone: params.phone,
+            surl: params.returnUrl,
+            furl: params.returnUrl,
+            udf1,
+            udf2,
+            udf3,
+            udf4: '',
+            udf5: '',
+            udf6: '',
+            udf7: '',
+            hash,
+        });
+
+        const response = await fetch(INITIATE_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: body.toString(),
+        });
+
+        const text = await response.text();
+
+        let json: any;
+        try {
+            json = JSON.parse(text);
+        } catch {
+            throw new Error(`Easebuzz returned non-JSON: ${text.slice(0, 300)}`);
+        }
+
+        // Easebuzz returns { status: 1, data: "ACCESS_KEY" } on success
+        if (json.status !== 1 || !json.data) {
+            throw new Error(`Easebuzz error: ${json.error_desc || json.data || JSON.stringify(json)}`);
+        }
+
         return {
-            url: this.baseUrl,
-            params: {
-                key: EASEBUZZ_API_KEY,
-                txnid: params.orderId,
-                amount: amountInRupees,
-                productinfo,
-                firstname,
-                email: params.email,
-                phone: params.phone,
-                surl: params.returnUrl,
-                furl: params.returnUrl,
-                udf1,
-                udf2,
-                udf3,
-                udf4: '',
-                udf5: '',
-                hash,
-            },
+            accessKey: json.data,
+            payUrl: `${PAY_BASE_URL}/${json.data}`,
         };
     }
 }

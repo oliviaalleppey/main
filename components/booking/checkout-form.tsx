@@ -20,29 +20,13 @@ export function CheckoutForm({ amount }: { amount: number }) {
         startTransition(async () => {
             const result = await initiateEasebuzzPaymentAction();
 
-            if (!result.success || !result.easebuzzPayload) {
+            if (!result.success || !result.payUrl) {
                 setError(result.error || 'Failed to initiate payment. Please try again.');
                 return;
             }
 
-            // Build and auto-submit the Easebuzz form
-            const payload = result.easebuzzPayload;
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = payload.url;
-
-            // Add all Omniware fields as hidden inputs
-            const fields = Object.entries(payload.params);
-            for (const [key, value] of fields) {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = key;
-                input.value = value as string;
-                form.appendChild(input);
-            }
-
-            document.body.appendChild(form);
-            form.submit();
+            // Redirect to Easebuzz payment page
+            window.location.href = result.payUrl;
         });
     };
 
