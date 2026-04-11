@@ -86,7 +86,7 @@ export default function StickyBookingBar({ basePrice, roomSlug }: StickyBookingB
 
     return (
         <div className={`${isMobileView
-            ? 'fixed bottom-0 left-0 z-50 bg-white/95 backdrop-blur-md border-t border-[var(--text-dark)]/5 py-2 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]'
+            ? 'fixed bottom-0 left-0 right-0 z-50 pointer-events-auto bg-white/95 backdrop-blur-md border-t border-[var(--text-dark)]/5 py-2 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]'
             : 'w-full bg-[var(--brand-primary)] py-4 px-4 md:px-6 rounded-xl shadow-lg transition-all duration-300'
             }`}>
             {isDatePickerOpen && (
