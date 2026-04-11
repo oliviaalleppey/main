@@ -302,7 +302,7 @@ export default async function AdminAvailabilityPage({ searchParams }: { searchPa
                                                     <BedDouble className="w-4 h-4 text-gray-400 flex-shrink-0 group-hover:text-blue-500 transition-colors" />
                                                     <div>
                                                         <p className="font-medium text-gray-900 text-sm group-hover:text-blue-600 transition-colors">{rt.name}</p>
-                                                        <p className="text-[11px] text-gray-400">{total} room{total !== 1 ? 's' : ''}</p>
+                                                        <p className="text-[11px] text-gray-400">{total > 0 ? `${total} room${total !== 1 ? 's' : ''}` : 'rooms from CRS'}</p>
                                                     </div>
                                                 </Link>
                                                 <Link 
@@ -348,19 +348,21 @@ export default async function AdminAvailabilityPage({ searchParams }: { searchPa
                                                 );
                                             }
 
-                                            const booked = Math.max(0, total - available);
+                                            // Use local room count as total if available, otherwise use CRS available count as a floor
+                                            const effectiveTotal = total > 0 ? total : available;
+                                            const booked = Math.max(0, effectiveTotal - available);
 
                                             if (view === 'month') {
                                                 return (
                                                     <td key={date} className={`text-center px-1 py-3 ${isToday ? 'bg-gray-50' : ''}`}>
-                                                        <CompactOccupancyCell booked={booked} total={total} />
+                                                        <CompactOccupancyCell booked={booked} total={effectiveTotal} />
                                                     </td>
                                                 );
                                             }
 
                                             return (
                                                 <td key={date} className={`text-center px-2 py-3 ${isToday ? 'bg-gray-50' : ''}`}>
-                                                    <LargeOccupancyCell booked={booked} total={total} />
+                                                    <LargeOccupancyCell booked={booked} total={effectiveTotal} />
                                                 </td>
                                             );
                                         })}
