@@ -29,7 +29,9 @@ export async function POST(req: NextRequest) {
         });
 
         // Verify Hash
+        console.log('[Easebuzz webhook] received params:', JSON.stringify(postData));
         const isValidHash = EasebuzzService.verifyResponseHash(postData);
+        console.log('[Easebuzz webhook] hash valid:', isValidHash);
 
         if (!isValidHash) {
             await db.insert(bookingLogs).values({

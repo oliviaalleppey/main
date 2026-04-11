@@ -68,6 +68,7 @@ export class EasebuzzService {
 
         const hashString = [
             EASEBUZZ_SALT,
+            responseParams.status || '',
             '', // udf10
             '', // udf9
             '', // udf8
@@ -140,6 +141,10 @@ export class EasebuzzService {
             hash,
         });
 
+        console.log('[Easebuzz] Initiating payment to:', INITIATE_URL);
+        console.log('[Easebuzz] key:', EASEBUZZ_API_KEY, '| txnid:', params.orderId, '| amount:', amountInRupees);
+        console.log('[Easebuzz] hash:', hash);
+
         const response = await fetch(INITIATE_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -147,6 +152,7 @@ export class EasebuzzService {
         });
 
         const text = await response.text();
+        console.log('[Easebuzz] raw response:', text.slice(0, 500));
 
         let json: any;
         try {
