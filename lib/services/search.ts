@@ -39,9 +39,9 @@ export async function getAvailableRoomsForSearch(
     });
 
     // Short-circuit: Ensure the requested party size mathematically fits into the largest possible room
-    const maxHotelAdults = Math.max(...allRoomTypes.map(t => t.maxAdults ?? 0));
-    const maxHotelChildren = Math.max(...allRoomTypes.map(t => t.maxChildren ?? 0));
-    const maxHotelGuests = Math.max(...allRoomTypes.map(t => t.maxGuests ?? 0));
+    const maxHotelAdults = Math.max(...allRoomTypes.map(t => t.maxAdults ?? 10));
+    const maxHotelChildren = Math.max(...allRoomTypes.map(t => t.maxChildren ?? 10));
+    const maxHotelGuests = Math.max(...allRoomTypes.map(t => t.maxGuests ?? 20));
 
     if (adultsPerRoom > maxHotelAdults || childrenPerRoom > maxHotelChildren || (adultsPerRoom + childrenPerRoom) > maxHotelGuests) {
         return {

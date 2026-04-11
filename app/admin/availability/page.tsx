@@ -7,7 +7,7 @@ import { HotsoftCrsProvider } from '@/lib/providers/crs/hotsoft-crs-provider';
 import { Suspense } from 'react';
 import { AvailabilityToolbar } from './toolbar';
 
-export const revalidate = 3600;
+export const revalidate = 300; // 5 minutes
 
 function getDateRange(date: string, view: string): string[] {
     const d = new Date(date + 'T00:00:00');
