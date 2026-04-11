@@ -51,6 +51,9 @@ export function BookingButton({
                     setErrorMsg(res.error);
                 }
             } catch (error) {
+                // Next.js redirect() works by throwing — let it propagate
+                if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) throw error;
+                if (error && typeof error === 'object' && 'digest' in error) throw error;
                 setErrorMsg(error instanceof Error ? error.message : 'An error occurred while selecting the room.');
             }
         });

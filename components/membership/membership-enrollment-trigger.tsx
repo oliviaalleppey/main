@@ -13,12 +13,12 @@ export function MembershipEnrollmentTrigger({ className }: MembershipEnrollmentT
 
   return (
     <>
-      <button 
+      <button
         onClick={() => setIsOpen(true)}
-        className={`inline-flex items-center justify-center gap-1.5 rounded-full font-bold uppercase tracking-widest text-[13px] transition-all group scale-100 hover:scale-105 active:scale-95 shadow-xl ${className}`}
+        className={`inline-flex items-center justify-center gap-2 transition-all group ${className}`}
       >
         Enroll Now
-        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
       </button>
 
       <MembershipEnrollmentForm 

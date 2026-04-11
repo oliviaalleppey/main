@@ -8,7 +8,7 @@ import { format } from 'date-fns';
 
 const membershipSchema = z.object({
   fullName: z.string().min(1, 'Full Name is required'),
-  dateOfBirth: z.string().min(1, 'Date of Birth is required'),
+  dateOfBirth: z.string().optional(),
   gender: z.string().optional(),
   nationality: z.string().optional(),
   memberPhotographUrl: z.string().optional(),
@@ -17,20 +17,20 @@ const membershipSchema = z.object({
   emailAddress: z.string().email('Invalid email address'),
   alternateContactNumber: z.string().optional(),
 
-  residentialAddress: z.string().min(1, 'Address is required'),
-  city: z.string().min(1, 'City is required'),
-  state: z.string().min(1, 'State is required'),
-  country: z.string().min(1, 'Country is required'),
-  pinCode: z.string().min(1, 'PIN Code is required'),
+  residentialAddress: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  country: z.string().optional(),
+  pinCode: z.string().optional(),
 
-  idType: z.string().min(1, 'ID Type is required'),
-  idNumber: z.string().min(1, 'ID Number is required'),
+  idType: z.string().optional(),
+  idNumber: z.string().optional(),
 
   preferredModeOfCommunication: z.string().optional(),
 
-  emergencyName: z.string().min(1, 'Emergency Contact Name is required'),
-  emergencyRelationship: z.string().min(1, 'Relationship is required'),
-  emergencyContactNumber: z.string().min(1, 'Emergency Contact Number is required'),
+  emergencyName: z.string().optional(),
+  emergencyRelationship: z.string().optional(),
+  emergencyContactNumber: z.string().optional(),
 });
 
 export type MembershipFormData = z.infer<typeof membershipSchema>;
@@ -40,35 +40,36 @@ export async function submitMembershipApplication(data: MembershipFormData) {
     const validatedData = membershipSchema.parse(data);
 
     // Save to database
+    // Fields marked notNull in schema receive empty string defaults when not collected by the simplified form
     await db.insert(membershipApplications).values({
       fullName: validatedData.fullName,
-      dateOfBirth: validatedData.dateOfBirth,
+      dateOfBirth: validatedData.dateOfBirth || '1900-01-01',
       gender: validatedData.gender,
       nationality: validatedData.nationality,
       memberPhotographUrl: validatedData.memberPhotographUrl,
-      
+
       mobileNumber: validatedData.mobileNumber,
       emailAddress: validatedData.emailAddress,
       alternateContactNumber: validatedData.alternateContactNumber,
-      
-      residentialAddress: validatedData.residentialAddress,
-      city: validatedData.city,
-      state: validatedData.state,
-      country: validatedData.country,
-      pinCode: validatedData.pinCode,
-      
-      idType: validatedData.idType,
-      idNumber: validatedData.idNumber,
-      
+
+      residentialAddress: validatedData.residentialAddress || '',
+      city: validatedData.city || '',
+      state: validatedData.state || '',
+      country: validatedData.country || '',
+      pinCode: validatedData.pinCode || '',
+
+      idType: validatedData.idType || '',
+      idNumber: validatedData.idNumber || '',
+
       preferredModeOfCommunication: validatedData.preferredModeOfCommunication,
-      
-      emergencyName: validatedData.emergencyName,
-      emergencyRelationship: validatedData.emergencyRelationship,
-      emergencyContactNumber: validatedData.emergencyContactNumber,
+
+      emergencyName: validatedData.emergencyName || '',
+      emergencyRelationship: validatedData.emergencyRelationship || '',
+      emergencyContactNumber: validatedData.emergencyContactNumber || '',
     });
 
     // Send emails
-    const dobFormatted = format(new Date(validatedData.dateOfBirth), 'dd MMM yyyy');
+    const dobFormatted = validatedData.dateOfBirth ? format(new Date(validatedData.dateOfBirth), 'dd MMM yyyy') : '';
 
     await Promise.allSettled([
       sendMembershipApplicationAcknowledgment({
@@ -80,7 +81,7 @@ export async function submitMembershipApplication(data: MembershipFormData) {
         email: validatedData.emailAddress,
         phone: validatedData.mobileNumber,
         dob: dobFormatted,
-        city: validatedData.city,
+        city: validatedData.city || '',
       })
     ]);
 

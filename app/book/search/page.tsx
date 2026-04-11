@@ -16,6 +16,7 @@ import {
 import { getAvailableRoomsForSearch, type SearchResult } from '@/lib/services/search';
 import { BookingButton } from '@/components/booking/booking-button';
 import { SearchStayEditor } from '@/components/booking/search-stay-editor';
+import { RoomImageCarousel } from '@/components/booking/room-image-carousel';
 import { formatRoomName } from '@/lib/utils';
 
 type SortKey = 'recommended' | 'price-asc' | 'size-desc';
@@ -221,44 +222,42 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                                 className="group overflow-hidden rounded-2xl md:rounded-3xl border border-[#DFE4D8] bg-white shadow-[0_14px_34px_-30px_rgba(15,23,42,0.5)] transition-all duration-300 hover:shadow-[0_18px_34px_-24px_rgba(15,23,42,0.45)] hover:-translate-y-1"
                             >
                                 <div className="flex flex-col xl:flex-row">
-                                    <div className="relative h-[180px] md:h-[220px] w-full overflow-hidden bg-gray-50 xl:h-auto xl:w-[340px]">
-                                        {result.roomType.images && result.roomType.images.length > 0 ? (
-                                            <Image
-                                                src={result.roomType.images[0]}
-                                                alt={roomName}
-                                                fill
-                                                className="object-cover transition-transform duration-1000 group-hover:scale-110"
-                                            />
-                                        ) : (
-                                            <div className="flex h-full items-center justify-center bg-[#F7F8F3] text-gray-400">
-                                                <Image src="/logo-icon.png" alt="Logo" width={40} height={40} className="opacity-20" />
-                                            </div>
-                                        )}
-                                        
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-                                        <div className="absolute left-0 top-4 flex flex-col gap-2">
-                                            {sortKey === 'recommended' && index === 0 && (
-                                                <div className="bg-[#1C2822] text-white px-4 py-1.5 rounded-r-full flex items-center gap-2 shadow-lg transform -translate-x-1 group-hover:translate-x-0 transition-transform duration-500">
-                                                    <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-                                                    <span className="text-[10px] uppercase font-bold tracking-[0.2em]">Top Pick</span>
+                                    <div className="relative h-[220px] md:h-[260px] w-full overflow-hidden bg-gray-50 xl:h-auto xl:w-[520px]">
+                                        <RoomImageCarousel
+                                            images={result.roomType.images || []}
+                                            roomName={roomName}
+                                        >
+                                            {result.roomType.images?.length === 0 && (
+                                                <div className="flex h-full items-center justify-center bg-[#F7F8F3] text-gray-400">
+                                                    <Image src="/logo-icon.png" alt="Logo" width={40} height={40} className="opacity-20" />
                                                 </div>
                                             )}
-                                            {result.bookable && result.availableRooms <= 3 && (
-                                                <div className="bg-[#E95D20] text-white px-4 py-1.5 rounded-r-full flex items-center gap-2 shadow-lg transform -translate-x-1 group-hover:translate-x-0 transition-transform duration-500 delay-75">
-                                                    <span className="text-[10px] uppercase font-bold tracking-[0.2em]">Only {result.availableRooms} Left</span>
+
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+                                            <div className="absolute left-0 top-4 flex flex-col gap-2 pointer-events-none">
+                                                {sortKey === 'recommended' && index === 0 && (
+                                                    <div className="bg-[#1C2822] text-white px-4 py-1.5 rounded-r-full flex items-center gap-2 shadow-lg transform -translate-x-1 group-hover:translate-x-0 transition-transform duration-500">
+                                                        <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                                                        <span className="text-[10px] uppercase font-bold tracking-[0.2em]">Top Pick</span>
+                                                    </div>
+                                                )}
+                                                {result.bookable && result.availableRooms <= 3 && (
+                                                    <div className="bg-[#E95D20] text-white px-4 py-1.5 rounded-r-full flex items-center gap-2 shadow-lg transform -translate-x-1 group-hover:translate-x-0 transition-transform duration-500 delay-75">
+                                                        <span className="text-[10px] uppercase font-bold tracking-[0.2em]">Only {result.availableRooms} Left</span>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {!result.bookable && (
+                                                <div className="absolute inset-0 bg-white/40 backdrop-blur-[2px] flex items-center justify-center p-6 text-center pointer-events-none">
+                                                    <div className="bg-white/90 shadow-xl rounded-2xl p-4 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                                                        <Ban className="w-6 h-6 mx-auto mb-2 text-gray-400" />
+                                                        <span className="text-[10px] uppercase font-bold tracking-[0.1em] text-gray-900 leading-tight block">Room Temporarily<br/>Unavailable</span>
+                                                    </div>
                                                 </div>
                                             )}
-                                        </div>
-
-                                        {!result.bookable && (
-                                            <div className="absolute inset-0 bg-white/40 backdrop-blur-[2px] flex items-center justify-center p-6 text-center">
-                                                <div className="bg-white/90 shadow-xl rounded-2xl p-4 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                                                    <Ban className="w-6 h-6 mx-auto mb-2 text-gray-400" />
-                                                    <span className="text-[10px] uppercase font-bold tracking-[0.1em] text-gray-900 leading-tight block">Room Temporarily<br/>Unavailable</span>
-                                                </div>
-                                            </div>
-                                        )}
+                                        </RoomImageCarousel>
                                     </div>
 
                                         <div className="flex-1 p-4 md:p-6 lg:p-7">

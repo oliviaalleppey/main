@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { SessionProvider } from "@/components/auth/session-provider";
 import FrontendLayout from "@/components/layout/frontend-layout";
 import { getColorPalette } from "@/lib/db/actions/settings-actions";
+import { Toaster } from "sonner";
 
 export const dynamic = "force-dynamic";
 
@@ -112,6 +113,7 @@ export default async function RootLayout({
           <FrontendLayout>
             {children}
           </FrontendLayout>
+          <Toaster position="top-center" richColors />
         </SessionProvider>
       </body>
     </html>

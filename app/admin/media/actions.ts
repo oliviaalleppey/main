@@ -369,6 +369,95 @@ export async function setDiningImage(slug: string, formData: FormData) {
     return { success: true, url };
 }
 
+// Membership privilege images
+const MEMBERSHIP_PRIVILEGE_KEYS = ['wellness', 'dining', 'stay', 'spa', 'events'] as const;
+
+// Gallery categories to use as fallbacks for each privilege
+const MEMBERSHIP_FALLBACK_CATEGORIES: Record<string, string> = {
+    wellness: 'wellness',
+    dining: 'dining',
+    stay: 'accommodation',
+    spa: 'wellness',
+    events: 'conference',
+};
+
+export async function getMembershipImages(): Promise<Record<string, string>> {
+    const keys = MEMBERSHIP_PRIVILEGE_KEYS.map(k => `membership_${k}`);
+    const [settingsResults, galleryResults] = await Promise.all([
+        db.select().from(siteSettings).where(inArray(siteSettings.key, keys)),
+        db.select({ imageUrl: galleryImages.imageUrl, category: galleryImages.category })
+            .from(galleryImages)
+            .where(eq(galleryImages.isActive, true))
+            .orderBy(galleryImages.sortOrder, desc(galleryImages.createdAt)),
+    ]);
+
+    // Build a map of first available gallery image per category
+    const galleryByCategory: Record<string, string> = {};
+    for (const row of galleryResults) {
+        if (row.category && !galleryByCategory[row.category]) {
+            galleryByCategory[row.category] = row.imageUrl;
+        }
+    }
+
+    // Specific membership images override gallery fallbacks
+    const map: Record<string, string> = {};
+    // Fill fallbacks first
+    for (const key of MEMBERSHIP_PRIVILEGE_KEYS) {
+        const fallbackCategory = MEMBERSHIP_FALLBACK_CATEGORIES[key];
+        if (fallbackCategory && galleryByCategory[fallbackCategory]) {
+            map[key] = galleryByCategory[fallbackCategory];
+        }
+    }
+    // Override with specific membership images if set
+    settingsResults.forEach(r => {
+        const k = (r.key as string).replace('membership_', '');
+        map[k] = (r.value as { url: string }).url;
+    });
+    return map;
+}
+
+export async function setMembershipImage(privilegeKey: string, formData: FormData) {
+    const file = formData.get('media') as File | null;
+    const manualUrl = formData.get('url') as string | null;
+
+    let url: string;
+
+    try {
+        if (file && file.size > 0) {
+            if (file.type.startsWith('image/')) {
+                const converted = await toWebP(file);
+                const blob = await put(converted.filename, converted.buffer, {
+                    access: 'public',
+                    addRandomSuffix: true,
+                    contentType: 'image/webp',
+                });
+                url = blob.url;
+            } else {
+                throw new Error('Only images supported');
+            }
+        } else if (manualUrl?.startsWith('http')) {
+            url = manualUrl;
+        } else {
+            throw new Error('No media provided');
+        }
+    } catch (error) {
+        console.error('Upload error:', error);
+        throw error;
+    }
+
+    const key = `membership_${privilegeKey}`;
+    const existing = await db.select().from(siteSettings).where(eq(siteSettings.key, key)).limit(1);
+    if (existing.length > 0) {
+        await db.update(siteSettings).set({ value: { url }, updatedAt: new Date() }).where(eq(siteSettings.key, key));
+    } else {
+        await db.insert(siteSettings).values({ key, value: { url } });
+    }
+
+    revalidatePath('/membership');
+    revalidatePath('/admin/media');
+    return { success: true, url };
+}
+
 // Bulk import media from existing URLs
 export async function bulkImportMedia(urls: string[], category: string) {
     if (!urls.length) return { success: false, count: 0 };
@@ -508,6 +597,118 @@ export async function setWeddingSectionImage(sectionKey: string, formData: FormD
     }
 
     revalidatePath('/wedding');
+    revalidatePath('/admin/media');
+    return { success: true, url };
+}
+
+// Conference venue images (3 venues)
+const CONFERENCE_VENUE_IMAGES = ['grand-ballroom', 'forum', 'poolside'] as const;
+
+export async function getConferenceVenueImages(): Promise<Record<string, string>> {
+    const keys = CONFERENCE_VENUE_IMAGES.map(k => `conference_venue_${k}`);
+    const results = await db.select().from(siteSettings).where(inArray(siteSettings.key, keys));
+    const map: Record<string, string> = {};
+    results.forEach(r => {
+        const key = (r.key as string).replace('conference_venue_', '');
+        map[key] = (r.value as { url: string }).url;
+    });
+    return map;
+}
+
+export async function setConferenceVenueImage(venueKey: string, formData: FormData) {
+    const file = formData.get('media') as File | null;
+    const manualUrl = formData.get('url') as string | null;
+
+    let url: string;
+
+    try {
+        if (file && file.size > 0) {
+            if (file.type.startsWith('image/')) {
+                const converted = await toWebP(file);
+                const blob = await put(converted.filename, converted.buffer, {
+                    access: 'public',
+                    addRandomSuffix: true,
+                    contentType: 'image/webp',
+                });
+                url = blob.url;
+            } else {
+                throw new Error('Only images supported');
+            }
+        } else if (manualUrl?.startsWith('http')) {
+            url = manualUrl;
+        } else {
+            throw new Error('No media provided');
+        }
+    } catch (error) {
+        console.error('Upload error:', error);
+        throw error;
+    }
+
+    const key = `conference_venue_${venueKey}`;
+    const existing = await db.select().from(siteSettings).where(eq(siteSettings.key, key)).limit(1);
+    if (existing.length > 0) {
+        await db.update(siteSettings).set({ value: { url }, updatedAt: new Date() }).where(eq(siteSettings.key, key));
+    } else {
+        await db.insert(siteSettings).values({ key, value: { url } });
+    }
+
+    revalidatePath('/conference-events');
+    revalidatePath('/admin/media');
+    return { success: true, url };
+}
+
+// Conference "How We Plan" section images (2 images)
+const CONFERENCE_SECTION_IMAGES = ['how_we_plan_1', 'how_we_plan_2'] as const;
+
+export async function getConferenceSectionImages(): Promise<Record<string, string>> {
+    const keys = CONFERENCE_SECTION_IMAGES.map(k => `conference_section_${k}`);
+    const results = await db.select().from(siteSettings).where(inArray(siteSettings.key, keys));
+    const map: Record<string, string> = {};
+    results.forEach(r => {
+        const key = (r.key as string).replace('conference_section_', '');
+        map[key] = (r.value as { url: string }).url;
+    });
+    return map;
+}
+
+export async function setConferenceSectionImage(sectionKey: string, formData: FormData) {
+    const file = formData.get('media') as File | null;
+    const manualUrl = formData.get('url') as string | null;
+
+    let url: string;
+
+    try {
+        if (file && file.size > 0) {
+            if (file.type.startsWith('image/')) {
+                const converted = await toWebP(file);
+                const blob = await put(converted.filename, converted.buffer, {
+                    access: 'public',
+                    addRandomSuffix: true,
+                    contentType: 'image/webp',
+                });
+                url = blob.url;
+            } else {
+                throw new Error('Only images supported');
+            }
+        } else if (manualUrl?.startsWith('http')) {
+            url = manualUrl;
+        } else {
+            throw new Error('No media provided');
+        }
+    } catch (error) {
+        console.error('Upload error:', error);
+        throw error;
+    }
+
+    const key = `conference_section_${sectionKey}`;
+    const existing = await db.select().from(siteSettings).where(eq(siteSettings.key, key)).limit(1);
+    if (existing.length > 0) {
+        await db.update(siteSettings).set({ value: { url }, updatedAt: new Date() }).where(eq(siteSettings.key, key));
+    } else {
+        await db.insert(siteSettings).values({ key, value: { url } });
+    }
+
+    revalidatePath('/conference-events');
     revalidatePath('/admin/media');
     return { success: true, url };
 }

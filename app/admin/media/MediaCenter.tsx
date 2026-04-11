@@ -1,11 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { Grid, Film, BedDouble, Heart } from 'lucide-react';
+import { Grid, Film, BedDouble, Heart, Mic2, Crown } from 'lucide-react';
 import MediaLibrary from './MediaLibrary';
 import PageHeaders from './PageHeaders';
 import RoomImages from './RoomImages';
 import WeddingVenues from './WeddingVenues';
+import ConferenceVenues from './ConferenceVenues';
+import MembershipImages from './MembershipImages';
 
 interface MediaItem {
     id: string;
@@ -34,11 +36,14 @@ interface Props {
     diningImages: Record<string, string>;
     weddingVenueImages: Record<string, string>;
     weddingSectionImages: Record<string, string>;
+    conferenceVenueImages: Record<string, string>;
+    conferenceSectionImages: Record<string, string>;
+    membershipImages: Record<string, string>;
 }
 
-type Tab = 'library' | 'rooms' | 'headers' | 'wedding';
+type Tab = 'library' | 'rooms' | 'headers' | 'wedding' | 'conference' | 'membership';
 
-export default function MediaCenter({ media, pageHeaders, rooms, amenityImages, diningImages, weddingVenueImages, weddingSectionImages }: Props) {
+export default function MediaCenter({ media, pageHeaders, rooms, amenityImages, diningImages, weddingVenueImages, weddingSectionImages, conferenceVenueImages, conferenceSectionImages, membershipImages }: Props) {
     const [tab, setTab] = useState<Tab>('rooms');
 
     const totalRoomImages = rooms.reduce((sum, r) => sum + (r.images?.length ?? 0), 0);
@@ -81,6 +86,14 @@ export default function MediaCenter({ media, pageHeaders, rooms, amenityImages, 
                     <Heart className="w-4 h-4" />
                     Wedding
                 </button>
+                <button onClick={() => setTab('conference')} className={tabClass('conference')}>
+                    <Mic2 className="w-4 h-4" />
+                    Conference
+                </button>
+                <button onClick={() => setTab('membership')} className={tabClass('membership')}>
+                    <Crown className="w-4 h-4" />
+                    Membership
+                </button>
             </div>
 
             {/* Content panel */}
@@ -89,6 +102,8 @@ export default function MediaCenter({ media, pageHeaders, rooms, amenityImages, 
                 {tab === 'library' && <MediaLibrary items={media} />}
                 {tab === 'headers' && <PageHeaders headers={pageHeaders} homeSlides={media.filter(m => m.category === 'home')} amenityImages={amenityImages} diningImages={diningImages} />}
                 {tab === 'wedding' && <WeddingVenues venueImages={weddingVenueImages} sectionImages={weddingSectionImages} />}
+                {tab === 'conference' && <ConferenceVenues venueImages={conferenceVenueImages} sectionImages={conferenceSectionImages} />}
+                {tab === 'membership' && <MembershipImages images={membershipImages} />}
             </div>
         </div>
     );

@@ -1,4 +1,4 @@
-import { getAllMedia, getPageHeaders, getRoomTypesWithImages, getAmenityImages, getDiningImages, getWeddingVenueImages, getWeddingSectionImages } from './actions';
+import { getAllMedia, getPageHeaders, getRoomTypesWithImages, getAmenityImages, getDiningImages, getWeddingVenueImages, getWeddingSectionImages, getConferenceVenueImages, getConferenceSectionImages, getMembershipImages } from './actions';
 import MediaCenter from './MediaCenter';
 
 export const metadata = {
@@ -14,7 +14,7 @@ interface MediaItem {
 }
 
 export default async function MediaPage() {
-    const [allMedia, pageHeaders, rooms, amenityImages, diningImages, weddingVenueImages, weddingSectionImages] = await Promise.all([
+    const [allMedia, pageHeaders, rooms, amenityImages, diningImages, weddingVenueImages, weddingSectionImages, conferenceVenueImages, conferenceSectionImages, membershipImages] = await Promise.all([
         getAllMedia(),
         getPageHeaders(),
         getRoomTypesWithImages(),
@@ -22,6 +22,9 @@ export default async function MediaPage() {
         getDiningImages(),
         getWeddingVenueImages(),
         getWeddingSectionImages(),
+        getConferenceVenueImages(),
+        getConferenceSectionImages(),
+        getMembershipImages(),
     ]);
 
     return (
@@ -34,6 +37,9 @@ export default async function MediaPage() {
                 diningImages={diningImages}
                 weddingVenueImages={weddingVenueImages}
                 weddingSectionImages={weddingSectionImages}
+                conferenceVenueImages={conferenceVenueImages}
+                conferenceSectionImages={conferenceSectionImages}
+                membershipImages={membershipImages}
             />
         </div>
     );
