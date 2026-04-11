@@ -26,6 +26,7 @@ const FROM_EMAIL = process.env.HOTEL_EMAIL || 'reservation@oliviaalleppey.com';
 const HOTEL_NAME = process.env.HOTEL_NAME || 'Olivia International';
 const RESERVATION_TEAM_EMAIL = process.env.HOTEL_RESERVATION_EMAIL || 'reservation@oliviaalleppey.com';
 const FNB_EMAIL = process.env.HOTEL_FNB_EMAIL || 'fnb@oliviaalleppey.com';
+const FOM_EMAIL = process.env.HOTEL_FOM_EMAIL || 'fom@oliviaalleppey.com';
 const VP_EMAIL = process.env.HOTEL_VP_EMAIL || 'vp@oliviaalleppey.com';
 const HOTEL_PHONE = process.env.HOTEL_PHONE || '+91 8075 416 514';
 const HOTEL_PHONE_TEL = HOTEL_PHONE.replace(/\s+/g, '');
@@ -54,7 +55,7 @@ export async function sendBookingConfirmation(params: {
     const { data, error } = await resend.emails.send({
       from: `${HOTEL_NAME} <${FROM_EMAIL}>`,
       to: [to],
-      bcc: ['reservation@oliviaalleppey.com', 'mail@oliviaalleppey.com'],
+      bcc: [RESERVATION_TEAM_EMAIL, FOM_EMAIL, 'mail@oliviaalleppey.com'],
       subject: `Booking Confirmation - ${bookingNumber}`,
       html: `
         <!DOCTYPE html>
@@ -128,6 +129,106 @@ export async function sendBookingConfirmation(params: {
   } catch (error) {
     console.error('Failed to send booking confirmation:', error);
     throw new Error('Failed to send confirmation email');
+  }
+}
+
+/**
+ * Send new booking alert to hotel staff (reservation + FOM)
+ */
+export async function sendBookingAlertToStaff(params: {
+  guestName: string;
+  guestEmail: string;
+  guestPhone: string;
+  bookingNumber: string;
+  confirmationNumber: string;
+  checkIn: string;
+  checkOut: string;
+  nights: number;
+  adults: number;
+  children: number;
+  roomType: string;
+  totalAmount: number;
+}) {
+  try {
+    const resend = getResendClient();
+    if (!resend) return { skipped: true };
+
+    const { guestName, guestEmail, guestPhone, bookingNumber, confirmationNumber, checkIn, checkOut, nights, adults, children, roomType, totalAmount } = params;
+
+    const { data, error } = await resend.emails.send({
+      from: `${HOTEL_NAME} System <${FROM_EMAIL}>`,
+      to: [RESERVATION_TEAM_EMAIL, FOM_EMAIL],
+      subject: `New Booking — ${bookingNumber} | ${guestName} | ${checkIn}`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #1A1A1A; margin: 0; padding: 0; background: #F4F0E8; }
+              .container { max-width: 620px; margin: 32px auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+              .header { background: #0D4A4A; color: #fff; padding: 24px 32px; }
+              .header h2 { margin: 0; font-size: 20px; }
+              .header p { margin: 6px 0 0; opacity: 0.75; font-size: 13px; }
+              .badge { display: inline-block; background: #C9A84C; color: #0D4A4A; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 4px 10px; border-radius: 20px; margin-top: 12px; }
+              .content { padding: 28px 32px; }
+              .card { background: #FAF6EF; border: 1px solid #E8E0D5; border-radius: 8px; overflow: hidden; margin-bottom: 20px; }
+              .row { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-bottom: 1px solid #EDE8DF; }
+              .row:last-child { border-bottom: none; }
+              .label { color: #6B7280; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+              .value { color: #1C1C1C; font-size: 14px; font-weight: 600; text-align: right; }
+              .value a { color: #C9A84C; text-decoration: none; }
+              .amount { font-size: 18px; color: #0D4A4A; font-weight: 700; }
+              .cta-wrap { text-align: center; padding: 8px 0 4px; }
+              .cta-btn { display: inline-block; background: #0D4A4A; color: #fff !important; text-decoration: none !important; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 14px 36px; border-radius: 8px; }
+              .footer { background: #FAF6EF; border-top: 1px solid #E8E0D5; text-align: center; padding: 16px 32px; font-size: 12px; color: #9CA3AF; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h2>${HOTEL_NAME}</h2>
+                <p>New Direct Booking Received</p>
+                <span class="badge">✓ Payment Confirmed</span>
+              </div>
+              <div class="content">
+                <div class="card">
+                  <div class="row"><span class="label">Booking No.</span><span class="value">${bookingNumber}</span></div>
+                  <div class="row"><span class="label">Confirmation No.</span><span class="value">${confirmationNumber}</span></div>
+                  <div class="row"><span class="label">Guest Name</span><span class="value">${guestName}</span></div>
+                  <div class="row"><span class="label">Email</span><span class="value"><a href="mailto:${guestEmail}">${guestEmail}</a></span></div>
+                  <div class="row"><span class="label">Phone</span><span class="value"><a href="tel:${guestPhone.replace(/\s+/g, '')}">${guestPhone}</a></span></div>
+                </div>
+                <div class="card">
+                  <div class="row"><span class="label">Room Type</span><span class="value">${roomType}</span></div>
+                  <div class="row"><span class="label">Check-in</span><span class="value">${checkIn}</span></div>
+                  <div class="row"><span class="label">Check-out</span><span class="value">${checkOut}</span></div>
+                  <div class="row"><span class="label">Nights</span><span class="value">${nights}</span></div>
+                  <div class="row"><span class="label">Guests</span><span class="value">${adults} adult${adults !== 1 ? 's' : ''}${children ? `, ${children} child${children !== 1 ? 'ren' : ''}` : ''}</span></div>
+                  <div class="row"><span class="label">Total Paid</span><span class="value amount">₹${(totalAmount / 100).toLocaleString('en-IN')}</span></div>
+                </div>
+                <div class="cta-wrap">
+                  <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'https://oliviaalleppey.com'}/admin/bookings" class="cta-btn">View in Admin →</a>
+                </div>
+              </div>
+              <div class="footer">
+                ${HOTEL_NAME} · Alappuzha, Kerala, India
+              </div>
+            </div>
+          </body>
+        </html>
+      `,
+    });
+
+    if (error) {
+      console.error('Error sending staff booking alert:', error);
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Failed to send staff booking alert:', error);
+    throw new Error('Failed to send staff booking alert');
   }
 }
 

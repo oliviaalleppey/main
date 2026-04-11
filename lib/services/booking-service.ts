@@ -17,7 +17,7 @@ import {
 import { IdempotencyService } from './idempotency';
 import { SessionExpiration } from './session-expiration';
 import { BookingLockService } from './booking-lock';
-import { sendBookingConfirmation } from './email';
+import { sendBookingConfirmation, sendBookingAlertToStaff } from './email';
 import { bookingStateMachine } from './booking-state-machine';
 import { eq, inArray } from 'drizzle-orm';
 import crypto from 'crypto';
@@ -1001,17 +1001,37 @@ export class BookingService {
                 apiResponse: reservationResponse
             });
 
-            // 8. SEND EMAIL (Async - don't block response)
-            // We use 'void' to fire-and-forget, or catch errors to avoid failing the request
+            // 8. SEND EMAILS (Async - don't block response)
+            const checkInDate = new Date(booking.checkIn);
+            const checkOutDate = new Date(booking.checkOut);
+            const nights = Math.round((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24));
+            const checkInStr = checkInDate.toLocaleDateString('en-IN');
+            const checkOutStr = checkOutDate.toLocaleDateString('en-IN');
+
             sendBookingConfirmation({
                 to: booking.guestEmail,
                 guestName: booking.guestName,
                 bookingNumber: booking.bookingNumber,
-                checkIn: new Date(booking.checkIn).toLocaleDateString('en-IN'),
-                checkOut: new Date(booking.checkOut).toLocaleDateString('en-IN'),
+                checkIn: checkInStr,
+                checkOut: checkOutStr,
                 roomType: primaryRoomTypeName,
                 totalAmount: booking.totalAmount
-            }).catch(e => console.error(`Failed to send confirmation email for ${bookingId}:`, e));
+            }).catch(e => console.error(`Failed to send guest confirmation email for ${bookingId}:`, e));
+
+            sendBookingAlertToStaff({
+                guestName: booking.guestName,
+                guestEmail: booking.guestEmail,
+                guestPhone: booking.guestPhone,
+                bookingNumber: booking.bookingNumber,
+                confirmationNumber: reservationResponse.confirmationNumber,
+                checkIn: checkInStr,
+                checkOut: checkOutStr,
+                nights,
+                adults: booking.adults || 1,
+                children: booking.children || 0,
+                roomType: primaryRoomTypeName,
+                totalAmount: booking.totalAmount,
+            }).catch(e => console.error(`Failed to send staff booking alert for ${bookingId}:`, e));
 
             return { success: true, booking: reservationResponse };
 
