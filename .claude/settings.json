@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsx:*)"
+    ],
+    "additionalDirectories": [
+      "/Users/agt/olivia/Olivia/scripts"
+    ]
+  }
+}
