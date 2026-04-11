@@ -1,7 +1,7 @@
 'use server';
 
 import { BookingService } from '@/lib/services/booking-service';
-import { OmniwareService } from '@/lib/services/omniware';
+import { EasebuzzService } from '@/lib/services/easebuzz';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { cookies, headers } from 'next/headers';
@@ -709,20 +709,20 @@ export async function finalizeBookingAction(paymentDetails: {
 }
 
 /**
- * Step 1 of Omniware payment:
- * Creates a pending booking and returns Omniware form params so the frontend
- * can POST them directly to the Omniware payment URL.
+ * Step 1 of Easebuzz payment:
+ * Creates a pending booking and returns Easebuzz form params so the frontend
+ * can POST them directly to the Easebuzz payment URL.
  */
-export async function initiateOmniwarePaymentAction(): Promise<{
+export async function initiateEasebuzzPaymentAction(): Promise<{
     success: boolean;
     error?: string;
-    omniwarePayload?: ReturnType<typeof OmniwareService.buildPaymentPayload>;
+    easebuzzPayload?: ReturnType<typeof EasebuzzService.buildPaymentPayload>;
 }> {
     const sessionId = (await cookies()).get('booking_session')?.value;
     if (!sessionId) return { success: false, error: 'Session expired. Please search again.' };
 
     const ip = (await headers()).get('x-forwarded-for') || 'unknown';
-    const limit = await RateLimiter.check(ip, 'initiateOmniwarePaymentAction');
+    const limit = await RateLimiter.check(ip, 'initiateEasebuzzPaymentAction');
     if (!limit.allowed) return { success: false, error: 'Too many attempts. Please try again.' };
 
     try {
@@ -742,7 +742,7 @@ export async function initiateOmniwarePaymentAction(): Promise<{
         // Create the pending booking record in DB
         const txnId = `OL-${Date.now()}`;
         const booking = await bookingService.finalizeSession(sessionId, {
-            method: 'omniware',
+            method: 'easebuzz',
             amount: expectedAmount,
             orderId: txnId,
         });
@@ -750,9 +750,9 @@ export async function initiateOmniwarePaymentAction(): Promise<{
         if (!booking) return { success: false, error: 'Failed to create booking record.' };
 
         const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://oliviaalleppey.com';
-        const returnUrl = `${baseUrl}/api/payment/omniware`;
+        const returnUrl = `${baseUrl}/api/payment/easebuzz`;
 
-        const omniwarePayload = OmniwareService.buildPaymentPayload({
+        const easebuzzPayload = EasebuzzService.buildPaymentPayload({
             orderId: txnId,
             amount: expectedAmount,
             name: `${guestDetails.firstName} ${guestDetails.lastName || ''}`.trim(),
@@ -761,13 +761,13 @@ export async function initiateOmniwarePaymentAction(): Promise<{
             returnUrl: returnUrl,
         });
 
-        // Clean up session cookie (booking is now pending Omniware confirmation)
+        // Clean up session cookie (booking is now pending Easebuzz confirmation)
         (await cookies()).delete('booking_session');
 
-        return { success: true, omniwarePayload };
+        return { success: true, easebuzzPayload };
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Payment initiation failed.';
-        console.error('Omniware payment initiation failed:', message);
+        console.error('Easebuzz payment initiation failed:', message);
         return { success: false, error: message };
     }
 }

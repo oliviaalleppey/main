@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { Grid, Film, BedDouble, Heart, Mic2, Crown } from 'lucide-react';
+import { Grid, Film, BedDouble, Heart, Mic2, Crown, Compass } from 'lucide-react';
 import MediaLibrary from './MediaLibrary';
 import PageHeaders from './PageHeaders';
 import RoomImages from './RoomImages';
 import WeddingVenues from './WeddingVenues';
 import ConferenceVenues from './ConferenceVenues';
 import MembershipImages from './MembershipImages';
+import DiscoverImages from './DiscoverImages';
 
 interface MediaItem {
     id: string;
@@ -39,11 +40,12 @@ interface Props {
     conferenceVenueImages: Record<string, string>;
     conferenceSectionImages: Record<string, string>;
     membershipImages: Record<string, string>;
+    discoverImages: Record<string, string>;
 }
 
-type Tab = 'library' | 'rooms' | 'headers' | 'wedding' | 'conference' | 'membership';
+type Tab = 'library' | 'rooms' | 'headers' | 'wedding' | 'conference' | 'membership' | 'discover';
 
-export default function MediaCenter({ media, pageHeaders, rooms, amenityImages, diningImages, weddingVenueImages, weddingSectionImages, conferenceVenueImages, conferenceSectionImages, membershipImages }: Props) {
+export default function MediaCenter({ media, pageHeaders, rooms, amenityImages, diningImages, weddingVenueImages, weddingSectionImages, conferenceVenueImages, conferenceSectionImages, membershipImages, discoverImages }: Props) {
     const [tab, setTab] = useState<Tab>('rooms');
 
     const totalRoomImages = rooms.reduce((sum, r) => sum + (r.images?.length ?? 0), 0);
@@ -94,6 +96,10 @@ export default function MediaCenter({ media, pageHeaders, rooms, amenityImages, 
                     <Crown className="w-4 h-4" />
                     Membership
                 </button>
+                <button onClick={() => setTab('discover')} className={tabClass('discover')}>
+                    <Compass className="w-4 h-4" />
+                    Discover
+                </button>
             </div>
 
             {/* Content panel */}
@@ -104,6 +110,7 @@ export default function MediaCenter({ media, pageHeaders, rooms, amenityImages, 
                 {tab === 'wedding' && <WeddingVenues venueImages={weddingVenueImages} sectionImages={weddingSectionImages} />}
                 {tab === 'conference' && <ConferenceVenues venueImages={conferenceVenueImages} sectionImages={conferenceSectionImages} />}
                 {tab === 'membership' && <MembershipImages images={membershipImages} />}
+                {tab === 'discover' && <DiscoverImages images={discoverImages} />}
             </div>
         </div>
     );

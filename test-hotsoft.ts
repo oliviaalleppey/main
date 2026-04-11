@@ -34,7 +34,7 @@ async function testHotsoft() {
             guestName: 'AMAL LAL'
         }],
         payment: {
-            method: 'Omniware',
+            method: 'Easebuzz',
             amount: 5000,
             transactionId: 'TXN12345'
         }

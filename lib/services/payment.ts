@@ -1,6 +1,6 @@
-import { OmniwareService } from './omniware';
+import { EasebuzzService } from './easebuzz';
 
-export const omniwareEnabled = OmniwareService.isConfigured;
+export const easebuzzEnabled = EasebuzzService.isConfigured;
 
 /**
  * Format amount for display (paise to rupees)

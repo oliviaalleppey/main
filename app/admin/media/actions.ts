@@ -458,6 +458,61 @@ export async function setMembershipImage(privilegeKey: string, formData: FormDat
     return { success: true, url };
 }
 
+// Discover experience images
+const DISCOVER_EXPERIENCE_KEYS = ['spa', 'dining', 'backwater', 'yoga', 'membership'] as const;
+
+export async function getDiscoverExperienceImages(): Promise<Record<string, string>> {
+    const keys = DISCOVER_EXPERIENCE_KEYS.map(k => `discover_exp_${k}`);
+    const results = await db.select().from(siteSettings).where(inArray(siteSettings.key, keys));
+    const map: Record<string, string> = {};
+    results.forEach(r => {
+        const k = (r.key as string).replace('discover_exp_', '');
+        map[k] = (r.value as { url: string }).url;
+    });
+    return map;
+}
+
+export async function setDiscoverExperienceImage(expKey: string, formData: FormData) {
+    const file = formData.get('media') as File | null;
+    const manualUrl = formData.get('url') as string | null;
+
+    let url: string;
+    try {
+        if (file && file.size > 0) {
+            if (file.type.startsWith('image/')) {
+                const converted = await toWebP(file);
+                const blob = await put(converted.filename, converted.buffer, {
+                    access: 'public',
+                    addRandomSuffix: true,
+                    contentType: 'image/webp',
+                });
+                url = blob.url;
+            } else {
+                throw new Error('Only images supported');
+            }
+        } else if (manualUrl?.startsWith('http')) {
+            url = manualUrl;
+        } else {
+            throw new Error('No media provided');
+        }
+    } catch (error) {
+        console.error('Upload error:', error);
+        throw error;
+    }
+
+    const key = `discover_exp_${expKey}`;
+    const existing = await db.select().from(siteSettings).where(eq(siteSettings.key, key)).limit(1);
+    if (existing.length > 0) {
+        await db.update(siteSettings).set({ value: { url }, updatedAt: new Date() }).where(eq(siteSettings.key, key));
+    } else {
+        await db.insert(siteSettings).values({ key, value: { url } });
+    }
+
+    revalidatePath('/discover');
+    revalidatePath('/admin/media');
+    return { success: true, url };
+}
+
 // Bulk import media from existing URLs
 export async function bulkImportMedia(urls: string[], category: string) {
     if (!urls.length) return { success: false, count: 0 };

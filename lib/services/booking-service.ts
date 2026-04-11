@@ -727,7 +727,7 @@ export class BookingService {
                 amount: payableTotal,
                 status: 'pending',
                 paymentMethod: paymentDetails.method,
-                omniwareOrderId: paymentDetails.orderId || `txn_${crypto.randomUUID()}`
+                easebuzzOrderId: paymentDetails.orderId || `txn_${crypto.randomUUID()}`
             }).returning();
 
             // 5. Lock Inventory (Internal)

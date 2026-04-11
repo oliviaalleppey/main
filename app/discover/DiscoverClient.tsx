@@ -127,30 +127,35 @@ const WELLNESS_HIGHLIGHTS = [
 
 const EXPERIENCES = [
     {
+        key: 'spa',
         title: 'The Spa at Olivia',
         tag: 'Wellness',
         description: 'Ayurvedic therapies and international treatments in a sanctuary of serenity.',
         href: '/wellness#spa',
     },
     {
+        key: 'dining',
         title: 'Kerala Cuisine',
         tag: 'Dining',
         description: 'Authentic flavours crafted with locally sourced ingredients at Finishing Point.',
         href: '/dining',
     },
     {
+        key: 'backwater',
         title: 'Backwater Cruises',
         tag: 'Experiences',
         description: 'Drift through the serene backwaters of Alappuzha at golden hour.',
         href: '/contact',
     },
     {
+        key: 'yoga',
         title: 'Yoga & Meditation',
         tag: 'Wellness',
         description: 'Sunrise sessions overlooking the backwaters with expert practitioners.',
         href: '/wellness#yoga',
     },
     {
+        key: 'membership',
         title: 'Lifestyle Membership',
         tag: 'Membership',
         description: 'Year-round privileges across dining, wellness, stays, and events.',
@@ -225,9 +230,10 @@ interface RoomType {
 interface DiscoverClientProps {
     headerImage?: string;
     rooms?: RoomType[];
+    experienceImages?: Record<string, string>;
 }
 
-export default function DiscoverClient({ headerImage, rooms = [] }: DiscoverClientProps) {
+export default function DiscoverClient({ headerImage, rooms = [], experienceImages = {} }: DiscoverClientProps) {
     return (
         <main className="min-h-screen bg-[#FAF7F0] text-[var(--text-dark)] overflow-hidden">
 
@@ -347,20 +353,32 @@ export default function DiscoverClient({ headerImage, rooms = [] }: DiscoverClie
                     </motion.p>
 
                     <HorizontalScroller>
-                        {EXPERIENCES.map((exp, i) => (
-                            <Link key={i} href={exp.href} className="flex-none w-[280px] md:w-[320px] group">
-                                <div className="relative aspect-[4/5] overflow-hidden rounded-sm mb-4 bg-[var(--surface-soft)]">
-                                    <div className="absolute inset-0 bg-[var(--surface-soft)]" />
-                                    <span className="absolute top-4 left-4 text-[9px] tracking-[0.25em] uppercase text-white/90 border border-white/40 px-2 py-1 backdrop-blur-sm">
-                                        {exp.tag}
-                                    </span>
-                                </div>
-                                <h3 className="font-serif text-[1.25rem] text-[var(--text-dark)] mb-1 group-hover:text-[var(--gold-accent-dark)] transition-colors">
-                                    {exp.title}
-                                </h3>
-                                <p className="text-[var(--text-dark)]/55 text-xs leading-relaxed">{exp.description}</p>
-                            </Link>
-                        ))}
+                        {EXPERIENCES.map((exp, i) => {
+                            const imageUrl = experienceImages[exp.key];
+                            return (
+                                <Link key={i} href={exp.href} className="flex-none w-[280px] md:w-[320px] group">
+                                    <div className="relative aspect-[4/5] overflow-hidden rounded-sm mb-4 bg-[var(--surface-soft)]">
+                                        {imageUrl ? (
+                                            <img
+                                                src={imageUrl}
+                                                alt={exp.title}
+                                                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                            />
+                                        ) : (
+                                            <div className="absolute inset-0 bg-[var(--surface-soft)]" />
+                                        )}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                                        <span className="absolute top-4 left-4 text-[9px] tracking-[0.25em] uppercase text-white/90 border border-white/40 px-2 py-1 backdrop-blur-sm">
+                                            {exp.tag}
+                                        </span>
+                                    </div>
+                                    <h3 className="font-serif text-[1.25rem] text-[var(--text-dark)] mb-1 group-hover:text-[var(--gold-accent-dark)] transition-colors">
+                                        {exp.title}
+                                    </h3>
+                                    <p className="text-[var(--text-dark)]/55 text-xs leading-relaxed">{exp.description}</p>
+                                </Link>
+                            );
+                        })}
                     </HorizontalScroller>
 
                     <motion.div

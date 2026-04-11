@@ -1,4 +1,4 @@
-import { getPageHeaders } from '@/app/admin/media/actions';
+import { getPageHeaders, getDiscoverExperienceImages } from '@/app/admin/media/actions';
 import { db } from '@/lib/db';
 import { roomTypes } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
@@ -9,7 +9,7 @@ export const metadata = {
 };
 
 export default async function DiscoverPage() {
-    const [pageHeaders, rooms] = await Promise.all([
+    const [pageHeaders, rooms, experienceImages] = await Promise.all([
         getPageHeaders(),
         db.query.roomTypes.findMany({
             where: eq(roomTypes.status, 'active'),
@@ -21,8 +21,9 @@ export default async function DiscoverPage() {
             },
             orderBy: (table, { asc }) => [asc(table.sortOrder)],
         }),
+        getDiscoverExperienceImages(),
     ]);
     const discoverHeader = pageHeaders.discover;
 
-    return <DiscoverClient headerImage={discoverHeader?.url} rooms={rooms} />;
+    return <DiscoverClient headerImage={discoverHeader?.url} rooms={rooms} experienceImages={experienceImages} />;
 }

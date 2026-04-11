@@ -536,10 +536,10 @@ export const payments = pgTable('payments', {
     id: uuid('id').defaultRandom().primaryKey(),
     bookingId: uuid('booking_id').references(() => bookings.id).notNull(),
 
-    // Omniware details
-    omniwareOrderId: varchar('omniware_order_id', { length: 255 }), // Our unique ID sent to Omniware
-    omniwareTransactionId: varchar('omniware_transaction_id', { length: 255 }), // Their returned unique identifier
-    omniwareHash: varchar('omniware_hash', { length: 255 }), // Stored hash for verification
+    // Easebuzz details
+    easebuzzOrderId: varchar('easebuzz_order_id', { length: 255 }), // Our unique ID sent to Easebuzz
+    easebuzzTransactionId: varchar('easebuzz_transaction_id', { length: 255 }), // Their returned unique identifier
+    easebuzzHash: varchar('easebuzz_hash', { length: 255 }), // Stored hash for verification
 
     // Payment details
     amount: integer('amount').notNull(), // in paise

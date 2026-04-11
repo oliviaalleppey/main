@@ -273,8 +273,8 @@ export default async function BookingDetailPage({ params }: PageProps) {
                             <div key={p.id} className="px-6 py-4 flex items-center gap-6 flex-wrap">
                                 <div className="flex-1 min-w-0">
                                     <p className="text-sm font-medium text-gray-900 capitalize">{p.paymentMethod?.replace('_', ' ') || 'Payment'}</p>
-                                    {(p.omniwareOrderId || p.omniwareTransactionId) && (
-                                        <p className="text-xs font-mono text-gray-400 mt-0.5 truncate">{p.omniwareOrderId || p.omniwareTransactionId}</p>
+                                    {(p.easebuzzOrderId || p.easebuzzTransactionId) && (
+                                        <p className="text-xs font-mono text-gray-400 mt-0.5 truncate">{p.easebuzzOrderId || p.easebuzzTransactionId}</p>
                                     )}
                                 </div>
                                 <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${p.status === 'success' ? 'bg-emerald-100 text-emerald-700' :
