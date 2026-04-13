@@ -249,6 +249,17 @@ function OutletCard({ outlet, index }: { outlet: DiningOutlet; index: number }) 
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                 </svg>
                             </a>
+                        ) : outlet.slug === 'brew-bar' ? (
+                            <Link
+                                href="/dining/brew-bar"
+                                className="group relative inline-flex items-center justify-center px-8 py-3.5 border border-[var(--brand-primary-dark)] text-white overflow-hidden transition-colors duration-300 bg-[var(--brand-primary-dark)]"
+                            >
+                                <span className="absolute inset-0 w-full h-full bg-black origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out z-0" />
+                                <span className="relative z-10 text-[11px] tracking-[0.24em] uppercase font-normal">View Menu</span>
+                                <svg className="relative z-10 w-3.5 h-3.5 ml-3 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                </svg>
+                            </Link>
                         ) : (
                             <Link
                                 href={`/dining/${outlet.slug}`}
