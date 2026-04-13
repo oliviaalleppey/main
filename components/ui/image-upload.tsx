@@ -6,6 +6,7 @@ import { GripVertical, ImagePlus, X, ImageOff, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { upload } from '@vercel/blob/client';
 import { toast } from 'sonner';
+import { toWebPClient } from '@/app/admin/media/webp-utils';
 
 function ImageWithFallback({ url }: { url: string }) {
     const [error, setError] = useState(false);
@@ -28,40 +29,6 @@ function ImageWithFallback({ url }: { url: string }) {
             onError={() => setError(true)}
         />
     );
-}
-
-// Convert any image to WebP using canvas (runs entirely in the browser — no server size limit)
-async function toWebPClient(file: File): Promise<File> {
-    return new Promise((resolve, reject) => {
-        const img = new window.Image();
-        const objectUrl = URL.createObjectURL(file);
-
-        img.onload = () => {
-            URL.revokeObjectURL(objectUrl);
-            const canvas = document.createElement('canvas');
-            canvas.width = img.naturalWidth;
-            canvas.height = img.naturalHeight;
-            const ctx = canvas.getContext('2d');
-            if (!ctx) { reject(new Error('Canvas not available')); return; }
-            ctx.drawImage(img, 0, 0);
-            canvas.toBlob(
-                (blob) => {
-                    if (!blob) { reject(new Error('WebP conversion failed')); return; }
-                    const webpName = file.name.replace(/\.[^.]+$/, '.webp');
-                    resolve(new File([blob], webpName, { type: 'image/webp' }));
-                },
-                'image/webp',
-                0.85,
-            );
-        };
-
-        img.onerror = () => {
-            URL.revokeObjectURL(objectUrl);
-            reject(new Error('Failed to load image'));
-        };
-
-        img.src = objectUrl;
-    });
 }
 
 interface ImageUploadProps {
@@ -100,8 +67,7 @@ export function ImageUpload({ value, onChange, onRemove, disabled }: ImageUpload
 
             onChange([...value, blob.url]);
         } catch (err) {
-            console.error('Upload error:', err);
-            toast.error('Upload failed. Please try again.');
+            toast.error(err instanceof Error ? err.message : 'Upload failed');
         } finally {
             setUploadState('idle');
             if (fileInputRef.current) fileInputRef.current.value = '';

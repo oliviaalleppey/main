@@ -5,39 +5,7 @@ import { updateRoomTypeImages, uploadRoomImageFile } from './actions';
 import { RefreshCw, Trash2, Star, ChevronUp, ChevronDown, Loader2, ImagePlus, BedDouble } from 'lucide-react';
 import { toast } from 'sonner';
 import { upload } from '@vercel/blob/client';
-
-async function toWebPClient(file: File): Promise<File> {
-    return new Promise((resolve, reject) => {
-        const img = new window.Image();
-        const objectUrl = URL.createObjectURL(file);
-
-        img.onload = () => {
-            URL.revokeObjectURL(objectUrl);
-            const canvas = document.createElement('canvas');
-            canvas.width = img.naturalWidth;
-            canvas.height = img.naturalHeight;
-            const ctx = canvas.getContext('2d');
-            if (!ctx) { reject(new Error('Canvas not available')); return; }
-            ctx.drawImage(img, 0, 0);
-            canvas.toBlob(
-                (blob) => {
-                    if (!blob) { reject(new Error('WebP conversion failed')); return; }
-                    const webpName = file.name.replace(/\.[^.]+$/, '.webp');
-                    resolve(new File([blob], webpName, { type: 'image/webp' }));
-                },
-                'image/webp',
-                0.85,
-            );
-        };
-
-        img.onerror = () => {
-            URL.revokeObjectURL(objectUrl);
-            reject(new Error('Failed to load image'));
-        };
-
-        img.src = objectUrl;
-    });
-}
+import { toWebPClient } from './webp-utils';
 
 interface RoomType {
     id: string;

@@ -7,39 +7,7 @@ import { UploadCloud, Download, Trash2, Image as ImageIcon, Video, Filter, Chevr
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { upload } from '@vercel/blob/client';
-
-async function toWebPClient(file: File): Promise<File> {
-    return new Promise((resolve, reject) => {
-        const img = new window.Image();
-        const objectUrl = URL.createObjectURL(file);
-
-        img.onload = () => {
-            URL.revokeObjectURL(objectUrl);
-            const canvas = document.createElement('canvas');
-            canvas.width = img.naturalWidth;
-            canvas.height = img.naturalHeight;
-            const ctx = canvas.getContext('2d');
-            if (!ctx) { reject(new Error('Canvas not available')); return; }
-            ctx.drawImage(img, 0, 0);
-            canvas.toBlob(
-                (blob) => {
-                    if (!blob) { reject(new Error('WebP conversion failed')); return; }
-                    const webpName = file.name.replace(/\.[^.]+$/, '.webp');
-                    resolve(new File([blob], webpName, { type: 'image/webp' }));
-                },
-                'image/webp',
-                0.85,
-            );
-        };
-
-        img.onerror = () => {
-            URL.revokeObjectURL(objectUrl);
-            reject(new Error('Failed to load image'));
-        };
-
-        img.src = objectUrl;
-    });
-}
+import { toWebPClient } from './webp-utils';
 
 interface MediaItem {
     id: string;
@@ -110,8 +78,8 @@ export default function MediaLibrary({ items }: { items: MediaItem[] }) {
             setUploadTitle('');
             setShowUpload(false);
             router.refresh();
-        } catch {
-            toast.error('Upload failed');
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : 'Upload failed');
         } finally {
             setIsUploading(false);
         }

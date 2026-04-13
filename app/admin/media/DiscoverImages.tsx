@@ -6,31 +6,7 @@ import { UploadCloud, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { upload } from '@vercel/blob/client';
-
-async function toWebPClient(file: File): Promise<File> {
-    return new Promise((resolve, reject) => {
-        const img = new window.Image();
-        const objectUrl = URL.createObjectURL(file);
-        img.onload = () => {
-            URL.revokeObjectURL(objectUrl);
-            const canvas = document.createElement('canvas');
-            canvas.width = img.naturalWidth;
-            canvas.height = img.naturalHeight;
-            const ctx = canvas.getContext('2d');
-            if (!ctx) { reject(new Error('Canvas not available')); return; }
-            ctx.drawImage(img, 0, 0);
-            canvas.toBlob(
-                (blob) => {
-                    if (!blob) { reject(new Error('WebP conversion failed')); return; }
-                    resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.webp'), { type: 'image/webp' }));
-                },
-                'image/webp', 0.85,
-            );
-        };
-        img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('Failed to load image')); };
-        img.src = objectUrl;
-    });
-}
+import { toWebPClient } from './webp-utils';
 
 const EXPERIENCES = [
     { key: 'spa', label: 'The Spa at Olivia', tag: 'Wellness' },
@@ -46,16 +22,23 @@ interface Props {
 
 export default function DiscoverImages({ images: initialImages }: Props) {
     const [images, setImages] = useState<Record<string, string>>(initialImages);
-    const [uploading, setUploading] = useState<string | null>(null);
+    type UploadState = { key: string; status: 'converting' | 'uploading'; progress: number } | null;
+    const [uploadState, setUploadState] = useState<UploadState>(null);
     const router = useRouter();
 
     const handleUpload = async (key: string, file: File) => {
-        setUploading(key);
+        setUploadState({ key, status: 'converting', progress: 0 });
+
         try {
-            const webpFile = await toWebPClient(file);
-            const blob = await upload(webpFile.name, webpFile, {
+            const fileToUpload = await toWebPClient(file);
+            setUploadState({ key, status: 'uploading', progress: 0 });
+
+            const blob = await upload(fileToUpload.name, fileToUpload, {
                 access: 'public',
                 handleUploadUrl: '/api/upload',
+                onUploadProgress: (progressEvent) => {
+                    setUploadState(prev => prev ? { ...prev, progress: Math.round(progressEvent.percentage) } : prev);
+                }
             });
             const fd = new FormData();
             fd.append('url', blob.url);
@@ -63,10 +46,10 @@ export default function DiscoverImages({ images: initialImages }: Props) {
             setImages(prev => ({ ...prev, [key]: result.url }));
             toast.success('Image updated!');
             router.refresh();
-        } catch {
-            toast.error('Upload failed');
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : 'Upload failed');
         } finally {
-            setUploading(null);
+            setUploadState(null);
         }
     };
 
@@ -76,7 +59,8 @@ export default function DiscoverImages({ images: initialImages }: Props) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {EXPERIENCES.map(exp => {
                     const imageUrl = images[exp.key];
-                    const isUploading = uploading === exp.key;
+                    const isUploading = uploadState?.key === exp.key;
+                    
                     return (
                         <div key={exp.key} className="border border-gray-200 rounded-xl p-4">
                             <div className="flex items-center justify-between mb-1">
@@ -104,13 +88,29 @@ export default function DiscoverImages({ images: initialImages }: Props) {
                                 className="hidden"
                                 id={`discover-file-${exp.key}`}
                                 onChange={e => { const f = e.target.files?.[0]; if (f) handleUpload(exp.key, f); }}
+                                disabled={isUploading}
                             />
                             <label
                                 htmlFor={`discover-file-${exp.key}`}
-                                className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-sm cursor-pointer transition-colors"
+                                className={`flex items-center justify-center gap-2 w-full px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-sm cursor-pointer transition-colors relative overflow-hidden ${isUploading ? 'pointer-events-none' : ''}`}
                             >
-                                {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <UploadCloud className="w-4 h-4" />}
-                                {isUploading ? 'Uploading...' : 'Upload Image'}
+                                {isUploading ? (
+                                    <>
+                                        <div 
+                                            className="absolute left-0 top-0 bottom-0 bg-amber-700/30 transition-all duration-300"
+                                            style={{ width: `${uploadState.status === 'converting' ? 100 : uploadState.progress}%` }}
+                                        />
+                                        <Loader2 className="w-4 h-4 animate-spin relative z-10" />
+                                        <span className="relative z-10 w-24 text-left">
+                                            {uploadState.status === 'converting' ? 'Converting...' : `Uploading ${uploadState.progress}%`}
+                                        </span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <UploadCloud className="w-4 h-4" />
+                                        <span>Upload Image</span>
+                                    </>
+                                )}
                             </label>
                         </div>
                     );

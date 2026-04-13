@@ -7,39 +7,7 @@ import { UploadCloud, Loader2, Image as ImageIcon, Video, Film, Trash2, Plus, La
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { upload } from '@vercel/blob/client';
-
-async function toWebPClient(file: File): Promise<File> {
-    return new Promise((resolve, reject) => {
-        const img = new window.Image();
-        const objectUrl = URL.createObjectURL(file);
-
-        img.onload = () => {
-            URL.revokeObjectURL(objectUrl);
-            const canvas = document.createElement('canvas');
-            canvas.width = img.naturalWidth;
-            canvas.height = img.naturalHeight;
-            const ctx = canvas.getContext('2d');
-            if (!ctx) { reject(new Error('Canvas not available')); return; }
-            ctx.drawImage(img, 0, 0);
-            canvas.toBlob(
-                (blob) => {
-                    if (!blob) { reject(new Error('WebP conversion failed')); return; }
-                    const webpName = file.name.replace(/\.[^.]+$/, '.webp');
-                    resolve(new File([blob], webpName, { type: 'image/webp' }));
-                },
-                'image/webp',
-                0.85,
-            );
-        };
-
-        img.onerror = () => {
-            URL.revokeObjectURL(objectUrl);
-            reject(new Error('Failed to load image'));
-        };
-
-        img.src = objectUrl;
-    });
-}
+import { toWebPClient } from './webp-utils';
 
 interface PageHeader {
     type: 'video' | 'image';
@@ -124,8 +92,8 @@ export default function PageHeaders({ headers, homeSlides: initialHomeSlides, am
             }
             toast.success('Page header updated!');
             router.refresh();
-        } catch {
-            toast.error('Upload failed');
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : 'Upload failed');
         } finally {
             setIsUploading(false);
         }
@@ -155,8 +123,8 @@ export default function PageHeaders({ headers, homeSlides: initialHomeSlides, am
             }
             toast.success('Slide added to carousel!');
             router.refresh();
-        } catch {
-            toast.error('Upload failed');
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : 'Upload failed');
         } finally {
             setIsUploading(false);
         }
@@ -202,8 +170,8 @@ export default function PageHeaders({ headers, homeSlides: initialHomeSlides, am
             setDiningImages(prev => ({ ...prev, [slug]: result.url }));
             toast.success('Dining image updated!');
             router.refresh();
-        } catch {
-            toast.error('Upload failed');
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : 'Upload failed');
         } finally {
             setUploadingDining(null);
         }
@@ -240,8 +208,8 @@ export default function PageHeaders({ headers, homeSlides: initialHomeSlides, am
             setAmenityImages(prev => ({ ...prev, [key]: result.url }));
             toast.success(`${AMENITY_ITEMS.find(a => a.key === key)?.label} image updated!`);
             router.refresh();
-        } catch {
-            toast.error('Upload failed');
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : 'Upload failed');
         } finally {
             setUploadingAmenity(null);
         }
