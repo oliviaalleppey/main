@@ -4,7 +4,7 @@ import StickyBookButton from '@/components/sticky-book-button';
 import WhatsAppWidget from '@/components/whatsapp-widget';
 import Link from 'next/link';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import EventInquiryForm from '@/components/conference/event-inquiry-form';
+import SimpleInquiryForm from '@/components/conference/simple-inquiry-form';
 import { useState, useEffect, useRef } from 'react';
 
 const mainVenues = [
@@ -153,7 +153,7 @@ export default function ConferenceEventsPage() {
                             <p className="text-[#3F5048]/75 mb-8 font-light text-base md:text-lg max-w-xl leading-relaxed">
                                 Share your event brief and our team will suggest the right venue, layout and service plan.
                             </p>
-                            <EventInquiryForm />
+                            <SimpleInquiryForm />
                         </motion.div>
                     </div>
                 </section>
