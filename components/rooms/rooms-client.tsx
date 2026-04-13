@@ -89,34 +89,19 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
 
                 {/* Hero Content - Compact */}
                 <div className="relative z-10 h-full flex flex-col justify-center items-center text-center px-6">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.2 }}
-                        className="flex items-center gap-4 mb-3"
-                    >
+                    <div className="flex items-center gap-4 mb-3">
                         <span className="w-8 h-[1px] bg-white/80" />
                         <p className="text-white text-[10px] tracking-[0.34em] uppercase font-light">
                             Olivia Alleppey
                         </p>
                         <span className="w-8 h-[1px] bg-white/80" />
-                    </motion.div>
+                    </div>
 
-                    <motion.h1
-                        initial={{ opacity: 0, y: 25 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.4 }}
-                        className="text-[4.25rem] sm:text-[5.25rem] md:text-[8.25rem] lg:text-[10.5rem] font-serif font-medium text-white mb-5 tracking-[-0.03em] leading-[0.92] [text-shadow:0_2px_22px_rgba(0,0,0,0.55)]"
-                    >
+                    <h1 className="text-[4.25rem] sm:text-[5.25rem] md:text-[8.25rem] lg:text-[10.5rem] font-serif font-medium text-white mb-5 tracking-[-0.03em] leading-[0.92] [text-shadow:0_2px_22px_rgba(0,0,0,0.55)]">
                         Rooms & Suites
-                    </motion.h1>
+                    </h1>
 
-                    <motion.div
-                        initial={{ opacity: 0, y: 15 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.8 }}
-                        className="flex gap-3"
-                    >
+                    <div className="flex gap-3">
                         <Link
                             href="#rooms-collection"
                             className="border border-white/90 bg-white text-[#2D3933] px-6 py-2.5 text-[10px] tracking-[0.22em] uppercase font-semibold shadow-[0_18px_40px_-28px_rgba(0,0,0,0.65)] hover:bg-white/95 transition-colors duration-300"
@@ -129,7 +114,7 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
                         >
                             Contact now
                         </Link>
-                    </motion.div>
+                    </div>
                 </div>
             </section>
 
@@ -203,13 +188,7 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
             <section className="py-12 md:py-16 px-6 md:px-10 bg-[#FAF8F3]">
                 <div className="max-w-7xl mx-auto">
                     <div className="grid lg:grid-cols-2 gap-6 items-center">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 1 }}
-                            className="relative h-[44vh] md:h-[58vh] order-2 lg:order-1 rounded-sm overflow-hidden"
-                        >
+                        <div className="relative h-[44vh] md:h-[58vh] order-2 lg:order-1 rounded-sm overflow-hidden">
                             <Image
                                 src={signatureRoom?.image || "/images/rooms/balcony-room-4.jpg"}
                                 alt={signatureRoom?.name || "Boat Race Finish Line View Suite Room"}
@@ -221,15 +200,9 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
                                     Starting from ₹{Math.round((signatureRoom?.basePrice || 0) / 100).toLocaleString('en-IN')}/night
                                 </span>
                             </div>
-                        </motion.div>
+                        </div>
 
-                        <motion.div
-                            initial={{ opacity: 0, x: 30 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 1 }}
-                            className="order-1 lg:order-2 lg:pl-8"
-                        >
+                        <div className="order-1 lg:order-2 lg:pl-8">
                             <span className="text-[#8D7858] text-[10px] tracking-[0.3em] uppercase mb-3 block">Signature experiences</span>
                             <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-[#2D3732] mb-4 leading-tight">
                                 {signatureRoom?.name || 'Boat Race Finish Line View Suite Room'}
@@ -286,7 +259,7 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
                                 <span className="text-[#2D3732] text-sm tracking-[0.2em] uppercase font-medium">Explore and Book</span>
                                 <span className="w-8 h-[1px] bg-[#BCA06F] group-hover:w-14 transition-all duration-300" />
                             </Link>
-                        </motion.div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -295,13 +268,7 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
             <section className="py-12 md:py-16 px-6 md:px-10 bg-[#FAF8F3]">
                 <div className="max-w-7xl mx-auto">
                     <div className="grid lg:grid-cols-2 gap-6 items-center">
-                        <motion.div
-                            initial={{ opacity: 0, x: -30 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 1 }}
-                            className="lg:pr-8"
-                        >
+                        <div className="lg:pr-8">
                             <span className="text-[#8D7858] text-[10px] tracking-[0.3em] uppercase mb-3 block">Signature experiences</span>
                             <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-[#2D3732] mb-4 leading-tight">
                                 {suiteRoom?.name || 'Lake View Balcony Suite Room'}
@@ -336,15 +303,9 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
                                 <span className="text-[#2D3732] text-sm tracking-[0.2em] uppercase font-medium">Discover the Suite</span>
                                 <span className="w-8 h-[1px] bg-[#BCA06F] group-hover:w-14 transition-all duration-300" />
                             </Link>
-                        </motion.div>
+                        </div>
 
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 1 }}
-                            className="relative h-[44vh] md:h-[58vh] rounded-sm overflow-hidden"
-                        >
+                        <div className="relative h-[44vh] md:h-[58vh] rounded-sm overflow-hidden">
                             <Image
                                 src={suiteRoom?.image || "/images/rooms/balcony-room-5.jpg"}
                                 alt={suiteRoom?.name || "Lake View Balcony Suite Room"}
@@ -356,7 +317,7 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
                                     Starting from ₹{Math.round((suiteRoom?.basePrice || 0) / 100).toLocaleString('en-IN')}/night
                                 </span>
                             </div>
-                        </motion.div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -370,12 +331,7 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
                 <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_30%_35%,rgba(255,255,255,0.55)_0%,rgba(255,255,255,0)_60%)]" />
 
                 <div className="relative z-10 max-w-3xl mx-auto text-center px-6 md:px-10 bg-[#FCFAF5]/92 border border-[#E6DDCE] py-8 md:py-10">
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 1 }}
-                    >
+                    <div>
                         <span className="inline-block w-10 h-[1px] bg-[#BFA47A] mb-5" />
                         <p className="text-[#8E7859] text-[10px] tracking-[0.3em] uppercase mb-4">Personalized Service</p>
                         <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-[#2D3732] mb-5 leading-tight">
@@ -394,7 +350,7 @@ export default function RoomsClient({ rooms: initialRooms }: RoomsClientProps) {
                                 <span className="relative z-10">Contact Concierge</span>
                             </Link>
                         </div>
-                    </motion.div>
+                    </div>
                 </div>
             </section>
 
@@ -431,14 +387,10 @@ function RoomCard({ room, index }: { room: RoomViewModel; index: number }) {
         <motion.div
             id={`room-${index}`}
             ref={ref}
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.8 }}
             className={`flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} gap-6 lg:gap-8 items-stretch lg:min-h-[46vh] scroll-mt-[200px] md:scroll-mt-[220px]`}
         >
             {/* Image Section */}
-            <div className="w-full lg:w-1/2 relative h-[34vh] sm:h-[40vh] lg:h-[44vh] xl:h-[46vh] overflow-hidden group">
+            <Link href={`/rooms/${room.slug}`} className="w-full lg:w-1/2 relative h-[34vh] sm:h-[40vh] lg:h-[44vh] xl:h-[46vh] overflow-hidden group block">
                 <motion.div style={{ y }} className="absolute inset-0 h-[120%] w-full -top-[10%]">
                     <Image
                         src={room.image}
@@ -458,7 +410,7 @@ function RoomCard({ room, index }: { room: RoomViewModel; index: number }) {
                         {room.view}
                     </div>
                 </div>
-            </div>
+            </Link>
 
             {/* Content Section */}
             <div className={`w-full lg:w-1/2 flex flex-col justify-center py-2 lg:py-0 ${isEven ? 'lg:pl-8' : 'lg:items-end lg:pr-8 text-right'}`}>

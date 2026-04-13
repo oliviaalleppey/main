@@ -122,7 +122,7 @@ export default function RoomHero({ images }: RoomHeroProps) {
                     <button
                         type="button"
                         onClick={goPrev}
-                        className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 items-center justify-center w-11 h-11 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 text-white transition-colors"
+                        className="flex absolute left-4 top-1/2 -translate-y-1/2 items-center justify-center w-11 h-11 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 text-white transition-colors"
                         aria-label="Previous image"
                     >
                         <span className="text-2xl leading-none">‹</span>
@@ -131,7 +131,7 @@ export default function RoomHero({ images }: RoomHeroProps) {
                     <button
                         type="button"
                         onClick={goNext}
-                        className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 items-center justify-center w-11 h-11 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 text-white transition-colors"
+                        className="flex absolute right-4 top-1/2 -translate-y-1/2 items-center justify-center w-11 h-11 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 text-white transition-colors"
                         aria-label="Next image"
                     >
                         <span className="text-2xl leading-none">›</span>
