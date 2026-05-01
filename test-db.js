@@ -1,10 +1,11 @@
-import 'dotenv/config';
-import postgres from 'postgres';
+require('@next/env').loadEnvConfig(process.cwd());
 
-async function main() {
-    const sql = postgres(process.env.DATABASE_URL);
-    const sessions = await sql`SELECT cart_data FROM booking_sessions ORDER BY created_at DESC LIMIT 1`;
-    console.log(JSON.stringify(sessions[0].cart_data, null, 2));
-    process.exit(0);
+const { db } = require('./lib/db');
+const { siteSettings } = require('./lib/db/schema');
+
+async function check() {
+  const results = await db.select().from(siteSettings);
+  console.log(JSON.stringify(results.filter(r => r.key.includes('conference')), null, 2));
+  process.exit(0);
 }
-main();
+check();

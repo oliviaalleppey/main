@@ -461,14 +461,44 @@ export async function setMembershipImage(privilegeKey: string, formData: FormDat
 // Discover experience images
 const DISCOVER_EXPERIENCE_KEYS = ['spa', 'dining', 'backwater', 'yoga', 'membership'] as const;
 
+const DISCOVER_FALLBACK_CATEGORIES: Record<string, string> = {
+    spa: 'wellness',
+    dining: 'dining',
+    backwater: 'home',
+    yoga: 'wellness',
+    membership: 'general',
+};
+
 export async function getDiscoverExperienceImages(): Promise<Record<string, string>> {
     const keys = DISCOVER_EXPERIENCE_KEYS.map(k => `discover_exp_${k}`);
-    const results = await db.select().from(siteSettings).where(inArray(siteSettings.key, keys));
+    const [settingsResults, galleryResults] = await Promise.all([
+        db.select().from(siteSettings).where(inArray(siteSettings.key, keys)),
+        db.select({ imageUrl: galleryImages.imageUrl, category: galleryImages.category })
+            .from(galleryImages)
+            .where(eq(galleryImages.isActive, true))
+            .orderBy(galleryImages.sortOrder, desc(galleryImages.createdAt)),
+    ]);
+
+    const galleryByCategory: Record<string, string> = {};
+    for (const row of galleryResults) {
+        if (row.category && !galleryByCategory[row.category]) {
+            galleryByCategory[row.category] = row.imageUrl;
+        }
+    }
+
     const map: Record<string, string> = {};
-    results.forEach(r => {
+    for (const key of DISCOVER_EXPERIENCE_KEYS) {
+        const fallbackCategory = DISCOVER_FALLBACK_CATEGORIES[key];
+        if (fallbackCategory && galleryByCategory[fallbackCategory]) {
+            map[key] = galleryByCategory[fallbackCategory];
+        }
+    }
+    
+    settingsResults.forEach(r => {
         const k = (r.key as string).replace('discover_exp_', '');
         map[k] = (r.value as { url: string }).url;
     });
+    
     return map;
 }
 

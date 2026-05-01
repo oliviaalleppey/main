@@ -7,8 +7,8 @@ async function testHotsoft() {
 
     console.log("Testing Availability...");
     const avail = await provider.checkAvailability({
-        checkIn: new Date().toISOString(),
-        checkOut: new Date(Date.now() + 86400000).toISOString(),
+        checkIn: new Date().toISOString().slice(0, 10),
+        checkOut: new Date(Date.now() + 86400000).toISOString().slice(0, 10),
         adults: 2,
         children: 0
     });
@@ -17,8 +17,8 @@ async function testHotsoft() {
     console.log("Testing Booking Push...");
     const booking = await provider.createReservation({
         reservationRef: 'TEST-' + Math.floor(Math.random() * 10000),
-        checkIn: new Date().toISOString(),
-        checkOut: new Date(Date.now() + 86400000).toISOString(),
+        checkIn: new Date().toISOString().slice(0, 10),
+        checkOut: new Date(Date.now() + 86400000).toISOString().slice(0, 10),
         primaryGuest: {
             title: 'Mr',
             firstName: 'AMAL',
