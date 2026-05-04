@@ -348,8 +348,14 @@ export default async function AdminAvailabilityPage({ searchParams }: { searchPa
                                                 );
                                             }
 
-                                            // Use local room count as total if available, otherwise use CRS available count as a floor
-                                            const effectiveTotal = total > 0 ? total : available;
+                                            // Use local room count as total if available
+                                            // If not available, use the highest CRS available count seen in this date range as an estimated total
+                                            let maxSeen = available;
+                                            if (total === 0 && availabilityMap[rt.slug]) {
+                                                const counts = Object.values(availabilityMap[rt.slug]).filter(v => v !== undefined);
+                                                if (counts.length > 0) maxSeen = Math.max(...counts);
+                                            }
+                                            const effectiveTotal = total > 0 ? total : maxSeen;
                                             const booked = Math.max(0, effectiveTotal - available);
 
                                             if (view === 'month') {
