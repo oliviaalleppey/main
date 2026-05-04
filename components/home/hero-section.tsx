@@ -146,141 +146,148 @@ export default function HeroSection({
                 )}
             </AnimatePresence>
 
-            {/* Carousel dot indicators (only when multiple slides) */}
-            {!showVideo && slides.length > 1 && (
-                <div className="absolute bottom-64 left-1/2 -translate-x-1/2 flex gap-3 z-20">
-                    {slides.map((_, index) => (
-                        <button
-                            key={index}
-                            onClick={() => setCurrentIndex(index)}
-                            className={`h-1 rounded-full transition-all duration-300 ${index === currentIndex ? 'w-8 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'}`}
-                            aria-label={`Go to slide ${index + 1}`}
-                        />
-                    ))}
+            {/* ── Single flex-column content layer ── */}
+            {/* All content lives here so flex distributes space — no fixed px offsets needed */}
+            <div className="absolute inset-0 flex flex-col z-10 text-white">
+
+                {/* ① Five-star plaque — top */}
+                <div className="flex justify-center pt-6 md:pt-10 flex-shrink-0 animate-fade-in-up">
+                    <Image
+                        src="/images/5star.png"
+                        alt="Olivia International Alleppey — Five Star Classified"
+                        width={480}
+                        height={320}
+                        className="w-[240px] sm:w-[280px] md:w-[400px] lg:w-[500px] h-auto drop-shadow-2xl"
+                        priority
+                    />
                 </div>
-            )}
 
-            {/* Five-star plaque — pinned near top of hero in clear sky area */}
-            <div className="absolute top-6 md:top-10 left-0 right-0 flex justify-center z-10 animate-fade-in-up">
-                <Image
-                    src="/images/5star.png"
-                    alt="Olivia International Alleppey — Five Star Classified"
-                    width={480}
-                    height={320}
-                    className="w-[220px] md:w-[340px] lg:w-[420px] h-auto drop-shadow-2xl"
-                    priority
-                />
-            </div>
+                {/* ② Typography — grows to fill space between logo and booking bar */}
+                <div className="flex-1 flex flex-col items-center justify-center text-center px-4 min-h-0">
+                    <h2 className="text-white text-[2.4rem] xs:text-5xl sm:text-5xl md:text-7xl lg:text-8xl font-serif mb-3 md:mb-6 tracking-wide animate-fade-in-up delay-100 drop-shadow-lg leading-tight">
+                        Experience The Unexperienced
+                    </h2>
+                    <p className="text-white text-sm md:text-lg font-light tracking-wider opacity-90 max-w-2xl animate-fade-in-up delay-200 drop-shadow-md">
+                        Where Luxury Meets the Backwaters.
+                    </p>
 
-            {/* Centered Typography */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-white z-10 text-center px-4 pb-48">
-                <h2 className="text-white text-5xl md:text-7xl lg:text-8xl font-serif mb-6 tracking-wide animate-fade-in-up delay-100 drop-shadow-lg">
-                    Experience The Unexperienced
-                </h2>
-                <p className="text-white text-sm md:text-lg font-light tracking-wider opacity-90 max-w-2xl animate-fade-in-up delay-200 drop-shadow-md">
-                    Discover a world of refined elegance and timeless luxury.
-                </p>
-            </div>
-
-            {/* Floating Search Bar - Unified Pill Style */}
-            <div id="booking-search" className="absolute bottom-40 left-0 right-0 z-30 px-4 md:px-0 safe-area-bottom flex flex-col items-center">
-                <div className="max-w-5xl w-full mx-auto flex flex-col md:flex-row items-end gap-4 animate-fade-in-up delay-300">
-
-                    {/* Stay Period Segment */}
-                    <div className="w-full md:flex-1 relative group">
-                        <label className="text-white text-xs font-bold uppercase tracking-widest mb-2 block ml-1 shadow-black/50 drop-shadow-md">Stay period</label>
-                        <button
-                            onClick={() => setIsDatePickerOpen(true)}
-                            className="w-full bg-white h-14 rounded-lg px-4 flex items-center justify-between hover:bg-gray-50 transition-colors shadow-lg"
-                        >
-                            <span className={`text-base font-medium ${!date?.from ? "text-gray-500" : "text-gray-900"}`}>
-                                {date?.from ? format(date.from, 'EEE, dd MMM yyyy') : 'Check-in'}
-                            </span>
-                            <span className="text-gray-300">→</span>
-                            <span className={`text-base font-medium ${!date?.to ? "text-gray-500" : "text-gray-900"}`}>
-                                {date?.to ? format(date.to, 'EEE, dd MMM yyyy') : 'Check-out'}
-                            </span>
-                        </button>
-
-                        {/* Date Picker Overlay */}
-                        {isDatePickerOpen && (
-                            <>
+                    {/* Carousel dots — inside text area, below subtitle */}
+                    {!showVideo && slides.length > 1 && (
+                        <div className="flex gap-3 mt-6">
+                            {slides.map((_, index) => (
                                 <button
-                                    aria-label="Close date picker"
-                                    className="fixed inset-0 z-40 cursor-default bg-black/35"
-                                    onClick={() => setIsDatePickerOpen(false)}
+                                    key={index}
+                                    onClick={() => setCurrentIndex(index)}
+                                    className={`h-1 rounded-full transition-all duration-300 ${index === currentIndex ? 'w-8 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'}`}
+                                    aria-label={`Go to slide ${index + 1}`}
                                 />
-                                <div className="fixed inset-x-0 bottom-0 md:inset-0 z-50 flex items-end md:items-center justify-center p-2 md:p-6 overscroll-none">
-                                    <LuxuryDatePicker
-                                        date={date}
-                                        setDate={setDate}
-                                        onClose={() => setIsDatePickerOpen(false)}
-                                        className="w-full max-w-[860px] rounded-t-3xl md:rounded-3xl max-h-[90vh] overflow-auto overscroll-contain"
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* ③ Booking widget — pinned to bottom, fully in flow */}
+                <div id="booking-search" className="flex-shrink-0 w-full px-4 md:px-6 pb-8 safe-area-bottom flex flex-col items-center animate-fade-in-up delay-300">
+                    <div className="max-w-5xl w-full mx-auto flex flex-col md:flex-row items-end gap-3 md:gap-4">
+
+                        {/* Stay Period Segment */}
+                        <div className="w-full md:flex-1 relative group">
+                            <label className="text-white text-xs font-bold uppercase tracking-widest mb-2 block ml-1 drop-shadow-md">Stay period</label>
+                            <button
+                                onClick={() => setIsDatePickerOpen(true)}
+                                className="w-full bg-white h-14 rounded-lg px-4 flex items-center justify-between hover:bg-gray-50 transition-colors shadow-lg"
+                            >
+                                <span className={`text-base font-medium ${!date?.from ? "text-gray-500" : "text-gray-900"}`}>
+                                    {date?.from ? format(date.from, 'EEE, dd MMM yyyy') : 'Check-in'}
+                                </span>
+                                <span className="text-gray-300">→</span>
+                                <span className={`text-base font-medium ${!date?.to ? "text-gray-500" : "text-gray-900"}`}>
+                                    {date?.to ? format(date.to, 'EEE, dd MMM yyyy') : 'Check-out'}
+                                </span>
+                            </button>
+
+                            {/* Date Picker Overlay */}
+                            {isDatePickerOpen && (
+                                <>
+                                    <button
+                                        aria-label="Close date picker"
+                                        className="fixed inset-0 z-40 cursor-default bg-black/35"
+                                        onClick={() => setIsDatePickerOpen(false)}
                                     />
-                                </div>
-                            </>
-                        )}
-                    </div>
+                                    <div className="fixed inset-x-0 bottom-0 md:inset-0 z-50 flex items-end md:items-center justify-center p-2 md:p-6 overscroll-none">
+                                        <LuxuryDatePicker
+                                            date={date}
+                                            setDate={setDate}
+                                            onClose={() => setIsDatePickerOpen(false)}
+                                            className="w-full max-w-[860px] rounded-t-3xl md:rounded-3xl max-h-[90vh] overflow-auto overscroll-contain"
+                                        />
+                                    </div>
+                                </>
+                            )}
+                        </div>
 
-                    {/* Guests Segment */}
-                    <div className="w-full md:w-[360px]">
-                        <label className="text-white text-xs font-bold uppercase tracking-widest mb-2 block ml-1 shadow-black/50 drop-shadow-md">Guests</label>
-                        <div className="w-full bg-white h-14 rounded-lg px-2 flex items-center shadow-lg">
-                            {/* Adults */}
-                            <div className="flex-1 flex items-center justify-between px-2">
-                                <span className="text-sm font-medium text-gray-900">Adult</span>
-                                <div className="flex items-center gap-2">
-                                    <button
-                                        onClick={() => setGuests({ ...guests, adults: Math.max(1, guests.adults - 1) })}
-                                        className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 hover:text-black hover:border-black transition-all"
-                                    >−</button>
-                                    <span className="text-sm font-bold w-4 text-center">{guests.adults}</span>
-                                    <button
-                                        onClick={() => setGuests({ ...guests, adults: Math.min(8, guests.adults + 1) })}
-                                        className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 hover:text-black hover:border-black transition-all"
-                                    >+</button>
+                        {/* Guests Segment */}
+                        <div className="w-full md:w-[360px]">
+                            <label className="text-white text-xs font-bold uppercase tracking-widest mb-2 block ml-1 drop-shadow-md">Guests</label>
+                            <div className="w-full bg-white h-14 rounded-lg px-2 flex items-center shadow-lg">
+                                {/* Adults */}
+                                <div className="flex-1 flex items-center justify-between px-2">
+                                    <span className="text-sm font-medium text-gray-900">Adult</span>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => setGuests({ ...guests, adults: Math.max(1, guests.adults - 1) })}
+                                            className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 hover:text-black hover:border-black transition-all"
+                                        >−</button>
+                                        <span className="text-sm font-bold w-4 text-center">{guests.adults}</span>
+                                        <button
+                                            onClick={() => setGuests({ ...guests, adults: Math.min(8, guests.adults + 1) })}
+                                            className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 hover:text-black hover:border-black transition-all"
+                                        >+</button>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div className="w-px h-8 bg-gray-200 mx-1"></div>
+                                <div className="w-px h-8 bg-gray-200 mx-1"></div>
 
-                            {/* Children */}
-                            <div className="flex-1 flex items-center justify-between px-2">
-                                <div className="flex flex-col xl:flex-row xl:items-baseline gap-0 xl:gap-1 leading-tight">
-                                    <span className="text-sm font-medium text-gray-900">Child</span>
-                                    <span className="text-[10px] text-gray-500 font-normal whitespace-nowrap">(&lt; 7 yrs)</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <button
-                                        onClick={() => setGuests({ ...guests, children: Math.max(0, guests.children - 1) })}
-                                        className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 hover:text-black hover:border-black transition-all"
-                                    >−</button>
-                                    <span className="text-sm font-bold w-4 text-center">{guests.children}</span>
-                                    <button
-                                        onClick={() => setGuests({ ...guests, children: Math.min(6, guests.children + 1) })}
-                                        className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 hover:text-black hover:border-black transition-all"
-                                    >+</button>
+                                {/* Children */}
+                                <div className="flex-1 flex items-center justify-between px-2">
+                                    <div className="flex flex-col xl:flex-row xl:items-baseline gap-0 xl:gap-1 leading-tight">
+                                        <span className="text-sm font-medium text-gray-900">Child</span>
+                                        <span className="text-[10px] text-gray-500 font-normal whitespace-nowrap">(&lt; 7 yrs)</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => setGuests({ ...guests, children: Math.max(0, guests.children - 1) })}
+                                            className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 hover:text-black hover:border-black transition-all"
+                                        >−</button>
+                                        <span className="text-sm font-bold w-4 text-center">{guests.children}</span>
+                                        <button
+                                            onClick={() => setGuests({ ...guests, children: Math.min(6, guests.children + 1) })}
+                                            className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 hover:text-black hover:border-black transition-all"
+                                        >+</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+
+                        {/* Search Button */}
+                        <div className="w-full md:w-auto">
+                            <button
+                                onClick={handleSearch}
+                                className="w-full bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-dark)] text-white h-14 px-8 rounded-lg text-sm font-bold uppercase tracking-wider transition-all shadow-lg flex items-center justify-center gap-2 whitespace-nowrap"
+                            >
+                                Search Availability
+                            </button>
+                        </div>
+
                     </div>
 
-                    {/* Search Button */}
-                    <div className="w-full md:w-auto">
-                        <button
-                            onClick={handleSearch}
-                            className="w-full bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-dark)] text-white h-14 px-8 rounded-lg text-sm font-bold uppercase tracking-wider transition-all shadow-lg flex items-center justify-center gap-2 whitespace-nowrap"
-                        >
-                            Search Availability
-                        </button>
-                    </div>
-
+                    {searchError && (
+                        <p className="text-[11px] text-red-100 bg-black/35 rounded px-3 py-1.5 mt-2 inline-block">
+                            {searchError}
+                        </p>
+                    )}
                 </div>
-                {searchError && (
-                    <p className="text-[11px] text-red-100 bg-black/35 rounded px-3 py-1.5 mt-2 inline-block">
-                        {searchError}
-                    </p>
-                )}
+
             </div>
         </section>
     );
