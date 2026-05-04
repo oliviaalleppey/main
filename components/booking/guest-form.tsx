@@ -79,7 +79,7 @@ function validateForm(data: FormData): Record<string, string> {
 
 export function GuestForm({
     initialValues,
-    submitLabel = 'Continue to Payment',
+    submitLabel = 'Save & Continue',
 }: GuestFormProps) {
     const formRef = useRef<HTMLFormElement>(null);
     const [errors, setErrors] = useState<Record<string, string>>({});

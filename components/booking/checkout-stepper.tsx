@@ -259,14 +259,6 @@ export function CheckoutStepper({
                             >
                                 <div className="p-4 md:p-5 border-t border-gray-100">
                                     {guestInfoContent}
-                                    <div className="mt-6 flex justify-end">
-                                        <button
-                                            onClick={() => handleNext(5)}
-                                            className="px-6 py-2.5 bg-[var(--text-dark)] text-white text-sm font-semibold rounded-lg hover:bg-black transition-colors flex items-center gap-2"
-                                        >
-                                            Continue to Payment <ChevronRight className="w-4 h-4" />
-                                        </button>
-                                    </div>
                                 </div>
                             </motion.div>
                         )}

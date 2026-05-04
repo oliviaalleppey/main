@@ -95,19 +95,6 @@ export function CheckoutForm({ amount }: { amount: number }) {
                 {!isPending ? `Pay ${payLabel} via Easebuzz` : 'Redirecting to Payment...'}
             </Button>
 
-            <div className="rounded-xl border border-gray-200 bg-white p-2.5 md:p-3">
-                <p className="text-xs uppercase tracking-wider text-gray-500 font-semibold mb-2">What happens next</p>
-                <ul className="space-y-2 text-sm text-gray-700">
-                    <li className="flex items-start gap-2">
-                        <CircleCheck className="w-4 h-4 mt-0.5 text-emerald-600" />
-                        You&apos;ll be redirected to Easebuzz to complete payment securely.
-                    </li>
-                    <li className="flex items-start gap-2">
-                        <CircleCheck className="w-4 h-4 mt-0.5 text-emerald-600" />
-                        After payment, we&apos;ll confirm your reservation with the hotel CRS.
-                    </li>
-                </ul>
-            </div>
         </div>
     );
 }

@@ -100,8 +100,9 @@ export default function HeroSection({
     };
 
     return (
-        <section className="relative h-[100vh] supports-[height:100dvh]:h-[100dvh] w-full select-none overflow-hidden bg-black">
-            {/* Background Media */}
+        <section className="relative h-[calc(100vh-var(--site-header-height))] supports-[height:100dvh]:h-[calc(100dvh-var(--site-header-height))] w-full select-none bg-black">
+            {/* Background Media — overflow-hidden here only, so content layer is never clipped */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <AnimatePresence>
                 {showVideo ? (
                     <motion.div
@@ -145,6 +146,7 @@ export default function HeroSection({
                     </motion.div>
                 )}
             </AnimatePresence>
+            </div>
 
             {/* ── Single flex-column content layer ── */}
             {/* All content lives here so flex distributes space — no fixed px offsets needed */}
@@ -187,7 +189,7 @@ export default function HeroSection({
                 </div>
 
                 {/* ③ Booking widget — pinned to bottom, fully in flow */}
-                <div id="booking-search" className="flex-shrink-0 w-full px-4 md:px-6 pb-8 safe-area-bottom flex flex-col items-center animate-fade-in-up delay-300">
+                <div id="booking-search" className="flex-shrink-0 w-full px-4 md:px-6 pb-4 flex flex-col items-center">
                     <div className="max-w-5xl w-full mx-auto flex flex-col md:flex-row items-end gap-3 md:gap-4">
 
                         {/* Stay Period Segment */}
@@ -235,13 +237,15 @@ export default function HeroSection({
                                     <span className="text-sm font-medium text-gray-900">Adult</span>
                                     <div className="flex items-center gap-2">
                                         <button
-                                            onClick={() => setGuests({ ...guests, adults: Math.max(1, guests.adults - 1) })}
-                                            className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 hover:text-black hover:border-black transition-all"
+                                            type="button"
+                                            onClick={() => setGuests(g => ({ ...g, adults: Math.max(1, g.adults - 1) }))}
+                                            className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 hover:text-black hover:border-black transition-all"
                                         >−</button>
-                                        <span className="text-sm font-bold w-4 text-center">{guests.adults}</span>
+                                        <span className="text-sm font-bold w-4 text-center text-gray-900">{guests.adults}</span>
                                         <button
-                                            onClick={() => setGuests({ ...guests, adults: Math.min(8, guests.adults + 1) })}
-                                            className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 hover:text-black hover:border-black transition-all"
+                                            type="button"
+                                            onClick={() => setGuests(g => ({ ...g, adults: Math.min(8, g.adults + 1) }))}
+                                            className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 hover:text-black hover:border-black transition-all"
                                         >+</button>
                                     </div>
                                 </div>
@@ -256,13 +260,15 @@ export default function HeroSection({
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <button
-                                            onClick={() => setGuests({ ...guests, children: Math.max(0, guests.children - 1) })}
-                                            className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 hover:text-black hover:border-black transition-all"
+                                            type="button"
+                                            onClick={() => setGuests(g => ({ ...g, children: Math.max(0, g.children - 1) }))}
+                                            className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 hover:text-black hover:border-black transition-all"
                                         >−</button>
-                                        <span className="text-sm font-bold w-4 text-center">{guests.children}</span>
+                                        <span className="text-sm font-bold w-4 text-center text-gray-900">{guests.children}</span>
                                         <button
-                                            onClick={() => setGuests({ ...guests, children: Math.min(6, guests.children + 1) })}
-                                            className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 hover:text-black hover:border-black transition-all"
+                                            type="button"
+                                            onClick={() => setGuests(g => ({ ...g, children: Math.min(6, g.children + 1) }))}
+                                            className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 hover:text-black hover:border-black transition-all"
                                         >+</button>
                                     </div>
                                 </div>

@@ -384,7 +384,7 @@ export default async function CheckoutPage({
                         )}
                         <GuestForm
                             initialValues={guestDetails}
-                            submitLabel="Save Guest Details"
+                            submitLabel="Save & Continue"
                         />
                     </div>
                 }
