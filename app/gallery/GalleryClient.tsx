@@ -1,11 +1,12 @@
 'use client';
 
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 
 import Image from 'next/image';
+import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface GalleryImage {
     id: string;
@@ -31,73 +32,44 @@ const getCategoryForImage = (title: string | null): string => {
 
 export default function GalleryClient({ initialImages }: { initialImages: GalleryImage[] }) {
     const [selectedCategory, setSelectedCategory] = useState('All');
+    const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
     const filteredImages = selectedCategory === 'All'
         ? initialImages
         : initialImages.filter(img => getCategoryForImage(img.title) === selectedCategory);
 
+    // Lightbox handlers
+    const openLightbox = (index: number) => setSelectedIndex(index);
+    const closeLightbox = () => setSelectedIndex(null);
+    const showNext = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (selectedIndex !== null) {
+            setSelectedIndex((selectedIndex + 1) % filteredImages.length);
+        }
+    };
+    const showPrev = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (selectedIndex !== null) {
+            setSelectedIndex((selectedIndex - 1 + filteredImages.length) % filteredImages.length);
+        }
+    };
+
+    // Keyboard navigation
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (selectedIndex === null) return;
+            if (e.key === 'ArrowRight') setSelectedIndex((selectedIndex + 1) % filteredImages.length);
+            if (e.key === 'ArrowLeft') setSelectedIndex((selectedIndex - 1 + filteredImages.length) % filteredImages.length);
+            if (e.key === 'Escape') closeLightbox();
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [selectedIndex, filteredImages.length]);
+
     return (
-        <main className="min-h-screen bg-[var(--surface-cream)] font-sans">
+        <main className="min-h-screen bg-[var(--surface-cream)] font-sans pt-24">
 
-            {/* Hero Section - Compact style like rooms page */}
-            <section className="relative h-[44vh] md:h-[52vh] w-full overflow-hidden">
-                <motion.div
-                    initial={{ scale: 1.05 }}
-                    animate={{ scale: 1 }}
-                    transition={{ duration: 8, ease: "easeOut" }}
-                    className="absolute inset-0 z-0"
-                >
-                    {/* Dark gradient background like rooms page hero */}
-                    <div className="absolute inset-0 bg-[linear-gradient(135deg,var(--brand-primary-deep)_0%,var(--brand-primary-dark)_38%,var(--brand-primary-deep)_100%)]" />
-                    <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_25%_30%,rgba(231,212,173,0.18)_0%,rgba(231,212,173,0)_60%)]" />
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/15 to-black/40" />
-                </motion.div>
 
-                {/* Hero Content - Compact */}
-                <div className="relative z-10 h-full flex flex-col justify-center items-center text-center px-6">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.2 }}
-                        className="flex items-center gap-4 mb-3"
-                    >
-                        <span className="w-8 h-[1px] bg-white/80" />
-                        <p className="text-white text-[10px] tracking-[0.34em] uppercase font-light">
-                            Olivia Alleppey
-                        </p>
-                        <span className="w-8 h-[1px] bg-white/80" />
-                    </motion.div>
-
-                    <motion.h1
-                        initial={{ opacity: 0, y: 25 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.4 }}
-                        className="text-[4.25rem] sm:text-[5.25rem] md:text-[8.25rem] lg:text-[10.5rem] font-serif font-medium text-white mb-5 tracking-[-0.03em] leading-[0.92] [text-shadow:0_2px_22px_rgba(0,0,0,0.55)]"
-                    >
-                        Gallery
-                    </motion.h1>
-
-                    <motion.div
-                        initial={{ opacity: 0, y: 15 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.8 }}
-                        className="flex gap-3"
-                    >
-                        <Link
-                            href="#gallery-collection"
-                            className="border border-white/90 bg-white text-[#2D3933] px-6 py-2.5 text-[10px] tracking-[0.22em] uppercase font-semibold shadow-[0_18px_40px_-28px_rgba(0,0,0,0.65)] hover:bg-white/95 transition-colors duration-300"
-                        >
-                            Explore Gallery
-                        </Link>
-                        <Link
-                            href="/contact"
-                            className="border border-white/85 bg-black/20 text-white px-6 py-2.5 text-[10px] tracking-[0.22em] uppercase font-semibold backdrop-blur-sm hover:bg-black/30 transition-colors duration-300"
-                        >
-                            Contact now
-                        </Link>
-                    </motion.div>
-                </div>
-            </section>
 
             {/* Category Filter */}
             <section id="gallery-collection"
@@ -126,10 +98,11 @@ export default function GalleryClient({ initialImages }: { initialImages: Galler
             <section className="py-24 px-6 md:px-12">
                 <div className="max-w-6xl mx-auto">
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {filteredImages.map((image) => (
+                        {filteredImages.map((image, index) => (
                             <div
                                 key={image.id}
                                 className="group cursor-pointer"
+                                onClick={() => openLightbox(index)}
                             >
                                 {/* Image */}
                                 <div className="relative h-72 bg-gray-100 mb-4 overflow-hidden rounded-lg">
@@ -184,6 +157,87 @@ export default function GalleryClient({ initialImages }: { initialImages: Galler
                     </a>
                 </div>
             </section>
+            {/* Lightbox Overlay */}
+            <AnimatePresence>
+                {selectedIndex !== null && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-sm"
+                        onClick={closeLightbox}
+                    >
+                        {/* Close button */}
+                        <button
+                            className="absolute top-6 right-6 p-2 text-white/70 hover:text-white bg-black/50 hover:bg-black/80 rounded-full transition-all z-50"
+                            onClick={(e) => { e.stopPropagation(); closeLightbox(); }}
+                        >
+                            <X className="w-8 h-8" />
+                        </button>
+
+                        {/* Navigation Buttons */}
+                        {filteredImages.length > 1 && (
+                            <>
+                                <button
+                                    className="absolute left-6 p-4 text-white/70 hover:text-white bg-black/50 hover:bg-black/80 rounded-full transition-all z-50 hidden md:block"
+                                    onClick={showPrev}
+                                >
+                                    <ChevronLeft className="w-10 h-10" />
+                                </button>
+                                <button
+                                    className="absolute right-6 p-4 text-white/70 hover:text-white bg-black/50 hover:bg-black/80 rounded-full transition-all z-50 hidden md:block"
+                                    onClick={showNext}
+                                >
+                                    <ChevronRight className="w-10 h-10" />
+                                </button>
+                            </>
+                        )}
+
+                        {/* Image Container */}
+                        <div 
+                            className="relative w-full max-w-6xl h-[80vh] md:h-[90vh] mx-4 flex flex-col items-center justify-center"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="relative w-full h-full">
+                                <Image
+                                    src={filteredImages[selectedIndex].imageUrl}
+                                    alt={filteredImages[selectedIndex].title || 'Gallery image'}
+                                    fill
+                                    className="object-contain"
+                                    quality={100}
+                                />
+                            </div>
+                            
+                            {/* Mobile Navigation (shows under image on small screens) */}
+                            {filteredImages.length > 1 && (
+                                <div className="flex md:hidden items-center justify-between w-full px-4 mt-6">
+                                    <button onClick={showPrev} className="p-3 text-white bg-white/10 rounded-full active:bg-white/20">
+                                        <ChevronLeft className="w-8 h-8" />
+                                    </button>
+                                    <div className="text-white/80 text-sm font-medium tracking-widest">
+                                        {selectedIndex + 1} / {filteredImages.length}
+                                    </div>
+                                    <button onClick={showNext} className="p-3 text-white bg-white/10 rounded-full active:bg-white/20">
+                                        <ChevronRight className="w-8 h-8" />
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* Title/Category Label */}
+                            <div className="absolute bottom-4 left-0 right-0 text-center pointer-events-none hidden md:block">
+                                <div className="inline-block bg-black/60 backdrop-blur-md px-6 py-3 rounded-full text-white">
+                                    <span className="text-[var(--gold-accent)] text-xs tracking-[0.2em] uppercase mr-3">
+                                        {getCategoryForImage(filteredImages[selectedIndex].title)}
+                                    </span>
+                                    <span className="font-serif text-lg">
+                                        {filteredImages[selectedIndex].title || 'Untitled'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </main>
     );
 }
