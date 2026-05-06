@@ -67,24 +67,24 @@ export default function GalleryClient({ initialImages }: { initialImages: Galler
     }, [selectedIndex, filteredImages.length]);
 
     return (
-        <main className="min-h-screen bg-[var(--surface-cream)] font-sans pt-24">
+        <main className="min-h-screen bg-[var(--surface-cream)] font-sans pt-[72px] md:pt-[84px]">
 
 
 
             {/* Category Filter */}
             <section id="gallery-collection"
-                className="py-8 px-6 md:px-12 bg-white border-b border-gray-200 sticky z-40"
+                className="py-5 px-6 md:px-12 bg-[var(--brand-primary)] sticky z-40 shadow-md"
                 style={{ top: 'var(--site-header-height, 62px)' }}
             >
                 <div className="max-w-6xl mx-auto">
-                    <div className="flex flex-wrap justify-center gap-4">
+                    <div className="flex flex-wrap justify-center gap-2 md:gap-4">
                         {categories.map((category) => (
                             <button
                                 key={category}
                                 onClick={() => setSelectedCategory(category)}
-                                className={`px-6 py-3 text-sm uppercase tracking-wider transition-all ${selectedCategory === category
-                                    ? 'text-[var(--brand-primary)] border-b-2 border-[var(--brand-primary)]'
-                                    : 'text-[#59544D] hover:text-[var(--text-dark)]'
+                                className={`px-6 py-2.5 text-[11px] uppercase tracking-[0.15em] font-semibold transition-all rounded-full ${selectedCategory === category
+                                    ? 'bg-[var(--gold-accent)] text-[#0F1C16] shadow-lg scale-105'
+                                    : 'text-white/80 hover:bg-white/10 hover:text-white'
                                     }`}
                             >
                                 {category}
@@ -95,7 +95,7 @@ export default function GalleryClient({ initialImages }: { initialImages: Galler
             </section>
 
             {/* Gallery Grid */}
-            <section className="py-24 px-6 md:px-12">
+            <section className="py-16 px-6 md:px-12">
                 <div className="max-w-6xl mx-auto">
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
                         {filteredImages.map((image, index) => (
