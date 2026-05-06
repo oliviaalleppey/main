@@ -5,10 +5,65 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { updateGuestDetails } from '@/app/book/actions';
-import { Loader2, Mail, MapPin, MessageSquare, Phone, User } from 'lucide-react';
+import { ChevronDown, Loader2, Mail, MapPin, MessageSquare, User } from 'lucide-react';
 import { useFormStatus } from 'react-dom';
 import { useRef, useState } from 'react';
 
+// ─── Country list ────────────────────────────────────────────────────────────
+// Top countries for a Kerala resort listed first, then alphabetical rest
+const COUNTRIES = [
+    { code: 'IN', dial: '+91',  flag: '🇮🇳', name: 'India' },
+    { code: 'DE', dial: '+49',  flag: '🇩🇪', name: 'Germany' },
+    { code: 'GB', dial: '+44',  flag: '🇬🇧', name: 'United Kingdom' },
+    { code: 'AE', dial: '+971', flag: '🇦🇪', name: 'UAE' },
+    { code: 'US', dial: '+1',   flag: '🇺🇸', name: 'United States' },
+    { code: 'AU', dial: '+61',  flag: '🇦🇺', name: 'Australia' },
+    { code: 'FR', dial: '+33',  flag: '🇫🇷', name: 'France' },
+    { code: 'IT', dial: '+39',  flag: '🇮🇹', name: 'Italy' },
+    { code: 'CA', dial: '+1',   flag: '🇨🇦', name: 'Canada' },
+    { code: 'SG', dial: '+65',  flag: '🇸🇬', name: 'Singapore' },
+    { code: 'MY', dial: '+60',  flag: '🇲🇾', name: 'Malaysia' },
+    { code: 'JP', dial: '+81',  flag: '🇯🇵', name: 'Japan' },
+    { code: 'NL', dial: '+31',  flag: '🇳🇱', name: 'Netherlands' },
+    { code: 'CH', dial: '+41',  flag: '🇨🇭', name: 'Switzerland' },
+    { code: 'SE', dial: '+46',  flag: '🇸🇪', name: 'Sweden' },
+    { code: 'NO', dial: '+47',  flag: '🇳🇴', name: 'Norway' },
+    { code: 'DK', dial: '+45',  flag: '🇩🇰', name: 'Denmark' },
+    { code: 'BE', dial: '+32',  flag: '🇧🇪', name: 'Belgium' },
+    { code: 'ES', dial: '+34',  flag: '🇪🇸', name: 'Spain' },
+    { code: 'PT', dial: '+351', flag: '🇵🇹', name: 'Portugal' },
+    { code: 'AT', dial: '+43',  flag: '🇦🇹', name: 'Austria' },
+    { code: 'NZ', dial: '+64',  flag: '🇳🇿', name: 'New Zealand' },
+    { code: 'ZA', dial: '+27',  flag: '🇿🇦', name: 'South Africa' },
+    { code: 'RU', dial: '+7',   flag: '🇷🇺', name: 'Russia' },
+    { code: 'CN', dial: '+86',  flag: '🇨🇳', name: 'China' },
+    { code: 'KR', dial: '+82',  flag: '🇰🇷', name: 'South Korea' },
+    { code: 'BD', dial: '+880', flag: '🇧🇩', name: 'Bangladesh' },
+    { code: 'LK', dial: '+94',  flag: '🇱🇰', name: 'Sri Lanka' },
+    { code: 'NP', dial: '+977', flag: '🇳🇵', name: 'Nepal' },
+    { code: 'PK', dial: '+92',  flag: '🇵🇰', name: 'Pakistan' },
+    { code: 'MV', dial: '+960', flag: '🇲🇻', name: 'Maldives' },
+    { code: 'BH', dial: '+973', flag: '🇧🇭', name: 'Bahrain' },
+    { code: 'KW', dial: '+965', flag: '🇰🇼', name: 'Kuwait' },
+    { code: 'QA', dial: '+974', flag: '🇶🇦', name: 'Qatar' },
+    { code: 'SA', dial: '+966', flag: '🇸🇦', name: 'Saudi Arabia' },
+    { code: 'OM', dial: '+968', flag: '🇴🇲', name: 'Oman' },
+    { code: 'IL', dial: '+972', flag: '🇮🇱', name: 'Israel' },
+    { code: 'TR', dial: '+90',  flag: '🇹🇷', name: 'Turkey' },
+    { code: 'EG', dial: '+20',  flag: '🇪🇬', name: 'Egypt' },
+    { code: 'NG', dial: '+234', flag: '🇳🇬', name: 'Nigeria' },
+    { code: 'GH', dial: '+233', flag: '🇬🇭', name: 'Ghana' },
+    { code: 'KE', dial: '+254', flag: '🇰🇪', name: 'Kenya' },
+    { code: 'MX', dial: '+52',  flag: '🇲🇽', name: 'Mexico' },
+    { code: 'BR', dial: '+55',  flag: '🇧🇷', name: 'Brazil' },
+    { code: 'AR', dial: '+54',  flag: '🇦🇷', name: 'Argentina' },
+    { code: 'PH', dial: '+63',  flag: '🇵🇭', name: 'Philippines' },
+    { code: 'ID', dial: '+62',  flag: '🇮🇩', name: 'Indonesia' },
+    { code: 'TH', dial: '+66',  flag: '🇹🇭', name: 'Thailand' },
+    { code: 'VN', dial: '+84',  flag: '🇻🇳', name: 'Vietnam' },
+];
+
+// ─── Types ───────────────────────────────────────────────────────────────────
 type GuestFormValues = {
     firstName?: string;
     lastName?: string;
@@ -23,9 +78,9 @@ interface GuestFormProps {
     submitLabel?: string;
 }
 
+// ─── Submit button ───────────────────────────────────────────────────────────
 function SubmitButton({ submitLabel }: { submitLabel: string }) {
     const { pending } = useFormStatus();
-
     return (
         <Button
             type="submit"
@@ -38,26 +93,17 @@ function SubmitButton({ submitLabel }: { submitLabel: string }) {
     );
 }
 
-function normalizePhone(value: string): string {
-    // Strip spaces, dashes, dots, parentheses
-    let digits = value.replace(/[\s\-().]/g, '');
-    // Remove leading +91 or 0
-    if (digits.startsWith('+91')) digits = digits.slice(3);
-    else if (digits.startsWith('91') && digits.length === 12) digits = digits.slice(2);
-    else if (digits.startsWith('0')) digits = digits.slice(1);
-    return digits;
-}
-
+// ─── Validation ──────────────────────────────────────────────────────────────
 function validateForm(data: FormData): Record<string, string> {
     const errors: Record<string, string> = {};
 
     const firstName = (data.get('firstName') as string || '').trim();
-    const lastName = (data.get('lastName') as string || '').trim();
-    const email = (data.get('email') as string || '').trim();
-    const phone = (data.get('phone') as string || '').trim();
+    const lastName  = (data.get('lastName')  as string || '').trim();
+    const email     = (data.get('email')     as string || '').trim();
+    const phone     = (data.get('phone')     as string || '').trim();
 
     if (!firstName) errors.firstName = 'First name is required';
-    if (!lastName) errors.lastName = 'Last name is required';
+    if (!lastName)  errors.lastName  = 'Last name is required';
 
     if (!email) {
         errors.email = 'Email is required';
@@ -68,24 +114,48 @@ function validateForm(data: FormData): Record<string, string> {
     if (!phone) {
         errors.phone = 'Phone number is required';
     } else {
-        const digits = normalizePhone(phone);
-        if (!/^[6-9]\d{9}$/.test(digits)) {
-            errors.phone = 'Enter a valid 10-digit Indian mobile number';
+        // phone field will hold the full number e.g. "+49 151 23456789"
+        // strip everything except digits and leading +
+        const clean = phone.replace(/[\s\-().]/g, '');
+        if (!/^\+\d{7,15}$/.test(clean)) {
+            errors.phone = 'Enter a valid phone number';
         }
     }
 
     return errors;
 }
 
+// ─── Parse existing phone into dial + local ───────────────────────────────────
+function parseInitialPhone(raw?: string): { dial: string; local: string } {
+    if (!raw) return { dial: '+91', local: '' };
+    const clean = raw.trim();
+    // Try to match a known dial code
+    for (const c of COUNTRIES) {
+        if (clean.startsWith(c.dial)) {
+            return { dial: c.dial, local: clean.slice(c.dial.length).replace(/^\s+/, '') };
+        }
+    }
+    return { dial: '+91', local: clean };
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
 export function GuestForm({
     initialValues,
     submitLabel = 'Save & Continue',
 }: GuestFormProps) {
     const formRef = useRef<HTMLFormElement>(null);
     const [errors, setErrors] = useState<Record<string, string>>({});
-    const [phoneHint, setPhoneHint] = useState(false);
+
+    const parsed = parseInitialPhone(initialValues?.phone);
+    const [dialCode, setDialCode] = useState(parsed.dial);
+    const [localNumber, setLocalNumber] = useState(parsed.local);
+
+    // Hidden field value — full combined number
+    const fullPhone = `${dialCode} ${localNumber}`.trim();
 
     async function handleSubmit(formData: FormData) {
+        // Inject the combined phone so validateForm sees it
+        formData.set('phone', fullPhone);
         const validationErrors = validateForm(formData);
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
@@ -95,8 +165,11 @@ export function GuestForm({
         await updateGuestDetails(formData);
     }
 
+    const selectedCountry = COUNTRIES.find(c => c.dial === dialCode) ?? COUNTRIES[0];
+
     return (
         <form ref={formRef} action={handleSubmit} className="space-y-3">
+            {/* ── Primary Guest ── */}
             <div className="rounded-xl border border-gray-200 bg-gray-50 p-2 md:p-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 mb-2 md:mb-3">Primary Guest</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3">
@@ -133,12 +206,14 @@ export function GuestForm({
                 </div>
             </div>
 
+            {/* ── Contact Details ── */}
             <div className="rounded-xl border border-gray-200 bg-gray-50 p-2 md:p-3">
                 <div className="flex items-center justify-between gap-3 mb-2 md:mb-3">
                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">Contact Details</p>
                     <span className="text-[11px] text-gray-500">Used for confirmation and invoice</span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3">
+                    {/* Email */}
                     <div className="space-y-1.5">
                         <Label htmlFor="email">Email Address</Label>
                         <div className="relative">
@@ -155,35 +230,48 @@ export function GuestForm({
                         </div>
                         {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
                     </div>
+
+                    {/* Phone with country code selector */}
                     <div className="space-y-1.5">
-                        <Label htmlFor="phone">Phone Number</Label>
-                        <div className="relative">
-                            <Phone className="w-4 h-4 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
-                            <Input
-                                id="phone"
-                                name="phone"
+                        <Label htmlFor="phoneLocal">Phone Number</Label>
+                        {/* Hidden field carries the full combined value */}
+                        <input type="hidden" name="phone" value={fullPhone} />
+                        <div className={`flex h-9 rounded-lg bg-white border overflow-hidden ${errors.phone ? 'border-red-400' : 'border-gray-300'}`}>
+                            {/* Country code selector */}
+                            <div className="relative flex-shrink-0">
+                                <select
+                                    aria-label="Country code"
+                                    value={dialCode}
+                                    onChange={e => setDialCode(e.target.value)}
+                                    className="h-full appearance-none bg-gray-50 border-r border-gray-300 pl-2 pr-6 text-sm text-gray-700 cursor-pointer focus:outline-none focus:ring-0"
+                                    style={{ minWidth: 0 }}
+                                >
+                                    {COUNTRIES.map(c => (
+                                        <option key={c.code} value={c.dial}>
+                                            {c.flag} {c.dial}
+                                        </option>
+                                    ))}
+                                </select>
+                                <ChevronDown className="w-3 h-3 text-gray-400 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                            </div>
+
+                            {/* Local number input */}
+                            <input
+                                id="phoneLocal"
                                 type="tel"
-                                required
-                                placeholder="+91 98765 43210"
-                                defaultValue={initialValues?.phone || ''}
-                                className={`h-9 rounded-lg bg-white pl-9 text-sm ${errors.phone ? 'border-red-400 focus-visible:ring-red-400' : 'border-gray-300'}`}
-                                onKeyDown={(e) => {
-                                    const allowed = /^[0-9+\-\s]$/;
-                                    const isNavKey = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key);
-                                    if (!allowed.test(e.key) && !isNavKey) {
-                                        e.preventDefault();
-                                        setPhoneHint(true);
-                                        setTimeout(() => setPhoneHint(false), 2000);
-                                    }
-                                }}
+                                inputMode="numeric"
+                                placeholder={selectedCountry.code === 'IN' ? '98765 43210' : '151 23456789'}
+                                value={localNumber}
+                                onChange={e => setLocalNumber(e.target.value.replace(/[^\d\s\-]/g, ''))}
+                                className="flex-1 min-w-0 px-2.5 text-sm bg-white focus:outline-none focus:ring-0"
                             />
                         </div>
                         {errors.phone && <p className="text-xs text-red-500">{errors.phone}</p>}
-                        {phoneHint && !errors.phone && <p className="text-xs text-amber-600">Only numbers, +, and - are allowed</p>}
                     </div>
                 </div>
             </div>
 
+            {/* ── Address ── */}
             <div className="rounded-xl border border-gray-200 bg-gray-50 p-2 md:p-3">
                 <Label htmlFor="address" className="inline-flex items-center gap-2 text-sm">
                     <MapPin className="w-4 h-4 text-gray-500" />
@@ -198,6 +286,7 @@ export function GuestForm({
                 />
             </div>
 
+            {/* ── Special Requests ── */}
             <div className="rounded-xl border border-gray-200 bg-gray-50 p-2 md:p-3">
                 <Label htmlFor="requests" className="inline-flex items-center gap-2 text-sm">
                     <MessageSquare className="w-4 h-4 text-gray-500" />
