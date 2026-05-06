@@ -254,7 +254,7 @@ export function GuestForm({
                         <Label htmlFor="phoneLocal">Phone Number</Label>
                         {/* Hidden field carries the full combined value */}
                         <input type="hidden" name="phone" value={fullPhone} />
-                        <div className={`flex h-9 rounded-lg bg-white border overflow-hidden ${errors.phone ? 'border-red-400' : 'border-gray-300'}`}>
+                        <div className={`flex h-9 rounded-lg bg-white border ${errors.phone ? 'border-red-400' : 'border-gray-300'}`}>
                             {/* Custom Country Code Selector */}
                             <div className="relative flex-shrink-0" ref={dropdownRef}>
                                 <button
@@ -263,7 +263,7 @@ export function GuestForm({
                                         setIsDropdownOpen(!isDropdownOpen);
                                         setSearchQuery(''); // Reset search when opening
                                     }}
-                                    className="flex items-center h-full bg-gray-50 border-r border-gray-300 pl-3 pr-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                                    className="flex items-center h-full bg-gray-50 border-r border-gray-300 pl-3 pr-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors rounded-l-lg"
                                 >
                                     <span>{selectedCountry.flag} {selectedCountry.dial}</span>
                                     <ChevronDown className="w-3.5 h-3.5 text-gray-400 ml-1.5" />
@@ -316,7 +316,7 @@ export function GuestForm({
                                 placeholder={selectedCountry.code === 'IN' ? '98765 43210' : '151 23456789'}
                                 value={localNumber}
                                 onChange={e => setLocalNumber(e.target.value.replace(/[^\d\s\-]/g, ''))}
-                                className="flex-1 min-w-0 px-2.5 text-sm bg-white focus:outline-none focus:ring-0"
+                                className="flex-1 min-w-0 px-2.5 text-sm bg-white focus:outline-none focus:ring-0 rounded-r-lg"
                             />
                         </div>
                         {errors.phone && <p className="text-xs text-red-500">{errors.phone}</p>}
