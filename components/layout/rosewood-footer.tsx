@@ -80,20 +80,20 @@ export default function RosewoodFooter() {
                         <div>
                             <h4 className="text-[11px] uppercase tracking-[0.28em] text-[#6B645C] mb-6">World of Olivia</h4>
                             <ul className="space-y-3 text-[15px] text-[#403A35]">
-                                <li><Link href="over" className="hover:text-[var(--text-dark)] transition-colors">Our Story</Link></li>
-                                <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">Residences</Link></li>
+                                <li><Link href="/discover" className="hover:text-[var(--text-dark)] transition-colors">Our Story</Link></li>
+                                <li><Link href="/accommodation" className="hover:text-[var(--text-dark)] transition-colors">Accommodation</Link></li>
                                 <li><Link href="mailto:hr@oliviaalleppey.com" className="hover:text-[var(--text-dark)] transition-colors">Careers</Link></li>
-                                <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">Press Room</Link></li>
+                                <li><Link href="/gallery" className="hover:text-[var(--text-dark)] transition-colors">Gallery</Link></li>
                             </ul>
                         </div>
 
                         <div>
-                            <h4 className="text-[11px] uppercase tracking-[0.28em] text-[#6B645C] mb-6">Support</h4>
+                            <h4 className="text-[11px] uppercase tracking-[0.28em] text-[#6B645C] mb-6">Explore</h4>
                             <ul className="space-y-3 text-[15px] text-[#403A35]">
-                                <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">Manage Reservations</Link></li>
-                                <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">Gift Cards</Link></li>
-                                <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">Contact</Link></li>
-                                <li><Link href="#" className="hover:text-[var(--text-dark)] transition-colors">FAQ</Link></li>
+                                <li><Link href="/dining" className="hover:text-[var(--text-dark)] transition-colors">Dining</Link></li>
+                                <li><Link href="/wellness" className="hover:text-[var(--text-dark)] transition-colors">Wellness</Link></li>
+                                <li><Link href="/wedding" className="hover:text-[var(--text-dark)] transition-colors">Weddings & Events</Link></li>
+                                <li><Link href="/contact" className="hover:text-[var(--text-dark)] transition-colors">Contact Us</Link></li>
                             </ul>
                         </div>
 
