@@ -9,9 +9,9 @@ import Image from 'next/image';
 
 interface GalleryImage {
     id: string;
-    title: string;
+    title: string | null;
     imageUrl: string;
-    category: string;
+    category: string | null;
 }
 
 export default function GalleryClient({ initialImages }: { initialImages: GalleryImage[] }) {
@@ -93,7 +93,7 @@ export default function GalleryClient({ initialImages }: { initialImages: Galler
                                 <div className="relative h-72 bg-gray-100 mb-4 overflow-hidden rounded-lg">
                                     <Image 
                                         src={image.imageUrl} 
-                                        alt={image.title} 
+                                        alt={image.title || 'Gallery image'} 
                                         fill 
                                         className="object-cover transition-transform duration-700 group-hover:scale-105"
                                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -110,7 +110,7 @@ export default function GalleryClient({ initialImages }: { initialImages: Galler
 
                                 {/* Image Info */}
                                 <div>
-                                    <h3 className="text-lg font-serif text-[var(--text-dark)] mb-1">{image.title}</h3>
+                                    <h3 className="text-lg font-serif text-[var(--text-dark)] mb-1">{image.title || 'Untitled'}</h3>
                                 </div>
                             </div>
                         ))}
