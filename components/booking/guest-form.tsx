@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { updateGuestDetails } from '@/app/book/actions';
 import { ChevronDown, Loader2, Mail, MapPin, MessageSquare, User } from 'lucide-react';
 import { useFormStatus } from 'react-dom';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 
 // ─── Country list ────────────────────────────────────────────────────────────
 // Top countries for a Kerala resort listed first, then alphabetical rest
@@ -149,6 +149,24 @@ export function GuestForm({
     const parsed = parseInitialPhone(initialValues?.phone);
     const [dialCode, setDialCode] = useState(parsed.dial);
     const [localNumber, setLocalNumber] = useState(parsed.local);
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsDropdownOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [dropdownRef]);
+
+    const filteredCountries = COUNTRIES.filter(c => 
+        c.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        c.dial.includes(searchQuery)
+    );
 
     // Hidden field value — full combined number
     const fullPhone = `${dialCode} ${localNumber}`.trim();
@@ -237,22 +255,57 @@ export function GuestForm({
                         {/* Hidden field carries the full combined value */}
                         <input type="hidden" name="phone" value={fullPhone} />
                         <div className={`flex h-9 rounded-lg bg-white border overflow-hidden ${errors.phone ? 'border-red-400' : 'border-gray-300'}`}>
-                            {/* Country code selector */}
-                            <div className="relative flex-shrink-0">
-                                <select
-                                    aria-label="Country code"
-                                    value={dialCode}
-                                    onChange={e => setDialCode(e.target.value)}
-                                    className="h-full appearance-none bg-gray-50 border-r border-gray-300 pl-2 pr-6 text-sm text-gray-700 cursor-pointer focus:outline-none focus:ring-0"
-                                    style={{ minWidth: 0 }}
+                            {/* Custom Country Code Selector */}
+                            <div className="relative flex-shrink-0" ref={dropdownRef}>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setIsDropdownOpen(!isDropdownOpen);
+                                        setSearchQuery(''); // Reset search when opening
+                                    }}
+                                    className="flex items-center h-full bg-gray-50 border-r border-gray-300 pl-3 pr-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                                 >
-                                    {COUNTRIES.map(c => (
-                                        <option key={c.code} value={c.dial}>
-                                            {c.flag} {c.dial}
-                                        </option>
-                                    ))}
-                                </select>
-                                <ChevronDown className="w-3 h-3 text-gray-400 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                                    <span>{selectedCountry.flag} {selectedCountry.dial}</span>
+                                    <ChevronDown className="w-3.5 h-3.5 text-gray-400 ml-1.5" />
+                                </button>
+
+                                {isDropdownOpen && (
+                                    <div className="absolute top-full left-0 mt-1 w-[280px] bg-white border border-gray-200 rounded-lg shadow-xl z-50 overflow-hidden">
+                                        <div className="p-2 border-b border-gray-100 bg-gray-50">
+                                            <input
+                                                type="text"
+                                                autoFocus
+                                                placeholder="Search country or code..."
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                                className="w-full h-8 px-3 text-sm rounded-md border border-gray-300 focus:outline-none focus:border-[var(--brand-primary)] focus:ring-1 focus:ring-[var(--brand-primary)]"
+                                            />
+                                        </div>
+                                        <div className="max-h-64 overflow-y-auto">
+                                            {filteredCountries.length > 0 ? (
+                                                filteredCountries.map(c => (
+                                                    <button
+                                                        key={c.code}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setDialCode(c.dial);
+                                                            setIsDropdownOpen(false);
+                                                        }}
+                                                        className={`w-full flex items-center px-3 py-2.5 text-left hover:bg-gray-50 transition-colors ${dialCode === c.dial ? 'bg-gray-50 font-medium' : ''}`}
+                                                    >
+                                                        <span className="mr-3 text-lg">{c.flag}</span>
+                                                        <span className="flex-1 text-sm text-gray-700">{c.name}</span>
+                                                        <span className="text-sm text-gray-400">{c.dial}</span>
+                                                    </button>
+                                                ))
+                                            ) : (
+                                                <div className="p-4 text-center text-sm text-gray-500">
+                                                    No countries found
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Local number input */}
