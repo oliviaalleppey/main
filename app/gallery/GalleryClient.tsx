@@ -95,36 +95,36 @@ export default function GalleryClient({ initialImages }: { initialImages: Galler
             </section>
 
             {/* Gallery Grid */}
-            <section className="py-16 px-6 md:px-12">
-                <div className="max-w-6xl mx-auto">
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <section className="py-2 md:py-16 px-1 md:px-12">
+                <div className="max-w-7xl mx-auto">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1 md:gap-6">
                         {filteredImages.map((image, index) => (
                             <div
                                 key={image.id}
-                                className="group cursor-pointer"
+                                className="group cursor-pointer flex flex-col"
                                 onClick={() => openLightbox(index)}
                             >
                                 {/* Image */}
-                                <div className="relative h-72 bg-gray-100 mb-4 overflow-hidden rounded-lg">
+                                <div className="relative aspect-square md:aspect-auto md:h-72 w-full bg-gray-100 md:mb-4 overflow-hidden md:rounded-lg">
                                     <Image 
                                         src={image.imageUrl} 
                                         alt={image.title || 'Gallery image'} 
                                         fill 
                                         className="object-cover transition-transform duration-700 group-hover:scale-105"
-                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                                     />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-[var(--brand-primary)]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-[var(--brand-primary)]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden md:block" />
 
                                     {/* Overlay on Hover */}
-                                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden md:flex items-center justify-center">
                                         <svg className="w-12 h-12 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
                                         </svg>
                                     </div>
                                 </div>
 
-                                {/* Image Info */}
-                                <div>
+                                {/* Image Info - Hidden on mobile, visible on desktop */}
+                                <div className="hidden md:block">
                                     <p className="text-[var(--gold-accent-dark)] text-xs tracking-[0.2em] uppercase mb-1">{getCategoryForImage(image.title)}</p>
                                     <h3 className="text-lg font-serif text-[var(--text-dark)] mb-1">{image.title || 'Untitled'}</h3>
                                 </div>
