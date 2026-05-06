@@ -14,7 +14,28 @@ interface GalleryImage {
     category: string | null;
 }
 
+const categories = ['All', 'Rooms', 'Dining', 'Spa', 'Pool', 'Events'];
+
+// Smart categorization based on image title
+const getCategoryForImage = (title: string | null): string => {
+    if (!title) return 'Events'; // Default fallback
+    const t = title.toLowerCase();
+    
+    if (t.includes('room') || t.includes('suite') || t.includes('villa') || t.includes('bed') || t.includes('balcony')) return 'Rooms';
+    if (t.includes('dining') || t.includes('restaurant') || t.includes('food') || t.includes('bar') || t.includes('cafe') || t.includes('breakfast') || t.includes('buffet')) return 'Dining';
+    if (t.includes('spa') || t.includes('wellness') || t.includes('massage') || t.includes('gym') || t.includes('treatment')) return 'Spa';
+    if (t.includes('pool') || t.includes('swim')) return 'Pool';
+    
+    return 'Events'; // Fallback for other things like lobby, exterior, etc.
+};
+
 export default function GalleryClient({ initialImages }: { initialImages: GalleryImage[] }) {
+    const [selectedCategory, setSelectedCategory] = useState('All');
+
+    const filteredImages = selectedCategory === 'All'
+        ? initialImages
+        : initialImages.filter(img => getCategoryForImage(img.title) === selectedCategory);
+
     return (
         <main className="min-h-screen bg-[var(--surface-cream)] font-sans">
 
@@ -78,13 +99,34 @@ export default function GalleryClient({ initialImages }: { initialImages: Galler
                 </div>
             </section>
 
-            {/* Category Filter (Removed as all images are general gallery images) */}
+            {/* Category Filter */}
+            <section id="gallery-collection"
+                className="py-8 px-6 md:px-12 bg-white border-b border-gray-200 sticky z-40"
+                style={{ top: 'var(--site-header-height, 62px)' }}
+            >
+                <div className="max-w-6xl mx-auto">
+                    <div className="flex flex-wrap justify-center gap-4">
+                        {categories.map((category) => (
+                            <button
+                                key={category}
+                                onClick={() => setSelectedCategory(category)}
+                                className={`px-6 py-3 text-sm uppercase tracking-wider transition-all ${selectedCategory === category
+                                    ? 'text-[var(--brand-primary)] border-b-2 border-[var(--brand-primary)]'
+                                    : 'text-[#59544D] hover:text-[var(--text-dark)]'
+                                    }`}
+                            >
+                                {category}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            </section>
 
             {/* Gallery Grid */}
             <section className="py-24 px-6 md:px-12">
                 <div className="max-w-6xl mx-auto">
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {initialImages.map((image) => (
+                        {filteredImages.map((image) => (
                             <div
                                 key={image.id}
                                 className="group cursor-pointer"
@@ -110,15 +152,16 @@ export default function GalleryClient({ initialImages }: { initialImages: Galler
 
                                 {/* Image Info */}
                                 <div>
+                                    <p className="text-[var(--gold-accent-dark)] text-xs tracking-[0.2em] uppercase mb-1">{getCategoryForImage(image.title)}</p>
                                     <h3 className="text-lg font-serif text-[var(--text-dark)] mb-1">{image.title || 'Untitled'}</h3>
                                 </div>
                             </div>
                         ))}
                     </div>
 
-                    {initialImages.length === 0 && (
+                    {filteredImages.length === 0 && (
                         <div className="text-center py-16">
-                            <p className="text-[#59544D]">No images in the gallery yet.</p>
+                            <p className="text-[#59544D]">No images found in this category.</p>
                         </div>
                     )}
                 </div>
