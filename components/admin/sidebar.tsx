@@ -15,6 +15,7 @@ import {
     Tag,
     Film,
     Users,
+    Image as ImageIcon,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -27,6 +28,7 @@ const NAV_ITEMS = [
     { href: '/admin/add-ons', label: 'Add-ons', icon: Sparkles },
     { href: '/admin/memberships', label: 'Memberships', icon: Users },
     { href: '/admin/media', label: 'Media', icon: Film },
+    { href: '/admin/gallery', label: 'Gallery', icon: ImageIcon },
     { href: '/admin/settings', label: 'Site Appearance', icon: Settings },
 ];
 
