@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx tsx:*)"
+      "Bash(npx tsx:*)",
+      "Bash(node -e ':*)",
+      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_sET6hpKRlHg2@ep-winter-river-aijfwj5s-pooler.c-4.us-east-1.aws.neon.tech/neondb?sslmode=require\" npx tsx test-db.ts)",
+      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_sET6hpKRlHg2@ep-winter-river-aijfwj5s-pooler.c-4.us-east-1.aws.neon.tech/neondb?sslmode=require\" npx tsx check-rooms-tmp.ts)",
+      "Bash(curl -s http://localhost:3000/rooms)",
+      "Bash(python3 -c ':*)"
     ],
     "additionalDirectories": [
       "/Users/agt/olivia/Olivia/scripts"

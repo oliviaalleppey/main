@@ -8,6 +8,7 @@ import { BookingFilters } from '@/components/admin/booking-filters';
 import { and, desc, eq, gte, inArray, lte, ilike, sql } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { DeleteBookingButton } from './DeleteBookingButton';
 
 const MAX_RETRIES = Number(process.env.BOOKING_WATCHDOG_MAX_RETRIES || 12);
 
@@ -164,6 +165,7 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
                             <th className="px-5 py-3 text-left text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Check-out</th>
                             <th className="px-5 py-3 text-left text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Status</th>
                             <th className="px-5 py-3 text-right text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Amount</th>
+                            <th className="px-5 py-3 text-right text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Action</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-50">
@@ -189,6 +191,9 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
                                     </span>
                                 </td>
                                 <td className="px-5 py-3.5 text-right font-semibold text-gray-900">{formatCurrency(booking.totalAmount)}</td>
+                                <td className="px-5 py-3.5 text-right">
+                                    <DeleteBookingButton bookingId={booking.id} />
+                                </td>
                             </tr>
                         ))}
                         {allBookings.length === 0 && (

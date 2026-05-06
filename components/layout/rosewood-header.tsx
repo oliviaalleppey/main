@@ -14,6 +14,7 @@ const NAV_ITEMS: Array<{ label: string; href: string; activePrefixes?: string[] 
     { label: 'Conference & Events', href: '/conference-events' },
     { label: 'Dining', href: '/dining' },
     { label: 'Wellness', href: '/wellness' },
+    { label: 'Gallery', href: '/gallery' },
     { label: 'Membership', href: '/membership' },
 ];
 
