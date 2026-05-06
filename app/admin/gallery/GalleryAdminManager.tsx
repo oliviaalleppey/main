@@ -12,6 +12,51 @@ interface GalleryImage {
     category: string;
 }
 
+const compressImage = async (file: File): Promise<File> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new window.Image();
+            img.src = event.target?.result as string;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 1920;
+                const MAX_HEIGHT = 1920;
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+                } else {
+                    if (height > MAX_HEIGHT) {
+                        width *= MAX_HEIGHT / height;
+                        height = MAX_HEIGHT;
+                    }
+                }
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx?.drawImage(img, 0, 0, width, height);
+                canvas.toBlob((blob) => {
+                    if (blob) {
+                        // Change extension to .jpg since we output jpeg
+                        const newName = file.name.replace(/\.[^/.]+$/, ".jpg");
+                        resolve(new File([blob], newName, { type: 'image/jpeg' }));
+                    } else {
+                        reject(new Error('Canvas to Blob failed'));
+                    }
+                }, 'image/jpeg', 0.85);
+            };
+            img.onerror = (error) => reject(error);
+        };
+        reader.onerror = (error) => reject(error);
+    });
+};
+
 export default function GalleryAdminManager({ initialImages }: { initialImages: GalleryImage[] }) {
     const [images, setImages] = useState<GalleryImage[]>(initialImages);
     const [isUploading, setIsUploading] = useState(false);
@@ -23,14 +68,16 @@ export default function GalleryAdminManager({ initialImages }: { initialImages: 
         setIsUploading(true);
         try {
             for (let i = 0; i < files.length; i++) {
-                const file = files[i];
+                const originalFile = files[i];
+                // Compress on client to avoid Vercel 4.5MB payload limit
+                const compressedFile = await compressImage(originalFile);
+
                 const formData = new FormData();
-                formData.append('media', file);
+                formData.append('media', compressedFile);
                 formData.append('category', 'gallery');
                 
-                // Format the filename for the title:
-                // e.g., "Boat_Race_Finish_Line.jpg" -> "Boat Race Finish Line"
-                let title = file.name.replace(/\.[^/.]+$/, ""); // remove extension
+                // Format the filename for the title from the ORIGINAL file name
+                let title = originalFile.name.replace(/\.[^/.]+$/, ""); // remove extension
                 title = title.replace(/_/g, ' '); // replace underscores with spaces
                 formData.append('title', title);
 
