@@ -67,7 +67,7 @@ export default function GalleryClient({ initialImages }: { initialImages: Galler
     }, [selectedIndex, filteredImages.length]);
 
     return (
-        <main className="min-h-screen bg-[var(--surface-cream)] font-sans pt-[72px] md:pt-[84px]">
+        <main className="min-h-screen bg-[var(--surface-cream)] font-sans pt-0">
 
 
 
@@ -140,23 +140,6 @@ export default function GalleryClient({ initialImages }: { initialImages: Galler
                 </div>
             </section>
 
-            {/* CTA Section */}
-            <section className="py-20 px-6 md:px-12 bg-[var(--brand-primary)]">
-                <div className="max-w-4xl mx-auto text-center">
-                    <h2 className="text-3xl md:text-4xl font-serif text-white mb-6 tracking-wide">
-                        Experience It Yourself
-                    </h2>
-                    <p className="text-white/92 text-lg mb-8 max-w-2xl mx-auto">
-                        Pictures can only tell part of the story. Book your stay and experience the luxury firsthand.
-                    </p>
-                    <a
-                        href="#booking-search"
-                        className="inline-block bg-white text-[var(--brand-primary)] px-8 py-4 text-sm uppercase tracking-[0.2em] hover:bg-[var(--gold-accent)] hover:text-white transition-colors"
-                    >
-                        Book Your Stay
-                    </a>
-                </div>
-            </section>
             {/* Lightbox Overlay */}
             <AnimatePresence>
                 {selectedIndex !== null && (
