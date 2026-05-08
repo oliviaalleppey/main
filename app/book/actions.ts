@@ -752,13 +752,20 @@ export async function initiateEasebuzzPaymentAction(): Promise<{
         const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://oliviaalleppey.com';
         const returnUrl = `${baseUrl}/api/payment/easebuzz`;
 
+        // Easebuzz requires a 10-digit numeric-only phone (no country code, no +, no spaces).
+        // The phone stored in session may include a dial code prefix e.g. "+91 9876543210".
+        // Strip all non-digit characters and keep the last 10 digits.
+        const rawPhone = guestDetails.phone || '';
+        const digitsOnly = rawPhone.replace(/\D/g, '');
+        const easebuzzPhone = digitsOnly.slice(-10);
+
         // Call Easebuzz server-side to get access_key, then redirect user to pay URL
         const { payUrl } = await EasebuzzService.initiatePayment({
             orderId: txnId,
             amount: expectedAmount,
             name: `${guestDetails.firstName} ${guestDetails.lastName || ''}`.trim(),
             email: guestDetails.email,
-            phone: guestDetails.phone,
+            phone: easebuzzPhone,
             returnUrl,
         });
 
