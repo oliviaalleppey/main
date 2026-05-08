@@ -205,11 +205,13 @@ export default async function CheckoutPage({
             const quotedPricePerNight = selection.quoteSnapshot?.pricePerNight || room.basePrice;
             const computedSubtotal = quotedPricePerNight * nights * quantity;
             const quotedSubtotal = selection.quoteSnapshot?.totalPrice;
+            // Trust the quoted subtotal — it was computed server-side by getAvailableRoomsForSearch
+            // and includes any pricing overrides or seasonal rules set in the admin.
             const subtotal = typeof quotedSubtotal === 'number' && quotedSubtotal > 0
-                ? Math.max(quotedSubtotal, computedSubtotal)
+                ? quotedSubtotal
                 : computedSubtotal;
             const taxRate = (room as any).taxRate ?? 12;
-            const computedTaxes = Math.round(computedSubtotal * (taxRate / 100));
+            const computedTaxes = Math.round(subtotal * (taxRate / 100));
             const quotedTaxes = selection.quoteSnapshot?.taxesAndFees;
             const taxesAndFees = typeof quotedTaxes === 'number' && quotedTaxes > 0
                 ? quotedTaxes
@@ -345,8 +347,8 @@ export default async function CheckoutPage({
                 }
                 inlineSearchEditor={
                     <SearchStayEditor
-                        initialCheckIn={new Date(session.checkIn!)}
-                        initialCheckOut={new Date(session.checkOut!)}
+                        initialCheckIn={toDateOnlyString(session.checkIn)}
+                        initialCheckOut={toDateOnlyString(session.checkOut)}
                         initialAdults={session.adults || 1}
                         initialChildren={session.children || 0}
                         initialRooms={Math.max(1, totalRoomCount)}

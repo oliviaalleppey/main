@@ -9,6 +9,7 @@ import { and, desc, eq, gte, inArray, lte, ilike, sql } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { DeleteBookingButton } from './DeleteBookingButton';
+import { CancelBookingButton } from './CancelBookingButton';
 
 const MAX_RETRIES = Number(process.env.BOOKING_WATCHDOG_MAX_RETRIES || 12);
 
@@ -192,7 +193,10 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
                                 </td>
                                 <td className="px-5 py-3.5 text-right font-semibold text-gray-900">{formatCurrency(booking.totalAmount)}</td>
                                 <td className="px-5 py-3.5 text-right">
-                                    <DeleteBookingButton bookingId={booking.id} />
+                                    <div className="flex items-center justify-end gap-1">
+                                        <CancelBookingButton bookingId={booking.id} bookingNumber={booking.bookingNumber} status={booking.status || ''} />
+                                        <DeleteBookingButton bookingId={booking.id} />
+                                    </div>
                                 </td>
                             </tr>
                         ))}

@@ -13,6 +13,7 @@ import {
     Tag,
     Users,
 } from 'lucide-react';
+import { format } from 'date-fns';
 import { getAvailableRoomsForSearch, type SearchResult } from '@/lib/services/search';
 import { BookingButton } from '@/components/booking/booking-button';
 import { SearchStayEditor } from '@/components/booking/search-stay-editor';
@@ -135,8 +136,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             <div className="sticky top-[56px] lg:top-[76px] z-30 border-b border-[#E4E8DD] bg-gradient-to-b from-[#FAFAF5] via-[#F7F8F2] to-[#F4F5F0] shadow-sm">
                 <div className="max-w-[1400px] mx-auto px-3 md:px-6 py-4 md:py-6">
                     <SearchStayEditor
-                        initialCheckIn={checkInDate}
-                        initialCheckOut={checkOutDate}
+                        initialCheckIn={checkInParam || format(new Date(), 'yyyy-MM-dd')}
+                        initialCheckOut={checkOutParam || format(new Date(Date.now() + 86400000), 'yyyy-MM-dd')}
                         initialAdults={safeAdults}
                         initialChildren={safeChildren}
                         initialRooms={safeRooms}

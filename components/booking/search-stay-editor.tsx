@@ -1,19 +1,19 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { DateRange } from 'react-day-picker';
 import { LuxuryDatePicker } from '@/components/ui/luxury-date-picker';
 import { useRouter } from 'next/navigation';
 import { ChevronDown, Search, Loader2 } from 'lucide-react';
 
 interface SearchStayEditorProps {
-    initialCheckIn: Date;
-    initialCheckOut: Date;
+    initialCheckIn: string; // "YYYY-MM-DD"
+    initialCheckOut: string; // "YYYY-MM-DD"
     initialAdults: number;
     initialChildren: number;
     initialRooms: number;
-    onUpdate?: (checkIn: Date, checkOut: Date, adults: number, children: number, rooms: number) => void;
+    onUpdate?: (checkIn: string, checkOut: string, adults: number, children: number, rooms: number) => void;
 }
 
 export function SearchStayEditor({
@@ -29,9 +29,11 @@ export function SearchStayEditor({
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(true);
 
+    // parseISO treats "YYYY-MM-DD" as local midnight — avoids UTC-to-local shift that
+    // new Date("YYYY-MM-DD") causes (dates appearing 1 day earlier in IST browsers).
     const [date, setDate] = useState<DateRange | undefined>({
-        from: initialCheckIn,
-        to: initialCheckOut,
+        from: parseISO(initialCheckIn),
+        to: parseISO(initialCheckOut),
     });
     const [guests, setGuests] = useState({
         adults: initialAdults,
@@ -42,16 +44,19 @@ export function SearchStayEditor({
     const handleUpdate = () => {
         if (!date?.from || !date?.to) return;
 
+        const checkInStr = format(date.from, 'yyyy-MM-dd');
+        const checkOutStr = format(date.to, 'yyyy-MM-dd');
+
         if (onUpdate) {
             startTransition(() => {
-                onUpdate(date.from!, date.to!, guests.adults, guests.children, guests.rooms);
+                onUpdate(checkInStr, checkOutStr, guests.adults, guests.children, guests.rooms);
             });
             return;
         }
 
         const params = new URLSearchParams();
-        params.set('checkIn', format(date.from, 'yyyy-MM-dd'));
-        params.set('checkOut', format(date.to, 'yyyy-MM-dd'));
+        params.set('checkIn', checkInStr);
+        params.set('checkOut', checkOutStr);
         params.set('adults', guests.adults.toString());
         params.set('children', guests.children.toString());
         params.set('rooms', guests.rooms.toString());

@@ -323,8 +323,10 @@ async function calculateSessionPayableAmount(sessionId: string): Promise<number>
         const pricePerNight = selection.quoteSnapshot?.pricePerNight || roomData.basePrice;
         const computed = pricePerNight * nights * quantity;
         const quoted = selection.quoteSnapshot?.totalPrice;
+        // Trust the quoted price — it was computed server-side by getAvailableRoomsForSearch
+        // and correctly reflects any pricing overrides or seasonal rules from the admin.
         const lineSubtotal = typeof quoted === 'number' && quoted > 0
-            ? Math.max(quoted, computed)
+            ? quoted
             : computed;
 
         const taxRate = roomData.taxRate ?? 12;
@@ -348,6 +350,7 @@ async function calculateSessionPayableAmount(sessionId: string): Promise<number>
         .select({
             id: addOns.id,
             price: addOns.price,
+            taxRate: addOns.taxRate,
         })
         .from(addOns)
         .where(and(
@@ -355,15 +358,17 @@ async function calculateSessionPayableAmount(sessionId: string): Promise<number>
             eq(addOns.isActive, true),
         ));
 
-    const addOnPriceMap = new Map(addOnRows.map((row) => [row.id, row.price]));
-    const addOnsSubtotal = selectedAddOns.reduce((sum, selected) => {
-        const price = addOnPriceMap.get(selected.addOnId);
-        if (!price) return sum;
-        return sum + (price * selected.quantity);
-    }, 0);
+    const addOnDataMap = new Map(addOnRows.map((row) => [row.id, { price: row.price, taxRate: row.taxRate ?? 18 }]));
+    let addOnsSubtotal = 0;
+    let addOnsTax = 0;
+    for (const selected of selectedAddOns) {
+        const data = addOnDataMap.get(selected.addOnId);
+        if (!data) continue;
+        const lineSubtotal = data.price * selected.quantity;
+        addOnsSubtotal += lineSubtotal;
+        addOnsTax += Math.round(lineSubtotal * (data.taxRate / 100));
+    }
 
-    // Add-ons GST is always 18% (add-ons are separate from room taxes).
-    const addOnsTax = Math.round(addOnsSubtotal * 0.18);
     return roomSubtotal + addOnsSubtotal + addOnsTax;
 }
 
@@ -769,8 +774,10 @@ export async function initiateEasebuzzPaymentAction(): Promise<{
             returnUrl,
         });
 
-        // Clean up session cookie
-        (await cookies()).delete('booking_session');
+        // Do NOT delete the session cookie here. If payment fails, Easebuzz redirects
+        // back to /book/checkout — the session cookie must still exist so the user
+        // can see their cart and retry. The cookie expires naturally (15 min).
+        // It is cleared on the confirmation page after verified payment.
 
         return { success: true, payUrl };
     } catch (error: unknown) {
@@ -780,7 +787,7 @@ export async function initiateEasebuzzPaymentAction(): Promise<{
     }
 }
 
-export async function updateSessionSearch(params: { checkIn: Date; checkOut: Date; adults: number; children: number }) {
+export async function updateSessionSearch(params: { checkIn: string; checkOut: string; adults: number; children: number }) {
     const sessionId = (await cookies()).get('booking_session')?.value;
     if (!sessionId) {
         return { success: false, message: 'Booking session expired. Please search again.' };
@@ -794,10 +801,10 @@ export async function updateSessionSearch(params: { checkIn: Date; checkOut: Dat
     }
 
     const cartData = (session.cartData as SessionCartData | null) || {};
-    
+
     // Check if the dates are actually different
-    const checkInDateOnly = toDateOnlyString(params.checkIn);
-    const checkOutDateOnly = toDateOnlyString(params.checkOut);
+    const checkInDateOnly = params.checkIn;
+    const checkOutDateOnly = params.checkOut;
     const oldCheckInDateOnly = toDateOnlyString(session.checkIn);
     const oldCheckOutDateOnly = toDateOnlyString(session.checkOut);
     const didChange = checkInDateOnly !== oldCheckInDateOnly || checkOutDateOnly !== oldCheckOutDateOnly || params.adults !== session.adults || params.children !== session.children;
@@ -813,28 +820,34 @@ export async function updateSessionSearch(params: { checkIn: Date; checkOut: Dat
 
     if (session.selectedRoomTypeId) {
         try {
+            // Use explicit UTC midnight dates so toISOString() gives the correct date string
+            const newCheckInDate = new Date(checkInDateOnly + 'T00:00:00Z');
+            const newCheckOutDate = new Date(checkOutDateOnly + 'T00:00:00Z');
+            const newNights = Math.max(1, Math.ceil((newCheckOutDate.getTime() - newCheckInDate.getTime()) / (1000 * 60 * 60 * 24)));
+
             const searchResult = await getAvailableRoomsForSearch(
-                params.checkIn,
-                params.checkOut,
+                newCheckInDate,
+                newCheckOutDate,
                 { adults: params.adults, children: params.children },
                 1
             );
-            
+
             if (searchResult.rooms.length > 0) {
                 const matchedRoom = searchResult.rooms.find(r => r.roomType.id === session.selectedRoomTypeId);
-                
+
                 if (matchedRoom && matchedRoom.bookable && matchedRoom.availableRooms >= 1) {
                     let matchedRatePlan = matchedRoom.ratePlans.find(rp => rp.id === session.selectedRatePlanId);
                     if (!matchedRatePlan && matchedRoom.ratePlans.length > 0) {
                         matchedRatePlan = matchedRoom.ratePlans[0];
                         autoSelectRatePlanId = matchedRatePlan.id;
                     }
-                    
+
                     if (matchedRatePlan) {
+                        const taxPerNight = matchedRatePlan.tax || Math.round(matchedRatePlan.amount * ((matchedRoom.roomType.taxRate || 12) / 100));
                         autoRequoteSnapshot = {
                             pricePerNight: matchedRatePlan.amount,
-                            totalPrice: matchedRatePlan.amount,
-                            taxesAndFees: matchedRatePlan.tax || Math.round(matchedRatePlan.amount * ((matchedRoom.roomType.taxRate || 12) / 100)),
+                            totalPrice: matchedRatePlan.amount * newNights,
+                            taxesAndFees: taxPerNight * newNights,
                             externalRatePlanId: matchedRatePlan.id,
                             capturedAt: new Date().toISOString()
                         };
