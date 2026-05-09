@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { uploadMedia, deleteMedia } from '../media/actions';
-import { Upload, X, Loader2, Image as ImageIcon } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { uploadMedia, deleteMedia, reorderGalleryImages } from '../media/actions';
+import { Upload, X, Loader2, Image as ImageIcon, GripVertical, Save } from 'lucide-react';
 import Image from 'next/image';
 
 interface GalleryImage {
@@ -25,17 +25,10 @@ const compressImage = async (file: File): Promise<File> => {
                 const MAX_HEIGHT = 1920;
                 let width = img.width;
                 let height = img.height;
-
                 if (width > height) {
-                    if (width > MAX_WIDTH) {
-                        height *= MAX_WIDTH / width;
-                        width = MAX_WIDTH;
-                    }
+                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
                 } else {
-                    if (height > MAX_HEIGHT) {
-                        width *= MAX_HEIGHT / height;
-                        height = MAX_HEIGHT;
-                    }
+                    if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
                 }
                 canvas.width = width;
                 canvas.height = height;
@@ -43,7 +36,6 @@ const compressImage = async (file: File): Promise<File> => {
                 ctx?.drawImage(img, 0, 0, width, height);
                 canvas.toBlob((blob) => {
                     if (blob) {
-                        // Change extension to .jpg since we output jpeg
                         const newName = file.name.replace(/\.[^/.]+$/, ".jpg");
                         resolve(new File([blob], newName, { type: 'image/jpeg' }));
                     } else {
@@ -60,27 +52,27 @@ const compressImage = async (file: File): Promise<File> => {
 export default function GalleryAdminManager({ initialImages }: { initialImages: GalleryImage[] }) {
     const [images, setImages] = useState<GalleryImage[]>(initialImages);
     const [isUploading, setIsUploading] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [isDirty, setIsDirty] = useState(false);
+    const [savedMsg, setSavedMsg] = useState(false);
+
+    const dragIndex = useRef<number | null>(null);
+    const dragOverIndex = useRef<number | null>(null);
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
         if (!files || files.length === 0) return;
-
         setIsUploading(true);
         try {
             for (let i = 0; i < files.length; i++) {
                 const originalFile = files[i];
-                // Compress on client to avoid Vercel 4.5MB payload limit
                 const compressedFile = await compressImage(originalFile);
-
                 const formData = new FormData();
                 formData.append('media', compressedFile);
                 formData.append('category', 'gallery');
-                
-                // Format the filename for the title from the ORIGINAL file name
-                let title = originalFile.name.replace(/\.[^/.]+$/, ""); // remove extension
-                title = title.replace(/_/g, ' '); // replace underscores with spaces
+                let title = originalFile.name.replace(/\.[^/.]+$/, "");
+                title = title.replace(/_/g, ' ');
                 formData.append('title', title);
-
                 const result = await uploadMedia(formData);
                 if (result.success && result.url) {
                     setImages((prev) => [
@@ -94,7 +86,6 @@ export default function GalleryAdminManager({ initialImages }: { initialImages: 
             alert('Failed to upload some images. Please try again.');
         } finally {
             setIsUploading(false);
-            // Reset the input
             e.target.value = '';
         }
     };
@@ -107,6 +98,42 @@ export default function GalleryAdminManager({ initialImages }: { initialImages: 
         } catch (error) {
             console.error('Failed to delete media:', error);
             alert('Failed to delete image.');
+        }
+    };
+
+    const handleDragStart = (index: number) => {
+        dragIndex.current = index;
+    };
+
+    const handleDragOver = (e: React.DragEvent, index: number) => {
+        e.preventDefault();
+        dragOverIndex.current = index;
+    };
+
+    const handleDrop = () => {
+        if (dragIndex.current === null || dragOverIndex.current === null) return;
+        if (dragIndex.current === dragOverIndex.current) return;
+
+        const reordered = [...images];
+        const [moved] = reordered.splice(dragIndex.current, 1);
+        reordered.splice(dragOverIndex.current, 0, moved);
+        setImages(reordered);
+        setIsDirty(true);
+        dragIndex.current = null;
+        dragOverIndex.current = null;
+    };
+
+    const handleSaveOrder = async () => {
+        setIsSaving(true);
+        try {
+            await reorderGalleryImages(images.map((img) => img.id));
+            setIsDirty(false);
+            setSavedMsg(true);
+            setTimeout(() => setSavedMsg(false), 2500);
+        } catch {
+            alert('Failed to save order. Please try again.');
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -140,9 +167,25 @@ export default function GalleryAdminManager({ initialImages }: { initialImages: 
 
             {/* Gallery Grid */}
             <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-                <div className="flex items-center gap-3 mb-6">
-                    <ImageIcon className="w-5 h-5 text-gray-400" />
-                    <h2 className="text-lg font-semibold text-gray-900">Gallery Images ({images.length})</h2>
+                <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                        <ImageIcon className="w-5 h-5 text-gray-400" />
+                        <h2 className="text-lg font-semibold text-gray-900">Gallery Images ({images.length})</h2>
+                        <span className="text-xs text-gray-400">Drag images to reorder</span>
+                    </div>
+                    {isDirty && (
+                        <button
+                            onClick={handleSaveOrder}
+                            disabled={isSaving}
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-semibold rounded-lg hover:bg-gray-700 disabled:opacity-60 transition-colors"
+                        >
+                            {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                            {isSaving ? 'Saving...' : 'Save Order'}
+                        </button>
+                    )}
+                    {savedMsg && (
+                        <span className="text-sm text-emerald-600 font-semibold">Order saved!</span>
+                    )}
                 </div>
 
                 {images.length === 0 ? (
@@ -151,16 +194,26 @@ export default function GalleryAdminManager({ initialImages }: { initialImages: 
                     </div>
                 ) : (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                        {images.map((image) => (
-                            <div key={image.id} className="group relative rounded-xl overflow-hidden border border-gray-200 bg-gray-50 aspect-square">
+                        {images.map((image, index) => (
+                            <div
+                                key={image.id}
+                                draggable
+                                onDragStart={() => handleDragStart(index)}
+                                onDragOver={(e) => handleDragOver(e, index)}
+                                onDrop={handleDrop}
+                                className="group relative rounded-xl overflow-hidden border border-gray-200 bg-gray-50 aspect-square cursor-grab active:cursor-grabbing"
+                            >
                                 <Image
                                     src={image.imageUrl}
                                     alt={image.title}
                                     fill
-                                    className="object-cover"
+                                    className="object-cover pointer-events-none"
                                     sizes="(max-width: 768px) 50vw, 25vw"
                                 />
                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="absolute top-2 left-2 p-1.5 bg-black/50 text-white rounded-lg">
+                                        <GripVertical className="w-4 h-4" />
+                                    </div>
                                     <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
                                         <p className="text-white text-xs font-medium truncate">{image.title}</p>
                                     </div>

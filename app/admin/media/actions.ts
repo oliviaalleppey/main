@@ -560,6 +560,18 @@ export async function bulkImportMedia(urls: string[], category: string) {
     return { success: true, count: values.length };
 }
 
+// Reorder gallery images by persisting new sortOrder values
+export async function reorderGalleryImages(orderedIds: string[]) {
+    await Promise.all(
+        orderedIds.map((id, index) =>
+            db.update(galleryImages).set({ sortOrder: index }).where(eq(galleryImages.id, id))
+        )
+    );
+    revalidatePath('/gallery');
+    revalidatePath('/admin/gallery');
+    return { success: true };
+}
+
 // Save URL as media (for client-side direct uploads)
 export async function saveMediaUrl(url: string, category: string, title: string) {
     const result = await db.insert(galleryImages).values({

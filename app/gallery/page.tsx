@@ -1,6 +1,6 @@
 import { db } from '@/lib/db';
 import { galleryImages } from '@/lib/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { eq, asc, desc } from 'drizzle-orm';
 import GalleryClient from './GalleryClient';
 
 export const metadata = {
@@ -15,7 +15,7 @@ export default async function GalleryPage() {
     const images = await db.select()
         .from(galleryImages)
         .where(eq(galleryImages.category, 'gallery'))
-        .orderBy(desc(galleryImages.createdAt));
+        .orderBy(asc(galleryImages.sortOrder), desc(galleryImages.createdAt));
 
     return <GalleryClient initialImages={images} />;
 }
