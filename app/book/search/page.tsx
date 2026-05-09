@@ -213,8 +213,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                         const roomSizeLabel = result.roomType.size
                             ? `${result.roomType.size} ${result.roomType.sizeUnit}`
                             : 'Size on request';
-                        const localRoomCount = result.roomType.roomCount ?? result.availableRooms;
-                        const maxSelectableRooms = Math.max(1, Math.min(result.availableRooms, localRoomCount));
+                        const maxSelectableRooms = Math.max(1, result.availableRooms);
                         const defaultRoomCount = Math.min(maxSelectableRooms, safeRooms);
 
                         return (
