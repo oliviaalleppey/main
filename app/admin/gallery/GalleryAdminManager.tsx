@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { uploadMedia, deleteMedia, reorderGalleryImages, updateGalleryImageTab, saveGalleryTabLabels } from '../media/actions';
-import { Upload, X, Loader2, GripVertical, Save, Pencil, Check } from 'lucide-react';
+import { Upload, X, Loader2, GripVertical, Save, Pencil, Check, Plus } from 'lucide-react';
 import Image from 'next/image';
 
 interface GalleryImage {
@@ -177,6 +177,31 @@ export default function GalleryAdminManager({
         await saveGalleryTabLabels(newTabs);
     };
 
+    const handleAddTab = async () => {
+        const slug = `tab_${Date.now()}`;
+        const newTab = { slug, label: 'New Tab' };
+        const newTabs = [...tabs, newTab];
+        setTabs(newTabs);
+        await saveGalleryTabLabels(newTabs);
+        // Auto-open rename
+        setEditingTab(slug);
+        setEditingLabel('New Tab');
+    };
+
+    const handleRemoveTab = async (slug: string) => {
+        if (!confirm(`Remove this tab? Images assigned to it will become uncategorised.`)) return;
+        const newTabs = tabs.filter(t => t.slug !== slug);
+        // Unassign images in that tab
+        const affectedIds = images.filter(i => i.tab === slug).map(i => i.id);
+        if (affectedIds.length) {
+            setImages(prev => prev.map(i => i.tab === slug ? { ...i, tab: null } : i));
+            await updateGalleryImageTab(affectedIds, null);
+        }
+        setTabs(newTabs);
+        if (activeTab === slug) setActiveTab('all');
+        await saveGalleryTabLabels(newTabs);
+    };
+
     return (
         <div className="space-y-6">
             {/* Upload */}
@@ -225,7 +250,7 @@ export default function GalleryAdminManager({
                             onDragOver={e => { e.preventDefault(); setTabDragOver(tab.slug); }}
                             onDragLeave={() => setTabDragOver(null)}
                             onDrop={() => handleDropOnTab(tab.slug)}
-                            className={`relative flex-shrink-0 flex items-center gap-1 px-3 py-2.5 rounded-t-lg border-b-2 transition-all duration-200 ${
+                            className={`group relative flex-shrink-0 flex items-center gap-1 px-3 py-2.5 rounded-t-lg border-b-2 transition-all duration-200 ${
                                 activeTab === tab.slug ? 'border-gray-900' : 'border-transparent'
                             } ${tabDragOver === tab.slug
                                 ? 'scale-125 bg-emerald-50 border-emerald-500 shadow-xl z-10 ring-2 ring-emerald-400 ring-offset-1'
@@ -260,10 +285,26 @@ export default function GalleryAdminManager({
                                     >
                                         <Pencil className="w-3 h-3" />
                                     </button>
+                                    <button
+                                        onClick={() => handleRemoveTab(tab.slug)}
+                                        className="opacity-0 group-hover:opacity-100 hover:opacity-100 text-gray-300 hover:text-red-500 transition-opacity"
+                                        title="Remove tab"
+                                    >
+                                        <X className="w-3 h-3" />
+                                    </button>
                                 </>
                             )}
                         </div>
                     ))}
+
+                    {/* Add tab */}
+                    <button
+                        onClick={handleAddTab}
+                        className="flex-shrink-0 mb-2 flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                        title="Add new tab"
+                    >
+                        <Plus className="w-3.5 h-3.5" /> Add Tab
+                    </button>
 
                     <div className="flex-1" />
 
