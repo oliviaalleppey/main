@@ -560,6 +560,14 @@ export async function bulkImportMedia(urls: string[], category: string) {
     return { success: true, count: values.length };
 }
 
+// Update the tab assignment for a gallery image
+export async function updateGalleryImageTab(id: string, tab: string | null) {
+    await db.update(galleryImages).set({ tab: tab || null }).where(eq(galleryImages.id, id));
+    revalidatePath('/gallery');
+    revalidatePath('/admin/gallery');
+    return { success: true };
+}
+
 // Reorder gallery images by persisting new sortOrder values
 export async function reorderGalleryImages(orderedIds: string[]) {
     await Promise.all(

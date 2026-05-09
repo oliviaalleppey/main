@@ -13,21 +13,14 @@ interface GalleryImage {
     title: string | null;
     imageUrl: string;
     category: string | null;
+    tab?: string | null;
 }
 
 const categories = ['All', 'Rooms', 'Dining', 'Spa', 'Pool', 'Events'];
 
-// Smart categorization based on image title
-const getCategoryForImage = (title: string | null): string => {
-    if (!title) return 'Events'; // Default fallback
-    const t = title.toLowerCase();
-    
-    if (t.includes('room') || t.includes('suite') || t.includes('villa') || t.includes('bed') || t.includes('balcony')) return 'Rooms';
-    if (t.includes('dining') || t.includes('restaurant') || t.includes('food') || t.includes('bar') || t.includes('cafe') || t.includes('breakfast') || t.includes('buffet')) return 'Dining';
-    if (t.includes('spa') || t.includes('wellness') || t.includes('massage') || t.includes('gym') || t.includes('treatment')) return 'Spa';
-    if (t.includes('pool') || t.includes('swim')) return 'Pool';
-    
-    return 'Events'; // Fallback for other things like lobby, exterior, etc.
+const getCategoryForImage = (image: GalleryImage): string => {
+    if (image.tab) return image.tab.charAt(0).toUpperCase() + image.tab.slice(1);
+    return '';
 };
 
 export default function GalleryClient({ initialImages }: { initialImages: GalleryImage[] }) {
@@ -36,7 +29,7 @@ export default function GalleryClient({ initialImages }: { initialImages: Galler
 
     const filteredImages = selectedCategory === 'All'
         ? initialImages
-        : initialImages.filter(img => getCategoryForImage(img.title) === selectedCategory);
+        : initialImages.filter(img => (img.tab || '').toLowerCase() === selectedCategory.toLowerCase());
 
     // Lightbox handlers
     const openLightbox = (index: number) => setSelectedIndex(index);
@@ -125,7 +118,7 @@ export default function GalleryClient({ initialImages }: { initialImages: Galler
 
                                 {/* Image Info - Hidden on mobile, visible on desktop */}
                                 <div className="hidden md:block">
-                                    <p className="text-[var(--gold-accent-dark)] text-xs tracking-[0.2em] uppercase mb-1">{getCategoryForImage(image.title)}</p>
+                                    <p className="text-[var(--gold-accent-dark)] text-xs tracking-[0.2em] uppercase mb-1">{getCategoryForImage(image)}</p>
                                     <h3 className="text-lg font-serif text-[var(--text-dark)] mb-1">{image.title || 'Untitled'}</h3>
                                 </div>
                             </div>
@@ -210,7 +203,7 @@ export default function GalleryClient({ initialImages }: { initialImages: Galler
                             <div className="absolute bottom-4 left-0 right-0 text-center pointer-events-none hidden md:block">
                                 <div className="inline-block bg-black/60 backdrop-blur-md px-6 py-3 rounded-full text-white">
                                     <span className="text-[var(--gold-accent)] text-xs tracking-[0.2em] uppercase mr-3">
-                                        {getCategoryForImage(filteredImages[selectedIndex].title)}
+                                        {getCategoryForImage(filteredImages[selectedIndex])}
                                     </span>
                                     <span className="font-serif text-lg">
                                         {filteredImages[selectedIndex].title || 'Untitled'}

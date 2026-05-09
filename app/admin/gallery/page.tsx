@@ -15,6 +15,7 @@ export default async function AdminGalleryPage() {
         .where(eq(galleryImages.category, 'gallery'))
         .orderBy(galleryImages.sortOrder, galleryImages.createdAt);
 
+
     return (
         <div className="p-8 max-w-7xl mx-auto">
             <h1 className="text-3xl font-serif text-[#0A1628] mb-8">Gallery Management</h1>
