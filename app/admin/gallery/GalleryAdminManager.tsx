@@ -193,7 +193,7 @@ export default function GalleryAdminManager({ initialImages }: { initialImages: 
                         No images in the gallery yet.
                     </div>
                 ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-4 md:grid-cols-8 gap-3">
                         {images.map((image, index) => (
                             <div
                                 key={image.id}
