@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { uploadMedia, deleteMedia, reorderGalleryImages, updateGalleryImageTab } from '../media/actions';
-import { Upload, X, Loader2, Image as ImageIcon, GripVertical, Save } from 'lucide-react';
+import { uploadMedia, deleteMedia, reorderGalleryImages, updateGalleryImageTab, saveGalleryTabLabels } from '../media/actions';
+import { Upload, X, Loader2, GripVertical, Save, Pencil, Check } from 'lucide-react';
 import Image from 'next/image';
 
 interface GalleryImage {
@@ -13,8 +13,10 @@ interface GalleryImage {
     tab?: string | null;
 }
 
-const TABS = ['All', 'Rooms', 'Dining', 'Spa', 'Pool', 'Events'] as const;
-type Tab = typeof TABS[number];
+interface TabDef {
+    slug: string;
+    label: string;
+}
 
 const compressImage = async (file: File): Promise<File> => {
     return new Promise((resolve, reject) => {
@@ -25,12 +27,12 @@ const compressImage = async (file: File): Promise<File> => {
             img.src = event.target?.result as string;
             img.onload = () => {
                 const canvas = document.createElement('canvas');
-                const MAX_WIDTH = 1920; const MAX_HEIGHT = 1920;
-                let width = img.width; let height = img.height;
-                if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } }
-                else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
-                canvas.width = width; canvas.height = height;
-                canvas.getContext('2d')?.drawImage(img, 0, 0, width, height);
+                const MAX = 1920;
+                let w = img.width, h = img.height;
+                if (w > h) { if (w > MAX) { h *= MAX / w; w = MAX; } }
+                else { if (h > MAX) { w *= MAX / h; h = MAX; } }
+                canvas.width = w; canvas.height = h;
+                canvas.getContext('2d')?.drawImage(img, 0, 0, w, h);
                 canvas.toBlob((blob) => {
                     if (blob) resolve(new File([blob], file.name.replace(/\.[^/.]+$/, '.jpg'), { type: 'image/jpeg' }));
                     else reject(new Error('Blob failed'));
@@ -42,57 +44,79 @@ const compressImage = async (file: File): Promise<File> => {
     });
 };
 
-export default function GalleryAdminManager({ initialImages }: { initialImages: GalleryImage[] }) {
+export default function GalleryAdminManager({
+    initialImages,
+    initialTabs,
+}: {
+    initialImages: GalleryImage[];
+    initialTabs: TabDef[];
+}) {
     const [images, setImages] = useState<GalleryImage[]>(initialImages);
-    const [activeTab, setActiveTab] = useState<Tab>('All');
+    const [tabs, setTabs] = useState<TabDef[]>(initialTabs);
+    const [activeTab, setActiveTab] = useState<string>('all');
+    const [selected, setSelected] = useState<Set<string>>(new Set());
     const [isUploading, setIsUploading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [isDirty, setIsDirty] = useState(false);
     const [savedMsg, setSavedMsg] = useState(false);
-    const [tabDragOver, setTabDragOver] = useState<Tab | null>(null);
+    const [tabDragOver, setTabDragOver] = useState<string | null>(null);
+    const [editingTab, setEditingTab] = useState<string | null>(null);
+    const [editingLabel, setEditingLabel] = useState('');
 
+    const dragIds = useRef<string[]>([]);
     const dragIndex = useRef<number | null>(null);
-    const dragId = useRef<string | null>(null);
     const dragOverIndex = useRef<number | null>(null);
 
-    const filteredImages = activeTab === 'All'
+    const filteredImages = activeTab === 'all'
         ? images
-        : images.filter(img => (img.tab || '').toLowerCase() === activeTab.toLowerCase());
+        : images.filter(img => (img.tab || '') === activeTab);
 
+    const tabCount = (slug: string) =>
+        slug === 'all' ? images.length : images.filter(i => (i.tab || '') === slug).length;
+
+    // ── Upload ──────────────────────────────────────────────────────────────
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
-        if (!files || files.length === 0) return;
+        if (!files?.length) return;
         setIsUploading(true);
         try {
             for (let i = 0; i < files.length; i++) {
-                const originalFile = files[i];
-                const compressedFile = await compressImage(originalFile);
+                const compressed = await compressImage(files[i]);
                 const formData = new FormData();
-                formData.append('media', compressedFile);
+                formData.append('media', compressed);
                 formData.append('category', 'gallery');
-                let title = originalFile.name.replace(/\.[^/.]+$/, '').replace(/_/g, ' ');
+                const title = files[i].name.replace(/\.[^/.]+$/, '').replace(/_/g, ' ');
                 formData.append('title', title);
                 const result = await uploadMedia(formData);
-                if (result.success && result.url) {
+                if (result.success && result.url)
                     setImages(prev => [{ id: result.id!, title, imageUrl: result.url!, category: 'gallery', tab: null }, ...prev]);
-                }
             }
-        } catch { alert('Failed to upload some images. Please try again.'); }
+        } catch { alert('Failed to upload some images.'); }
         finally { setIsUploading(false); e.target.value = ''; }
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this image?')) return;
-        try {
-            await deleteMedia(id);
-            setImages(images.filter(img => img.id !== id));
-        } catch { alert('Failed to delete image.'); }
+        if (!confirm('Delete this image?')) return;
+        try { await deleteMedia(id); setImages(prev => prev.filter(i => i.id !== id)); setSelected(prev => { const s = new Set(prev); s.delete(id); return s; }); }
+        catch { alert('Failed to delete.'); }
     };
 
-    // Drag within grid (reorder)
+    // ── Selection ───────────────────────────────────────────────────────────
+    const toggleSelect = (id: string) => {
+        setSelected(prev => {
+            const s = new Set(prev);
+            s.has(id) ? s.delete(id) : s.add(id);
+            return s;
+        });
+    };
+
+    const clearSelection = () => setSelected(new Set());
+
+    // ── Drag within grid (reorder) ──────────────────────────────────────────
     const handleDragStart = (index: number, id: string) => {
         dragIndex.current = index;
-        dragId.current = id;
+        // If the dragged image is selected, carry all selected; otherwise just this one
+        dragIds.current = selected.has(id) && selected.size > 1 ? [...selected] : [id];
     };
 
     const handleDragOverGrid = (e: React.DragEvent, index: number) => {
@@ -101,40 +125,56 @@ export default function GalleryAdminManager({ initialImages }: { initialImages: 
     };
 
     const handleDropGrid = () => {
-        if (dragIndex.current === null || dragOverIndex.current === null) return;
-        if (dragIndex.current === dragOverIndex.current) return;
+        if (dragIndex.current === null || dragOverIndex.current === null || dragIndex.current === dragOverIndex.current) return;
         const reordered = [...images];
-        const srcId = dragId.current;
-        const srcGlobalIdx = reordered.findIndex(img => img.id === srcId);
         const targetImg = filteredImages[dragOverIndex.current];
-        const targetGlobalIdx = reordered.findIndex(img => img.id === targetImg.id);
-        const [moved] = reordered.splice(srcGlobalIdx, 1);
-        reordered.splice(targetGlobalIdx, 0, moved);
-        setImages(reordered);
+        const targetGlobalIdx = reordered.findIndex(i => i.id === targetImg.id);
+        const movingIds = new Set(dragIds.current);
+        const moving = reordered.filter(i => movingIds.has(i.id));
+        const rest = reordered.filter(i => !movingIds.has(i.id));
+        const insertAt = rest.findIndex(i => i.id === targetImg.id);
+        rest.splice(insertAt >= 0 ? insertAt : rest.length, 0, ...moving);
+        setImages(rest);
         setIsDirty(true);
-        dragIndex.current = null; dragOverIndex.current = null; dragId.current = null;
+        dragIndex.current = null; dragOverIndex.current = null;
     };
 
-    // Drag onto a tab to assign category
-    const handleDropOnTab = async (tab: Tab) => {
+    // ── Drag onto tab ───────────────────────────────────────────────────────
+    const handleDropOnTab = async (slug: string) => {
         setTabDragOver(null);
-        if (!dragId.current) return;
-        const id = dragId.current;
-        dragId.current = null;
-        const newTab = tab === 'All' ? null : tab.toLowerCase();
-        setImages(prev => prev.map(img => img.id === id ? { ...img, tab: newTab } : img));
-        await updateGalleryImageTab(id, newTab);
+        if (!dragIds.current.length) return;
+        const ids = [...dragIds.current];
+        dragIds.current = [];
+        const newTab = slug === 'all' ? null : slug;
+        setImages(prev => prev.map(img => ids.includes(img.id) ? { ...img, tab: newTab } : img));
+        clearSelection();
+        await updateGalleryImageTab(ids, newTab);
     };
 
+    // ── Save reorder ────────────────────────────────────────────────────────
     const handleSaveOrder = async () => {
         setIsSaving(true);
         try {
-            await reorderGalleryImages(images.map(img => img.id));
+            await reorderGalleryImages(images.map(i => i.id));
             setIsDirty(false);
             setSavedMsg(true);
             setTimeout(() => setSavedMsg(false), 2500);
         } catch { alert('Failed to save order.'); }
         finally { setIsSaving(false); }
+    };
+
+    // ── Rename tab ──────────────────────────────────────────────────────────
+    const startEditTab = (slug: string, currentLabel: string) => {
+        setEditingTab(slug);
+        setEditingLabel(currentLabel);
+    };
+
+    const commitEditTab = async () => {
+        if (!editingTab || !editingLabel.trim()) { setEditingTab(null); return; }
+        const newTabs = tabs.map(t => t.slug === editingTab ? { ...t, label: editingLabel.trim() } : t);
+        setTabs(newTabs);
+        setEditingTab(null);
+        await saveGalleryTabLabels(newTabs);
     };
 
     return (
@@ -159,29 +199,83 @@ export default function GalleryAdminManager({ initialImages }: { initialImages: 
                 </div>
             </div>
 
-            {/* Tabs — also drop targets */}
+            {/* Main panel */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="flex items-center gap-1 px-4 pt-4 pb-0 border-b border-gray-100">
-                    {TABS.map(tab => (
-                        <button
-                            key={tab}
-                            onClick={() => setActiveTab(tab)}
-                            onDragOver={e => { e.preventDefault(); setTabDragOver(tab); }}
+
+                {/* Tab bar */}
+                <div className="flex items-center gap-1 px-4 pt-4 border-b border-gray-100 overflow-x-auto">
+
+                    {/* ALL tab */}
+                    <button
+                        onClick={() => setActiveTab('all')}
+                        onDragOver={e => { e.preventDefault(); setTabDragOver('all'); }}
+                        onDragLeave={() => setTabDragOver(null)}
+                        onDrop={() => handleDropOnTab('all')}
+                        className={`relative flex-shrink-0 px-4 py-2.5 text-sm font-semibold rounded-t-lg border-b-2 transition-all duration-200 ${
+                            activeTab === 'all' ? 'border-gray-900 text-gray-900' : 'border-transparent text-gray-400 hover:text-gray-700'
+                        } ${tabDragOver === 'all' ? 'scale-125 bg-gray-100 border-gray-400 text-gray-900 shadow-lg z-10' : ''}`}
+                    >
+                        All <span className="ml-1 text-xs opacity-60">({tabCount('all')})</span>
+                    </button>
+
+                    {/* Custom tabs */}
+                    {tabs.map(tab => (
+                        <div
+                            key={tab.slug}
+                            onDragOver={e => { e.preventDefault(); setTabDragOver(tab.slug); }}
                             onDragLeave={() => setTabDragOver(null)}
-                            onDrop={() => handleDropOnTab(tab)}
-                            className={`px-4 py-2 text-sm font-semibold rounded-t-lg border-b-2 transition-all ${
-                                activeTab === tab
-                                    ? 'border-gray-900 text-gray-900'
-                                    : 'border-transparent text-gray-400 hover:text-gray-700'
-                            } ${tabDragOver === tab ? 'bg-emerald-50 border-emerald-400 text-emerald-700 scale-105' : ''}`}
+                            onDrop={() => handleDropOnTab(tab.slug)}
+                            className={`relative flex-shrink-0 flex items-center gap-1 px-3 py-2.5 rounded-t-lg border-b-2 transition-all duration-200 ${
+                                activeTab === tab.slug ? 'border-gray-900' : 'border-transparent'
+                            } ${tabDragOver === tab.slug
+                                ? 'scale-125 bg-emerald-50 border-emerald-500 shadow-xl z-10 ring-2 ring-emerald-400 ring-offset-1'
+                                : ''
+                            }`}
                         >
-                            {tab}
-                            <span className="ml-1.5 text-xs text-gray-400">
-                                ({tab === 'All' ? images.length : images.filter(i => (i.tab || '').toLowerCase() === tab.toLowerCase()).length})
-                            </span>
-                        </button>
+                            {editingTab === tab.slug ? (
+                                <div className="flex items-center gap-1">
+                                    <input
+                                        autoFocus
+                                        value={editingLabel}
+                                        onChange={e => setEditingLabel(e.target.value)}
+                                        onKeyDown={e => { if (e.key === 'Enter') commitEditTab(); if (e.key === 'Escape') setEditingTab(null); }}
+                                        className="w-24 text-sm font-semibold border-b border-gray-400 outline-none bg-transparent"
+                                    />
+                                    <button onClick={commitEditTab} className="text-emerald-600 hover:text-emerald-700">
+                                        <Check className="w-3.5 h-3.5" />
+                                    </button>
+                                </div>
+                            ) : (
+                                <>
+                                    <button
+                                        onClick={() => setActiveTab(tab.slug)}
+                                        className={`text-sm font-semibold ${activeTab === tab.slug ? 'text-gray-900' : 'text-gray-400 hover:text-gray-700'}`}
+                                    >
+                                        {tab.label} <span className="ml-1 text-xs opacity-60">({tabCount(tab.slug)})</span>
+                                    </button>
+                                    <button
+                                        onClick={() => startEditTab(tab.slug, tab.label)}
+                                        className="opacity-0 group-hover:opacity-100 hover:opacity-100 text-gray-300 hover:text-gray-600 transition-opacity ml-0.5"
+                                        title="Rename tab"
+                                    >
+                                        <Pencil className="w-3 h-3" />
+                                    </button>
+                                </>
+                            )}
+                        </div>
                     ))}
+
                     <div className="flex-1" />
+
+                    {selected.size > 0 && (
+                        <div className="mb-2 flex items-center gap-2">
+                            <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                                {selected.size} selected — drag to a tab
+                            </span>
+                            <button onClick={clearSelection} className="text-xs text-gray-400 hover:text-gray-600">Clear</button>
+                        </div>
+                    )}
+
                     {isDirty && (
                         <button onClick={handleSaveOrder} disabled={isSaving}
                             className="mb-2 inline-flex items-center gap-2 px-4 py-1.5 bg-gray-900 text-white text-sm font-semibold rounded-lg hover:bg-gray-700 disabled:opacity-60 transition-colors">
@@ -189,49 +283,70 @@ export default function GalleryAdminManager({ initialImages }: { initialImages: 
                             {isSaving ? 'Saving...' : 'Save Order'}
                         </button>
                     )}
-                    {savedMsg && <span className="mb-2 text-sm text-emerald-600 font-semibold">Order saved!</span>}
+                    {savedMsg && <span className="mb-2 text-sm text-emerald-600 font-semibold">Saved!</span>}
                 </div>
 
                 <div className="p-4">
-                    <p className="text-xs text-gray-400 mb-4">Drag an image onto a tab above to assign it to that category. Drag within the grid to reorder.</p>
+                    <p className="text-xs text-gray-400 mb-4">
+                        Click images to select · Drag selected onto a tab to assign · Pencil icon on tab to rename · Drag within grid to reorder
+                    </p>
 
                     {filteredImages.length === 0 ? (
                         <div className="text-center py-12 text-gray-400">
-                            {activeTab === 'All' ? 'No images yet.' : `No images in ${activeTab} yet. Drag images here from the All tab.`}
+                            {activeTab === 'all' ? 'No images yet.' : `No images in this tab. Drag images onto the tab above to assign them.`}
                         </div>
                     ) : (
                         <div className="grid grid-cols-4 md:grid-cols-8 gap-3">
-                            {filteredImages.map((image, index) => (
-                                <div
-                                    key={image.id}
-                                    draggable
-                                    onDragStart={() => handleDragStart(index, image.id)}
-                                    onDragOver={e => handleDragOverGrid(e, index)}
-                                    onDrop={handleDropGrid}
-                                    className="group relative rounded-xl overflow-hidden border border-gray-200 bg-gray-50 aspect-square cursor-grab active:cursor-grabbing"
-                                >
-                                    <Image src={image.imageUrl} alt={image.title} fill
-                                        className="object-cover pointer-events-none"
-                                        sizes="(max-width: 768px) 25vw, 12vw" />
-                                    {image.tab && (
-                                        <div className="absolute top-1 left-1 bg-emerald-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded capitalize">
-                                            {image.tab}
+                            {filteredImages.map((image, index) => {
+                                const isSelected = selected.has(image.id);
+                                return (
+                                    <div
+                                        key={image.id}
+                                        draggable
+                                        onDragStart={() => handleDragStart(index, image.id)}
+                                        onDragOver={e => handleDragOverGrid(e, index)}
+                                        onDrop={handleDropGrid}
+                                        onClick={() => toggleSelect(image.id)}
+                                        className={`group relative rounded-xl overflow-hidden border-2 bg-gray-50 aspect-square cursor-grab active:cursor-grabbing transition-all duration-150 ${
+                                            isSelected
+                                                ? 'border-blue-500 ring-2 ring-blue-300 scale-95'
+                                                : 'border-gray-200 hover:border-gray-400'
+                                        }`}
+                                    >
+                                        <Image src={image.imageUrl} alt={image.title} fill
+                                            className="object-cover pointer-events-none"
+                                            sizes="(max-width: 768px) 25vw, 12vw" />
+
+                                        {/* Selected checkmark */}
+                                        {isSelected && (
+                                            <div className="absolute top-1.5 left-1.5 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center z-10">
+                                                <Check className="w-3 h-3 text-white" />
+                                            </div>
+                                        )}
+
+                                        {/* Tab badge */}
+                                        {image.tab && !isSelected && (
+                                            <div className="absolute top-1 left-1 bg-emerald-600/90 text-white text-[8px] font-bold px-1 py-0.5 rounded capitalize z-10">
+                                                {tabs.find(t => t.slug === image.tab)?.label || image.tab}
+                                            </div>
+                                        )}
+
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div className="absolute top-2 left-2 p-1 bg-black/50 text-white rounded">
+                                                <GripVertical className="w-3 h-3" />
+                                            </div>
+                                            <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
+                                                <p className="text-white text-[9px] font-medium truncate">{image.title}</p>
+                                            </div>
+                                            <button
+                                                onClick={e => { e.stopPropagation(); handleDelete(image.id); }}
+                                                className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors">
+                                                <X className="w-3 h-3" />
+                                            </button>
                                         </div>
-                                    )}
-                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <div className="absolute top-2 left-2 p-1 bg-black/50 text-white rounded">
-                                            <GripVertical className="w-3 h-3" />
-                                        </div>
-                                        <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
-                                            <p className="text-white text-[9px] font-medium truncate">{image.title}</p>
-                                        </div>
-                                        <button onClick={() => handleDelete(image.id)}
-                                            className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors">
-                                            <X className="w-3 h-3" />
-                                        </button>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
                 </div>

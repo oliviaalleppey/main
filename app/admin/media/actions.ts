@@ -560,9 +560,23 @@ export async function bulkImportMedia(urls: string[], category: string) {
     return { success: true, count: values.length };
 }
 
-// Update the tab assignment for a gallery image
-export async function updateGalleryImageTab(id: string, tab: string | null) {
-    await db.update(galleryImages).set({ tab: tab || null }).where(eq(galleryImages.id, id));
+// Update the tab assignment for one or more gallery images
+export async function updateGalleryImageTab(ids: string | string[], tab: string | null) {
+    const idList = Array.isArray(ids) ? ids : [ids];
+    await Promise.all(
+        idList.map(id => db.update(galleryImages).set({ tab: tab || null }).where(eq(galleryImages.id, id)))
+    );
+    revalidatePath('/gallery');
+    revalidatePath('/admin/gallery');
+    return { success: true };
+}
+
+// Save custom gallery tab labels to siteSettings
+export async function saveGalleryTabLabels(tabs: { slug: string; label: string }[]) {
+    const { siteSettings } = await import('@/lib/db/schema');
+    await db.insert(siteSettings)
+        .values({ key: 'gallery_tabs', value: tabs })
+        .onConflictDoUpdate({ target: siteSettings.key, set: { value: tabs, updatedAt: new Date() } });
     revalidatePath('/gallery');
     revalidatePath('/admin/gallery');
     return { success: true };

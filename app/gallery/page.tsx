@@ -1,5 +1,5 @@
 import { db } from '@/lib/db';
-import { galleryImages } from '@/lib/db/schema';
+import { galleryImages, siteSettings } from '@/lib/db/schema';
 import { eq, asc, desc } from 'drizzle-orm';
 import GalleryClient from './GalleryClient';
 
@@ -8,14 +8,25 @@ export const metadata = {
     description: 'Explore the beauty and luxury of Olivia Alleppey through our curated gallery.',
 };
 
-export const revalidate = 60; // revalidate every minute
+export const revalidate = 60;
+
+const DEFAULT_TABS = [
+    { slug: 'rooms', label: 'Rooms' },
+    { slug: 'dining', label: 'Dining' },
+    { slug: 'spa', label: 'Spa' },
+    { slug: 'pool', label: 'Pool' },
+    { slug: 'events', label: 'Events' },
+];
 
 export default async function GalleryPage() {
-    // Fetch only images assigned to the 'gallery' category (or fallback to all if you want, but user said they will upload them from Gallery admin)
-    const images = await db.select()
-        .from(galleryImages)
-        .where(eq(galleryImages.category, 'gallery'))
-        .orderBy(asc(galleryImages.sortOrder), desc(galleryImages.createdAt));
+    const [images, tabSetting] = await Promise.all([
+        db.select().from(galleryImages)
+            .where(eq(galleryImages.category, 'gallery'))
+            .orderBy(asc(galleryImages.sortOrder), desc(galleryImages.createdAt)),
+        db.select().from(siteSettings).where(eq(siteSettings.key, 'gallery_tabs')).limit(1),
+    ]);
 
-    return <GalleryClient initialImages={images} />;
+    const tabs = (tabSetting[0]?.value as typeof DEFAULT_TABS | null) ?? DEFAULT_TABS;
+
+    return <GalleryClient initialImages={images} tabs={tabs} />;
 }

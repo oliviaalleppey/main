@@ -16,20 +16,20 @@ interface GalleryImage {
     tab?: string | null;
 }
 
-const categories = ['All', 'Rooms', 'Dining', 'Spa', 'Pool', 'Events'];
+interface TabDef { slug: string; label: string; }
 
-const getCategoryForImage = (image: GalleryImage): string => {
-    if (image.tab) return image.tab.charAt(0).toUpperCase() + image.tab.slice(1);
-    return '';
+const getCategoryForImage = (image: GalleryImage, tabs: TabDef[]): string => {
+    if (!image.tab) return '';
+    return tabs.find(t => t.slug === image.tab)?.label || image.tab;
 };
 
-export default function GalleryClient({ initialImages }: { initialImages: GalleryImage[] }) {
+export default function GalleryClient({ initialImages, tabs }: { initialImages: GalleryImage[]; tabs: TabDef[] }) {
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
     const filteredImages = selectedCategory === 'All'
         ? initialImages
-        : initialImages.filter(img => (img.tab || '').toLowerCase() === selectedCategory.toLowerCase());
+        : initialImages.filter(img => (img.tab || '') === selectedCategory);
 
     // Lightbox handlers
     const openLightbox = (index: number) => setSelectedIndex(index);
@@ -71,16 +71,16 @@ export default function GalleryClient({ initialImages }: { initialImages: Galler
             >
                 <div className="max-w-6xl mx-auto">
                     <div className="flex flex-wrap justify-center gap-2 md:gap-4">
-                        {categories.map((category) => (
+                        {[{ slug: 'All', label: 'All' }, ...tabs.map(t => ({ slug: t.slug, label: t.label }))].map((tab) => (
                             <button
-                                key={category}
-                                onClick={() => setSelectedCategory(category)}
-                                className={`px-6 py-2.5 text-[11px] uppercase tracking-[0.15em] font-semibold transition-all rounded-full ${selectedCategory === category
+                                key={tab.slug}
+                                onClick={() => setSelectedCategory(tab.slug)}
+                                className={`px-6 py-2.5 text-[11px] uppercase tracking-[0.15em] font-semibold transition-all rounded-full ${selectedCategory === tab.slug
                                     ? 'bg-[var(--gold-accent)] text-[#0F1C16] shadow-lg scale-105'
                                     : 'text-white/80 hover:bg-white/10 hover:text-white'
                                     }`}
                             >
-                                {category}
+                                {tab.label}
                             </button>
                         ))}
                     </div>
@@ -118,7 +118,7 @@ export default function GalleryClient({ initialImages }: { initialImages: Galler
 
                                 {/* Image Info - Hidden on mobile, visible on desktop */}
                                 <div className="hidden md:block">
-                                    <p className="text-[var(--gold-accent-dark)] text-xs tracking-[0.2em] uppercase mb-1">{getCategoryForImage(image)}</p>
+                                    <p className="text-[var(--gold-accent-dark)] text-xs tracking-[0.2em] uppercase mb-1">{getCategoryForImage(image, tabs)}</p>
                                     <h3 className="text-lg font-serif text-[var(--text-dark)] mb-1">{image.title || 'Untitled'}</h3>
                                 </div>
                             </div>
@@ -203,7 +203,7 @@ export default function GalleryClient({ initialImages }: { initialImages: Galler
                             <div className="absolute bottom-4 left-0 right-0 text-center pointer-events-none hidden md:block">
                                 <div className="inline-block bg-black/60 backdrop-blur-md px-6 py-3 rounded-full text-white">
                                     <span className="text-[var(--gold-accent)] text-xs tracking-[0.2em] uppercase mr-3">
-                                        {getCategoryForImage(filteredImages[selectedIndex])}
+                                        {getCategoryForImage(filteredImages[selectedIndex], tabs)}
                                     </span>
                                     <span className="font-serif text-lg">
                                         {filteredImages[selectedIndex].title || 'Untitled'}
