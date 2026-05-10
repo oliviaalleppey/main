@@ -3,7 +3,7 @@
 import { put } from '@vercel/blob';
 import { db } from '@/lib/db';
 import { siteSettings, galleryImages, roomTypes } from '@/lib/db/schema';
-import { eq, desc, inArray } from 'drizzle-orm';
+import { eq, desc, inArray, sql } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import sharp from 'sharp';
 
@@ -560,11 +560,33 @@ export async function bulkImportMedia(urls: string[], category: string) {
     return { success: true, count: values.length };
 }
 
-// Update the tab assignment for one or more gallery images
-export async function updateGalleryImageTab(ids: string | string[], tab: string | null) {
+// Add a tab slug to one or more gallery images (does not remove existing tabs)
+export async function addGalleryImageTab(ids: string | string[], tabSlug: string) {
     const idList = Array.isArray(ids) ? ids : [ids];
-    await Promise.all(
-        idList.map(id => db.update(galleryImages).set({ tab: tab || null }).where(eq(galleryImages.id, id)))
+    await Promise.all(idList.map(id =>
+        db.execute(
+            sql`UPDATE gallery_images SET tabs = CASE WHEN tabs @> ${JSON.stringify([tabSlug])}::jsonb THEN tabs ELSE tabs || ${JSON.stringify([tabSlug])}::jsonb END WHERE id = ${id}::uuid`
+        )
+    ));
+    revalidatePath('/gallery');
+    revalidatePath('/admin/gallery');
+    return { success: true };
+}
+
+// Remove a single tab slug from one image
+export async function removeGalleryImageTab(id: string, tabSlug: string) {
+    await db.execute(
+        sql`UPDATE gallery_images SET tabs = (SELECT jsonb_agg(t) FROM jsonb_array_elements_text(tabs) t WHERE t != ${tabSlug}) WHERE id = ${id}::uuid`
+    );
+    revalidatePath('/gallery');
+    revalidatePath('/admin/gallery');
+    return { success: true };
+}
+
+// Clear all tabs for images (used when removing a tab definition)
+export async function clearTabFromImages(tabSlug: string) {
+    await db.execute(
+        sql`UPDATE gallery_images SET tabs = (SELECT COALESCE(jsonb_agg(t), '[]'::jsonb) FROM jsonb_array_elements_text(tabs) t WHERE t != ${tabSlug})`
     );
     revalidatePath('/gallery');
     revalidatePath('/admin/gallery');

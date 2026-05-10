@@ -13,14 +13,15 @@ interface GalleryImage {
     title: string | null;
     imageUrl: string;
     category: string | null;
-    tab?: string | null;
+    tabs?: string[] | null;
 }
 
 interface TabDef { slug: string; label: string; }
 
 const getCategoryForImage = (image: GalleryImage, tabs: TabDef[]): string => {
-    if (!image.tab) return '';
-    return tabs.find(t => t.slug === image.tab)?.label || image.tab;
+    const first = (image.tabs ?? [])[0];
+    if (!first) return '';
+    return tabs.find(t => t.slug === first)?.label || first;
 };
 
 export default function GalleryClient({ initialImages, tabs }: { initialImages: GalleryImage[]; tabs: TabDef[] }) {
@@ -29,7 +30,7 @@ export default function GalleryClient({ initialImages, tabs }: { initialImages: 
 
     const filteredImages = selectedCategory === 'All'
         ? initialImages
-        : initialImages.filter(img => (img.tab || '') === selectedCategory);
+        : initialImages.filter(img => (img.tabs ?? []).includes(selectedCategory));
 
     // Lightbox handlers
     const openLightbox = (index: number) => setSelectedIndex(index);

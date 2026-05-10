@@ -737,7 +737,7 @@ export const galleryImages = pgTable('gallery_images', {
     description: text('description'),
     imageUrl: text('image_url').notNull(),
     category: varchar('category', { length: 100 }), // 'rooms', 'dining', 'spa', 'pool', 'events'
-    tab: varchar('tab', { length: 50 }), // gallery sub-tab: 'rooms' | 'dining' | 'spa' | 'pool' | 'events' | null = uncategorized
+    tabs: json('tabs').$type<string[]>().default([]), // gallery sub-tabs: array of slugs e.g. ['rooms', 'dining']
     sortOrder: integer('sort_order').default(0),
     isActive: boolean('is_active').default(true),
     createdAt: timestamp('created_at').defaultNow(),
