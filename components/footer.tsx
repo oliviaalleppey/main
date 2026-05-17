@@ -146,6 +146,9 @@ export default function Footer() {
                             ))}
                         </div>
                     </div>
+                    <p className="text-center text-xs text-pearl-white/40 mt-4">
+                        Developed by Fristel Studio
+                    </p>
                 </div>
             </div>
         </footer>
