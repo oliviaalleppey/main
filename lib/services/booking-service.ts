@@ -1001,37 +1001,39 @@ export class BookingService {
                 apiResponse: reservationResponse
             });
 
-            // 8. SEND EMAILS (Async - don't block response)
+            // 8. SEND EMAILS
             const checkInDate = new Date(booking.checkIn);
             const checkOutDate = new Date(booking.checkOut);
             const nights = Math.round((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24));
             const checkInStr = checkInDate.toLocaleDateString('en-IN');
             const checkOutStr = checkOutDate.toLocaleDateString('en-IN');
 
-            sendBookingConfirmation({
-                to: booking.guestEmail,
-                guestName: booking.guestName,
-                bookingNumber: booking.bookingNumber,
-                checkIn: checkInStr,
-                checkOut: checkOutStr,
-                roomType: primaryRoomTypeName,
-                totalAmount: booking.totalAmount
-            }).catch(e => console.error(`Failed to send guest confirmation email for ${bookingId}:`, e));
+            await Promise.all([
+                sendBookingConfirmation({
+                    to: booking.guestEmail,
+                    guestName: booking.guestName,
+                    bookingNumber: booking.bookingNumber,
+                    checkIn: checkInStr,
+                    checkOut: checkOutStr,
+                    roomType: primaryRoomTypeName,
+                    totalAmount: booking.totalAmount
+                }).catch(e => console.error(`Failed to send guest confirmation email for ${bookingId}:`, e)),
 
-            sendBookingAlertToStaff({
-                guestName: booking.guestName,
-                guestEmail: booking.guestEmail,
-                guestPhone: booking.guestPhone,
-                bookingNumber: booking.bookingNumber,
-                confirmationNumber: reservationResponse.confirmationNumber,
-                checkIn: checkInStr,
-                checkOut: checkOutStr,
-                nights,
-                adults: booking.adults || 1,
-                children: booking.children || 0,
-                roomType: primaryRoomTypeName,
-                totalAmount: booking.totalAmount,
-            }).catch(e => console.error(`Failed to send staff booking alert for ${bookingId}:`, e));
+                sendBookingAlertToStaff({
+                    guestName: booking.guestName,
+                    guestEmail: booking.guestEmail,
+                    guestPhone: booking.guestPhone,
+                    bookingNumber: booking.bookingNumber,
+                    confirmationNumber: reservationResponse.confirmationNumber,
+                    checkIn: checkInStr,
+                    checkOut: checkOutStr,
+                    nights,
+                    adults: booking.adults || 1,
+                    children: booking.children || 0,
+                    roomType: primaryRoomTypeName,
+                    totalAmount: booking.totalAmount,
+                }).catch(e => console.error(`Failed to send staff booking alert for ${bookingId}:`, e)),
+            ]);
 
             return { success: true, booking: reservationResponse };
 
