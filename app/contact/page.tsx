@@ -130,7 +130,7 @@ export default function ContactPage() {
                                     <div>
                                         <h3 className="font-medium text-[var(--text-dark)] mb-1">Phone</h3>
                                         <p className="text-[#59544D]">
-                                            Primary (Landline): +91/0 477225088, +91/0 4772250800<br />
+                                            Primary (Landline): +91/0 4772250800<br />
                                             Primary: <a href="tel:+918075416514" className="hover:text-[var(--gold-accent-dark)] transition-colors">+91 8075 416 514</a><br />
                                             Reservations: <a href="tel:+918075416514" className="hover:text-[var(--gold-accent-dark)] transition-colors">+91 8075 416 514</a><br />
                                             Code: Outside India +91 | India 0

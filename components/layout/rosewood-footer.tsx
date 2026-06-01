@@ -52,7 +52,7 @@ export default function RosewoodFooter() {
                                     +91 8075 416 514
                                 </a>
                                 <br />
-                                Primary (Landline): +91/0 477225088, +91/0 4772250800
+                                Primary (Landline): +91/0 4772250800
                             </p>
                         </div>
                     </div>
