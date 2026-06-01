@@ -146,7 +146,11 @@ export default function Footer() {
                             ))}
                         </div>
                     </div>
-                    <p className="text-center text-xs text-stone-400 mt-4">
+                    <p className="text-center text-xs text-pearl-white/40 mt-5 leading-relaxed">
+                        Owned and Operated by Olivia Hospitalities Private Limited<br />
+                        CIN: U55101KL2007PTC020204&nbsp;&nbsp;·&nbsp;&nbsp;GSTIN: 32AABCO1416E1Z6
+                    </p>
+                    <p className="text-center text-xs text-stone-400 mt-3">
                         Developed by Fristel Studio
                     </p>
                 </div>

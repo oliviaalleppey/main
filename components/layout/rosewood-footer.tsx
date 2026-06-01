@@ -148,6 +148,13 @@ export default function RosewoodFooter() {
                         <p className="mt-5 text-[10px] uppercase tracking-widest text-[#5E5851] text-center">
                             © 2026 Olivia International. All Rights Reserved.
                         </p>
+                        <p className="mt-3 text-[10px] text-[#5E5851] text-center leading-relaxed">
+                            Owned and Operated by Olivia Hospitalities Private Limited<br />
+                            CIN: U55101KL2007PTC020204&nbsp;&nbsp;·&nbsp;&nbsp;GSTIN: 32AABCO1416E1Z6
+                        </p>
+                        <p className="mt-3 text-[10px] text-[#5E5851] text-center">
+                            Developed by Fristel Studio
+                        </p>
                     </div>
                 </div>
             </div>

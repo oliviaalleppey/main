@@ -138,6 +138,18 @@ export default function LegalPage({
                             </p>
                         </address>
                     </div>
+
+                    <div className="mt-8 pt-8 border-t border-[#E5E5E5]">
+                        <p className="text-[10px] font-medium tracking-[0.3em] uppercase text-[#9A9390] mb-3">
+                            Legal Entity
+                        </p>
+                        <p className="text-[12px] leading-[1.9] text-[#5A5550]">
+                            Owned and Operated by<br />
+                            <span className="font-medium text-[#3A3A3A]">Olivia Hospitalities Private Limited</span><br />
+                            CIN: U55101KL2007PTC020204<br />
+                            GSTIN: 32AABCO1416E1Z6
+                        </p>
+                    </div>
                 </aside>
 
                 {/* ── Main Content ─────────────────────────────────────── */}
@@ -202,6 +214,15 @@ export default function LegalPage({
                                 </a>
                             </p>
                         </address>
+                        <div className="mt-5 pt-5 border-t border-[#EFEFEF]">
+                            <p className="text-[10px] font-medium tracking-[0.3em] uppercase text-[#9A9390] mb-2">
+                                Legal Entity
+                            </p>
+                            <p className="text-[12px] leading-[1.9] text-[#5A5550]">
+                                Owned and Operated by <span className="font-medium text-[#3A3A3A]">Olivia Hospitalities Private Limited</span><br />
+                                CIN: U55101KL2007PTC020204 · GSTIN: 32AABCO1416E1Z6
+                            </p>
+                        </div>
                         <div className="mt-6 space-y-2">
                             {(Array.isArray(relatedLink) ? relatedLink : [relatedLink]).map((link) => (
                                 <Link
