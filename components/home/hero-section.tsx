@@ -152,6 +152,20 @@ export default function HeroSection({
             {/* All content lives here so flex distributes space — no fixed px offsets needed */}
             <div className="absolute inset-0 flex flex-col z-10 text-white">
 
+                {/* Dubai booking office — top-right corner */}
+                <div className="absolute top-3 right-3 sm:top-4 sm:right-5 md:top-8 md:right-10 z-20 text-right text-white animate-fade-in-up">
+                    <p className="font-serif uppercase tracking-[0.18em] text-sm sm:text-base md:text-xl leading-none drop-shadow-lg">
+                        Dubai
+                    </p>
+                    <p className="uppercase tracking-[0.22em] text-[9px] sm:text-[10px] md:text-xs font-light opacity-85 mt-0.5 mb-1.5 drop-shadow-md">
+                        Booking Office
+                    </p>
+                    <div className="flex flex-col gap-0.5 text-xs sm:text-sm md:text-base font-medium drop-shadow-md">
+                        <a href="tel:+971505587651" className="hover:text-[var(--gold-accent)] transition-colors">+971 50 558 7651</a>
+                        <a href="tel:+971504522043" className="hover:text-[var(--gold-accent)] transition-colors">+971 50 452 2043</a>
+                    </div>
+                </div>
+
                 {/* ① Five-star plaque — top */}
                 <div className="flex justify-center pt-6 md:pt-10 flex-shrink-0 animate-fade-in-up">
                     <Image
