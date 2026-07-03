@@ -49,7 +49,7 @@ export default function HeroSection({
     const [searchError, setSearchError] = useState<string | null>(null);
     const [date, setDate] = useState<DateRange | undefined>(undefined);
     const [guests, setGuests] = useState({ adults: 2, children: 0 });
-    const [dubaiTabOpen, setDubaiTabOpen] = useState(false);
+    const [bookingTabOpen, setBookingTabOpen] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
@@ -154,68 +154,98 @@ export default function HeroSection({
             {/* All content lives here so flex distributes space — no fixed px offsets needed */}
             <div className="absolute inset-0 flex flex-col z-10 text-white">
 
-                {/* Dubai booking office — MOBILE: vertical side tab (floating overlay, no reflow) */}
-                <div className="sm:hidden absolute right-0 top-1/2 -translate-y-1/2 z-30 flex items-center animate-fade-in-up">
-                    {/* slide-out numbers panel */}
-                    <div className={`overflow-hidden transition-all duration-300 ease-out ${dubaiTabOpen ? 'max-w-[240px] opacity-100' : 'max-w-0 opacity-0'}`}>
-                        <div className="flex flex-col justify-center gap-2 rounded-l-2xl border border-r-0 border-[var(--gold-accent)]/60 bg-gradient-to-br from-[#0a7c54] to-[#043b2c] px-4 py-3 text-right text-white shadow-[0_12px_40px_-10px_rgba(0,0,0,0.7)]">
-                            <p className="whitespace-nowrap font-serif uppercase tracking-[0.2em] text-[10px] leading-none text-[var(--gold-accent)]">
-                                Dubai Booking Office
-                            </p>
-                            <a href="tel:+971505587651" className="flex items-center justify-end gap-1.5 whitespace-nowrap text-sm font-semibold hover:text-[var(--gold-accent)] transition-colors">
-                                <Phone className="h-3 w-3 text-[var(--gold-accent)]" strokeWidth={2.5} />
-                                +971 50 558 7651
-                            </a>
-                            <a href="tel:+971504522043" className="flex items-center justify-end gap-1.5 whitespace-nowrap text-sm font-semibold hover:text-[var(--gold-accent)] transition-colors">
-                                <Phone className="h-3 w-3 text-[var(--gold-accent)]" strokeWidth={2.5} />
-                                +971 50 452 2043
-                            </a>
+                {/* Booking offices — MOBILE: vertical side tab, top-right (floating overlay, no reflow) */}
+                <div className="sm:hidden absolute right-0 top-6 z-30 flex items-center animate-fade-in-up">
+                    {/* slide-out panel: India + Dubai cards */}
+                    <div className={`overflow-hidden transition-all duration-300 ease-out ${bookingTabOpen ? 'max-w-[250px] opacity-100' : 'max-w-0 opacity-0'}`}>
+                        <div className="mr-1.5 flex flex-col gap-2">
+                            {/* India */}
+                            <div className="rounded-2xl border border-[#043b2c] bg-[#065f46] px-4 py-3 text-center text-white shadow-[0_12px_40px_-10px_rgba(0,0,0,0.7)]">
+                                <p className="whitespace-nowrap font-serif font-bold uppercase tracking-[0.2em] text-[10px] leading-none text-white">
+                                    India Booking Office
+                                </p>
+                                <div className="mt-2 flex flex-col gap-1">
+                                    <a href="tel:+914772250888" className="flex items-center justify-center gap-1.5 whitespace-nowrap text-sm font-semibold">
+                                        <Phone className="h-3 w-3" strokeWidth={2.5} />
+                                        +91/0 4772250888
+                                    </a>
+                                    <a href="tel:+914772250800" className="flex items-center justify-center gap-1.5 whitespace-nowrap text-sm font-semibold">
+                                        <Phone className="h-3 w-3" strokeWidth={2.5} />
+                                        +91/0 4772250800
+                                    </a>
+                                </div>
+                            </div>
+                            {/* Dubai */}
+                            <div className="rounded-2xl border border-[#043b2c] bg-[#065f46] px-4 py-3 text-center text-white shadow-[0_12px_40px_-10px_rgba(0,0,0,0.7)]">
+                                <p className="whitespace-nowrap font-serif font-bold uppercase tracking-[0.2em] text-[10px] leading-none text-white">
+                                    Dubai Booking Office
+                                </p>
+                                <div className="mt-2 flex flex-col gap-1">
+                                    <a href="tel:+971505587651" className="flex items-center justify-center gap-1.5 whitespace-nowrap text-sm font-semibold">
+                                        <Phone className="h-3 w-3" strokeWidth={2.5} />
+                                        +971 50 558 7651
+                                    </a>
+                                    <a href="tel:+971504522043" className="flex items-center justify-center gap-1.5 whitespace-nowrap text-sm font-semibold">
+                                        <Phone className="h-3 w-3" strokeWidth={2.5} />
+                                        +971 50 452 2043
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     {/* always-visible tab */}
                     <button
                         type="button"
-                        onClick={() => setDubaiTabOpen((v) => !v)}
-                        aria-expanded={dubaiTabOpen}
-                        aria-label="Dubai booking office phone numbers"
-                        className="flex flex-col items-center gap-2 rounded-l-xl border border-r-0 border-[var(--gold-accent)]/60 bg-gradient-to-b from-[#0a7c54] to-[#065f46] px-1.5 py-3 text-[var(--gold-accent)] shadow-[0_8px_24px_-6px_rgba(0,0,0,0.6)]"
+                        onClick={() => setBookingTabOpen((v) => !v)}
+                        aria-expanded={bookingTabOpen}
+                        aria-label="India and Dubai booking office phone numbers"
+                        className="flex flex-col items-center gap-2 rounded-l-xl border border-r-0 border-[#043b2c] bg-[#065f46] px-1.5 py-3 text-white shadow-[0_8px_24px_-6px_rgba(0,0,0,0.6)]"
                     >
                         <Phone className="h-3.5 w-3.5" strokeWidth={2.5} />
-                        <span className="[writing-mode:vertical-rl] rotate-180 font-serif uppercase tracking-[0.18em] text-[11px] leading-none">
-                            Dubai Booking
+                        <span className="[writing-mode:vertical-rl] rotate-180 font-serif font-bold uppercase tracking-[0.18em] text-[11px] leading-none text-white">
+                            Booking Office
                         </span>
                     </button>
                 </div>
 
-                {/* Dubai booking office — DESKTOP/TABLET: top-right emerald card */}
-                <div className="hidden sm:block absolute sm:top-4 sm:right-5 md:top-6 md:right-8 z-20 animate-fade-in-up">
-                    <div className="relative overflow-hidden rounded-2xl border border-[var(--gold-accent)]/60 bg-gradient-to-br from-[#0a7c54] via-[#065f46] to-[#043b2c] px-3.5 py-2.5 sm:px-5 sm:py-3.5 md:px-6 md:py-4 shadow-[0_12px_40px_-10px_rgba(0,0,0,0.7)]">
-                        {/* inner highlight ring + soft gold corner glow for depth */}
-                        <span className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/10" />
-                        <span className="pointer-events-none absolute -top-10 -right-10 h-24 w-24 rounded-full bg-[var(--gold-accent)]/25 blur-2xl" />
-
-                        <div className="relative text-right text-white">
-                            {/* header */}
-                            <div className="flex items-center justify-end gap-1.5 sm:gap-2">
-                                <span className="h-px w-5 sm:w-7 bg-gradient-to-l from-[var(--gold-accent)] to-transparent" />
-                                <span className="font-serif uppercase tracking-[0.2em] text-sm sm:text-lg md:text-xl leading-none text-[var(--gold-accent)]">
-                                    Dubai
-                                </span>
-                            </div>
-                            <p className="uppercase tracking-[0.25em] text-[8px] sm:text-[10px] md:text-[11px] font-light text-white/70 mt-1 mb-2">
-                                Booking Office
-                            </p>
-                            {/* numbers */}
-                            <div className="flex flex-col items-end gap-1 text-xs sm:text-sm md:text-base font-semibold tracking-wide">
-                                <a href="tel:+971505587651" className="inline-flex items-center gap-1.5 hover:text-[var(--gold-accent)] transition-colors">
-                                    <Phone className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-[var(--gold-accent)]" strokeWidth={2.5} />
-                                    +971 50 558 7651
-                                </a>
-                                <a href="tel:+971504522043" className="inline-flex items-center gap-1.5 hover:text-[var(--gold-accent)] transition-colors">
-                                    <Phone className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-[var(--gold-accent)]" strokeWidth={2.5} />
-                                    +971 50 452 2043
-                                </a>
-                            </div>
+                {/* Booking offices — DESKTOP/TABLET: top-right stacked emerald cards */}
+                <div className="hidden sm:flex flex-col gap-2 md:gap-3 absolute sm:top-4 sm:right-5 md:top-6 md:right-8 z-20 animate-fade-in-up">
+                    {/* India */}
+                    <div className="rounded-2xl border border-[#043b2c] bg-[#065f46] px-3.5 py-2.5 sm:px-5 sm:py-3.5 md:px-6 md:py-4 text-center text-white shadow-[0_12px_40px_-10px_rgba(0,0,0,0.7)]">
+                        <p className="font-serif font-bold uppercase tracking-[0.2em] text-sm sm:text-lg md:text-xl leading-none text-white">
+                            India
+                        </p>
+                        <p className="uppercase tracking-[0.25em] text-[8px] sm:text-[10px] md:text-[11px] font-bold text-white mt-1 mb-2">
+                            Booking Office
+                        </p>
+                        <div className="flex flex-col items-center gap-1 text-xs sm:text-sm md:text-base font-semibold tracking-wide">
+                            <a href="tel:+914772250888" className="inline-flex items-center gap-1.5">
+                                <Phone className="h-3 w-3 sm:h-3.5 sm:w-3.5" strokeWidth={2.5} />
+                                +91/0 4772250888
+                            </a>
+                            <a href="tel:+914772250800" className="inline-flex items-center gap-1.5">
+                                <Phone className="h-3 w-3 sm:h-3.5 sm:w-3.5" strokeWidth={2.5} />
+                                +91/0 4772250800
+                            </a>
+                        </div>
+                    </div>
+                    {/* Dubai */}
+                    <div className="rounded-2xl border border-[#043b2c] bg-[#065f46] px-3.5 py-2.5 sm:px-5 sm:py-3.5 md:px-6 md:py-4 text-center text-white shadow-[0_12px_40px_-10px_rgba(0,0,0,0.7)]">
+                        <p className="font-serif font-bold uppercase tracking-[0.2em] text-sm sm:text-lg md:text-xl leading-none text-white">
+                            Dubai
+                        </p>
+                        <p className="uppercase tracking-[0.25em] text-[8px] sm:text-[10px] md:text-[11px] font-bold text-white mt-1 mb-2">
+                            Booking Office
+                        </p>
+                        <div className="flex flex-col items-center gap-1 text-xs sm:text-sm md:text-base font-semibold tracking-wide">
+                            <a href="tel:+971505587651" className="inline-flex items-center gap-1.5">
+                                <Phone className="h-3 w-3 sm:h-3.5 sm:w-3.5" strokeWidth={2.5} />
+                                +971 50 558 7651
+                            </a>
+                            <a href="tel:+971504522043" className="inline-flex items-center gap-1.5">
+                                <Phone className="h-3 w-3 sm:h-3.5 sm:w-3.5" strokeWidth={2.5} />
+                                +971 50 452 2043
+                            </a>
                         </div>
                     </div>
                 </div>
