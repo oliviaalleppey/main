@@ -52,10 +52,15 @@ export default function RosewoodFooter() {
                                     +91 8075 416 514
                                 </a>
                                 <br />
-                                Primary (Landline):{' '}
-                                <a href="tel:+914772250888" className="underline decoration-[var(--btn-dark)]/20 hover:text-[var(--text-dark)] transition-colors">+91/0 4772250888</a>
+                                India Booking Office:{' '}
+                                <a href="tel:+914772250888" className="whitespace-nowrap underline decoration-[var(--btn-dark)]/20 hover:text-[var(--text-dark)] transition-colors">+91/0 4772250888</a>
                                 ,{' '}
-                                <a href="tel:+914772250800" className="underline decoration-[var(--btn-dark)]/20 hover:text-[var(--text-dark)] transition-colors">+91/0 4772250800</a>
+                                <a href="tel:+914772250800" className="whitespace-nowrap underline decoration-[var(--btn-dark)]/20 hover:text-[var(--text-dark)] transition-colors">+91/0 4772250800</a>
+                                <br />
+                                Dubai Booking Office:{' '}
+                                <a href="tel:+971505587651" className="whitespace-nowrap underline decoration-[var(--btn-dark)]/20 hover:text-[var(--text-dark)] transition-colors">+971 50 558 7651</a>
+                                ,{' '}
+                                <a href="tel:+971504522043" className="whitespace-nowrap underline decoration-[var(--btn-dark)]/20 hover:text-[var(--text-dark)] transition-colors">+971 50 452 2043</a>
                             </p>
                         </div>
                     </div>
