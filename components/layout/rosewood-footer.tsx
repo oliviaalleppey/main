@@ -14,7 +14,7 @@ export default function RosewoodFooter() {
                     <div className="max-w-md">
                         <h3 className="text-2xl font-serif mb-3 tracking-wide text-[var(--text-dark)]">Stay Connected</h3>
                         <p className="text-[#4F4942] text-base leading-relaxed">
-                            Join our mailing list to receive potential updates and exclusive offers from Olivia International.
+                            Join our mailing list to receive potential updates and exclusive offers from Olivia Alleppey.
                         </p>
                     </div>
 
@@ -30,8 +30,8 @@ export default function RosewoodFooter() {
                         <h4 className="text-[11px] uppercase tracking-[0.28em] text-[#6B645C] mb-6">Contact us</h4>
                         <div className="space-y-4 text-[15px] text-[#403A35] leading-relaxed">
                             <p>
-                                Olivia International,<br />
-                                Finishing Point, Punnamada,<br />
+                                Olivia Alleppey,<br />
+                                Finishing Point,<br />
                                 Alappuzha, Kerala - 688013, India
                             </p>
 
@@ -154,7 +154,7 @@ export default function RosewoodFooter() {
                         </div>
 
                         <p className="mt-5 text-[10px] uppercase tracking-widest text-[#5E5851] text-center">
-                            © 2026 Olivia International. All Rights Reserved.
+                            © 2026 Olivia Alleppey. All Rights Reserved.
                         </p>
                         <p className="mt-3 text-[10px] text-[#5E5851] text-center leading-relaxed">
                             Owned and Operated by Olivia Hospitalities Private Limited<br />
