@@ -1,23 +1,13 @@
 import type { Metadata } from 'next';
 import LegalPage from '@/components/legal/legal-page';
+import { pageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
-    title: 'Privacy Policy | Olivia International Hotel',
+export const metadata: Metadata = pageMetadata({
+    title: 'Privacy Policy',
     description:
-        'Read the Privacy Policy for Olivia International Hotel, including how personal data is collected, used, shared, stored, protected, and how privacy requests can be made.',
-    alternates: {
-        canonical: 'https://oliviaalleppey.com/privacy',
-    },
-    keywords: [
-        'Olivia International Hotel privacy policy',
-        'hotel privacy policy',
-        'personal data',
-        'cookies',
-        'booking information',
-        'CCTV privacy',
-        'data retention',
-    ],
-};
+        'Read the Privacy Policy for Olivia Alleppey, including how personal data is collected, used, shared, stored, protected, and how privacy requests can be made.',
+    path: '/privacy',
+});
 
 const highlights = [
     'Personal data',

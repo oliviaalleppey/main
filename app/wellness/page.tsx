@@ -329,7 +329,8 @@ export default function WellnessPage() {
                     <div className="max-w-[1600px] mx-auto">
                         <div className="text-center mb-10 md:mb-12">
                             <span className="inline-block w-12 h-[1px] bg-[#C6AF84] mb-5" />
-                            <h2 className="text-4xl md:text-5xl font-serif text-[#2C3632] tracking-tight">The Spa at Olivia</h2>
+                            {/* h1: primary heading for the wellness page. */}
+                            <h1 className="text-4xl md:text-5xl font-serif text-[#2C3632] tracking-tight">The Spa at Olivia</h1>
                         </div>
 
                         {/* Spa intro — alternating layout */}

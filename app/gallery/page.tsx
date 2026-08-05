@@ -1,12 +1,15 @@
+import { pageMetadata } from '@/lib/seo';
 import { db } from '@/lib/db';
 import { galleryImages, siteSettings } from '@/lib/db/schema';
 import { eq, asc, desc } from 'drizzle-orm';
 import GalleryClient from './GalleryClient';
 
-export const metadata = {
-    title: 'Gallery | Olivia Alleppey',
-    description: 'Explore the beauty and luxury of Olivia Alleppey through our curated gallery.',
-};
+export const metadata = pageMetadata({
+    title: 'Photo Gallery',
+    description:
+        'Explore Olivia Alleppey through our curated gallery — rooms and suites, dining venues, the spa, pool and banquet spaces at our 5-star hotel in Alappuzha, Kerala.',
+    path: '/gallery',
+});
 
 export const revalidate = 60;
 

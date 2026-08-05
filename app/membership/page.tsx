@@ -1,11 +1,14 @@
+import { pageMetadata } from '@/lib/seo';
 import { ChevronDown } from 'lucide-react';
 import { MembershipEnrollmentTrigger } from '@/components/membership/membership-enrollment-trigger';
 import { getMembershipImages } from '@/app/admin/media/actions';
 
-export const metadata = {
-    title: 'Membership | Olivia Alleppey',
-    description: 'The Olivia Lifestyle Membership — Exclusive access, priority privileges, and year-round benefits.',
-};
+export const metadata = pageMetadata({
+    title: 'The Olivia Lifestyle Membership',
+    description:
+        'The Olivia Lifestyle Membership — year-round access to the pool, gym and spa, priority dining and banquet privileges, and member rates at Olivia Alleppey, Alappuzha.',
+    path: '/membership',
+});
 
 const PRIVILEGES = [
     {

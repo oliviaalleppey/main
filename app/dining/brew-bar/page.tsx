@@ -2,6 +2,17 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import StickyBookButton from '@/components/sticky-book-button';
 import WhatsAppWidget from '@/components/whatsapp-widget';
+import type { Metadata } from 'next';
+import { pageMetadata } from '@/lib/seo';
+import JsonLd from '@/components/seo/json-ld';
+import { breadcrumbSchema, restaurantSchema } from '@/lib/structured-data';
+
+export const metadata: Metadata = pageMetadata({
+    title: 'Brew Bar — Dining',
+    description:
+        'Brew Bar at Olivia Alleppey — craft coffee, teas and light bites in a relaxed setting at our 5-star hotel in Alappuzha, Kerala.',
+    path: '/dining/brew-bar',
+});
 
 const VEG = () => (
     <span className="inline-flex items-center justify-center w-4 h-4 border-2 border-green-600 rounded-sm flex-shrink-0">
@@ -194,6 +205,21 @@ function Section({ section }: { section: MenuSection }) {
 export default function BrewBiteMenuPage() {
     return (
         <>
+            <JsonLd
+                data={[
+                    restaurantSchema({
+                        name: 'Brew Bar',
+                        slug: 'brew-bar',
+                        description:
+                            'Craft coffee, teas and light bites in a relaxed setting at Olivia Alleppey.',
+                        cuisine: 'Cafe',
+                    }),
+                    breadcrumbSchema([
+                        { name: 'Dining', path: '/dining' },
+                        { name: 'Brew Bar', path: '/dining/brew-bar' },
+                    ]),
+                ]}
+            />
             <main className="min-h-screen bg-[#FAF6F0]">
 
                 {/* Hero */}

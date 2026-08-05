@@ -8,7 +8,7 @@ const navigation = [
     { name: 'Discover', href: '/discover' },
     { name: 'Accommodation', href: '/accommodation' },
     { name: 'Wedding', href: '/wedding' },
-    { name: 'Conference & Events', href: '/conference-and-events' },
+    { name: 'Conference & Events', href: '/conference-events' },
     { name: 'Dining', href: '/dining' },
     { name: 'Experiences', href: '/experiences' },
     { name: 'Wellness', href: '/wellness' },

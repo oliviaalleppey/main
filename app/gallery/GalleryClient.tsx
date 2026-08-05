@@ -63,7 +63,17 @@ export default function GalleryClient({ initialImages, tabs }: { initialImages: 
     return (
         <main className="min-h-screen bg-[var(--surface-cream)] font-sans pt-0">
 
-
+            {/* Page heading — the page previously rendered no h1 at all. */}
+            <section className="pt-10 pb-8 md:pt-14 md:pb-10 px-6 md:px-12 text-center">
+                <span className="inline-block w-12 h-[1px] bg-[var(--gold-accent)] mb-5" />
+                <h1 className="text-4xl md:text-5xl font-serif text-[var(--text-dark)] tracking-tight">
+                    The Olivia Gallery
+                </h1>
+                <p className="mt-4 max-w-2xl mx-auto text-[#4F4942] font-light leading-relaxed">
+                    Rooms and suites, dining venues, the spa and our banquet spaces — a look
+                    around Olivia Alleppey on the Kerala backwaters.
+                </p>
+            </section>
 
             {/* Category Filter */}
             <section id="gallery-collection"

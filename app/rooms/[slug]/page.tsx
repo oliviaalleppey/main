@@ -16,6 +16,9 @@ import { roomTypes } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { ensureRoomTypeMinOccupancyColumn } from '@/lib/db/schema-guard';
 import { formatRoomName } from '@/lib/utils';
+import { pageMetadata } from '@/lib/seo';
+import JsonLd from '@/components/seo/json-ld';
+import { breadcrumbSchema, hotelRoomSchema } from '@/lib/structured-data';
 
 export const revalidate = 0;
 
@@ -27,40 +30,22 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         where: eq(roomTypes.slug, slug),
     });
 
-    if (!room) return { title: 'Room Not Found' };
+    if (!room) return { title: 'Room Not Found', robots: { index: false, follow: false } };
 
     const roomName = formatRoomName(room.name);
     const images = Array.isArray(room.images) ? room.images : [];
-    const ogImage = room.featuredImage || images[0] || '/og-image.jpg';
+    // Falls back to the generated /opengraph-image when the room has no artwork.
+    const ogImage = room.featuredImage || images[0] || undefined;
 
-    return {
-        title: `${roomName} | Olivia International Hotel`,
-        description: room.shortDescription || room.description || `Experience luxury in our ${roomName} at Olivia International Hotel, Alappuzha.`,
-        openGraph: {
-            title: `${roomName} | Olivia International Hotel`,
-            description: room.shortDescription || room.description || `Experience luxury in our ${roomName}.`,
-            type: "website",
-            url: `https://oliviaalleppey.com/rooms/${slug}`,
-            siteName: "Olivia International Hotel",
-            images: [
-                {
-                    url: ogImage,
-                    width: 1200,
-                    height: 630,
-                    alt: roomName,
-                },
-            ],
-        },
-        twitter: {
-            card: "summary_large_image",
-            title: `${roomName} | Olivia International Hotel`,
-            description: room.shortDescription || room.description || `Experience luxury in our ${roomName}.`,
-            images: [ogImage],
-        },
-        alternates: {
-            canonical: `https://oliviaalleppey.com/rooms/${slug}`,
-        },
-    };
+    return pageMetadata({
+        title: roomName,
+        description:
+            room.shortDescription ||
+            room.description ||
+            `Experience luxury in our ${roomName} at Olivia Alleppey, Alappuzha, Kerala.`,
+        path: `/rooms/${slug}`,
+        image: ogImage,
+    });
 }
 
 export default async function RoomDetailPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -107,6 +92,24 @@ export default async function RoomDetailPage({ params }: { params: Promise<{ slu
 
     return (
         <main className="min-h-screen bg-[var(--surface-cream)] font-sans selection:bg-[var(--text-dark)] selection:text-white pb-40 md:pb-0 pt-0 md:pt-8">
+            <JsonLd
+                data={[
+                    hotelRoomSchema({
+                        name: roomName,
+                        slug,
+                        description: room.shortDescription || room.description,
+                        image: room.featuredImage || room.images?.[0],
+                        // basePrice is stored in paise.
+                        price: room.basePrice ? Math.round(room.basePrice / 100) : null,
+                        maxOccupancy: room.maxGuests,
+                        sizeSqft: room.size,
+                    }),
+                    breadcrumbSchema([
+                        { name: 'Rooms & Suites', path: '/rooms' },
+                        { name: roomName, path: `/rooms/${slug}` },
+                    ]),
+                ]}
+            />
 
             {/* Booking Search Bar */}
             <section className="md:sticky md:top-[var(--site-header-height,80px)] z-40 max-w-[1400px] mx-auto md:px-6 md:mb-6 md:pt-4 pointer-events-none md:pointer-events-auto">

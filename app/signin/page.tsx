@@ -1,5 +1,12 @@
 import { signIn } from "@/auth"
 import { Button } from "@/components/ui/button"
+import type { Metadata } from "next"
+
+// Admin sign-in: never index, never follow.
+export const metadata: Metadata = {
+    title: "Sign In",
+    robots: { index: false, follow: false, nocache: true },
+}
 
 export default function SignInPage() {
     return (

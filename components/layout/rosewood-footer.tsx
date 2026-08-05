@@ -89,7 +89,7 @@ export default function RosewoodFooter() {
                             <h4 className="text-[11px] uppercase tracking-[0.28em] text-[#6B645C] mb-6">World of Olivia</h4>
                             <ul className="space-y-3 text-[15px] text-[#403A35]">
                                 <li><Link href="/discover" className="hover:text-[var(--text-dark)] transition-colors">Our Story</Link></li>
-                                <li><Link href="/accommodation" className="hover:text-[var(--text-dark)] transition-colors">Accommodation</Link></li>
+                                <li><Link href="/rooms" className="hover:text-[var(--text-dark)] transition-colors">Accommodation</Link></li>
                                 <li><Link href="mailto:hr@oliviaalleppey.com" className="hover:text-[var(--text-dark)] transition-colors">Careers</Link></li>
                                 <li><Link href="/gallery" className="hover:text-[var(--text-dark)] transition-colors">Gallery</Link></li>
                             </ul>

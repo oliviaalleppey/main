@@ -6,8 +6,14 @@ import { SessionProvider } from "@/components/auth/session-provider";
 import FrontendLayout from "@/components/layout/frontend-layout";
 import { getColorPalette } from "@/lib/db/actions/settings-actions";
 import { Toaster } from "sonner";
+import JsonLd from "@/components/seo/json-ld";
+import { hotelSchema, websiteSchema } from "@/lib/structured-data";
+import { BRAND, SITE_URL } from "@/lib/seo";
 
-export const dynamic = "force-dynamic";
+// No `force-dynamic` here: it opted every route out of static rendering.
+// Note the root layout still calls auth(), which reads cookies and therefore
+// keeps routes dynamic on its own — see the SEO notes for the follow-up needed
+// to make marketing pages genuinely static.
 
 const sans = Outfit({
   subsets: ["latin"],
@@ -29,40 +35,45 @@ const cinzel = Cinzel({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://oliviaalleppey.com"),
-  title: "Olivia International Hotel - Luxury 5-Star Hotel in Alappuzha, Kerala",
-  description: "Experience unparalleled luxury at Olivia International Hotel, a premium 5-star property in the heart of Alappuzha, Kerala. Book your stay directly for exclusive offers.",
-  keywords: ["luxury hotel", "5-star hotel", "Alappuzha hotel", "Kerala hotel", "Olivia International Hotel"],
-  authors: [{ name: "Olivia International Hotel" }],
+  metadataBase: new URL(SITE_URL),
+  // `template` lets pages set a bare title and inherit the brand suffix.
+  title: {
+    default: `${BRAND} - Luxury 5-Star Hotel in Alappuzha, Kerala`,
+    template: `%s | ${BRAND}`,
+  },
+  description:
+    "Experience unparalleled luxury at Olivia Alleppey, a premium 5-star hotel at Finishing Point, Alappuzha, Kerala. Book direct for exclusive rates on lake-view rooms and suites.",
+  applicationName: BRAND,
+  authors: [{ name: BRAND }],
   openGraph: {
-    title: "Olivia International Hotel - Luxury 5-Star Hotel in Alappuzha",
-    description: "Experience unparalleled luxury at Olivia International Hotel, a premium 5-star property in the heart of Alappuzha, Kerala.",
+    title: `${BRAND} - Luxury 5-Star Hotel in Alappuzha`,
+    description:
+      "Experience unparalleled luxury at Olivia Alleppey, a premium 5-star hotel at Finishing Point, Alappuzha, Kerala.",
     type: "website",
     locale: "en_IN",
-    siteName: "Olivia International Hotel",
-    url: "https://oliviaalleppey.com",
-    images: [
-      {
-        url: "/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Olivia International Hotel - Luxury in Alappuzha",
-      },
-    ],
+    siteName: BRAND,
+    url: SITE_URL,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Olivia International Hotel - Luxury 5-Star Hotel in Alappuzha",
-    description: "Experience unparalleled luxury at Olivia International Hotel.",
-    images: ["/og-image.jpg"],
+    title: `${BRAND} - Luxury 5-Star Hotel in Alappuzha`,
+    description: "Experience unparalleled luxury at Olivia Alleppey, Kerala.",
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
   },
-  alternates: {
-    canonical: "https://oliviaalleppey.com",
-  },
+  // NOTE: no `alternates.canonical` here on purpose. A canonical set in the
+  // root layout is inherited by every page that does not override it, which
+  // previously made the whole site canonicalise to the homepage. Pages set
+  // their own canonical via pageMetadata().
 };
 
 async function getSafeSession() {
@@ -109,6 +120,7 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <body className="font-sans subpixel-antialiased" suppressHydrationWarning>
+        <JsonLd data={[hotelSchema(), websiteSchema()]} />
         <SessionProvider session={session}>
           <FrontendLayout>
             {children}

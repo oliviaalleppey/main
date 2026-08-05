@@ -4,30 +4,18 @@ import { getRoomTypes } from "@/lib/services/room-management";
 import { db } from "@/lib/db";
 import { roomInventory } from "@/lib/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
+import { pageMetadata } from "@/lib/seo";
+import JsonLd from "@/components/seo/json-ld";
+import { breadcrumbSchema } from "@/lib/structured-data";
 
 export const revalidate = 0;
 
-export const metadata: Metadata = {
-    title: "Rooms & Suites | Olivia International Hotel",
-    description: "Explore our luxury rooms and suites at Olivia International Hotel, Alappuzha. Lake views, canal views, and premium amenities await.",
-    openGraph: {
-        title: "Rooms & Suites | Olivia International Hotel",
-        description: "Explore our luxury rooms and suites at Olivia International Hotel, Alappuzha.",
-        type: "website",
-        url: "https://oliviaalleppey.com/rooms",
-        siteName: "Olivia International Hotel",
-        images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Rooms at Olivia International Hotel" }],
-    },
-    twitter: {
-        card: "summary_large_image",
-        title: "Rooms & Suites | Olivia International Hotel",
-        description: "Explore our luxury rooms and suites at Olivia International Hotel, Alappuzha.",
-        images: ["/og-image.jpg"],
-    },
-    alternates: {
-        canonical: "https://oliviaalleppey.com/rooms",
-    },
-};
+export const metadata: Metadata = pageMetadata({
+    title: "Rooms & Suites",
+    description:
+        "Explore luxury rooms and suites at Olivia Alleppey, Alappuzha. Lake-view and canal-view rooms, balcony suites and the Boat Race Suite, with premium amenities and direct-booking rates.",
+    path: "/rooms",
+});
 
 export default async function RoomsPage() {
     const rooms = await getRoomTypes();
@@ -56,6 +44,7 @@ export default async function RoomsPage() {
 
     return (
         <main className="min-h-screen bg-[var(--surface-cream)] font-sans selection:bg-[var(--gold-accent)] selection:text-white">
+            <JsonLd data={breadcrumbSchema([{ name: "Rooms & Suites", path: "/rooms" }])} />
             <RoomsClient rooms={serializedRooms} />
         </main>
     );

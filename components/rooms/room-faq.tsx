@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
+import JsonLd from '@/components/seo/json-ld';
+import { faqSchema } from '@/lib/structured-data';
 
 interface FAQ {
     question: string;
@@ -39,6 +41,8 @@ export default function RoomFAQ() {
 
     return (
         <section className="relative py-20 px-6 md:px-12 bg-[#fafaf8] overflow-hidden">
+            {/* The same FAQs are rendered visibly in this section. */}
+            <JsonLd data={faqSchema(faqs)} />
             <div className="relative max-w-4xl mx-auto">
                 {/* Section Header */}
                 <div className="text-center mb-16">

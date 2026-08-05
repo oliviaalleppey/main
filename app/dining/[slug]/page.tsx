@@ -6,28 +6,35 @@ import { notFound } from 'next/navigation';
 import { Clock, MapPin, Users, Utensils, Phone, Mail } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import JsonLd from '@/components/seo/json-ld';
+import { breadcrumbSchema, restaurantSchema } from '@/lib/structured-data';
+import { pageMetadata } from '@/lib/seo';
 
+// Next 16: `params` is a Promise and must be awaited. Reading `params.slug`
+// synchronously yields undefined, which made every outlet here 404.
 type Props = {
-    params: { slug: string };
+    params: Promise<{ slug: string }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-    const outlet = await db
-        .select()
-        .from(diningOutlets)
-        .where(eq(diningOutlets.slug, params.slug))
-        .limit(1);
+    const { slug } = await params;
+    const outlet = await getOutlet(slug);
 
-    if (!outlet[0]) {
-        return {
-            title: 'Dining Outlet Not Found',
-        };
+    if (!outlet) {
+        return { title: 'Dining Outlet Not Found', robots: { index: false, follow: false } };
     }
 
-    return {
-        title: `${outlet[0].name} | Dining | Olivia Alleppey`,
-        description: outlet[0].shortDescription || outlet[0].description || '',
-    };
+    const description =
+        outlet.shortDescription ||
+        outlet.description ||
+        `${outlet.name} at Olivia Alleppey — dining at our 5-star hotel in Alappuzha, Kerala.`;
+
+    return pageMetadata({
+        title: `${outlet.name} — Dining`,
+        description,
+        path: `/dining/${slug}`,
+        image: outlet.featuredImage || undefined,
+    });
 }
 
 async function getOutlet(slug: string) {
@@ -41,7 +48,8 @@ async function getOutlet(slug: string) {
 }
 
 export default async function OutletPage({ params }: Props) {
-    const outlet = await getOutlet(params.slug);
+    const { slug } = await params;
+    const outlet = await getOutlet(slug);
 
     if (!outlet) {
         notFound();
@@ -51,6 +59,22 @@ export default async function OutletPage({ params }: Props) {
 
     return (
         <div className="min-h-screen bg-white">
+            <JsonLd
+                data={[
+                    restaurantSchema({
+                        name: outlet.name,
+                        slug,
+                        description: outlet.shortDescription || outlet.description,
+                        image: outlet.featuredImage,
+                        cuisine: outlet.cuisineType,
+                        hours: outlet.operatingHours,
+                    }),
+                    breadcrumbSchema([
+                        { name: 'Dining', path: '/dining' },
+                        { name: outlet.name, path: `/dining/${slug}` },
+                    ]),
+                ]}
+            />
             {/* Hero Section */}
             <section className="relative h-[70vh] flex items-end overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent z-10" />

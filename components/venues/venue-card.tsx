@@ -35,7 +35,7 @@ export default function VenueCard({ venue }: VenueCardProps) {
     const imageUrl = venue.featuredImage || getPlaceholderImage();
 
     return (
-        <Link href={`/conference-and-events/${venue.slug}`} className="group block">
+        <Link href={`/conference-events/${venue.slug}`} className="group block">
             <div className="bg-white overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1">
                 {/* Image */}
                 <div className="relative h-80 overflow-hidden">

@@ -1,23 +1,13 @@
 import type { Metadata } from 'next';
 import LegalPage from '@/components/legal/legal-page';
+import { pageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
-    title: 'Terms & Conditions | Olivia International Hotel',
+export const metadata: Metadata = pageMetadata({
+    title: 'Terms & Conditions',
     description:
-        'Read the Terms & Conditions for Olivia International Hotel, including booking terms, payment rules, cancellation conditions, guest responsibilities, and website use.',
-    alternates: {
-        canonical: 'https://oliviaalleppey.com/terms',
-    },
-    keywords: [
-        'Olivia International Hotel terms and conditions',
-        'hotel booking terms',
-        'cancellation policy',
-        'refund policy',
-        'guest rules',
-        'check-in check-out policy',
-        'hotel liability',
-    ],
-};
+        'Read the Terms & Conditions for Olivia Alleppey, including booking terms, payment rules, cancellation conditions, guest responsibilities, and website use.',
+    path: '/terms',
+});
 
 const highlights = [
     'Reservations',

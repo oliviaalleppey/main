@@ -7,7 +7,7 @@ import { Calendar, ChevronRight, MapPin, ReceiptText } from "lucide-react";
 import Image from "next/image";
 
 export const metadata = {
-    title: "My Bookings | Olivia International Hotel",
+    title: "My Bookings",
     description: "View and manage your reservations.",
 };
 

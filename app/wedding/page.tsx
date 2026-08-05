@@ -7,6 +7,8 @@ import Image from 'next/image';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import WeddingInquiryForm from '@/components/wedding/wedding-inquiry-form';
 import { useState, useEffect, useRef } from 'react';
+import JsonLd from '@/components/seo/json-ld';
+import { faqSchema } from '@/lib/structured-data';
 
 const venueNames = ['Grand Ballroom', 'Forum Hall', 'Pool Side Venue'];
 
@@ -64,6 +66,8 @@ export default function WeddingPage() {
 
     return (
         <>
+            {/* The same FAQs are rendered visibly further down this page. */}
+            <JsonLd data={faqSchema(faqs)} />
             <main className="min-h-screen bg-[#FAF8F3] text-[#26322D]">
 
                 {/* Sticky Venue Nav */}
@@ -103,7 +107,8 @@ export default function WeddingPage() {
                     <div className="max-w-[1600px] mx-auto">
                         <div className="text-center mb-10 md:mb-12">
                             <span className="inline-block w-12 h-[1px] bg-[#C6AF84] mb-5" />
-                            <h2 className="text-4xl md:text-5xl font-serif text-[#2C3632] tracking-tight">Spaces Designed for Wedding Flow</h2>
+                            {/* h1: primary heading for the weddings page. */}
+                            <h1 className="text-4xl md:text-5xl font-serif text-[#2C3632] tracking-tight">Spaces Designed for Wedding Flow</h1>
                         </div>
                         <div className="space-y-8 md:space-y-10">
                             {venues.map((venue, index) => (

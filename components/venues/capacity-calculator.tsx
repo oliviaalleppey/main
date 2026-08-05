@@ -182,7 +182,7 @@ export default function CapacityCalculator({ venues }: CapacityCalculatorProps) 
                                             </div>
                                         </div>
                                         <a
-                                            href={`/conference-and-events/${venue.slug}`}
+                                            href={`/conference-events/${venue.slug}`}
                                             className="px-4 py-2 bg-cream-100 hover:bg-gold-500 hover:text-white text-cream-700 rounded-lg transition-colors text-sm font-medium"
                                         >
                                             View Details

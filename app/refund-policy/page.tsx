@@ -1,23 +1,13 @@
 import type { Metadata } from 'next';
 import LegalPage from '@/components/legal/legal-page';
+import { pageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
-    title: 'Refund Policy | Olivia International Hotel',
+export const metadata: Metadata = pageMetadata({
+    title: 'Refund Policy',
     description:
-        'Read the Refund Policy for Olivia International Hotel, including refundable and non-refundable bookings, cancellation windows, no-shows, early departures, and refund timelines.',
-    alternates: {
-        canonical: 'https://oliviaalleppey.com/refund-policy',
-    },
-    keywords: [
-        'Olivia International Hotel refund policy',
-        'hotel refund policy',
-        'booking refunds',
-        'cancellation refunds',
-        'no-show policy',
-        'early departure refund',
-        'third-party booking refunds',
-    ],
-};
+        'Read the Refund Policy for Olivia Alleppey, including refundable and non-refundable bookings, cancellation windows, no-shows, early departures, and refund timelines.',
+    path: '/refund-policy',
+});
 
 const highlights = [
     'Refundable bookings',

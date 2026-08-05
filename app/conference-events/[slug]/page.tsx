@@ -7,28 +7,45 @@ import Image from 'next/image';
 import Link from 'next/link';
 import SeatingDiagram from '@/components/venues/seating-diagram';
 import { MapPin, Maximize2, Users, Wifi, Video, Coffee, Check, Download, Phone, Mail } from 'lucide-react';
+import JsonLd from '@/components/seo/json-ld';
+import { breadcrumbSchema, venueSchema } from '@/lib/structured-data';
+import { pageMetadata } from '@/lib/seo';
 
+// Next 16: `params` is a Promise and must be awaited. Reading `params.slug`
+// synchronously yields undefined, which made every venue here 404.
 type Props = {
-    params: { slug: string };
+    params: Promise<{ slug: string }>;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-    const venue = await db
-        .select()
+/** Pre-render every active venue at build time. */
+export async function generateStaticParams() {
+    const rows = await db
+        .select({ slug: venues.slug })
         .from(venues)
-        .where(eq(venues.slug, params.slug))
-        .limit(1);
+        .where(eq(venues.isActive, true));
 
-    if (!venue[0]) {
-        return {
-            title: 'Venue Not Found',
-        };
+    return rows.map((row) => ({ slug: row.slug }));
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+    const { slug } = await params;
+    const venue = await getVenue(slug);
+
+    if (!venue) {
+        return { title: 'Venue Not Found', robots: { index: false, follow: false } };
     }
 
-    return {
-        title: `${venue[0].name} | Conference & Events | Olivia Alleppey`,
-        description: venue[0].shortDescription || venue[0].description || '',
-    };
+    const description =
+        venue.shortDescription ||
+        venue.description ||
+        `${venue.name} at Olivia Alleppey — conference and event venue in Alappuzha, Kerala.`;
+
+    return pageMetadata({
+        title: `${venue.name} — Conference & Events`,
+        description,
+        path: `/conference-events/${slug}`,
+        image: venue.featuredImage || undefined,
+    });
 }
 
 async function getVenue(slug: string) {
@@ -42,7 +59,8 @@ async function getVenue(slug: string) {
 }
 
 export default async function VenuePage({ params }: Props) {
-    const venue = await getVenue(params.slug);
+    const { slug } = await params;
+    const venue = await getVenue(slug);
 
     if (!venue) {
         notFound();
@@ -54,6 +72,22 @@ export default async function VenuePage({ params }: Props) {
 
     return (
         <div className="min-h-screen bg-white">
+            <JsonLd
+                data={[
+                    venueSchema({
+                        name: venue.name,
+                        slug,
+                        description: venue.shortDescription || venue.description,
+                        image: venue.featuredImage,
+                        maxCapacity: venue.capacityTheatre,
+                        areaSqft: venue.area,
+                    }),
+                    breadcrumbSchema([
+                        { name: 'Conference & Events', path: '/conference-events' },
+                        { name: venue.name, path: `/conference-events/${slug}` },
+                    ]),
+                ]}
+            />
             {/* Hero Section */}
             <section className="relative h-[70vh] flex items-end overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent z-10" />
@@ -294,7 +328,7 @@ export default async function VenuePage({ params }: Props) {
             <section className="py-12 px-4 bg-cream-50">
                 <div className="max-w-7xl mx-auto text-center">
                     <Link
-                        href="/conference-and-events"
+                        href="/conference-events"
                         className="inline-flex items-center gap-2 text-cream-700 hover:text-gold-600 transition-colors"
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
