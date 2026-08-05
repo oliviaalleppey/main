@@ -7,6 +7,7 @@ import FrontendLayout from "@/components/layout/frontend-layout";
 import { getColorPalette } from "@/lib/db/actions/settings-actions";
 import { Toaster } from "sonner";
 import JsonLd from "@/components/seo/json-ld";
+import GoogleAnalytics from "@/components/analytics/google-analytics";
 import { hotelSchema, websiteSchema } from "@/lib/structured-data";
 import { BRAND, SITE_URL } from "@/lib/seo";
 
@@ -80,6 +81,17 @@ async function getSafeSession() {
   try {
     return await auth();
   } catch (error: any) {
+    // auth() reads cookies, so during static generation Next throws a
+    // DynamicServerError to signal "this route must be dynamic". That is
+    // control flow, not a failure — swallowing it logs ~80 spurious build
+    // errors and hides a signal the framework relies on.
+    if (
+      error?.digest === 'DYNAMIC_SERVER_USAGE' ||
+      error?.name === 'DynamicServerError'
+    ) {
+      throw error;
+    }
+
     if (error?.name === 'JWTSessionError' || error?.message?.includes('JWTSessionError')) {
       return null;
     }
@@ -121,6 +133,7 @@ export default async function RootLayout({
     >
       <body className="font-sans subpixel-antialiased" suppressHydrationWarning>
         <JsonLd data={[hotelSchema(), websiteSchema()]} />
+        <GoogleAnalytics />
         <SessionProvider session={session}>
           <FrontendLayout>
             {children}

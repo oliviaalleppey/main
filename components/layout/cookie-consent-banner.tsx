@@ -57,7 +57,9 @@ export default function CookieConsentBanner() {
 
                 {/* Text */}
                 <p className="text-[13px] leading-[1.7] text-[#4D4640]">
-                    We use essential cookies for secure sign-in and booking sessions.{' '}
+                    We use essential cookies for secure sign-in and booking sessions, and
+                    analytics cookies to understand how the site is used. Choose
+                    &ldquo;Essential Only&rdquo; to decline analytics cookies.{' '}
                     <Link
                         href="/privacy#cookies"
                         className="font-medium text-[var(--text-dark)] underline underline-offset-3 decoration-[#B68845]"
