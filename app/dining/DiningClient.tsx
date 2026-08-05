@@ -132,7 +132,7 @@ export default function DiningClient({ outlets }: Props) {
                             <span className="text-[#A68A5A]">✦</span> Every meal at Olivia is crafted with care
                         </p>
                         <a
-                            href="https://oliviaalleppey.com/menu.pdf"
+                            href="https://www.oliviaalleppey.com/menu.pdf"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="border border-[#D3C3A7] bg-[#FCFAF5] text-[#31403A] px-6 py-2.5 text-xs tracking-[0.18em] uppercase hover:bg-[#F1E9D9] transition-colors duration-300"

@@ -5,7 +5,15 @@
  * brand name, contact details and domain only ever need changing in one place.
  */
 
-export const SITE_URL = "https://oliviaalleppey.com";
+/**
+ * Canonical origin, including the `www` subdomain.
+ *
+ * The apex domain 301s to `www`, so this MUST keep the `www` prefix: a canonical
+ * tag or sitemap entry pointing at the apex points at a redirect, which Google
+ * treats as a soft error ("Page with redirect") and will not index cleanly.
+ * It also matches the GA4 stream URL.
+ */
+export const SITE_URL = "https://www.oliviaalleppey.com";
 
 /** Public-facing brand name used in titles and OG tags. */
 export const BRAND = "Olivia Alleppey";
