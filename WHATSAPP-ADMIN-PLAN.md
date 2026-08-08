@@ -188,9 +188,7 @@ Both were waiting on roles, and roles have landed (§6, `lib/services/whatsapp/r
 
 - **Sprint 5: go live.** Needs Meta credentials from the hotel (Phase 1). Nothing
   else is blocked.
-- `whatsapp-sync` cron (account health / template status polling) is still not
-  registered; template status does arrive by webhook, so this is a backstop rather
-  than a gap.
+- ~~`whatsapp-sync` cron~~ — built in Sprint 8 below.
 - Media in the inbox (send images/PDFs) is specced in Module 6 but not built — the
   composer is text and templates only.
 - Analytics: attribution to bookings via UTM/offer codes and A/B testing are
@@ -275,6 +273,51 @@ Verified additionally against the live database: `analyticsOverview` → workboo
 produced a valid 34 KB file with 31 gap-filled trend rows for a 30-day window.
 
 Total: **400 assertions across 9 suites.**
+
+### Sprint 8 — whatsapp-sync cron (2026-08-08)
+
+`lib/services/whatsapp/sync.ts` + `app/api/cron/whatsapp-sync/route.ts`, hourly
+at :15 in `vercel.json` (offset from the automations cron at :00).
+
+A backstop by design — template status arrives by webhook and the dispatcher
+reacts to account errors on the next send. This covers the states that generate
+**no event at all**: a quality rating that drifted down over a quiet weekend, a
+template Meta paused without a second notification, and a webhook subscription
+that silently lapsed — the last of which nothing else can detect, because a
+webhook that stops arriving produces no error anywhere. Hence
+`minutesSinceLastWebhook()`.
+
+**Red quality halts everything.** `wa_settings.halt_on_red_quality` already
+existed and already defaulted to `true`, so this was a decision the schema had
+made and nothing implemented. A RED rating is the step before Meta restricts the
+number outright, so the sync halts every live campaign *and* turns the kill
+switch off — halting alone would leave automations and the inbox still sending.
+It is honest about it: a second red run reports `killSwitchTripped: false`
+rather than claiming to have switched off something already off.
+
+The route returns 200 even on failure, matching `whatsapp-retention`. A cron
+that 500s on a transient Graph API blip produces alert noise and fixes nothing;
+the `ok` field in the body is the thing to watch.
+
+**31 assertions** in `scripts/test-sync-db.ts`, against the real database,
+driving the mock provider's `WHATSAPP_MOCK_QUALITY` to force the red path.
+
+⚠️ **This suite arms the kill switch on purpose** — it cannot test the trip
+otherwise. Every mutation is captured up front and restored in a `finally`, and
+the final assertions re-read from the database to prove it. Keep that property.
+
+It also exposed a trap worth knowing: **`runSync()` calls `syncTemplates()`,
+which faithfully mirrors whatever the provider reports — and under the mock
+provider that is four invented templates**, which persisted into the live
+database on the first run. They would have appeared in the campaign wizard's
+picker as real, approved templates. The suite now deletes anything whose
+`meta_template_id` starts with `mock-`, matched on the provider's own id prefix
+so a genuine Meta template can never be caught by it.
+
+Verified: `tsc` clean, `eslint` 0 errors, and the `wa_*` tables confirmed back
+to baseline afterwards (`wa_templates` at 0, `enabled = false`, `test_mode = true`).
+
+Total: **431 assertions across 10 suites.**
 
 ### Blocking action for the user
 
