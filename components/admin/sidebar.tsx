@@ -15,6 +15,7 @@ import {
     Tag,
     Film,
     Users,
+    MessageCircle,
     Image as ImageIcon,
 } from 'lucide-react';
 
@@ -27,6 +28,7 @@ const NAV_ITEMS = [
     { href: '/admin/rooms/rate-plans', label: 'Rate Plans', icon: Tag },
     { href: '/admin/add-ons', label: 'Add-ons', icon: Sparkles },
     { href: '/admin/memberships', label: 'Memberships', icon: Users },
+    { href: '/admin/whatsapp', label: 'WhatsApp', icon: MessageCircle },
     { href: '/admin/media', label: 'Media', icon: Film },
     { href: '/admin/gallery', label: 'Gallery', icon: ImageIcon },
     { href: '/admin/settings', label: 'Site Appearance', icon: Settings },
@@ -35,10 +37,19 @@ const NAV_ITEMS = [
 interface SidebarProps {
     pendingConfirmations?: number;
     atRiskConfirmations?: number;
+    /** Session role. Non-admins are WhatsApp-module users and see only that. */
+    role?: string;
 }
 
-export function Sidebar({ pendingConfirmations = 0, atRiskConfirmations = 0 }: SidebarProps) {
+export function Sidebar({ pendingConfirmations = 0, atRiskConfirmations = 0, role }: SidebarProps) {
     const pathname = usePathname();
+
+    // The middleware already refuses these roles everywhere outside
+    // /admin/whatsapp; hiding the rest of the menu stops them clicking links that
+    // only bounce them back, rather than adding any protection of its own.
+    const navItems = role === 'admin'
+        ? NAV_ITEMS
+        : NAV_ITEMS.filter((item) => item.href.startsWith('/admin/whatsapp'));
 
     return (
         <div className="flex w-64 flex-col bg-[#0A1628] min-h-screen">
@@ -56,7 +67,7 @@ export function Sidebar({ pendingConfirmations = 0, atRiskConfirmations = 0 }: S
             {/* Navigation */}
             <nav className="flex-1 p-3 space-y-0.5">
                 <p className="text-white/30 text-[10px] uppercase tracking-widest px-3 py-2 font-semibold">Main Menu</p>
-                {NAV_ITEMS.map((item) => {
+                {navItems.map((item) => {
                     const Icon = item.icon;
                     const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href);
                     return (

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [
+    {
+      "path": "/api/cron/booking-watchdog",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/whatsapp-dispatch",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/whatsapp-automations",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/whatsapp-retention",
+      "schedule": "30 3 * * *"
+    }
+  ]
+}

@@ -41,13 +41,24 @@ export const authConfig = {
         },
         authorized({ auth, request: { nextUrl } }) {
             const isLoggedIn = !!auth?.user;
-            const isAdmin = auth?.user?.role === 'admin';
+            const role = auth?.user?.role;
+            const isAdmin = role === 'admin';
             const isOnAdminPanel = nextUrl.pathname.startsWith('/admin');
 
             if (isOnAdminPanel) {
                 if (!isLoggedIn) return false;
-                if (!isAdmin) return false;
-                return true;
+                if (isAdmin) return true;
+
+                // The WhatsApp module has its own roles (marketing, front desk,
+                // viewer) with per-capability checks inside. They are admitted to
+                // that module only — deliberately not to the rest of the panel,
+                // which has no such checks and would hand them bookings, pricing
+                // and payments as a side effect.
+                if (nextUrl.pathname.startsWith('/admin/whatsapp')) {
+                    return role === 'marketing' || role === 'frontdesk' || role === 'viewer';
+                }
+
+                return false;
             }
             return true;
         },

@@ -18,6 +18,7 @@ import { IdempotencyService } from './idempotency';
 import { SessionExpiration } from './session-expiration';
 import { BookingLockService } from './booking-lock';
 import { sendBookingConfirmation, sendBookingAlertToStaff } from './email';
+import { fireAutomation } from './whatsapp/automations';
 import { bookingStateMachine } from './booking-state-machine';
 import { eq, inArray } from 'drizzle-orm';
 import crypto from 'crypto';
@@ -1001,7 +1002,7 @@ export class BookingService {
                 apiResponse: reservationResponse
             });
 
-            // 8. SEND EMAILS
+            // 8. SEND EMAILS (and the WhatsApp confirmation, if that automation is on)
             const checkInDate = new Date(booking.checkIn);
             const checkOutDate = new Date(booking.checkOut);
             const nights = Math.round((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24));
@@ -1033,6 +1034,28 @@ export class BookingService {
                     roomType: primaryRoomTypeName,
                     totalAmount: booking.totalAmount,
                 }).catch(e => console.error(`Failed to send staff booking alert for ${bookingId}:`, e)),
+
+                // WhatsApp booking confirmation. This only queues a message for the
+                // dispatcher, and it is a no-op unless the automation has been
+                // switched on and given an approved template — so a hotel that has
+                // not set WhatsApp up sees no change here at all. It never throws:
+                // a messaging problem must not fail a booking that is already made.
+                fireAutomation('booking_confirmation', {
+                    phone: booking.guestPhone,
+                    name: booking.guestName,
+                    dedupe: bookingId,
+                    variables: {
+                        '1': booking.guestName,
+                        '2': booking.bookingNumber,
+                        '3': checkInStr,
+                        '4': checkOutStr,
+                        '5': primaryRoomTypeName,
+                    },
+                }).then((outcome) => {
+                    if (!outcome.queued && outcome.reason !== 'disabled') {
+                        console.info(`[whatsapp] booking_confirmation not queued for ${bookingId}: ${outcome.reason}`);
+                    }
+                }),
             ]);
 
             return { success: true, booking: reservationResponse };
@@ -1099,6 +1122,19 @@ export class BookingService {
         if (booking.status !== 'failed' && booking.status !== 'refunded') {
             await bookingStateMachine.transition(bookingId, 'failed', {
                 reason: `Payment Failure: ${reason}`
+            });
+
+            // Payment-recovery nudge. Queued, never sent inline, and idempotent on
+            // the booking id so a gateway that retries its failure webhook cannot
+            // message the guest twice. Silent unless the automation is switched on.
+            void fireAutomation('payment_failed', {
+                phone: booking.guestPhone,
+                name: booking.guestName,
+                dedupe: bookingId,
+                variables: {
+                    '1': booking.guestName,
+                    '2': booking.bookingNumber,
+                },
             });
         }
     }

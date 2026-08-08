@@ -1,4 +1,4 @@
-import { pgTable, text, varchar, integer, timestamp, boolean, decimal, pgEnum, uuid, date, json, primaryKey } from 'drizzle-orm/pg-core';
+import { pgTable, text, varchar, integer, timestamp, boolean, decimal, pgEnum, uuid, date, json, primaryKey, index, uniqueIndex } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 // ============================================
@@ -1262,3 +1262,513 @@ export const membershipApplications = pgTable('membership_applications', {
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow(),
 });
+
+// ============================================
+// WHATSAPP — Cloud API broadcast & guest messaging
+// ============================================
+//
+// Design notes:
+//  - `wa_messages` is BOTH the outbound queue and the permanent audit log. The
+//    dispatcher claims rows with FOR UPDATE SKIP LOCKED, so no external queue
+//    service is needed and overlapping cron invocations are safe.
+//  - `idempotency_key` is unique per (campaign, contact). A retry can never
+//    double-send or double-bill.
+//  - Consent is append-only in `wa_consent_events`. `wa_contacts.consent_status`
+//    is the fast-read projection of that ledger, never the sole record.
+//  - All money is stored in paise (integer), matching formatCurrency() in
+//    lib/utils.ts which divides by 100.
+
+export const waConsentStatusEnum = pgEnum('wa_consent_status', [
+    'pending',      // imported without a documented WhatsApp opt-in — re-permission template only
+    'opted_in',     // documented consent; may receive marketing
+    'opted_out',    // withdrew consent; utility only where a transaction justifies it
+    'suppressed',   // permanent do-not-contact
+]);
+
+export const waContactSourceEnum = pgEnum('wa_contact_source', [
+    'booking', 'guest_profile', 'inquiry', 'import', 'inbound', 'manual',
+]);
+
+export const waCampaignStatusEnum = pgEnum('wa_campaign_status', [
+    'draft', 'pending_approval', 'scheduled', 'sending', 'paused', 'completed', 'halted', 'failed',
+]);
+
+export const waMessageStatusEnum = pgEnum('wa_message_status', [
+    'queued', 'sending', 'sent', 'delivered', 'read', 'failed', 'skipped', 'cancelled',
+]);
+
+export const waTemplateStatusEnum = pgEnum('wa_template_status', [
+    'draft',            // being written in our panel
+    'internal_review',  // awaiting a manager's approval before we submit to Meta
+    'pending_meta',     // submitted, awaiting Meta review
+    'approved', 'rejected', 'paused', 'disabled',
+]);
+
+export const waTemplateCategoryEnum = pgEnum('wa_template_category', [
+    'MARKETING', 'UTILITY', 'AUTHENTICATION',
+]);
+
+export const waDirectionEnum = pgEnum('wa_direction', ['inbound', 'outbound']);
+
+// --------------------------------------------
+// Contacts & consent
+// --------------------------------------------
+
+export const waContacts = pgTable('wa_contacts', {
+    id: uuid('id').defaultRandom().primaryKey(),
+
+    // Always stored E.164 (e.g. +919847123456). Normalised on write by phone.ts.
+    phone: varchar('phone', { length: 20 }).notNull().unique(),
+    name: varchar('name', { length: 255 }),
+    email: varchar('email', { length: 255 }),
+    locale: varchar('locale', { length: 10 }).default('en'),
+
+    source: waContactSourceEnum('source').notNull().default('import'),
+    importId: uuid('import_id'),
+    guestProfileId: uuid('guest_profile_id').references(() => guestProfiles.id, { onDelete: 'set null' }),
+
+    // Consent — projection of wa_consent_events, kept here for fast filtering.
+    consentStatus: waConsentStatusEnum('consent_status').notNull().default('pending'),
+    consentSource: varchar('consent_source', { length: 255 }), // e.g. "booking form", "front desk card"
+    consentAt: timestamp('consent_at'),
+    consentProofUrl: text('consent_proof_url'),
+    provenanceNote: text('provenance_note'), // mandatory on import — DPDP evidence
+    optedOutAt: timestamp('opted_out_at'),
+    optOutMethod: varchar('opt_out_method', { length: 50 }), // 'button' | 'stop_reply' | 'manual' | 'block_signal'
+
+    // Engagement / rate-limiting counters
+    lastInboundAt: timestamp('last_inbound_at'),
+    lastOutboundAt: timestamp('last_outbound_at'),
+    marketingSentCount: integer('marketing_sent_count').default(0),
+    marketingSent30d: integer('marketing_sent_30d').default(0), // drives the frequency cap
+    failureCount: integer('failure_count').default(0),
+    isWhatsappUser: boolean('is_whatsapp_user'), // null = unknown until first send attempt
+
+    tags: json('tags').$type<string[]>().default([]),
+    notes: text('notes'),
+
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+}, (table) => [
+    index('wa_contacts_consent_idx').on(table.consentStatus),
+    index('wa_contacts_source_idx').on(table.source),
+    index('wa_contacts_guest_profile_idx').on(table.guestProfileId),
+    index('wa_contacts_last_inbound_idx').on(table.lastInboundAt),
+]);
+
+// Append-only. Never updated or deleted — this is the proof of consent.
+export const waConsentEvents = pgTable('wa_consent_events', {
+    id: uuid('id').defaultRandom().primaryKey(),
+    contactId: uuid('contact_id').notNull().references(() => waContacts.id, { onDelete: 'cascade' }),
+    // Denormalised so consent history can be read by number without a join, and so
+    // it stays correct if a contact's number is later corrected. It does NOT
+    // survive erasure: this row cascades with the contact, which is the intended
+    // DPDP behaviour — the proof that an erasure happened lives in wa_audit_log,
+    // and the do-not-contact guarantee lives in wa_suppression.
+    phone: varchar('phone', { length: 20 }).notNull(),
+    fromStatus: waConsentStatusEnum('from_status'),
+    toStatus: waConsentStatusEnum('to_status').notNull(),
+    reason: text('reason'),
+    source: varchar('source', { length: 100 }),
+    actorId: uuid('actor_id'), // admin user who made the change; null = system/guest action
+    actorEmail: varchar('actor_email', { length: 255 }),
+    ip: varchar('ip', { length: 64 }),
+    createdAt: timestamp('created_at').defaultNow(),
+}, (table) => [
+    index('wa_consent_events_contact_idx').on(table.contactId),
+    index('wa_consent_events_phone_idx').on(table.phone),
+]);
+
+// Permanent do-not-contact. Survives re-imports — this is what stops an opt-out
+// being resurrected by the next CSV upload.
+export const waSuppression = pgTable('wa_suppression', {
+    id: uuid('id').defaultRandom().primaryKey(),
+    phone: varchar('phone', { length: 20 }).notNull().unique(),
+    reason: varchar('reason', { length: 255 }),
+    addedBy: uuid('added_by'),
+    createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const waImports = pgTable('wa_imports', {
+    id: uuid('id').defaultRandom().primaryKey(),
+    filename: varchar('filename', { length: 255 }).notNull(),
+    blobUrl: text('blob_url'),
+    rowCount: integer('row_count').default(0),
+    importedCount: integer('imported_count').default(0),
+    updatedCount: integer('updated_count').default(0),
+    rejectedCount: integer('rejected_count').default(0),
+    duplicateCount: integer('duplicate_count').default(0),
+
+    // What the operator declared about consent at import time. Required.
+    consentDeclaration: json('consent_declaration').$type<{
+        hasExplicitOptIn: boolean;
+        source?: string;
+        collectedAt?: string;
+        proofUrl?: string;
+    }>(),
+    provenanceNote: text('provenance_note').notNull(),
+    assignedStatus: waConsentStatusEnum('assigned_status').notNull().default('pending'),
+
+    columnMapping: json('column_mapping').$type<Record<string, string>>(),
+    errorReportUrl: text('error_report_url'),
+    actorId: uuid('actor_id'),
+    actorEmail: varchar('actor_email', { length: 255 }),
+    createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const waAudiences = pgTable('wa_audiences', {
+    id: uuid('id').defaultRandom().primaryKey(),
+    name: varchar('name', { length: 255 }).notNull(),
+    description: text('description'),
+    // 'dynamic' re-evaluates the filter at send time, so opt-outs auto-exclude.
+    type: varchar('type', { length: 20 }).notNull().default('dynamic'),
+    filter: json('filter').$type<Record<string, unknown>>().default({}),
+    contactIds: json('contact_ids').$type<string[]>(), // static audiences only
+    lastCount: integer('last_count').default(0),
+    lastEvaluatedAt: timestamp('last_evaluated_at'),
+    isSystem: boolean('is_system').default(false), // prebuilt, not user-deletable
+    createdBy: uuid('created_by'),
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+// --------------------------------------------
+// Templates
+// --------------------------------------------
+
+export const waTemplates = pgTable('wa_templates', {
+    id: uuid('id').defaultRandom().primaryKey(),
+    name: varchar('name', { length: 255 }).notNull(), // Meta requires lower_snake_case
+    language: varchar('language', { length: 10 }).notNull().default('en'),
+    category: waTemplateCategoryEnum('category').notNull().default('MARKETING'),
+    status: waTemplateStatusEnum('status').notNull().default('draft'),
+
+    metaTemplateId: varchar('meta_template_id', { length: 100 }),
+    components: json('components').$type<unknown[]>().default([]),
+    bodyText: text('body_text'),
+    headerType: varchar('header_type', { length: 20 }), // text | image | document | none
+    headerText: text('header_text'),
+    footerText: text('footer_text'),
+    buttons: json('buttons').$type<unknown[]>().default([]),
+    variableCount: integer('variable_count').default(0),
+    // Maps {{1}} -> a data source, e.g. { "1": "contact.firstName" }
+    variableMap: json('variable_map').$type<Record<string, string>>().default({}),
+    variableFallbacks: json('variable_fallbacks').$type<Record<string, string>>().default({}),
+
+    rejectionReason: text('rejection_reason'),
+    qualityScore: varchar('quality_score', { length: 20 }),
+
+    submittedBy: uuid('submitted_by'),
+    approvedBy: uuid('approved_by'),
+    submittedAt: timestamp('submitted_at'),
+    syncedAt: timestamp('synced_at'),
+
+    sentCount: integer('sent_count').default(0),
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+}, (table) => [
+    uniqueIndex('wa_templates_name_lang_idx').on(table.name, table.language),
+    index('wa_templates_status_idx').on(table.status),
+]);
+
+// --------------------------------------------
+// Campaigns & the send queue
+// --------------------------------------------
+
+export const waCampaigns = pgTable('wa_campaigns', {
+    id: uuid('id').defaultRandom().primaryKey(),
+    name: varchar('name', { length: 255 }).notNull(),
+    description: text('description'),
+    templateId: uuid('template_id').references(() => waTemplates.id),
+    audienceId: uuid('audience_id').references(() => waAudiences.id),
+    status: waCampaignStatusEnum('status').notNull().default('draft'),
+
+    dailyCap: integer('daily_cap'),
+    throttlePerMin: integer('throttle_per_min').default(60),
+    scheduledAt: timestamp('scheduled_at'),
+    startedAt: timestamp('started_at'),
+    completedAt: timestamp('completed_at'),
+
+    // Counters — updated by the dispatcher and the webhook.
+    totalCount: integer('total_count').default(0),
+    queuedCount: integer('queued_count').default(0),
+    sentCount: integer('sent_count').default(0),
+    deliveredCount: integer('delivered_count').default(0),
+    readCount: integer('read_count').default(0),
+    failedCount: integer('failed_count').default(0),
+    skippedCount: integer('skipped_count').default(0),
+    optedOutCount: integer('opted_out_count').default(0),
+
+    // Paise.
+    estimatedCost: integer('estimated_cost').default(0),
+    actualCost: integer('actual_cost').default(0),
+
+    // Static per-campaign variable values, e.g. { "2": "MONSOON30" }
+    staticVariables: json('static_variables').$type<Record<string, string>>().default({}),
+
+    createdBy: uuid('created_by'),
+    approvedBy: uuid('approved_by'), // two-person rule above the approval threshold
+    haltReason: text('halt_reason'),
+    variantOf: uuid('variant_of'), // A/B testing
+
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+}, (table) => [
+    index('wa_campaigns_status_idx').on(table.status),
+    index('wa_campaigns_scheduled_idx').on(table.scheduledAt),
+]);
+
+// The queue AND the audit log. One row per recipient per send.
+export const waMessages = pgTable('wa_messages', {
+    id: uuid('id').defaultRandom().primaryKey(),
+    campaignId: uuid('campaign_id').references(() => waCampaigns.id, { onDelete: 'cascade' }),
+    contactId: uuid('contact_id').notNull().references(() => waContacts.id, { onDelete: 'cascade' }),
+    templateId: uuid('template_id').references(() => waTemplates.id),
+    automationKey: varchar('automation_key', { length: 100 }), // set for transactional sends
+
+    direction: waDirectionEnum('direction').notNull().default('outbound'),
+    status: waMessageStatusEnum('status').notNull().default('queued'),
+
+    // Meta's message id. Nullable until sent; Postgres allows many NULLs in a unique index.
+    wamid: varchar('wamid', { length: 128 }).unique(),
+    // sha256 of (campaignId|contactId|templateId). Makes retries exactly-once.
+    idempotencyKey: varchar('idempotency_key', { length: 128 }).notNull().unique(),
+    conversationId: varchar('conversation_id', { length: 128 }),
+
+    variables: json('variables').$type<Record<string, string>>().default({}),
+    renderedBody: text('rendered_body'), // what the guest actually saw
+
+    attempts: integer('attempts').default(0),
+    errorCode: integer('error_code'),
+    errorDetail: text('error_detail'),
+    skipReason: varchar('skip_reason', { length: 100 }), // why the consent gate blocked it
+
+    cost: integer('cost').default(0), // paise
+    pricingCategory: varchar('pricing_category', { length: 30 }),
+
+    queuedAt: timestamp('queued_at').defaultNow(),
+    sendAfter: timestamp('send_after'), // backoff / quiet-hours deferral
+    sentAt: timestamp('sent_at'),
+    deliveredAt: timestamp('delivered_at'),
+    readAt: timestamp('read_at'),
+    failedAt: timestamp('failed_at'),
+}, (table) => [
+    // The dispatcher's claim query. Order matters: status first, then due time.
+    index('wa_messages_dispatch_idx').on(table.status, table.sendAfter),
+    index('wa_messages_campaign_status_idx').on(table.campaignId, table.status),
+    index('wa_messages_contact_idx').on(table.contactId),
+    index('wa_messages_sent_at_idx').on(table.sentAt),
+]);
+
+// --------------------------------------------
+// Two-way inbox
+// --------------------------------------------
+
+export const waInboxThreads = pgTable('wa_inbox_threads', {
+    id: uuid('id').defaultRandom().primaryKey(),
+    contactId: uuid('contact_id').notNull().references(() => waContacts.id, { onDelete: 'cascade' }).unique(),
+    status: varchar('status', { length: 20 }).notNull().default('open'), // open | resolved
+    assignedTo: uuid('assigned_to'),
+    // Free-form replies are only allowed while this is in the future (Meta's 24h window).
+    windowExpiresAt: timestamp('window_expires_at'),
+    lastMessageAt: timestamp('last_message_at'),
+    lastInboundAt: timestamp('last_inbound_at'),
+    unreadCount: integer('unread_count').default(0),
+    labels: json('labels').$type<string[]>().default([]),
+    internalNotes: text('internal_notes'),
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+}, (table) => [
+    index('wa_inbox_threads_status_idx').on(table.status),
+    index('wa_inbox_threads_last_message_idx').on(table.lastMessageAt),
+]);
+
+export const waInboxMessages = pgTable('wa_inbox_messages', {
+    id: uuid('id').defaultRandom().primaryKey(),
+    threadId: uuid('thread_id').notNull().references(() => waInboxThreads.id, { onDelete: 'cascade' }),
+    direction: waDirectionEnum('direction').notNull(),
+    type: varchar('type', { length: 20 }).notNull().default('text'), // text | image | document | button | template
+    body: text('body'),
+    mediaUrl: text('media_url'),
+    mediaMimeType: varchar('media_mime_type', { length: 100 }),
+    wamid: varchar('wamid', { length: 128 }).unique(),
+    status: waMessageStatusEnum('status').default('sent'),
+    sentBy: uuid('sent_by'), // admin user for outbound; null for inbound
+    errorDetail: text('error_detail'),
+    createdAt: timestamp('created_at').defaultNow(),
+}, (table) => [
+    index('wa_inbox_messages_thread_idx').on(table.threadId, table.createdAt),
+]);
+
+export const waCannedReplies = pgTable('wa_canned_replies', {
+    id: uuid('id').defaultRandom().primaryKey(),
+    title: varchar('title', { length: 255 }).notNull(),
+    body: text('body').notNull(),
+    category: varchar('category', { length: 100 }),
+    sortOrder: integer('sort_order').default(0),
+    isActive: boolean('is_active').default(true),
+    createdAt: timestamp('created_at').defaultNow(),
+});
+
+// --------------------------------------------
+// Automations, ops, audit
+// --------------------------------------------
+
+export const waAutomations = pgTable('wa_automations', {
+    id: uuid('id').defaultRandom().primaryKey(),
+    key: varchar('key', { length: 100 }).notNull().unique(), // 'booking_confirmation', 'prearrival', ...
+    label: varchar('label', { length: 255 }).notNull(),
+    description: text('description'),
+    enabled: boolean('enabled').default(false),
+    templateId: uuid('template_id').references(() => waTemplates.id),
+    offsetHours: integer('offset_hours').default(0), // negative = before the event
+    config: json('config').$type<Record<string, unknown>>().default({}),
+    lastFiredAt: timestamp('last_fired_at'),
+    fireCount: integer('fire_count').default(0),
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+// Raw webhook payloads, append-only, for debugging and replay. Auto-purged.
+export const waEvents = pgTable('wa_events', {
+    id: uuid('id').defaultRandom().primaryKey(),
+    eventType: varchar('event_type', { length: 50 }).notNull(),
+    wamid: varchar('wamid', { length: 128 }),
+    payload: json('payload').$type<Record<string, unknown>>(),
+    processed: boolean('processed').default(false),
+    processingError: text('processing_error'),
+    receivedAt: timestamp('received_at').defaultNow(),
+}, (table) => [
+    index('wa_events_wamid_idx').on(table.wamid),
+    index('wa_events_received_idx').on(table.receivedAt),
+]);
+
+// Singleton config row (key = 'default').
+export const waSettings = pgTable('wa_settings', {
+    key: varchar('key', { length: 50 }).primaryKey().default('default'),
+
+    enabled: boolean('enabled').default(false),          // global kill switch
+    testMode: boolean('test_mode').default(true),        // redirect all sends to testNumbers
+    testNumbers: json('test_numbers').$type<string[]>().default([]),
+
+    dailyCap: integer('daily_cap').default(250),
+    throttlePerMin: integer('throttle_per_min').default(60),
+    batchSize: integer('batch_size').default(100),
+    maxConcurrency: integer('max_concurrency').default(10),
+    maxAttempts: integer('max_attempts').default(3),
+
+    quietHoursEnabled: boolean('quiet_hours_enabled').default(true),
+    quietHoursStart: integer('quiet_hours_start').default(21), // IST hour, inclusive
+    quietHoursEnd: integer('quiet_hours_end').default(9),      // IST hour, exclusive
+    timezone: varchar('timezone', { length: 50 }).default('Asia/Kolkata'),
+
+    frequencyCapPer30d: integer('frequency_cap_per_30d').default(2),
+
+    monthlyBudget: integer('monthly_budget').default(2500000), // paise = ₹25,000
+    budgetWarnPercent: integer('budget_warn_percent').default(80),
+
+    // Auto-halt thresholds. Basis points to avoid floats: 300 = 3.00%.
+    stopOptOutRateBp: integer('stop_opt_out_rate_bp').default(300),
+    stopFailureRateBp: integer('stop_failure_rate_bp').default(1000),
+    stopMinSample: integer('stop_min_sample').default(200),
+    haltOnRedQuality: boolean('halt_on_red_quality').default(true),
+
+    approvalThreshold: integer('approval_threshold').default(1000), // two-person rule above this
+
+    // Cached account health, refreshed by the sync cron.
+    qualityRating: varchar('quality_rating', { length: 20 }),
+    messagingTier: varchar('messaging_tier', { length: 50 }),
+    tokenExpiresAt: timestamp('token_expires_at'),
+    lastWebhookAt: timestamp('last_webhook_at'),
+    lastSyncAt: timestamp('last_sync_at'),
+    lastHealthError: text('last_health_error'),
+
+    updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const waAuditLog = pgTable('wa_audit_log', {
+    id: uuid('id').defaultRandom().primaryKey(),
+    actorId: uuid('actor_id'),
+    actorEmail: varchar('actor_email', { length: 255 }),
+    action: varchar('action', { length: 100 }).notNull(),
+    entityType: varchar('entity_type', { length: 50 }),
+    entityId: varchar('entity_id', { length: 100 }),
+    before: json('before').$type<Record<string, unknown>>(),
+    after: json('after').$type<Record<string, unknown>>(),
+    ip: varchar('ip', { length: 64 }),
+    createdAt: timestamp('created_at').defaultNow(),
+}, (table) => [
+    index('wa_audit_log_created_idx').on(table.createdAt),
+    index('wa_audit_log_actor_idx').on(table.actorId),
+]);
+
+// --------------------------------------------
+// Relations
+// --------------------------------------------
+
+export const waContactsRelations = relations(waContacts, ({ one, many }) => ({
+    guestProfile: one(guestProfiles, {
+        fields: [waContacts.guestProfileId],
+        references: [guestProfiles.id],
+    }),
+    messages: many(waMessages),
+    consentEvents: many(waConsentEvents),
+    thread: one(waInboxThreads, {
+        fields: [waContacts.id],
+        references: [waInboxThreads.contactId],
+    }),
+}));
+
+export const waConsentEventsRelations = relations(waConsentEvents, ({ one }) => ({
+    contact: one(waContacts, {
+        fields: [waConsentEvents.contactId],
+        references: [waContacts.id],
+    }),
+}));
+
+export const waCampaignsRelations = relations(waCampaigns, ({ one, many }) => ({
+    template: one(waTemplates, {
+        fields: [waCampaigns.templateId],
+        references: [waTemplates.id],
+    }),
+    audience: one(waAudiences, {
+        fields: [waCampaigns.audienceId],
+        references: [waAudiences.id],
+    }),
+    messages: many(waMessages),
+}));
+
+export const waMessagesRelations = relations(waMessages, ({ one }) => ({
+    campaign: one(waCampaigns, {
+        fields: [waMessages.campaignId],
+        references: [waCampaigns.id],
+    }),
+    contact: one(waContacts, {
+        fields: [waMessages.contactId],
+        references: [waContacts.id],
+    }),
+    template: one(waTemplates, {
+        fields: [waMessages.templateId],
+        references: [waTemplates.id],
+    }),
+}));
+
+export const waTemplatesRelations = relations(waTemplates, ({ many }) => ({
+    campaigns: many(waCampaigns),
+    messages: many(waMessages),
+}));
+
+export const waInboxThreadsRelations = relations(waInboxThreads, ({ one, many }) => ({
+    contact: one(waContacts, {
+        fields: [waInboxThreads.contactId],
+        references: [waContacts.id],
+    }),
+    messages: many(waInboxMessages),
+}));
+
+export const waInboxMessagesRelations = relations(waInboxMessages, ({ one }) => ({
+    thread: one(waInboxThreads, {
+        fields: [waInboxMessages.threadId],
+        references: [waInboxThreads.id],
+    }),
+}));

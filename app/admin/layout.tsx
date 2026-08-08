@@ -25,7 +25,14 @@ export default function AdminLayout({
 
 async function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     const session = await auth();
-    if (!session || session.user?.role !== 'admin') {
+    const role = session?.user?.role;
+
+    // Admins, plus the WhatsApp module's own roles. The middleware in
+    // auth.config.ts is what confines those roles to /admin/whatsapp; this layout
+    // wraps every admin page, so rejecting them here would lock them out of the
+    // module they are for.
+    const allowed = role === 'admin' || role === 'marketing' || role === 'frontdesk' || role === 'viewer';
+    if (!session || !allowed) {
         redirect('/signin');
     }
 
@@ -54,6 +61,7 @@ async function AdminLayoutContent({ children }: { children: React.ReactNode }) {
             <Sidebar
                 pendingConfirmations={pendingConfirmations}
                 atRiskConfirmations={atRiskConfirmations}
+                role={role}
             />
             <main className="flex-1 p-8">
                 {children}
