@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { AlertTriangle, TrendingUp } from 'lucide-react';
+import { AlertTriangle, Download, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/utils';
@@ -120,7 +120,21 @@ export function AnalyticsView() {
                         </button>
                     ))}
                 </div>
-                {loading && <span className="text-xs text-gray-400">Refreshing…</span>}
+                <div className="flex items-center gap-3">
+                    {loading && <span className="text-xs text-gray-400">Refreshing…</span>}
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        // A plain navigation, not fetch(): the response is an
+                        // attachment, so the browser's own download handling is
+                        // what we want. The range follows whatever is on screen.
+                        onClick={() => {
+                            window.location.href = `/api/admin/whatsapp/analytics/export?days=${days}`;
+                        }}
+                    >
+                        <Download className="mr-1.5 h-4 w-4" /> Export XLSX
+                    </Button>
+                </div>
             </div>
 
             {funnel.queued === 0 && (

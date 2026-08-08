@@ -193,8 +193,10 @@ Both were waiting on roles, and roles have landed (§6, `lib/services/whatsapp/r
   than a gap.
 - Media in the inbox (send images/PDFs) is specced in Module 6 but not built — the
   composer is text and templates only.
-- Analytics: attribution to bookings via UTM/offer codes, A/B testing, and XLSX
-  export are specced but not built. The funnel, trends, cost and leaderboard are.
+- Analytics: attribution to bookings via UTM/offer codes and A/B testing are
+  specced but not built. The funnel, trends, cost, leaderboard and XLSX export
+  are. Attribution needs a link-tagging scheme agreed first — it is a decision,
+  not just code.
 
 ### Sprint 6 — phone masking and the page capability gates (2026-08-08)
 
@@ -237,6 +239,42 @@ country code plus an operator prefix carrying almost no entropy.
 **Not verified over HTTP — see gotcha 15.** The masking is proven by unit tests
 and the route changes are one-line transformations, but the end-to-end check
 that a `frontdesk` session actually receives masked JSON could not be run.
+
+### Sprint 7 — analytics XLSX export (2026-08-08)
+
+`lib/services/whatsapp/analytics-export.ts` builds a four-sheet workbook —
+Summary, Daily, Templates, By hour — served by
+`app/api/admin/whatsapp/analytics/export/route.ts` and reachable from the Export
+button on the analytics screen.
+
+Two failure modes here produce a file that opens perfectly and is silently wrong
+by a factor of 100, so both are pinned by tests:
+
+1. **Money is stored in paise** (gotcha 6). Every amount is divided by 100 and
+   given a rupee number format. The fixture uses amounts that are not round
+   rupees (₹412.34, ₹1.08) so a missing conversion cannot coincidentally look
+   right.
+2. **The percentages arrive on two scales.** Funnel and template rates are
+   fractions; `proofPercent` and `percentOfBudget` are already 0–100. All are
+   normalised to fractions and written with a real Excel percent format, so they
+   stay numbers the reader can chart or average rather than strings like "62%"
+   that sort alphabetically.
+
+Gated on `analytics.read`, which `frontdesk` and `viewer` hold. That is
+deliberate and safe: the workbook is aggregate-only — no phone number, name or
+message body — and a test asserts no string cell in any sheet looks like a phone
+number, so the export cannot become a way around the masking. Exports are
+written to the audit log with the requested window.
+
+**33 assertions** in `scripts/test-analytics-export.ts`, which builds the
+workbook and reads it back with the same library, so every assertion is about
+what a reader of the file would actually see. It also covers the empty report
+(headers present, no data rows) — the state the hotel's own data is in today.
+
+Verified additionally against the live database: `analyticsOverview` → workbook
+produced a valid 34 KB file with 31 gap-filled trend rows for a 30-day window.
+
+Total: **400 assertions across 9 suites.**
 
 ### Blocking action for the user
 

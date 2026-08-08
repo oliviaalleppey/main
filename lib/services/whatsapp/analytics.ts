@@ -379,3 +379,5 @@ export async function analyticsOverview(range: DateRange) {
 
     return { range, funnel: funnelData, trends, cost, templates, hours, consent };
 }
+
+export type AnalyticsOverview = Awaited<ReturnType<typeof analyticsOverview>>;
