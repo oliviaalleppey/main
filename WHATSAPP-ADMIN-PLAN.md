@@ -189,8 +189,7 @@ Both were waiting on roles, and roles have landed (§6, `lib/services/whatsapp/r
 - **Sprint 5: go live.** Needs Meta credentials from the hotel (Phase 1). Nothing
   else is blocked.
 - ~~`whatsapp-sync` cron~~ — built in Sprint 8 below.
-- Media in the inbox (send images/PDFs) is specced in Module 6 but not built — the
-  composer is text and templates only.
+- ~~Media in the inbox~~ — built in Sprint 9 below.
 - Analytics: attribution to bookings via UTM/offer codes and A/B testing are
   specced but not built. The funnel, trends, cost, leaderboard and XLSX export
   are. Attribution needs a link-tagging scheme agreed first — it is a decision,
@@ -334,6 +333,55 @@ Verified: `tsc` clean, `eslint` 0 errors, and the `wa_*` tables confirmed back
 to baseline afterwards (`wa_templates` at 0, `enabled = false`, `test_mode = true`).
 
 Total: **431 assertions across 10 suites.**
+
+### Sprint 9 — inbox media (2026-08-08)
+
+Send images and PDFs from the inbox composer. No migration needed —
+`wa_inbox_messages` already had `type`, `media_url` and `media_mime_type`.
+
+`sendMediaReply()` is a **sibling** of `sendReply()`, not a branch inside it. It
+runs the same two gates in the same order, and the duplication is deliberate: a
+future edit to one path cannot silently skip a gate on the other. Media is
+free-form content, so the 24-hour window applies exactly as it does to text —
+there is no template equivalent of "here is the menu PDF", which is why the
+paperclip disappears once the window closes.
+
+Upload and send are **one route** (`…/inbox/[id]/media`). A separate upload
+endpoint would be a public-blob writer any authenticated role could call without
+ever sending anything, which is a file-drop service we do not want to run.
+
+Two traps worth keeping:
+
+1. **Do not convert to WebP.** `app/api/admin/upload-image` helpfully converts
+   uploads to WebP; Meta accepts only JPEG and PNG for image messages, so the
+   same "help" here would produce a file WhatsApp refuses. A test asserts webp is
+   rejected.
+2. **Meta fetches the link itself**, so the blob must be genuinely public — which
+   is why this uses Vercel Blob rather than a route behind the admin session. The
+   mock provider rejects a non-https link (code 131053) rather than pretending any
+   URL works.
+
+On a send failure the blob is deliberately **not** deleted: the failed-message
+bubble links to it so the operator can see what they tried to send. An orphaned
+file costs pennies; a broken bubble costs an explanation.
+
+**33 assertions** in `scripts/test-media-db.ts`. Two findings from writing it:
+
+- An **opted-out guest still receives a service-window reply** — an opt-out is an
+  opt-out of *marketing*, and `consent.ts` allows UTILITY with a warning. The
+  state that blocks unconditionally is `suppressed`. Both are now pinned.
+- The suite sets `WHATSAPP_MOCK_ALWAYS_SUCCEED`, because otherwise whether an
+  assertion passes depends on which synthetic number lands in the mock's
+  deterministic failure bucket.
+
+**Verified in the running panel**, end to end: a real PNG uploaded through the
+route to Vercel Blob, sent via the mock provider, persisted as `type: image` with
+the caption as `body`, and rendered in the transcript — confirmed loaded rather
+than broken via `naturalWidth: 50`. The closed-window thread correctly showed the
+template picker with **no** paperclip. Afterwards the blob was deleted, settings
+restored, and the demo data removed; `wa_*` is back to 0 rows and bookings to 90.
+
+Total: **464 assertions across 11 suites.**
 
 ### Blocking action for the user
 

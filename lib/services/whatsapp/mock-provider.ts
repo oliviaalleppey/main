@@ -8,6 +8,7 @@ import {
     type SendResult,
     type SendTemplateParams,
     type SendTextParams,
+    type SendMediaParams,
     type WhatsAppProvider,
 } from './types';
 
@@ -165,6 +166,24 @@ export class MockProvider implements WhatsAppProvider {
     }
 
     async sendText(params: SendTextParams): Promise<SendResult> {
+        return this.send(params.to);
+    }
+
+    /**
+     * Media send. Rejects an unreachable link the way Meta does (code 131053,
+     * "media upload error") rather than pretending any URL works — the most
+     * likely real failure is a blob URL that is not actually public, and a mock
+     * that always succeeds would hide exactly that.
+     */
+    async sendMedia(params: SendMediaParams): Promise<SendResult> {
+        if (!/^https:\/\//i.test(params.link)) {
+            throw new WhatsAppError({
+                code: 131053,
+                message: '[mock] Media link must be a public https URL',
+                errorClass: 'permanent',
+                httpStatus: 400,
+            });
+        }
         return this.send(params.to);
     }
 

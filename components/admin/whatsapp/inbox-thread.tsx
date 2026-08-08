@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import {
     AlertTriangle, Check, CheckCheck, ChevronDown, Loader2, Lock, MessageSquareText,
-    Send, User,
+    FileText, Paperclip, Send, User,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -21,6 +21,8 @@ type ThreadMessage = {
     body: string | null;
     status: string | null;
     errorDetail: string | null;
+    mediaUrl: string | null;
+    mediaMimeType: string | null;
     createdAt: string | null;
 };
 
@@ -84,6 +86,7 @@ export function InboxThread({ threadId, onChanged }: { threadId: string; onChang
     const [notes, setNotes] = useState('');
 
     const transcriptRef = useRef<HTMLDivElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const load = useCallback(async () => {
         try {
@@ -185,6 +188,47 @@ export function InboxThread({ threadId, onChanged }: { threadId: string; onChang
             setSending(false);
         }
     }, [draft, load, onChanged, templateId, thread, threadId, windowOpen]);
+
+    /**
+     * Upload and send an image or PDF.
+     *
+     * The typed draft travels with it as the caption, because that is what an
+     * operator attaching a menu almost always means — and it saves sending two
+     * messages where one will do.
+     */
+    const sendFile = useCallback(async (file: File) => {
+        setSending(true);
+        try {
+            const form = new FormData();
+            form.append('file', file);
+            if (draft.trim()) form.append('caption', draft.trim());
+
+            const response = await fetch(`/api/admin/whatsapp/inbox/${threadId}/media`, {
+                method: 'POST',
+                body: form,
+            });
+            const result = await response.json();
+
+            if (!response.ok) {
+                if (result.code === 'window_closed') {
+                    toast.error('The 24-hour window closed, so a file can no longer be sent.');
+                    await load();
+                    return;
+                }
+                throw new Error(result.error ?? 'Could not send the file');
+            }
+
+            for (const warning of result.warnings ?? []) toast.warning(warning);
+
+            setDraft('');
+            await load();
+            onChanged();
+        } catch (caught) {
+            toast.error(caught instanceof Error ? caught.message : 'Could not send the file');
+        } finally {
+            setSending(false);
+        }
+    }, [draft, load, onChanged, threadId]);
 
     const patch = useCallback(
         async (body: Record<string, unknown>, successMessage?: string) => {
@@ -308,7 +352,35 @@ export function InboxThread({ threadId, onChanged }: { threadId: string; onChang
                                             Template
                                         </p>
                                     )}
-                                    <p className="whitespace-pre-wrap break-words text-sm">{message.body}</p>
+                                    {message.type === 'image' && message.mediaUrl && (
+                                        // eslint-disable-next-line @next/next/no-img-element -- blob host is not in next.config images
+                                        <img
+                                            src={message.mediaUrl}
+                                            alt={message.body || 'Photo'}
+                                            className="mb-1 max-h-64 rounded-md object-cover"
+                                        />
+                                    )}
+                                    {message.type === 'document' && message.mediaUrl && (
+                                        <a
+                                            href={message.mediaUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className={cn(
+                                                'mb-1 flex items-center gap-2 rounded-md px-2 py-1.5 text-sm underline',
+                                                outbound && message.status !== 'failed'
+                                                    ? 'bg-emerald-700/40'
+                                                    : 'bg-gray-100',
+                                            )}
+                                        >
+                                            <FileText className="h-4 w-4 shrink-0" />
+                                            <span className="truncate">{message.body || 'Document'}</span>
+                                        </a>
+                                    )}
+                                    {/* A media message may have no caption, and an empty
+                                        paragraph would leave a stray gap in the bubble. */}
+                                    {message.body && !(message.type === 'document' && message.mediaUrl) && (
+                                        <p className="whitespace-pre-wrap break-words text-sm">{message.body}</p>
+                                    )}
 
                                     <div
                                         className={cn(
@@ -387,6 +459,29 @@ export function InboxThread({ threadId, onChanged }: { threadId: string; onChang
                                 maxLength={4096}
                                 className="resize-none"
                             />
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/jpeg,image/png,application/pdf"
+                                className="hidden"
+                                onChange={(event) => {
+                                    const file = event.target.files?.[0];
+                                    // Reset first, so picking the same file twice
+                                    // in a row still fires onChange.
+                                    event.target.value = '';
+                                    if (file) sendFile(file);
+                                }}
+                            />
+                            <Button
+                                variant="outline"
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={sending}
+                                className="self-end"
+                                title="Send a photo or PDF (JPEG, PNG, PDF)"
+                                aria-label="Attach a photo or PDF"
+                            >
+                                <Paperclip className="h-4 w-4" />
+                            </Button>
                             <Button onClick={send} disabled={sending || !draft.trim()} className="self-end">
                                 {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                             </Button>

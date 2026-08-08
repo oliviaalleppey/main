@@ -144,6 +144,25 @@ export type SendTextParams = {
     previewUrl?: boolean;
 };
 
+/** The media kinds the inbox composer offers. Meta supports more; these are ours. */
+export const MEDIA_KINDS = ['image', 'document'] as const;
+export type MediaKind = (typeof MEDIA_KINDS)[number];
+
+export type SendMediaParams = {
+    to: string;
+    kind: MediaKind;
+    /**
+     * A publicly reachable URL. Meta fetches the file itself, so this must be
+     * served without authentication — hence Vercel Blob rather than a route
+     * behind the admin session.
+     */
+    link: string;
+    /** Images may carry a caption; documents may too, and it renders above the file. */
+    caption?: string;
+    /** Documents only. Meta shows this as the file name in the chat. */
+    filename?: string;
+};
+
 export type SendResult = {
     wamid: string;
     /** Meta returns this when the recipient's number was normalised differently. */
@@ -183,6 +202,7 @@ export interface WhatsAppProvider {
 
     sendTemplate(params: SendTemplateParams): Promise<SendResult>;
     sendText(params: SendTextParams): Promise<SendResult>;
+    sendMedia(params: SendMediaParams): Promise<SendResult>;
 
     listTemplates(): Promise<RemoteTemplate[]>;
     createTemplate(params: CreateTemplateParams): Promise<{ metaTemplateId: string; status: string }>;

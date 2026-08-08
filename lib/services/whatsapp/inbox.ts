@@ -6,7 +6,7 @@ import { and, asc, desc, eq, inArray, ilike, or, sql } from 'drizzle-orm';
 import { getProvider } from './index';
 import { canSend, describeBlockReason } from './consent';
 import { getSettings } from './settings';
-import { WhatsAppError, classifyError, SERVICE_WINDOW_MS } from './types';
+import { WhatsAppError, classifyError, SERVICE_WINDOW_MS, type MediaKind } from './types';
 import { renderTemplateText } from './template-lint';
 
 /**
@@ -355,6 +355,129 @@ export async function sendReply(params: {
             direction: 'outbound',
             type: 'text',
             body,
+            status: 'failed',
+            sentBy: params.actor.id,
+            errorDetail: `${detail}${code ? ` (Meta ${code}, ${spec.class})` : ''}`,
+        });
+
+        throw error;
+    }
+}
+
+/** Meta's caps. Exceeding them is a wasted round trip and a confusing error. */
+export const MEDIA_LIMITS = {
+    image: { bytes: 5 * 1024 * 1024, mime: ['image/jpeg', 'image/png'] },
+    document: { bytes: 100 * 1024 * 1024, mime: ['application/pdf'] },
+} as const;
+
+/**
+ * Send an image or PDF inside the service window.
+ *
+ * Deliberately a sibling of sendReply() rather than a branch inside it: it runs
+ * the *same* two gates in the same order, and the duplication is the point —
+ * a future edit to one path cannot silently skip a gate on the other.
+ *
+ * Media is free-form content, so the window rule applies exactly as it does to
+ * text. There is no template equivalent for "here is the menu PDF", which is
+ * why this cannot be offered once the window has closed.
+ *
+ * The caller is responsible for having put the file somewhere publicly
+ * reachable — Meta fetches the link itself.
+ */
+export async function sendMediaReply(params: {
+    threadId: string;
+    kind: MediaKind;
+    link: string;
+    mimeType: string;
+    filename?: string;
+    caption?: string;
+    actor: Actor;
+}) {
+    if (!/^https:\/\//i.test(params.link)) {
+        throw new Error('Media link must be a public https URL');
+    }
+    const allowed = MEDIA_LIMITS[params.kind].mime as readonly string[];
+    if (!allowed.includes(params.mimeType)) {
+        throw new Error(`${params.kind} must be one of: ${allowed.join(', ')}`);
+    }
+    const caption = params.caption?.trim() || undefined;
+    if (caption && caption.length > 1024) {
+        throw new Error('Caption must be 1024 characters or fewer');
+    }
+
+    const row = await db
+        .select({ thread: waInboxThreads, contact: waContacts })
+        .from(waInboxThreads)
+        .innerJoin(waContacts, eq(waInboxThreads.contactId, waContacts.id))
+        .where(eq(waInboxThreads.id, params.threadId))
+        .limit(1);
+
+    if (!row.length) throw new Error('Thread not found');
+    const { thread, contact } = row[0];
+
+    // Gate 1: the window.
+    const state = windowState(thread);
+    if (!state.open) throw new WindowClosedError(state.expiresAt);
+
+    // Gate 2: the shared consent chokepoint, UTILITY for the same reason as text —
+    // the guest opened this conversation.
+    const settings = await getSettings();
+    const verdict = await canSend(contact, { category: 'UTILITY', settings });
+    if (!verdict.allowed) {
+        throw new SendBlockedError(verdict.reason, describeBlockReason(verdict.reason));
+    }
+
+    const provider = getProvider();
+
+    try {
+        const result = await provider.sendMedia({
+            to: contact.phone,
+            kind: params.kind,
+            link: params.link,
+            caption,
+            filename: params.filename,
+        });
+
+        const [message] = await db
+            .insert(waInboxMessages)
+            .values({
+                threadId: thread.id,
+                direction: 'outbound',
+                type: params.kind,
+                // The caption is the body: it is what the guest reads, and putting
+                // it here means the thread list preview needs no special case.
+                body: caption ?? params.filename ?? null,
+                mediaUrl: params.link,
+                mediaMimeType: params.mimeType,
+                wamid: result.wamid,
+                status: 'sent',
+                sentBy: params.actor.id,
+            })
+            .returning();
+
+        await db
+            .update(waInboxThreads)
+            .set({ lastMessageAt: new Date(), updatedAt: new Date() })
+            .where(eq(waInboxThreads.id, thread.id));
+
+        await db
+            .update(waContacts)
+            .set({ lastOutboundAt: new Date(), updatedAt: new Date() })
+            .where(eq(waContacts.id, contact.id));
+
+        return { message, warnings: verdict.warnings };
+    } catch (error) {
+        const code = error instanceof WhatsAppError ? error.code : undefined;
+        const spec = classifyError(code);
+        const detail = error instanceof Error ? error.message : 'Send failed';
+
+        await db.insert(waInboxMessages).values({
+            threadId: thread.id,
+            direction: 'outbound',
+            type: params.kind,
+            body: caption ?? params.filename ?? null,
+            mediaUrl: params.link,
+            mediaMimeType: params.mimeType,
             status: 'failed',
             sentBy: params.actor.id,
             errorDetail: `${detail}${code ? ` (Meta ${code}, ${spec.class})` : ''}`,

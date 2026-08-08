@@ -7,6 +7,7 @@ import {
     type SendResult,
     type SendTemplateParams,
     type SendTextParams,
+    type SendMediaParams,
     type WhatsAppProvider,
 } from './types';
 import { toWhatsAppId } from './phone';
@@ -200,6 +201,50 @@ export class CloudProvider implements WhatsAppProvider {
             throw new WhatsAppError({
                 code: 0,
                 message: 'Meta accepted the request but returned no message id',
+                errorClass: 'retryable',
+                raw: result,
+            });
+        }
+        return { wamid };
+    }
+
+    /**
+     * Send an image or document by public link.
+     *
+     * Meta fetches the URL itself rather than us uploading bytes, which is why
+     * the link has to be publicly reachable. The alternative — POST to /media for
+     * an id, then send the id — avoids that but adds a second round trip and a
+     * 30-day expiry on the id; the link form is simpler and the blob store is
+     * already public.
+     */
+    async sendMedia(params: SendMediaParams): Promise<SendResult> {
+        const config = requireConfig();
+        // The media object's key is the type name itself: { image: {...} }.
+        const media: Record<string, unknown> = { link: params.link };
+        if (params.caption) media.caption = params.caption;
+        // filename is meaningful only for documents; Meta ignores it elsewhere.
+        if (params.kind === 'document' && params.filename) media.filename = params.filename;
+
+        const result = await graphRequest<{ messages?: { id: string }[] }>(
+            config,
+            `${config.phoneNumberId}/messages`,
+            {
+                method: 'POST',
+                body: {
+                    messaging_product: 'whatsapp',
+                    recipient_type: 'individual',
+                    to: toWhatsAppId(params.to),
+                    type: params.kind,
+                    [params.kind]: media,
+                },
+            },
+        );
+
+        const wamid = result.messages?.[0]?.id;
+        if (!wamid) {
+            throw new WhatsAppError({
+                code: 0,
+                message: 'Meta accepted the media request but returned no message id',
                 errorClass: 'retryable',
                 raw: result,
             });
