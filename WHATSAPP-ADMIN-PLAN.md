@@ -234,9 +234,25 @@ across 8 suites** (was 354) — 13 new ones on `phoneMaskerFor`, stated as hidde
 digits rather than as a fraction of the number, because what is revealed is the
 country code plus an operator prefix carrying almost no entropy.
 
-**Not verified over HTTP — see gotcha 15.** The masking is proven by unit tests
-and the route changes are one-line transformations, but the end-to-end check
-that a `frontdesk` session actually receives masked JSON could not be run.
+**Verified over HTTP (2026-08-08), against the running server with real session
+cookies for all four roles:**
+
+| Check | admin | marketing | frontdesk | viewer |
+|---|---|---|---|---|
+| `GET /api/…/contacts` | `+919000000103` | — | `+9190•••••103` | masked |
+| `canUnmask` in that payload | `true` | `true` | `false` | `false` |
+| `GET /api/…/inbox` threads | real | — | masked | masked |
+| `GET /api/…/contacts/export` | 200 | 200 | **403** | **403** |
+| `GET /api/…/analytics/export` | 200 | 200 | **403** | 200 |
+| Contact detail **page** | 200 | 200 | 200 | 200 |
+
+The page check is the important one, and it was done on the rendered HTML rather
+than on a JSON payload: for `admin` the real number appears twice in the markup
+and the masked form not at all; for `frontdesk` the real number appears **zero**
+times and the masked form twice. Nothing leaks through the RSC payload.
+
+That all four roles now return 200 on the contact detail page is the fix for the
+gate bug above — before it, three of them were redirected to `/signin`.
 
 ### Sprint 7 — analytics XLSX export (2026-08-08)
 
@@ -389,24 +405,31 @@ mode, and flip the kill switch on.
     cookie with the project's own `AUTH_SECRET` via
     `scripts/dev-session-cookie.ts`, set it with `document.cookie`, and the panel
     renders. It grants nothing the secret holder does not already have and only
-    works against a server running that same secret.
+    works against a server running that same secret. It takes a role argument
+    (`… /tmp/cookie.cjs frontdesk`) — the interesting cases are the non-admin
+    ones, since masking and the capability gates are by definition invisible when
+    you look at the panel as an administrator. It is also usable straight from
+    `curl` with `-H "Cookie: authjs.session-token=<token>"`, which is a faster
+    way to diff two roles' payloads than driving a browser. **The token lasts one
+    hour — see gotcha 15.**
 14. **`psql` is not installed on this machine.** Apply migrations through the
     project's Neon `Pool`, which handles the multi-statement transaction; the
     HTTP `neon()` driver does not.
-15. **The dev session cookie no longer authenticates (open, 2026-08-08).** Gotcha
-    13's method now yields 401 on every API route and 307 on every page, with the
-    server logging `[auth] Session decryption failed`. Ruled out, all checked
-    rather than assumed: the secret is identical (`.env` is the only env file,
-    one `AUTH_SECRET`, 64 chars after quote-stripping, no `$` so dotenv-expand
-    and `node --env-file` cannot diverge); the dev server runs from this
-    directory and reports `Environments: .env`; a restart did not fix it, so it
-    is not a stale in-memory secret; `encode`/`decode` round-trips fine locally
-    with that same secret; and all three cookie names
-    (`authjs.session-token`, `__Secure-` prefixed, legacy `next-auth.`) fail
-    identically, so it is not the salt. Something changed in how the running
-    server derives the key. **Do not treat visual/HTTP verification as available
-    until this is solved** — and do not burn a sprint on it mid-task as this one
-    nearly did.
+15. **The dev session cookie expires after one hour — that is all.** An earlier
+    revision of this document recorded a mysterious authentication failure here
+    and told the next session not to trust visual verification. **That was wrong,
+    and it was wrong in an expensive way**: `[auth] Session decryption failed` is
+    what Auth.js logs for an *expired* token as well as an undecryptable one, and
+    a long working session outlives the script's `maxAge` of 3600s. The secret
+    was never the problem — asking the running server for a fingerprint of its
+    own `AUTH_SECRET` returned exactly what the minting script produced.
+
+    The lesson worth keeping: **when a diagnosis rests on ruling things out, ask
+    the running system what it actually sees rather than reasoning about it from
+    outside.** A twelve-line dev-only route that reported the secret fingerprint
+    and the raw `decode()` error settled in one request what an hour of
+    elimination had not. Mint the cookie immediately before using it, and if it
+    stops working, re-mint before investigating anything else.
 
 ---
 
