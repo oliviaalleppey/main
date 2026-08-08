@@ -135,7 +135,8 @@ export async function getAvailableRoomsForSearch(
             crsRoomTypeId: room.roomTypeId,
         }));
 
-        if (apiRoom && apiRoom.availableCount > 0) {
+        if (apiRoom) {
+            const isAvailable = apiRoom.availableCount > 0;
             const bestRate = [...apiRoom.ratePlans].sort((a, b) => a.amount - b.amount)[0];
             const baseCrsPrice = bestRate ? bestRate.amount : apiRoom.price;
 
@@ -241,10 +242,10 @@ export async function getAvailableRoomsForSearch(
                 totalPrice,
                 taxesAndFees: taxes,
                 breakdown: [],
-                available: true,
+                available: isAvailable,
                 availableRooms: apiRoom.availableCount,
                 ratePlans: ratePlansWithMealPlan,
-                bookable: true,
+                bookable: isAvailable,
             });
         }
     }
