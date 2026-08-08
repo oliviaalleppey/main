@@ -5,6 +5,8 @@ import { waContacts, waConsentEvents, waMessages, waSuppression, waInboxThreads,
 import { asc, desc, eq } from 'drizzle-orm';
 import { requireCapability, errorResponse, audit } from '@/lib/services/whatsapp/admin-guard';
 import { recordConsentChange } from '@/lib/services/whatsapp/consent';
+import { phoneMaskerFor } from '@/lib/services/whatsapp/phone';
+import { shouldMaskPhones } from '@/lib/services/whatsapp/roles';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,7 +18,8 @@ type Params = { params: Promise<{ id: string }> };
  */
 export async function GET(request: Request, { params }: Params) {
     try {
-        await requireCapability(request, 'contacts.read');
+        const actor = await requireCapability(request, 'contacts.read');
+        const mask = phoneMaskerFor(actor.role);
         const { id } = await params;
 
         const contact = await db
@@ -59,8 +62,12 @@ export async function GET(request: Request, { params }: Params) {
 
         return NextResponse.json({
             ...contact[0],
+            contact: { ...contact[0].contact, phone: mask(contact[0].contact.phone) },
+            // The consent ledger carries its own copy of the number, so masking
+            // the contact alone would leak it straight back through the history.
+            consentHistory: consentHistory.map((e) => ({ ...e, phone: mask(e.phone) })),
+            canUnmask: !shouldMaskPhones(actor.role),
             messages,
-            consentHistory,
             thread: thread ?? null,
         });
     } catch (error) {

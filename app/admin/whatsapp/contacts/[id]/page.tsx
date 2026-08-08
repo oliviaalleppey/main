@@ -1,7 +1,8 @@
 import Link from 'next/link';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { ArrowLeft, MessageSquare, ShieldCheck } from 'lucide-react';
-import { auth } from '@/auth';
+import { requirePageCapability } from '@/lib/services/whatsapp/admin-guard';
+import { phoneMaskerFor } from '@/lib/services/whatsapp/phone';
 import { db } from '@/lib/db';
 import {
     waContacts, waConsentEvents, waMessages, waTemplates, guestProfiles, bookings,
@@ -50,8 +51,8 @@ function formatDate(value: Date | string | null | undefined): string {
 }
 
 export default async function WhatsAppContactDetailPage({ params }: PageProps) {
-    const session = await auth();
-    if (!session || session.user?.role !== 'admin') redirect('/signin');
+    const actor = await requirePageCapability('contacts.read');
+    const mask = phoneMaskerFor(actor.role);
 
     const { id } = await params;
     if (!UUID.test(id)) notFound();
@@ -156,7 +157,7 @@ export default async function WhatsAppContactDetailPage({ params }: PageProps) {
                 <div className="flex flex-wrap items-start justify-between gap-4">
                     <div>
                         <h2 className="text-xl font-semibold text-gray-900">{contact.name || 'Unnamed contact'}</h2>
-                        <p className="mt-0.5 font-mono text-sm text-gray-600">{contact.phone}</p>
+                        <p className="mt-0.5 font-mono text-sm text-gray-600">{mask(contact.phone)}</p>
                         {contact.email && <p className="text-sm text-gray-500">{contact.email}</p>}
                         <div className="mt-3 flex flex-wrap items-center gap-2">
                             <ConsentBadge status={contact.consentStatus} />
@@ -172,7 +173,7 @@ export default async function WhatsAppContactDetailPage({ params }: PageProps) {
                     </div>
                     <ContactActions
                         contactId={contact.id}
-                        phone={contact.phone}
+                        phone={mask(contact.phone)}
                         consentStatus={contact.consentStatus as ConsentStatus}
                         name={contact.name}
                         email={contact.email}

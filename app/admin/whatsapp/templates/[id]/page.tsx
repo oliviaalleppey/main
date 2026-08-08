@@ -1,7 +1,7 @@
 import Link from 'next/link';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
-import { auth } from '@/auth';
+import { requirePageCapability } from '@/lib/services/whatsapp/admin-guard';
 import { db } from '@/lib/db';
 import { waTemplates } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
@@ -25,8 +25,7 @@ function formatDateTime(value: Date | string | null | undefined): string {
 }
 
 export default async function TemplateDetailPage({ params }: PageProps) {
-    const session = await auth();
-    if (!session || session.user?.role !== 'admin') redirect('/signin');
+    await requirePageCapability('templates.read');
 
     const { id } = await params;
     if (!UUID.test(id)) notFound();

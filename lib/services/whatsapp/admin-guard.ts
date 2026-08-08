@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { db } from '@/lib/db';
 import { waAuditLog } from '@/lib/db/schema';
@@ -80,6 +81,34 @@ export async function requireCapability(request: Request, capability: Capability
         id: (session.user as { id?: string }).id,
         email: session.user?.email ?? undefined,
         ip: request.headers.get('x-forwarded-for')?.split(',')[0]?.trim(),
+        role,
+    };
+}
+
+/**
+ * The server-component equivalent of requireCapability.
+ *
+ * Pages have no Request to pass, and cannot throw a 403 — they redirect. The
+ * three detail pages in this module originally gated on `role !== 'admin'`,
+ * which silently made the whole capability table inert on exactly the screens
+ * that display phone numbers: a marketing user holding contacts.write could not
+ * open a contact at all. Returning the actor also gives the page the role it
+ * needs to decide masking.
+ *
+ * Forbidden sends the user to the module root rather than /signin — they are
+ * signed in perfectly well, and bouncing them to a sign-in page for a permission
+ * problem is the pointless loop ForbiddenError exists to avoid.
+ */
+export async function requirePageCapability(capability: Capability): Promise<AdminActor> {
+    const session = await auth();
+    const role = session?.user?.role;
+
+    if (!session || !isWhatsAppRole(role)) redirect('/signin');
+    if (!can(role, capability)) redirect('/admin/whatsapp');
+
+    return {
+        id: (session.user as { id?: string }).id,
+        email: session.user?.email ?? undefined,
         role,
     };
 }

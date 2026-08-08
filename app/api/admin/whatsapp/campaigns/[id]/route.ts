@@ -4,6 +4,7 @@ import { waCampaigns, waTemplates, waAudiences, waMessages, waContacts } from '@
 import { desc, eq, sql, type SQL } from 'drizzle-orm';
 import { requireCapability, errorResponse, audit } from '@/lib/services/whatsapp/admin-guard';
 import { refreshCampaignCounters } from '@/lib/services/whatsapp/campaigns';
+import { phoneMaskerFor } from '@/lib/services/whatsapp/phone';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,7 +21,8 @@ const RECIPIENT_PAGE = 100;
  */
 export async function GET(request: Request, { params }: Params) {
     try {
-        await requireCapability(request, 'campaigns.read');
+        const actor = await requireCapability(request, 'campaigns.read');
+        const mask = phoneMaskerFor(actor.role);
         const { id } = await params;
         const url = new URL(request.url);
         const statusFilter = url.searchParams.get('status');
@@ -104,7 +106,9 @@ export async function GET(request: Request, { params }: Params) {
             campaign: campaign ?? row.campaign,
             template: row.template,
             audience: row.audience,
-            recipients,
+            // The per-recipient table is the largest single list of numbers in the
+            // module — a viewer scrolling it would otherwise harvest the audience.
+            recipients: recipients.map((r) => ({ ...r, phone: mask(r.phone) })),
             recipientStatusCounts: Object.fromEntries(statusRows.map((r) => [r.status, Number(r.count)])),
             pagination: { page, pageSize: RECIPIENT_PAGE, total, pages: Math.ceil(total / RECIPIENT_PAGE) },
         });

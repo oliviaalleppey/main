@@ -4,7 +4,8 @@ import { db } from '@/lib/db';
 import { waContacts, waConsentEvents, guestProfiles } from '@/lib/db/schema';
 import { desc, eq, sql } from 'drizzle-orm';
 import { requireCapability, errorResponse, audit } from '@/lib/services/whatsapp/admin-guard';
-import { normalizePhone } from '@/lib/services/whatsapp/phone';
+import { normalizePhone, phoneMaskerFor } from '@/lib/services/whatsapp/phone';
+import { shouldMaskPhones } from '@/lib/services/whatsapp/roles';
 import { readContactFilters, contactWhere } from '@/lib/services/whatsapp/contact-query';
 
 export const dynamic = 'force-dynamic';
@@ -16,7 +17,8 @@ const MAX_PAGE_SIZE = 200;
  */
 export async function GET(request: Request) {
     try {
-        await requireCapability(request, 'contacts.read');
+        const actor = await requireCapability(request, 'contacts.read');
+        const mask = phoneMaskerFor(actor.role);
 
         const url = new URL(request.url);
         const page = Math.max(1, Number(url.searchParams.get('page') ?? 1));
@@ -80,7 +82,10 @@ export async function GET(request: Request) {
         const tagRowList = tagRows.rows as { tag: string; count: number }[];
 
         return NextResponse.json({
-            contacts: rows,
+            // Masked at the boundary, not in the table component: the unmasked
+            // value must never reach the client for a role that may not see it.
+            contacts: rows.map((r) => ({ ...r, phone: mask(r.phone) })),
+            canUnmask: !shouldMaskPhones(actor.role),
             pagination: { page, pageSize, total, pages: Math.ceil(total / pageSize) },
             statusCounts: Object.fromEntries(statusRows.map((r) => [r.status, Number(r.count)])),
             tags: tagRowList.map((r) => ({ tag: r.tag, count: Number(r.count) })),

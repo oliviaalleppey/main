@@ -20,6 +20,7 @@ import {
     WHATSAPP_ROLES, ALL_CAPABILITIES, ROLE_LABELS, ROLE_DESCRIPTIONS,
     type Capability,
 } from '@/lib/services/whatsapp/roles';
+import { phoneMaskerFor } from '@/lib/services/whatsapp/phone';
 
 let passed = 0;
 let failed = 0;
@@ -103,6 +104,45 @@ check('frontdesk sees masked numbers', shouldMaskPhones('frontdesk'));
 check('viewer sees masked numbers', shouldMaskPhones('viewer'));
 check('an unknown role sees masked numbers', shouldMaskPhones('superuser'));
 check('null sees masked numbers', shouldMaskPhones(null));
+
+console.log('\n--- phoneMaskerFor is what the routes actually call ---');
+{
+    const REAL = '+919847123456';
+    const masked = phoneMaskerFor('frontdesk')(REAL);
+    const plain = phoneMaskerFor('admin')(REAL);
+
+    check('admin gets the number back untouched', plain === REAL);
+    check('marketing gets the number back untouched', phoneMaskerFor('marketing')(REAL) === REAL);
+    check('frontdesk gets a masked number', masked !== REAL);
+    check('viewer gets a masked number', phoneMaskerFor('viewer')(REAL) !== REAL);
+
+    // The point of masking is that digits are gone, not merely re-formatted: a
+    // mask that kept every digit while inserting bullets would pass a naive
+    // "not equal" check and leak the whole number.
+    //
+    // The threshold is stated as hidden digits rather than as a fraction. What is
+    // revealed here is the country code and '98' — an operator prefix carrying
+    // almost no entropy — so a ratio would flatter the mask. Five hidden digits
+    // is 100,000 candidates, which is what makes the number unguessable.
+    const digitsIn = REAL.replace(/\D/g, '');
+    const digitsOut = masked.replace(/\D/g, '');
+    check('at least 5 digits are hidden', digitsIn.length - digitsOut.length >= 5);
+    check('the masked form does not contain the full number', !digitsOut.includes(digitsIn));
+    check('enough tail survives to recognise a guest', masked.endsWith('456'));
+    check('the country code survives', masked.startsWith('+91'));
+
+    // An unknown or absent role must mask — failing closed is the whole point.
+    check('an unknown role is masked', phoneMaskerFor('superuser')(REAL) !== REAL);
+    check('null is masked', phoneMaskerFor(null)(REAL) !== REAL);
+    check('undefined is masked', phoneMaskerFor(undefined)(REAL) !== REAL);
+
+    check('masking agrees with shouldMaskPhones for every role',
+        WHATSAPP_ROLES.every((role) =>
+            (phoneMaskerFor(role)(REAL) !== REAL) === shouldMaskPhones(role)));
+
+    // Masking twice must not reveal anything new or corrupt the display form.
+    check('masking is idempotent', phoneMaskerFor('frontdesk')(masked) === masked);
+}
 
 console.log('\n--- the table is internally consistent ---');
 check('every role has a label', WHATSAPP_ROLES.every((role) => !!ROLE_LABELS[role]));

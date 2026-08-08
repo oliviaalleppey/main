@@ -26,20 +26,29 @@ async function main() {
     const cookieName = 'authjs.session-token';
     const maxAge = 60 * 60; // one hour is plenty for a look around
 
+    // The role is selectable because the interesting cases are the non-admin
+    // ones: phone masking, and the capability gates, are by definition invisible
+    // when you look at the panel as an administrator.
+    //   node --env-file=.env /tmp/cookie.cjs frontdesk
+    const role = process.argv[2] ?? 'admin';
+    if (!['admin', 'marketing', 'frontdesk', 'viewer'].includes(role)) {
+        throw new Error(`Unknown role '${role}'`);
+    }
+
     const token = await encode({
         token: {
-            name: 'Local Dev Admin',
-            email: 'dev-local@example.invalid',
+            name: `Local Dev ${role}`,
+            email: `dev-local-${role}@example.invalid`,
             sub: '00000000-0000-0000-0000-0000000000ad',
             id: '00000000-0000-0000-0000-0000000000ad',
-            role: 'admin',
+            role,
         },
         secret,
         salt: cookieName,
         maxAge,
     });
 
-    console.log(JSON.stringify({ cookieName, token, maxAge }));
+    console.log(JSON.stringify({ cookieName, token, maxAge, role }));
 }
 
 main().catch((error) => { console.error(error); process.exit(1); });

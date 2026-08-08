@@ -195,8 +195,48 @@ Both were waiting on roles, and roles have landed (§6, `lib/services/whatsapp/r
   composer is text and templates only.
 - Analytics: attribution to bookings via UTM/offer codes, A/B testing, and XLSX
   export are specced but not built. The funnel, trends, cost and leaderboard are.
-- `frontdesk`/`viewer` phone masking is decided in `roles.ts` (`shouldMaskPhones`)
-  but the contacts UI does not consult it yet — every current caller is an admin.
+
+### Sprint 6 — phone masking and the page capability gates (2026-08-08)
+
+`shouldMaskPhones` was built and tested but nothing consulted it. Wiring it up
+surfaced a larger bug first: **the three server-rendered detail pages still gated
+on `role !== 'admin'`**, so the entire capability table was inert on exactly the
+screens that display phone numbers. A `marketing` user holding `contacts.write`
+could not open a contact at all. `requirePageCapability()` (`admin-guard.ts`) is
+the server-component counterpart of `requireCapability` — it redirects rather
+than throwing, and sends a *forbidden* user to the module root rather than
+`/signin`, which would otherwise be a pointless sign-in loop for someone already
+signed in.
+
+Masking is applied **server-side at the response boundary**, never in a client
+component — masking in the client would still ship the real number in the JSON
+or the RSC payload, where the devtools population this protects against can read
+it. `phoneMaskerFor(role)` (`phone.ts`) returns identity for unmasked roles so
+callers apply it unconditionally instead of branching.
+
+Covered: contacts list, contact detail (route *and* page, including the consent
+ledger, which carries its own copy of the number), inbox list, inbox thread, and
+the campaign per-recipient table — the largest single list of numbers in the
+module. CSV export already required `contacts.unmask`; the button is now hidden
+for roles that lack it rather than 403-ing on click.
+
+On the contact detail page the real number is still used server-side for the
+booking-history lookup (matched on the last 10 digits) — only the render sites
+are masked. `prettyPhone()` in the client components needs no change: its regex
+requires all digits, so a masked value falls through unformatted.
+
+`scripts/dev-session-cookie.ts` now takes a role argument, because the
+interesting cases are by definition invisible when you look at the panel as an
+administrator.
+
+Verified: `tsc --noEmit` clean, `eslint` 0 errors, and **367 assertions pass
+across 8 suites** (was 354) — 13 new ones on `phoneMaskerFor`, stated as hidden
+digits rather than as a fraction of the number, because what is revealed is the
+country code plus an operator prefix carrying almost no entropy.
+
+**Not verified over HTTP — see gotcha 15.** The masking is proven by unit tests
+and the route changes are one-line transformations, but the end-to-end check
+that a `frontdesk` session actually receives masked JSON could not be run.
 
 ### Blocking action for the user
 
@@ -272,6 +312,20 @@ mode, and flip the kill switch on.
 14. **`psql` is not installed on this machine.** Apply migrations through the
     project's Neon `Pool`, which handles the multi-statement transaction; the
     HTTP `neon()` driver does not.
+15. **The dev session cookie no longer authenticates (open, 2026-08-08).** Gotcha
+    13's method now yields 401 on every API route and 307 on every page, with the
+    server logging `[auth] Session decryption failed`. Ruled out, all checked
+    rather than assumed: the secret is identical (`.env` is the only env file,
+    one `AUTH_SECRET`, 64 chars after quote-stripping, no `$` so dotenv-expand
+    and `node --env-file` cannot diverge); the dev server runs from this
+    directory and reports `Environments: .env`; a restart did not fix it, so it
+    is not a stale in-memory secret; `encode`/`decode` round-trips fine locally
+    with that same secret; and all three cookie names
+    (`authjs.session-token`, `__Secure-` prefixed, legacy `next-auth.`) fail
+    identically, so it is not the salt. Something changed in how the running
+    server derives the key. **Do not treat visual/HTTP verification as available
+    until this is solved** — and do not burn a sprint on it mid-task as this one
+    nearly did.
 
 ---
 
@@ -282,7 +336,7 @@ A read-only audit of the live Neon database, because this changes the warm-up pl
 | Source | Rows | Usable for marketing? |
 |---|---|---|
 | `guest_profiles` | **4** total, 4 with a phone | **No.** `marketing_opt_in = true` on **0** rows. `communication_preference = 'whatsapp'` on **0** rows. |
-| `bookings` | 89 rows, **42 distinct `guest_phone`** | Utility yes (transactional relationship). Marketing only after a re-permission ask. |
+| `bookings` | 90 rows as of 2026-08-08 (89 when first audited), **42 distinct `guest_phone`** | Utility yes (transactional relationship). Marketing only after a re-permission ask. |
 | `wa_*` tables | not created yet | Migration `0006_whatsapp_module.sql` is written but not applied. |
 
 **Consequence:** there is no documented opt-in list in the system today. The columns

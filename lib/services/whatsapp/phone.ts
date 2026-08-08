@@ -3,6 +3,7 @@
 // and landlines would slip through as valid WhatsApp recipients. This module is
 // server-only, so the larger metadata has no bundle cost.
 import { parsePhoneNumberFromString, type PhoneNumber, type CountryCode } from 'libphonenumber-js/max';
+import { shouldMaskPhones } from './roles';
 
 /**
  * Phone number normalisation for WhatsApp.
@@ -172,6 +173,19 @@ export function maskPhone(e164: string): string {
     const head = e164.slice(0, 5);
     const tail = e164.slice(-3);
     return `${head}${'•'.repeat(Math.max(0, e164.length - 8))}${tail}`;
+}
+
+/**
+ * The masking function a given role should have applied to every number it sees.
+ *
+ * Returns identity for roles holding `contacts.unmask`, so callers can apply it
+ * unconditionally rather than branching. Masking has to happen **server-side**,
+ * before the number is serialised: doing it in a client component would still
+ * ship the real value in the JSON response or the RSC payload, where anyone with
+ * devtools can read it — which is the entire population this protects against.
+ */
+export function phoneMaskerFor(role: string | null | undefined): (e164: string) => string {
+    return shouldMaskPhones(role) ? maskPhone : (e164: string) => e164;
 }
 
 /**

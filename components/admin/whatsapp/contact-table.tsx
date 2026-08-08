@@ -49,6 +49,12 @@ type ListResponse = {
     pagination: { page: number; pageSize: number; total: number; pages: number };
     statusCounts: Record<string, number>;
     tags: { tag: string; count: number }[];
+    /**
+     * Whether this role sees real numbers. The server has already masked the rows
+     * either way — this only decides whether to offer CSV export, which requires
+     * contacts.unmask and would otherwise be a button that always 403s.
+     */
+    canUnmask: boolean;
 };
 
 const STATUS_ORDER: ConsentStatus[] = ['opted_in', 'pending', 'opted_out', 'suppressed'];
@@ -231,9 +237,11 @@ export function ContactTable() {
                     />
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => exportCsv(false)}>
-                        <Download className="mr-1.5 h-4 w-4" /> Export
-                    </Button>
+                    {data?.canUnmask !== false && (
+                        <Button variant="outline" size="sm" onClick={() => exportCsv(false)}>
+                            <Download className="mr-1.5 h-4 w-4" /> Export
+                        </Button>
+                    )}
                     <Button variant="outline" size="sm" onClick={() => setAddOpen(true)}>
                         <Plus className="mr-1.5 h-4 w-4" /> Add contact
                     </Button>
@@ -320,7 +328,9 @@ export function ContactTable() {
                         <BulkButton onClick={() => setBulkAction('tag')}>Add tag</BulkButton>
                         <BulkButton onClick={() => setBulkAction('untag')}>Remove tag</BulkButton>
                         <BulkButton onClick={() => setBulkAction('consent')}>Set consent</BulkButton>
-                        <BulkButton onClick={() => exportCsv(true)}>Export selected</BulkButton>
+                        {data?.canUnmask !== false && (
+                            <BulkButton onClick={() => exportCsv(true)}>Export selected</BulkButton>
+                        )}
                         <button
                             type="button"
                             onClick={() => setSelected(new Set())}

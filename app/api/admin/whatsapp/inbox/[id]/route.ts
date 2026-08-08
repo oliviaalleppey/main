@@ -4,6 +4,7 @@ import { requireCapability, errorResponse, audit } from '@/lib/services/whatsapp
 import {
     getThread, markRead, setThreadStatus, assignThread, setLabels, setInternalNotes,
 } from '@/lib/services/whatsapp/inbox';
+import { phoneMaskerFor } from '@/lib/services/whatsapp/phone';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,7 +19,8 @@ type Params = { params: Promise<{ id: string }> };
  */
 export async function GET(request: Request, { params }: Params) {
     try {
-        await requireCapability(request, 'inbox.read');
+        const actor = await requireCapability(request, 'inbox.read');
+        const mask = phoneMaskerFor(actor.role);
         const { id } = await params;
 
         const thread = await getThread(id);
@@ -29,7 +31,14 @@ export async function GET(request: Request, { params }: Params) {
         const markedRead = (thread.unreadCount ?? 0) > 0;
         if (markedRead) await markRead(id);
 
-        return NextResponse.json({ thread: { ...thread, unreadCount: 0 }, markedRead });
+        return NextResponse.json({
+            thread: {
+                ...thread,
+                unreadCount: 0,
+                contact: { ...thread.contact, phone: mask(thread.contact.phone) },
+            },
+            markedRead,
+        });
     } catch (error) {
         return errorResponse(error);
     }

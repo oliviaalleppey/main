@@ -1,7 +1,7 @@
 import Link from 'next/link';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
-import { auth } from '@/auth';
+import { requirePageCapability } from '@/lib/services/whatsapp/admin-guard';
 import { CampaignDetail } from '@/components/admin/whatsapp/campaign-detail';
 
 export const dynamic = 'force-dynamic';
@@ -11,8 +11,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 type PageProps = { params: Promise<{ id: string }> };
 
 export default async function CampaignDetailPage({ params }: PageProps) {
-    const session = await auth();
-    if (!session || session.user?.role !== 'admin') redirect('/signin');
+    await requirePageCapability('campaigns.read');
 
     const { id } = await params;
     if (!UUID.test(id)) notFound();
