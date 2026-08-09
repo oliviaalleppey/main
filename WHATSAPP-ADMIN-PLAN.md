@@ -53,6 +53,8 @@
 | 38 | **Audit-log UI** (tab of the compliance screen) | `.../compliance-view.tsx` |
 | 39 | **Roles & capabilities** — admin / marketing / frontdesk / viewer | `.../roles.ts`, `.../admin-guard.ts`, `auth.config.ts` |
 | 40 | Two more crons: automations (hourly), retention purge (nightly) | `app/api/cron/whatsapp-{automations,retention}/`, `vercel.json` |
+| 41 | **Booking attribution** — per-message click tokens, `/w/<token>`, two tiers | `.../attribution.ts`, `app/w/[token]/route.ts`, `drizzle/0007_whatsapp_attribution.sql` |
+| 42 | **A/B testing** — deterministic bucketing, read-rate significance | `.../ab.ts`, `.../analytics.ts` (`variantStats`) |
 
 Verification done: `tsc --noEmit` clean across the project; all generated SQL
 (36 statements) parsed against the real Postgres 17 grammar via `libpg-query`;
@@ -190,10 +192,13 @@ Both were waiting on roles, and roles have landed (§6, `lib/services/whatsapp/r
   else is blocked.
 - ~~`whatsapp-sync` cron~~ — built in Sprint 8 below.
 - ~~Media in the inbox~~ — built in Sprint 9 below.
-- Analytics: attribution to bookings via UTM/offer codes and A/B testing are
-  specced but not built. The funnel, trends, cost, leaderboard and XLSX export
-  are. Attribution needs a link-tagging scheme agreed first — it is a decision,
-  not just code.
+- ~~Booking attribution and A/B testing~~ — built in Sprint 10 below. **Offer-code
+  attribution was deliberately deferred**, and the reason is worth keeping: the
+  columns `bookings.promo_code` and `bookings.offer_id` exist and *nothing has
+  ever written them*. There is no promo redemption anywhere in the funnel — no
+  input, no discount calculation, no `offers.usage_count` increment. Offer-code
+  attribution is therefore not an addition to attribution; it is a discount
+  feature that touches the money path and needs its own sprint and its own tests.
 
 ### Sprint 6 — phone masking and the page capability gates (2026-08-08)
 
@@ -383,6 +388,269 @@ restored, and the demo data removed; `wa_*` is back to 0 rows and bookings to 90
 
 Total: **464 assertions across 11 suites.**
 
+### Sprint 10 — booking attribution and A/B testing (2026-08-08)
+
+Migration `drizzle/0007_whatsapp_attribution.sql`, applied the same way as 0006.
+Two new tables (`wa_clicks`, `wa_booking_attribution`), a `click_token` on
+`wa_messages`, link config on `wa_campaigns`, and three window settings.
+
+**The scheme, and why it is this one.** Meta allows exactly **one** variable in a
+URL button and it must sit at the **end** of the URL. That single constraint
+decides the whole design: a multi-parameter `?utm_source=…&utm_campaign=…` cannot
+be assembled from template variables, so the per-recipient part has to be one
+opaque suffix resolved server-side. Hence `https://www.oliviaalleppey.com/w/<token>`,
+8 chars of Crockford base32, one token per *message*.
+
+**UTM parameters are emitted for the hotel's Google Analytics and are not the
+mechanism.** Our attribution is the token plus a 30-day first-party cookie. UTM is
+strippable, lost across redirects, and long gone by the time a booking row is
+written — treating it as the source of truth is the standard way this is got
+wrong. The redirect still carries it so GA agrees with us.
+
+**Two tiers, never summed without a label:**
+
+| Tier | Mechanism | Reported as |
+|---|---|---|
+| `click` | token → cookie → booking | deterministic; the headline figure |
+| `phone_match` | messaged, didn't click, booked on a matching number in 7 days | inferred; shown below a divider, excluded from the headline |
+
+Tier 2 exists because tier 1 loses the phone-to-laptop switch completely, and a
+number that only ever under-counts is the wrong kind of wrong when its job is
+justifying spend. Defaults: 30-day click window, 7-day phone window, both in
+`wa_settings`.
+
+**Three things here would fail silently and produce a number nobody questions:**
+
+1. **The WhatsApp preview fetch.** Meta fetches every link to build its preview
+   card, *at send time, for every recipient*. Unfiltered, click-through rate is
+   roughly "everyone we sent to" and reads as a triumph. Bot hits are recorded
+   with a reason and excluded from every rate — recorded rather than dropped so
+   an implausible count can still be explained afterwards.
+2. **The open redirect.** `/w/<token>` is a link sent to thousands of guests on
+   the hotel's own domain. `buildDestination()` is the only place a redirect
+   target is produced and it forces the target back onto our origin; the
+   destination comes from the campaign row and *never* from the request. The
+   guard is "starts with exactly one slash", not "has no scheme", because
+   `//evil.com` is a protocol-relative URL that a URL parser resolves to another
+   host. Eight hostile inputs are pinned as tests.
+3. **The button index.** Meta rejects the whole message if you send a parameter
+   for a button that is static. Marketing templates get an auto-added opt-out
+   button which is very often button 0, so the index is read off the stored
+   components rather than assumed.
+
+**A circularity guard worth knowing about:** tier 2 matches campaign sends only
+(`campaign_id IS NOT NULL`). The booking confirmation is sent *because of* a
+booking, so crediting it would make automations look like a revenue engine whose
+output rises with bookings no matter what marketing does.
+
+**A/B testing** reuses the `variant_of` column the schema already had — variants
+are separate campaign rows, so every counter, cost figure, stop rule and
+attribution row works on them unchanged. Assignment is a deterministic hash of
+(parent campaign, contact), so a queue rebuild cannot move people between arms
+and nobody receives both. The parent id is in the hash so the same half of the
+list is not in arm A for ever.
+
+**The reporting is deliberately conservative, and this is the part to not
+"improve" later.** Winners are declared on **read rate** only. With 90 bookings
+in the system and 42 distinct guest numbers, booking-rate significance is months
+away, and `describeOutcome()` refuses to name a winner on booking counts —
+"7 of 9 vs 2 of 9" looks decisive and is not. Below ~5 expected reads per arm the
+p-value is not wrong so much as meaningless, and the result carries a caveat
+instead of a verdict.
+
+**Operators configure this in the campaign wizard**, step 3, and the fields only
+appear when the chosen template actually has a dynamic URL button — offering a
+destination for a template that cannot carry a token would silently do nothing.
+The path is validated as site-relative at the API edge *as well as* in
+`buildDestination()`, so a stored value cannot become an off-site redirect even
+if the redirect guard is later refactored.
+
+`dynamicUrlButtonIndex()` lives in `template-lint.ts`, not with the rest of
+attribution, and that placement is load-bearing: `template-lint.ts` imports
+nothing, which is what lets the wizard call it in the browser. `attribution.ts`
+imports the database, and pulling that into a client bundle is not an option.
+
+Capture happens in `app/book/actions.ts` at both `finalizeSession()` call sites,
+not in `BookingService`: the cookie only exists in a request context, and the
+payment webhook that confirms a booking has no cookies at all. It never throws —
+an analytics failure must not fail a paid booking.
+
+**175 new assertions across two suites** (`test-attribution.ts` pure,
+`test-attribution-db.ts` against the real database). ⚠️ The DB suite **writes to
+the `bookings` table**, which no other suite does — attribution rows carry a real
+FK. Every booking is tracked by id, deleted in a `finally`, and the closing
+assertions re-read the count to prove the suite left it where it found it.
+
+⚠️ **That count is captured at suite start, not hard-coded** — and it must stay
+that way. It was `=== 90` until a real guest booked a room mid-run on
+2026-08-09. **This is the live production database and the hotel is actively
+selling into it**, so a constant fails the suite on a normal Tuesday, which
+teaches whoever sees it to ignore the one assertion that would catch a real leak.
+The check is now a delta: more than at start is a warning to go and look at the
+newest row before deleting anything; *fewer* than at start means the suite
+deleted a booking it did not create, which is the actual disaster.
+
+Verified over HTTP against the running server: a human click returned 302 with
+the full UTM string and a 30-day `HttpOnly; SameSite=lax` cookie; the same token
+fetched with a `WhatsApp/2.23.20.0` user agent returned the redirect with **no
+`Set-Cookie`** and was stored as `is_bot` with reason `whatsapp_preview`; an
+unknown token redirected to the home page. IPs are stored hashed. All fixtures
+removed afterwards.
+
+`tsc --noEmit` clean; `eslint` 0 errors across every file touched (the
+`settings.ts:80` warning still predates this work).
+
+Total: **646 assertions across 13 suites.**
+
+### Sprint 11 — go-live preparation while credentials are outstanding (2026-08-08)
+
+Three pieces of work that exist because Meta credentials had still not arrived,
+and waiting idly for them wastes the wait.
+
+**The credential list the hotel was given was wrong.** It included
+`WHATSAPP_DAILY_CAP=250` and `WHATSAPP_ENABLED=false`, **neither of which is read
+anywhere in this codebase** — the cap lives in `wa_settings.daily_cap` and the
+kill switch in `wa_settings.enabled`. The second is actively dangerous: it reads
+like a safety catch, so someone could believe sending is disabled by environment
+when it is not. The list also **omitted `WHATSAPP_PROVIDER`**, which is the only
+thing that switches the module off the mock provider — real credentials without
+it change nothing. And `WHATSAPP_WEBHOOK_VERIFY_TOKEN` is not Meta's to give: we
+invent it and paste it into their webhook config.
+
+Only four values actually have to come from the hotel:
+`WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_BUSINESS_ACCOUNT_ID`,
+`WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_APP_SECRET`.
+
+**1. Template drafts** (`lib/services/whatsapp/template-drafts.ts`,
+`scripts/seed-templates.ts`, `scripts/test-template-drafts.ts`).
+
+Six templates written, linted and staged-ready — the five from §8 plus
+`olivia_payment_failed_v1`, which was missing: the `payment_failed` automation is
+already wired into `BookingService` and would have sat permanently disabled with
+no template to fire.
+
+Meta's review is the long pole and **cannot start until the WABA exists**, so
+writing the copy now converts submission day from an afternoon into a few clicks.
+Two rejections were caught by our own linter before Meta ever saw them:
+
+- **Every draft was missing example values.** Meta rejects a variable-bearing
+  template that arrives without them. All six would have come back rejected.
+- `olivia_checkout_review_v1` had **two adjacent variables** (`{{2}}, {{3}}`),
+  which is a rejection rule in its own right.
+
+The suite's most valuable assertions are the two cross-file ones. **Variable
+counts are pinned against the code that actually fires them** — a template
+expecting four parameters where its caller sends five does not fail at approval,
+it fails per send, as a pile of failed rows long afterwards. And **each marketing
+template's opt-out button text is checked against `consent.ts`**: a "No thanks"
+button whose text that file does not recognise renders as an opt-out, is tapped
+as an opt-out, and does nothing.
+
+`scripts/seed-templates.ts` stages them as drafts, is idempotent, and **refuses
+to overwrite anything past `draft`** — once submitted, Meta's copy is
+authoritative. It was run against the live database to prove it works, verified
+through the templates API, then removed; `wa_templates` is back to 0.
+
+**110 assertions** in `scripts/test-template-drafts.ts`.
+
+**2. Credential preflight** (`scripts/preflight-whatsapp.ts`). Read-only: sends
+nothing, creates nothing, changes nothing. It asks each question separately and
+in dependency order, because the alternative is debugging four credentials at
+once through a Graph error that names none of them. It checks the token, that the
+phone number ID resolves and is verified, that quality is not already RED, and —
+the one that catches credentials taken from two different Meta accounts — **that
+the WABA actually owns that phone number**. Also template read permission, and
+whether any app is subscribed for webhooks, which nothing else can detect because
+a webhook that never arrives produces no error.
+
+It reports *all* missing credentials in one pass rather than one per re-run, and
+it prints only fingerprints, never a credential.
+
+**3. The unauthenticated upload routes are closed.** `app/api/admin/upload-image`
+had no permission check at all, and `app/api/upload` — which mints Vercel Blob
+client tokens, where the token *is* the write permission — shipped with its
+authentication as a commented-out TODO. Both were open public-blob writers on a
+live site. Verified over HTTP: anonymous now gets 401 on both, `admin` passes,
+and `frontdesk` is correctly refused. Non-admin roles never had access to the
+media screens anyway (`auth.config.ts` admits them only to `/admin/whatsapp`),
+and the WhatsApp inbox media route has its own `requireCapability` gate, so
+nothing regressed.
+
+Total: **756 assertions across 14 suites.**
+
+### Sprint 12 — offer codes (2026-08-09)
+
+The deferred half of attribution, now built. `lib/services/offers.ts`, migration
+`drizzle/0008_campaign_offer_code.sql`, and a promo field on the checkout summary.
+
+**Three decisions, agreed before any code was written:**
+
+1. **The discount comes off the room subtotal, and tax is recalculated.** Add-ons
+   stay at full price — they are near-cost, and they are where margin disappears
+   fastest. GST is then charged on what the guest actually pays for the room.
+2. **Codes never stack; the larger wins.** The hotel's published terms already say
+   offers "may not be combined unless expressly stated", so this is not new
+   policy. Trying a second, worse code cannot leave a guest worse off, and they
+   are told which code is in force either way.
+3. **Auto-applied from the campaign link, still typeable.** The code resolves
+   through the *click record* rather than a second cookie, so an auto-applied
+   discount is provably attached to a real click on a real campaign. A code the
+   guest typed themselves is never overwritten, even by a better one.
+
+**The tax-scaling decision is the one to understand.** Room tax is not always
+ours to compute — when the CRS returns a quote, `taxesAndFees` is a figure it
+calculated on the undiscounted rate. So discounted tax is derived pro rata,
+`roomTax × discountedRoom / room`, rather than recomputed from a percentage. That
+treats quoted and computed tax identically. The live verification hit exactly
+this case: the room's tax was ₹750 on ₹14,998 — 5%, a CRS-quoted figure, not the
+12% the room type carries.
+
+**The money is computed in three places** — `calculateSessionPayableAmount`, the
+checkout page, and `BookingService.finalizeSession` — which predates this work.
+The discount arithmetic is *not* duplicated into them: all three go through the
+shared `applyDiscount()`, and the checkout page now displays the total from the
+same `calculateSessionQuote()` the payment step verifies against. A one-paisa
+disagreement between any two of them rejects the booking with a price mismatch
+the guest can do nothing about.
+
+Two further properties worth keeping:
+
+- **Only the code is stored on the session; the discount is recomputed on every
+  quote.** A cached discount goes stale the moment the guest adds a room, and a
+  stale discount is the one bug here that reaches the payment gateway.
+- **Redemption is a single conditional UPDATE**, not read-then-write. Validation
+  is deliberately advisory — two guests can both see the last seat — and the
+  increment is what actually decides. A booking that then fails calls
+  `releaseOffer()` from the catch, so a failed booking never permanently consumes
+  a seat on a limited offer.
+
+**107 assertions** across `scripts/test-offers.ts` (arithmetic) and
+`scripts/test-offers-db.ts` (validation, redemption, concurrency). The suite that
+matters fires 20 concurrent redemptions at an offer with 10 seats and asserts
+exactly 10 are granted.
+
+**Verified end to end in the browser** on a real booking session: ₹14,998 room +
+₹750 tax, `VERIFY20` applied, giving −₹3,000 discount, −₹150 tax saved, and a
+total of ₹12,598 — the room tax falling to ₹600 in proportion, and the displayed
+lines reconciling exactly against the previous total. The offers table is back to
+0 rows and no booking carries a discount.
+
+Not exercised end to end: the persistence of `promo_code` / `offer_id` /
+`discount_amount` onto a completed `bookings` row, because completing a booking
+means driving a real payment. The columns are written from the same validated
+quote the tests cover, but that last hop is unproven.
+
+**Promo codes are managed at `/admin/offers`** (admin only), and a campaign
+advertises one through a picker in the wizard's link-tracking block. The picker
+is deliberately not a text field, and the API re-validates the code against a
+live, active, unexpired offer: a mistyped code produces *no error anyone sees* —
+it auto-applies to nothing and every recipient quietly pays full price on an
+offer the hotel believes it is running. Codes cannot be renamed after creation
+(they have been sent to guests and recorded on bookings) and cannot be deleted
+once used — only deactivated, which stops them immediately and keeps the record.
+
+Total: **863 assertions across 16 suites.**
+
 ### Blocking action for the user
 
 None. The migration is applied and the module runs. To actually send, someone must
@@ -478,6 +746,24 @@ mode, and flip the kill switch on.
     and the raw `decode()` error settled in one request what an hour of
     elimination had not. Mint the cookie immediately before using it, and if it
     stops working, re-mint before investigating anything else.
+16. **A Meta URL button takes exactly one variable, at the end of the URL.** This
+    is not a style preference, it is the constraint that decides any link-tracking
+    design: you cannot put `?utm_source=…&utm_campaign=…&utm_content=…` in a
+    template, because there is one slot and it is a suffix. Anything per-recipient
+    must be a single opaque token resolved server-side. Also: sending a button
+    parameter for a button that is *static* does not get ignored — Meta rejects
+    the whole message — so `dynamicUrlButtonIndex()` returning null must mean no
+    button component at all, and the index must be read off the stored components
+    because the auto-added marketing opt-out button is usually button 0.
+17. **WhatsApp fetches every link you send, at send time, to build its preview
+    card.** So a click endpoint gets one hit per recipient before anyone has
+    tapped anything. Without user-agent filtering, click-through rate is
+    approximately "everyone we sent to" and looks like the best campaign the
+    hotel has ever run. The same applies to `facebookexternalhit`. Record the
+    hits with an `is_bot` flag rather than dropping them — a count that cannot be
+    explained later is its own problem — and exclude them from every rate.
+    Corollary for any future endpoint of this shape: `robots.ts` must disallow it
+    too, or search crawlers add a second layer of fake engagement.
 
 ---
 
@@ -488,7 +774,7 @@ A read-only audit of the live Neon database, because this changes the warm-up pl
 | Source | Rows | Usable for marketing? |
 |---|---|---|
 | `guest_profiles` | **4** total, 4 with a phone | **No.** `marketing_opt_in = true` on **0** rows. `communication_preference = 'whatsapp'` on **0** rows. |
-| `bookings` | 90 rows as of 2026-08-08 (89 when first audited), **42 distinct `guest_phone`** | Utility yes (transactional relationship). Marketing only after a re-permission ask. |
+| `bookings` | 91 rows as of 2026-08-09 (89 when first audited, 90 on 08-08), **~42 distinct `guest_phone`** | Utility yes (transactional relationship). Marketing only after a re-permission ask. |
 | `wa_*` tables | not created yet | Migration `0006_whatsapp_module.sql` is written but not applied. |
 
 **Consequence:** there is no documented opt-in list in the system today. The columns
