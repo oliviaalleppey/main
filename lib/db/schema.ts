@@ -1506,10 +1506,21 @@ export const waCampaigns = pgTable('wa_campaigns', {
     // Static per-campaign variable values, e.g. { "2": "MONSOON30" }
     staticVariables: json('static_variables').$type<Record<string, string>>().default({}),
 
+    // Where /w/<token> sends the guest. Read from here, never from the request —
+    // a destination taken off the query string is an open redirect.
+    destinationPath: text('destination_path'),
+    // Emitted on the redirect so the hotel's GA lines up with ours. Never the
+    // mechanism we attribute on.
+    utmCampaign: varchar('utm_campaign', { length: 100 }),
+    // The promo code this campaign advertises, auto-applied to the booking
+    // session of a guest who arrives through its link.
+    offerCode: varchar('offer_code', { length: 50 }),
+
     createdBy: uuid('created_by'),
     approvedBy: uuid('approved_by'), // two-person rule above the approval threshold
     haltReason: text('halt_reason'),
     variantOf: uuid('variant_of'), // A/B testing
+    variantLabel: varchar('variant_label', { length: 20 }), // 'A' | 'B'; NULL when not a test
 
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow(),
@@ -1537,6 +1548,10 @@ export const waMessages = pgTable('wa_messages', {
 
     variables: json('variables').$type<Record<string, string>>().default({}),
     renderedBody: text('rendered_body'), // what the guest actually saw
+
+    // 8 chars of Crockford base32, unique. Only set for campaign sends whose
+    // template carries a dynamic URL button; NULL everywhere else.
+    clickToken: varchar('click_token', { length: 16 }).unique(),
 
     attempts: integer('attempts').default(0),
     errorCode: integer('error_code'),
@@ -1675,6 +1690,13 @@ export const waSettings = pgTable('wa_settings', {
 
     approvalThreshold: integer('approval_threshold').default(1000), // two-person rule above this
 
+    // Attribution windows. 30 days for a click because a hotel stay is
+    // deliberated over; 7 for a phone match, deliberately tighter, because a
+    // loose window on a probabilistic signal invents attribution from coincidence.
+    clickAttributionDays: integer('click_attribution_days').default(30),
+    phoneAttributionDays: integer('phone_attribution_days').default(7),
+    phoneAttributionEnabled: boolean('phone_attribution_enabled').default(true),
+
     // Cached account health, refreshed by the sync cron.
     qualityRating: varchar('quality_rating', { length: 20 }),
     messagingTier: varchar('messaging_tier', { length: 50 }),
@@ -1700,6 +1722,65 @@ export const waAuditLog = pgTable('wa_audit_log', {
 }, (table) => [
     index('wa_audit_log_created_idx').on(table.createdAt),
     index('wa_audit_log_actor_idx').on(table.actorId),
+]);
+
+// --------------------------------------------
+// Attribution
+// --------------------------------------------
+
+// Every hit on /w/<token>, bots included. Bot hits are recorded rather than
+// dropped so an implausible click count can be explained afterwards; they are
+// excluded from every reported rate.
+export const waClicks = pgTable('wa_clicks', {
+    id: uuid('id').defaultRandom().primaryKey(),
+    messageId: uuid('message_id').references(() => waMessages.id, { onDelete: 'cascade' }),
+    campaignId: uuid('campaign_id').references(() => waCampaigns.id, { onDelete: 'cascade' }),
+    contactId: uuid('contact_id').references(() => waContacts.id, { onDelete: 'cascade' }),
+    token: varchar('token', { length: 16 }).notNull(),
+
+    isBot: boolean('is_bot').notNull().default(false),
+    botReason: varchar('bot_reason', { length: 50 }),
+    userAgent: text('user_agent'),
+    ipHash: varchar('ip_hash', { length: 64 }),
+    referer: text('referer'),
+
+    createdAt: timestamp('created_at').defaultNow(),
+}, (table) => [
+    index('wa_clicks_message_idx').on(table.messageId),
+    index('wa_clicks_campaign_idx').on(table.campaignId, table.isBot),
+    index('wa_clicks_contact_idx').on(table.contactId),
+    index('wa_clicks_created_idx').on(table.createdAt),
+]);
+
+// A join table rather than columns on `bookings`: it keeps a WhatsApp concern out
+// of the core booking schema, lets one booking carry both a click record and a
+// phone-match record so the tiers stay comparable, and means this module can be
+// removed without a bookings migration.
+export const waBookingAttribution = pgTable('wa_booking_attribution', {
+    id: uuid('id').defaultRandom().primaryKey(),
+    bookingId: uuid('booking_id').notNull().references(() => bookings.id, { onDelete: 'cascade' }),
+    campaignId: uuid('campaign_id').references(() => waCampaigns.id, { onDelete: 'set null' }),
+    messageId: uuid('message_id').references(() => waMessages.id, { onDelete: 'set null' }),
+    contactId: uuid('contact_id').references(() => waContacts.id, { onDelete: 'set null' }),
+    clickId: uuid('click_id').references(() => waClicks.id, { onDelete: 'set null' }),
+
+    // 'click' — deterministic, they followed our link.
+    // 'phone_match' — probabilistic, messaged then booked on a matching number
+    // without clicking. The two are never summed without a label.
+    kind: varchar('kind', { length: 20 }).notNull(),
+
+    // Snapshot of bookings.totalAmount in paise (gotcha 6) at attribution time,
+    // so a later cancellation cannot silently rewrite historic campaign revenue.
+    revenue: integer('revenue').default(0),
+    hoursToBook: integer('hours_to_book'),
+
+    createdAt: timestamp('created_at').defaultNow(),
+}, (table) => [
+    // At most one click attribution and one phone-match attribution per booking,
+    // which is also what makes capture idempotent.
+    uniqueIndex('wa_booking_attribution_booking_kind_idx').on(table.bookingId, table.kind),
+    index('wa_booking_attribution_campaign_idx').on(table.campaignId, table.kind),
+    index('wa_booking_attribution_created_idx').on(table.createdAt),
 ]);
 
 // --------------------------------------------

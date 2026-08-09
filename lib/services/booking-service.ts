@@ -19,6 +19,7 @@ import { SessionExpiration } from './session-expiration';
 import { BookingLockService } from './booking-lock';
 import { sendBookingConfirmation, sendBookingAlertToStaff } from './email';
 import { fireAutomation } from './whatsapp/automations';
+import { applyDiscount, validateOfferCode, redeemOffer, releaseOffer } from './offers';
 import { bookingStateMachine } from './booking-state-machine';
 import { eq, inArray } from 'drizzle-orm';
 import crypto from 'crypto';
@@ -573,6 +574,10 @@ export class BookingService {
         await IdempotencyService.lock(idempotencyKey, 'finalizeBooking', '/api/book/finalize');
 
         let bookingId: string | null = null;
+        // Hoisted so the catch can hand the offer back. A use claimed for a
+        // booking that then failed would otherwise be lost permanently, which on
+        // a limited offer means a seat nobody ever gets.
+        let claimedOfferId: string | null = null;
 
         try {
             // Generate unique booking reference number
@@ -664,9 +669,51 @@ export class BookingService {
             // Add-ons are taxed separately at 18%.
             const addOnTaxAmount = Math.round(addOnSubtotal * 0.18);
 
-            const subtotal = roomSubtotal + addOnSubtotal;
-            const taxAmount = roomTaxAmount + addOnTaxAmount;
-            const payableTotal = subtotal + taxAmount;
+            // Promo code. Only the code is carried on the session; its value is
+            // recomputed here against the final cart, so a code applied before
+            // the guest added a room is worth what it is worth now — and the
+            // arithmetic is the shared applyDiscount(), not a second copy of it,
+            // because a one-paisa disagreement with the amount the payment step
+            // verified rejects the booking outright.
+            const promoCodeOnSession = typeof (cartData as { promoCode?: unknown }).promoCode === 'string'
+                ? (cartData as { promoCode: string }).promoCode
+                : null;
+
+            const preDiscountTotal = roomSubtotal + roomTaxAmount + addOnSubtotal + addOnTaxAmount;
+            const validation = promoCodeOnSession
+                ? await validateOfferCode(promoCodeOnSession, {
+                    roomSubtotal,
+                    bookingTotal: preDiscountTotal,
+                })
+                : null;
+
+            let appliedOffer: { id: string; code: string; title: string } | null = null;
+            let discountPaise = 0;
+
+            if (validation?.valid) {
+                // Claim the use before the booking exists. If the offer ran out in
+                // the seconds since the guest saw it, they simply pay full price:
+                // losing a discount is recoverable, losing the booking is not.
+                const claimed = await redeemOffer(validation.offer.id);
+                if (claimed) {
+                    appliedOffer = {
+                        id: validation.offer.id,
+                        code: validation.offer.code,
+                        title: validation.offer.title,
+                    };
+                    discountPaise = validation.discount;
+                    claimedOfferId = validation.offer.id;
+                }
+            }
+
+            const quote = applyDiscount(
+                { roomSubtotal, roomTax: roomTaxAmount, addOnSubtotal, addOnTax: addOnTaxAmount },
+                discountPaise,
+            );
+
+            const subtotal = quote.subtotal;
+            const taxAmount = quote.taxAmount;
+            const payableTotal = quote.total;
 
             const [newBooking] = await db.insert(bookings).values({
                 bookingNumber: bookingRef,
@@ -682,6 +729,12 @@ export class BookingService {
                 totalAmount: payableTotal,
                 subtotal: subtotal,
                 taxAmount: taxAmount,
+                // These three columns have existed since the original schema and
+                // nothing has ever written them until now.
+                promoCode: appliedOffer?.code ?? null,
+                offerId: appliedOffer?.id ?? null,
+                discountAmount: quote.discount,
+                discountReason: appliedOffer ? appliedOffer.title : null,
                 status: 'initiated',
                 paymentStatus: 'pending',
                 ratePlanId: roomLineItems[0]?.ratePlanId || undefined,
@@ -767,6 +820,16 @@ export class BookingService {
 
         } catch (error: unknown) {
             const message = getErrorMessage(error);
+
+            // Hand back a promo use claimed for a booking that then failed.
+            // Never allowed to mask the real error: the booking failure is what
+            // the caller needs to see, and a release that itself fails is a
+            // spare seat on an offer, not a lost booking.
+            if (claimedOfferId) {
+                await releaseOffer(claimedOfferId).catch((e) =>
+                    console.error(`Failed to release offer ${claimedOfferId}:`, e));
+            }
+
             // Log Error
             await db.insert(bookingLogs).values({
                 bookingId: bookingId || undefined,

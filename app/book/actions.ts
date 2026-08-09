@@ -18,6 +18,11 @@ import { mapCrsRoomTypeMatchesInternal } from '@/lib/config/crs';
 import { getBookingProvider } from '@/lib/providers/crs/factory';
 import { formatRoomName } from '@/lib/utils';
 import { getAvailableRoomsForSearch } from '@/lib/services/search';
+import { attributeBooking, offerCodeForClick, CLICK_COOKIE } from '@/lib/services/whatsapp/attribution';
+import {
+    applyDiscount, validateOfferCode, betterOf, normalizeCode,
+    type QuoteBase, type DiscountedQuote,
+} from '@/lib/services/offers';
 
 type SelectedAddOnInput = {
     addOnId: string;
@@ -50,6 +55,27 @@ type SessionCartData = {
     selectedAddOns?: SelectedAddOnInput[];
     [key: string]: unknown;
 };
+
+/**
+ * Record which WhatsApp campaign, if any, produced this booking.
+ *
+ * This has to happen here rather than inside BookingService, because the click
+ * cookie only exists in a request context and the payment webhook that confirms
+ * the booking has no cookies at all. Both finalizeSession() call sites are
+ * server actions, so both can read it.
+ *
+ * Never throws and never blocks the booking: attributeBooking() swallows its own
+ * errors, and this wrapper exists so a future change to it cannot start throwing
+ * into the payment path.
+ */
+async function captureWhatsAppAttribution(bookingId: string): Promise<void> {
+    try {
+        const clickId = (await cookies()).get(CLICK_COOKIE)?.value ?? null;
+        await attributeBooking({ bookingId, clickId });
+    } catch (error) {
+        console.error('[whatsapp] attribution capture failed:', error);
+    }
+}
 
 function toDateOnlyString(value: string | Date | null | undefined): string {
     if (!value) return '';
@@ -289,7 +315,172 @@ async function persistSessionRoomSelections(
     };
 }
 
+/**
+ * The room and add-on money for a session, split the way applyDiscount() needs it.
+ *
+ * The promo code is stored in the session as a bare string and the discount is
+ * recomputed here on every call, never cached. A stored discount amount goes
+ * stale the moment the guest adds a room or an add-on, and a stale discount is
+ * the one bug in this area that reaches the payment gateway: the guest is shown
+ * one total and charged another.
+ */
+export async function calculateSessionQuote(sessionId: string): Promise<{
+    base: QuoteBase;
+    quote: DiscountedQuote;
+    promoCode: string | null;
+    offerId: string | null;
+    promoTitle: string | null;
+}> {
+    const { base, promoCode } = await sessionMoney(sessionId);
+
+    if (!promoCode) {
+        return { base, quote: applyDiscount(base, 0), promoCode: null, offerId: null, promoTitle: null };
+    }
+
+    const bookingTotal = base.roomSubtotal + base.roomTax + base.addOnSubtotal + base.addOnTax;
+    const validation = await validateOfferCode(promoCode, {
+        roomSubtotal: base.roomSubtotal,
+        bookingTotal,
+    });
+
+    // A code that has since expired, been deactivated or been fully claimed
+    // simply stops applying. It is not an error: the guest is shown the
+    // undiscounted total on the checkout page, which is what they will be charged.
+    if (!validation.valid) {
+        return { base, quote: applyDiscount(base, 0), promoCode: null, offerId: null, promoTitle: null };
+    }
+
+    return {
+        base,
+        quote: applyDiscount(base, validation.discount),
+        promoCode: validation.offer.code,
+        offerId: validation.offer.id,
+        promoTitle: validation.offer.title,
+    };
+}
+
 async function calculateSessionPayableAmount(sessionId: string): Promise<number> {
+    const { quote } = await calculateSessionQuote(sessionId);
+    return quote.total;
+}
+
+export type PromoResult = {
+    ok: boolean;
+    message: string;
+    /** The code actually in force afterwards, which may be the previous one. */
+    appliedCode: string | null;
+    discount: number;
+    total: number;
+};
+
+/**
+ * Apply a promo code to the current booking session.
+ *
+ * Only the code string is stored. Everything else — whether it is still valid,
+ * what it is worth against this cart — is recomputed on every quote, so the
+ * figure the guest sees cannot drift from the figure they are charged.
+ */
+export async function applyPromoCodeAction(rawCode: string): Promise<PromoResult> {
+    const sessionId = (await cookies()).get('booking_session')?.value;
+    if (!sessionId) {
+        return { ok: false, message: 'Your session has expired. Please search again.', appliedCode: null, discount: 0, total: 0 };
+    }
+
+    const ip = (await headers()).get('x-forwarded-for') || 'unknown';
+    // Promo codes are guessable by design, so the entry point is rate limited:
+    // without it this is an oracle for enumerating every code the hotel runs.
+    const limit = await RateLimiter.check(ip, 'applyPromoCodeAction');
+    if (!limit.allowed) {
+        return { ok: false, message: 'Too many attempts. Please try again shortly.', appliedCode: null, discount: 0, total: 0 };
+    }
+
+    const code = normalizeCode(rawCode);
+    if (!code) {
+        return { ok: false, message: 'Enter a promo code.', appliedCode: null, discount: 0, total: 0 };
+    }
+
+    const current = await calculateSessionQuote(sessionId);
+    const bookingTotal = current.base.roomSubtotal + current.base.roomTax
+        + current.base.addOnSubtotal + current.base.addOnTax;
+
+    const validation = await validateOfferCode(code, {
+        roomSubtotal: current.base.roomSubtotal,
+        bookingTotal,
+    });
+
+    if (!validation.valid) {
+        return {
+            ok: false,
+            message: validation.message,
+            appliedCode: current.promoCode,
+            discount: current.quote.discount,
+            total: current.quote.total,
+        };
+    }
+
+    // Codes do not stack — the hotel's published terms already say so. The larger
+    // discount wins, so trying a second code can never leave the guest worse off.
+    const { winner, replaced } = betterOf(
+        current.promoCode ? { code: current.promoCode, discount: current.quote.discount } : null,
+        { code: validation.offer.code, discount: validation.discount },
+    );
+
+    if (!replaced) {
+        return {
+            ok: false,
+            message: `Your existing code ${current.promoCode} is a better discount, so we have kept it.`,
+            appliedCode: current.promoCode,
+            discount: current.quote.discount,
+            total: current.quote.total,
+        };
+    }
+
+    await persistPromoCode(sessionId, winner.code);
+    const updated = await calculateSessionQuote(sessionId);
+
+    revalidatePath('/book/checkout');
+    return {
+        ok: true,
+        message: validation.message,
+        appliedCode: updated.promoCode,
+        discount: updated.quote.discount,
+        total: updated.quote.total,
+    };
+}
+
+export async function removePromoCodeAction(): Promise<PromoResult> {
+    const sessionId = (await cookies()).get('booking_session')?.value;
+    if (!sessionId) {
+        return { ok: false, message: 'Your session has expired. Please search again.', appliedCode: null, discount: 0, total: 0 };
+    }
+
+    await persistPromoCode(sessionId, null);
+    const updated = await calculateSessionQuote(sessionId);
+
+    revalidatePath('/book/checkout');
+    return {
+        ok: true,
+        message: 'Promo code removed.',
+        appliedCode: null,
+        discount: 0,
+        total: updated.quote.total,
+    };
+}
+
+async function persistPromoCode(sessionId: string, code: string | null): Promise<void> {
+    const session = await db.query.bookingSessions.findFirst({
+        where: eq(bookingSessions.id, sessionId),
+    });
+    if (!session) throw new Error('Session not found');
+
+    const cartData = (session.cartData as SessionCartData | null) || {};
+    await db.update(bookingSessions)
+        .set({ cartData: { ...cartData, promoCode: code }, updatedAt: new Date() })
+        .where(eq(bookingSessions.id, sessionId));
+}
+
+/** Room and add-on money for a session, before any discount. */
+async function sessionMoney(sessionId: string): Promise<{ base: QuoteBase; promoCode: string | null }> {
     await ensureRoomTypeMinOccupancyColumn();
 
     const session = await db.query.bookingSessions.findFirst({
@@ -313,7 +504,12 @@ async function calculateSessionPayableAmount(sessionId: string): Promise<number>
     });
     const roomTypePriceMap = new Map(roomRows.map((row) => [row.id, { basePrice: row.basePrice, taxRate: row.taxRate }]));
 
-    const roomSubtotal = roomSelections.reduce((sum, selection) => {
+    // Room charges and room tax are accumulated separately, because a promo code
+    // discounts the charges and the tax then follows them pro rata. Summing them
+    // into one figure first, as this used to, makes that split impossible.
+    let roomSubtotal = 0;
+    let roomTax = 0;
+    for (const selection of roomSelections) {
         const quantity = sanitizeRoomCount(selection.quantity);
         const roomData = roomTypePriceMap.get(selection.roomTypeId);
         if (!roomData) {
@@ -334,14 +530,19 @@ async function calculateSessionPayableAmount(sessionId: string): Promise<number>
             ? quotedTaxes
             : computedTaxes;
 
-        return sum + lineSubtotal + lineTaxes;
-    }, 0);
+        roomSubtotal += lineSubtotal;
+        roomTax += lineTaxes;
+    }
+
+    const promoCode = typeof cartData.promoCode === 'string' && cartData.promoCode.trim()
+        ? cartData.promoCode.trim()
+        : null;
 
     const selectedAddOns = sanitizeSelectedAddOns(cartData.selectedAddOns);
     const selectedAddOnIds = Array.from(new Set(selectedAddOns.map((entry) => entry.addOnId)));
 
     if (!selectedAddOnIds.length) {
-        return roomSubtotal;
+        return { base: { roomSubtotal, roomTax, addOnSubtotal: 0, addOnTax: 0 }, promoCode };
     }
 
     const addOnRows = await db
@@ -356,15 +557,16 @@ async function calculateSessionPayableAmount(sessionId: string): Promise<number>
         ));
 
     const addOnPriceMap = new Map(addOnRows.map((row) => [row.id, row.price]));
-    const addOnsSubtotal = selectedAddOns.reduce((sum, selected) => {
+    const addOnSubtotal = selectedAddOns.reduce((sum, selected) => {
         const price = addOnPriceMap.get(selected.addOnId);
         if (!price) return sum;
         return sum + (price * selected.quantity);
     }, 0);
 
-    // Add-ons GST is always 18% (add-ons are separate from room taxes).
-    const addOnsTax = Math.round(addOnsSubtotal * 0.18);
-    return roomSubtotal + addOnsSubtotal + addOnsTax;
+    // Add-ons GST is always 18% (add-ons are separate from room taxes), and a
+    // promo code never touches them.
+    const addOnTax = Math.round(addOnSubtotal * 0.18);
+    return { base: { roomSubtotal, roomTax, addOnSubtotal, addOnTax }, promoCode };
 }
 
 export async function startBookingSession(
@@ -491,6 +693,15 @@ export async function startBookingSession(
             return { error: 'At least one guest is required per room. Please increase the number of guests or reduce the number of selected rooms.' };
         }
 
+        // A guest who arrived through a WhatsApp campaign link gets that
+        // campaign's promo code applied for them. Only if they have not already
+        // entered one of their own — a code they typed is a deliberate choice and
+        // must not be silently overwritten, even by a better one.
+        const existingPromo = typeof cartData.promoCode === 'string' ? cartData.promoCode : null;
+        const campaignPromo = existingPromo
+            ? null
+            : await offerCodeForClick(cookieStore.get(CLICK_COOKIE)?.value ?? null);
+
         await db.update(bookingSessions).set({
             selectedRoomTypeId: roomType.id,
             selectedRatePlanId: ratePlan.id,
@@ -498,6 +709,7 @@ export async function startBookingSession(
             expiresAt: new Date(Date.now() + 15 * 60 * 1000),
             cartData: {
                 ...cartData,
+                promoCode: existingPromo ?? campaignPromo ?? null,
                 roomSelections: nextSelections,
                 roomSelection: {
                     roomTypeId: roomType.id,
@@ -696,6 +908,8 @@ export async function finalizeBookingAction(paymentDetails: {
             throw new Error("Failed to finalize booking");
         }
 
+        await captureWhatsAppAttribution(booking.id);
+
         // Clear cookie
         (await cookies()).delete('booking_session');
 
@@ -748,6 +962,8 @@ export async function initiateEasebuzzPaymentAction(): Promise<{
         });
 
         if (!booking) return { success: false, error: 'Failed to create booking record.' };
+
+        await captureWhatsAppAttribution(booking.id);
 
         const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://oliviaalleppey.com';
         const returnUrl = `${baseUrl}/api/payment/easebuzz`;

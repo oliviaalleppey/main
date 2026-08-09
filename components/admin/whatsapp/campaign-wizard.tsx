@@ -13,7 +13,7 @@ import { ExclusionPanel, type Breakdown, type SampleContact } from './exclusion-
 import { CATEGORY_PRICE } from './template-status';
 import { formatCurrency } from '@/lib/utils';
 import { cn } from '@/lib/utils';
-import type { TemplateButton } from '@/lib/services/whatsapp/template-lint';
+import { dynamicUrlButtonIndex, type TemplateButton } from '@/lib/services/whatsapp/template-lint';
 
 /**
  * The 5-step campaign wizard.
@@ -37,6 +37,8 @@ type Template = {
     variableCount: number | null;
     variableMap: Record<string, string> | null;
 };
+
+type ActiveOffer = { id: string; code: string; title: string };
 
 type Audience = {
     id: string;
@@ -75,6 +77,10 @@ export function CampaignWizard() {
     const [audienceId, setAudienceId] = useState('');
     const [name, setName] = useState('');
     const [staticVariables, setStaticVariables] = useState<Record<string, string>>({});
+    const [destinationPath, setDestinationPath] = useState('/');
+    const [utmCampaign, setUtmCampaign] = useState('');
+    const [offerCode, setOfferCode] = useState('');
+    const [activeOffers, setActiveOffers] = useState<ActiveOffer[]>([]);
     const [dailyCap, setDailyCap] = useState<number | ''>('');
     const [throttlePerMin, setThrottlePerMin] = useState<number | ''>('');
     const [scheduledAt, setScheduledAt] = useState('');
@@ -86,14 +92,18 @@ export function CampaignWizard() {
     const [launching, setLaunching] = useState(false);
 
     const template = templates.find((t) => t.id === templateId);
+    const tracksClicks = dynamicUrlButtonIndex(template?.buttons ?? null) !== null;
     const audience = audiences.find((a) => a.id === audienceId);
 
     useEffect(() => {
         (async () => {
             try {
-                const [templateResponse, audienceResponse] = await Promise.all([
+                const [templateResponse, audienceResponse, offerResponse] = await Promise.all([
                     fetch('/api/admin/whatsapp/templates'),
                     fetch('/api/admin/whatsapp/audiences'),
+                    // Only an admin can read this; a marketing user building a
+                    // campaign simply gets no promo picker rather than an error.
+                    fetch('/api/admin/offers?active=true').catch(() => null),
                 ]);
                 const templateBody = await templateResponse.json().catch(() => ({}));
                 const audienceBody = await audienceResponse.json().catch(() => ({}));
@@ -103,6 +113,11 @@ export function CampaignWizard() {
                 // Only approved templates can be sent, so nothing else is offered.
                 setTemplates((templateBody.templates ?? []).filter((t: Template) => t.status === 'approved'));
                 setAudiences(audienceBody.audiences ?? []);
+
+                if (offerResponse?.ok) {
+                    const offerBody = await offerResponse.json().catch(() => ({}));
+                    setActiveOffers(offerBody.offers ?? []);
+                }
             } catch (error) {
                 setLoadError(error instanceof Error ? error.message : 'Could not load campaign options');
             }
@@ -169,6 +184,10 @@ export function CampaignWizard() {
                     dailyCap: dailyCap || undefined,
                     throttlePerMin: throttlePerMin || undefined,
                     scheduledAt: scheduledAt ? new Date(scheduledAt).toISOString() : undefined,
+                    // Only sent when the template can actually carry a token.
+                    destinationPath: tracksClicks ? destinationPath.trim() || '/' : undefined,
+                    utmCampaign: tracksClicks && utmCampaign.trim() ? utmCampaign.trim() : undefined,
+                    offerCode: tracksClicks && offerCode ? offerCode : undefined,
                 }),
             });
             const created = await createResponse.json().catch(() => ({}));
@@ -425,6 +444,80 @@ export function CampaignWizard() {
                         </div>
 
                         <div>
+                            {/*
+                              Only shown when the template actually has a dynamic
+                              URL button. Offering a destination for a template
+                              that cannot carry a token would silently do nothing.
+                            */}
+                            {tracksClicks && (
+                                <div className="mb-4 space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-3">
+                                    <div>
+                                        <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                            Link tracking
+                                        </h4>
+                                        <p className="mt-1 text-xs text-gray-500">
+                                            This template has a tracked button. Each guest gets their own
+                                            link, so clicks and any bookings that follow are attributed to
+                                            this campaign.
+                                        </p>
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label htmlFor="camp-destination">Where the button goes</Label>
+                                        <Input
+                                            id="camp-destination"
+                                            value={destinationPath}
+                                            onChange={(event) => setDestinationPath(event.target.value)}
+                                            placeholder="/rooms/houseboat"
+                                        />
+                                        <p className="text-xs text-gray-500">
+                                            A path on this site, starting with a slash. Anything else falls
+                                            back to the home page.
+                                        </p>
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label htmlFor="camp-utm">Google Analytics campaign name</Label>
+                                        <Input
+                                            id="camp-utm"
+                                            value={utmCampaign}
+                                            onChange={(event) => setUtmCampaign(event.target.value)}
+                                            placeholder="onam_2026"
+                                        />
+                                        <p className="text-xs text-gray-500">
+                                            Optional. Sent as <span className="font-mono">utm_campaign</span> so
+                                            GA reporting lines up with the numbers here.
+                                        </p>
+                                    </div>
+
+                                    {/*
+                                      A picker rather than a text field on purpose: a mistyped
+                                      code is not an error anyone sees. It would auto-apply to
+                                      nothing, and every recipient would pay full price on an
+                                      offer the hotel believes it is running.
+                                    */}
+                                    <div className="space-y-1.5">
+                                        <Label htmlFor="camp-offer">Promo code</Label>
+                                        <select
+                                            id="camp-offer"
+                                            value={offerCode}
+                                            onChange={(event) => setOfferCode(event.target.value)}
+                                            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none"
+                                        >
+                                            <option value="">No promo code</option>
+                                            {activeOffers.map((offer) => (
+                                                <option key={offer.id} value={offer.code}>
+                                                    {offer.code} — {offer.title}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <p className="text-xs text-gray-500">
+                                            {activeOffers.length === 0
+                                                ? 'No active promo codes. Create one under Promo Codes to offer a discount here.'
+                                                : 'Applied automatically for guests who follow this link. They can still type it themselves.'}
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
                             <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
                                 Preview {samples[0]?.name ? `for ${samples[0].name}` : ''}
                             </h4>

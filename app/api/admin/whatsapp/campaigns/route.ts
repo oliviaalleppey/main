@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/lib/db';
-import { waCampaigns, waTemplates, waAudiences } from '@/lib/db/schema';
+import { waCampaigns, waTemplates, waAudiences, offers } from '@/lib/db/schema';
 import { desc, eq, sql } from 'drizzle-orm';
 import { requireCapability, errorResponse, audit } from '@/lib/services/whatsapp/admin-guard';
 import { getSettings } from '@/lib/services/whatsapp/settings';
+import { normalizeCode, hotelToday } from '@/lib/services/offers';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,6 +49,25 @@ const createSchema = z.object({
     dailyCap: z.number().int().min(1).optional(),
     throttlePerMin: z.number().int().min(1).max(600).optional(),
     scheduledAt: z.string().datetime().optional(),
+
+    // Where the tracked button sends the guest. Constrained to a site-relative
+    // path at the edge as well as in buildDestination(), so a stored value can
+    // never become an off-site redirect even if the redirect guard is later
+    // refactored. A single leading slash, never two — '//evil.com' is a
+    // protocol-relative URL that resolves to another host.
+    destinationPath: z.string().trim().regex(/^\/(?!\/)[^\s]*$/, {
+        message: 'The destination must be a path on this site, starting with a single "/".',
+    }).max(500).optional(),
+    utmCampaign: z.string().trim().max(100).regex(/^[A-Za-z0-9._-]+$/, {
+        message: 'Use letters, numbers, dots, dashes and underscores only.',
+    }).optional(),
+
+    // The promo code this campaign advertises, applied automatically to the
+    // booking session of a guest who follows its link. Validated against a real,
+    // active offer below — a code that does not exist would silently produce no
+    // discount for every recipient, which is the kind of failure nobody notices
+    // until a guest complains.
+    offerCode: z.string().trim().max(50).optional(),
 });
 
 /**
@@ -72,6 +92,37 @@ export async function POST(request: Request) {
                 { error: `Template "${template.name}" is ${template.status}. Only approved templates can be sent.` },
                 { status: 400 },
             );
+        }
+
+        // A promo code that does not resolve to a live offer is refused at
+        // creation rather than at send time. The failure it prevents is silent:
+        // every recipient follows the link, the code auto-applies to nothing,
+        // and they pay full price on an offer the hotel believes it is running.
+        let resolvedOfferCode: string | null = null;
+        if (body.offerCode) {
+            const code = normalizeCode(body.offerCode);
+            const offer = await db.query.offers.findFirst({
+                where: sql`upper(${offers.code}) = ${code}`,
+            });
+            if (!offer) {
+                return NextResponse.json(
+                    { error: `Promo code ${code} does not exist. Create it under Promo Codes first.` },
+                    { status: 400 },
+                );
+            }
+            if (!offer.isActive) {
+                return NextResponse.json(
+                    { error: `Promo code ${code} is inactive, so it would give no discount.` },
+                    { status: 400 },
+                );
+            }
+            if (offer.validTo < hotelToday()) {
+                return NextResponse.json(
+                    { error: `Promo code ${code} expired on ${offer.validTo}.` },
+                    { status: 400 },
+                );
+            }
+            resolvedOfferCode = offer.code;
         }
 
         // An unmapped variable would render as a fallback for every recipient,
@@ -107,6 +158,9 @@ export async function POST(request: Request) {
                 dailyCap: body.dailyCap ?? settings.dailyCap,
                 throttlePerMin: body.throttlePerMin ?? settings.throttlePerMin,
                 scheduledAt: body.scheduledAt ? new Date(body.scheduledAt) : null,
+                destinationPath: body.destinationPath ?? null,
+                utmCampaign: body.utmCampaign ?? null,
+                offerCode: resolvedOfferCode,
                 createdBy: actor.id,
             })
             .returning();

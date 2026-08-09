@@ -19,7 +19,8 @@ import { CheckoutStepper } from '@/components/booking/checkout-stepper';
 import { SearchStayEditor } from '@/components/booking/search-stay-editor';
 import { CheckoutRoomList } from '@/components/booking/checkout-room-list';
 import { getAvailableRoomsForSearch } from '@/lib/services/search';
-import { updateSessionSearch } from '@/app/book/actions';
+import { updateSessionSearch, calculateSessionQuote } from '@/app/book/actions';
+import { PromoCodeField } from '@/components/booking/promo-code-field';
 import { GuestForm } from '@/components/booking/guest-form';
 import { AddOnsSelector } from '@/components/booking/add-ons-selector';
 import { ensureRoomTypeMinOccupancyColumn } from '@/lib/db/schema-guard';
@@ -174,6 +175,11 @@ export default async function CheckoutPage({
         where: eq(bookingSessions.id, sessionToken)
     });
     if (!session) redirect('/book/search');
+
+    // The authoritative money. This page itemises the lines itself, but the
+    // total it displays comes from here — the same function the payment step
+    // verifies against — so the two can never disagree.
+    const promo = await calculateSessionQuote(sessionToken);
 
     const availableAddOns = await db.query.addOns.findMany({
         where: eq(addOns.isActive, true),
@@ -492,12 +498,42 @@ export default async function CheckoutPage({
                                     <span className="font-medium text-black">{formatCurrency(taxesAndFeesTotal)}</span>
                                 </div>
                             )}
+
+                            {promo.quote.discount > 0 && (
+                                <div className="pt-3 border-t border-gray-100 space-y-1">
+                                    <div className="flex justify-between text-emerald-700">
+                                        <span>Discount{promo.promoCode ? ` (${promo.promoCode})` : ''}</span>
+                                        <span className="font-medium">-{formatCurrency(promo.quote.discount)}</span>
+                                    </div>
+                                    {/* Shown separately because the two numbers must visibly
+                                        add up to the drop in the total — otherwise the guest
+                                        sees a ₹1,000 discount take ₹1,120 off and wonders
+                                        which figure is wrong. */}
+                                    {promo.quote.taxSaved > 0 && (
+                                        <div className="flex justify-between text-[13px] text-emerald-700">
+                                            <span>Tax saved</span>
+                                            <span className="font-medium">-{formatCurrency(promo.quote.taxSaved)}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            <PromoCodeField
+                                appliedCode={promo.promoCode}
+                                appliedTitle={promo.promoTitle}
+                                discount={promo.quote.discount}
+                            />
                         </div>
 
                         <div className="mt-5 border-t border-gray-200 pt-4">
                             <div className="flex justify-between items-center">
                                 <span className="text-[var(--text-dark)] font-semibold text-[13px] uppercase tracking-[0.1em]">Total Amount</span>
-                                <span className="text-2xl font-medium text-[var(--text-dark)] tracking-tight">{formatCurrency(totalPrice)}</span>
+                                <span className="text-2xl font-medium text-[var(--text-dark)] tracking-tight">
+                                    {/* From the shared quote, not the locally summed
+                                        totalPrice: this is the figure the payment step
+                                        verifies, so it is the one that must be displayed. */}
+                                    {formatCurrency(promo.quote.total)}
+                                </span>
                             </div>
                         </div>
                     </div>
