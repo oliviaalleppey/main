@@ -12,6 +12,9 @@ export default function robots(): MetadataRoute.Robots {
                     "/api/",
                     "/signin",
                     "/my-bookings",
+                    // Campaign click redirects. Every crawl is a fake click that
+                    // would have to be filtered back out of the reported rate.
+                    "/w/",
                     // Booking funnel: thin, parameterised, and often per-session.
                     "/book/search",
                     "/book/details",

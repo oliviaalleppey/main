@@ -1,6 +1,7 @@
 import { db } from '@/lib/db';
 import { sql } from 'drizzle-orm';
 import { getSettings, budgetState } from './settings';
+import type { VariantStats } from './ab';
 
 /**
  * Analytics over the send log.
@@ -33,12 +34,14 @@ export type Funnel = {
     sent: number;
     delivered: number;
     read: number;
+    clicked: number;
     replied: number;
     failed: number;
     skipped: number;
     optedOut: number;
     deliveryRate: number;
     readRate: number;
+    clickRate: number;
     optOutRate: number;
 };
 
@@ -87,9 +90,26 @@ export async function funnel(range: DateRange): Promise<Funnel> {
           AND created_at >= ${range.from} AND created_at <= ${range.to}
     `);
 
+    // Clicks are counted as distinct MESSAGES clicked, not raw hits, so the stage
+    // stays comparable with the ones above it — one guest tapping a link five
+    // times is one message that produced engagement, not five.
+    //
+    // `is_bot = false` is not optional here: WhatsApp fetches every link to build
+    // its preview card, so the unfiltered count is roughly "everyone we sent to"
+    // and would show a ~100% click rate on a campaign nobody opened.
+    const clickedResult = await db.execute<{ clicked: number }>(sql`
+        SELECT COUNT(DISTINCT c.message_id)::int AS "clicked"
+        FROM wa_clicks c
+        JOIN wa_messages m ON m.id = c.message_id
+        WHERE c.is_bot = false
+          AND m.queued_at >= ${range.from} AND m.queued_at <= ${range.to}
+          AND m.direction = 'outbound'
+    `);
+
     const sent = Number(counts.sent) || 0;
     const delivered = Number(counts.delivered) || 0;
     const read = Number(counts.read) || 0;
+    const clicked = Number(clickedResult.rows[0]?.clicked) || 0;
     const optedOut = Number(optedOutResult.rows[0]?.opted_out) || 0;
 
     return {
@@ -97,6 +117,7 @@ export async function funnel(range: DateRange): Promise<Funnel> {
         sent,
         delivered,
         read,
+        clicked,
         replied: Number(repliedResult.rows[0]?.replied) || 0,
         failed: Number(counts.failed) || 0,
         skipped: Number(counts.skipped) || 0,
@@ -105,8 +126,118 @@ export async function funnel(range: DateRange): Promise<Funnel> {
         // would render as "NaN%" on the dashboard.
         deliveryRate: sent ? delivered / sent : 0,
         readRate: delivered ? read / delivered : 0,
+        // Over delivered, not over read: Meta only reports read receipts when the
+        // guest has them enabled, so `read` is an undercount of an unknown size
+        // and dividing by it would produce click rates above 100%.
+        clickRate: delivered ? clicked / delivered : 0,
         optOutRate: delivered ? optedOut / delivered : 0,
     };
+}
+
+export type AttributionSummary = {
+    clickBookings: number;
+    clickRevenue: number;
+    phoneBookings: number;
+    phoneRevenue: number;
+    /** Deterministic only. The number to quote when someone asks for one number. */
+    confirmedBookings: number;
+    confirmedRevenue: number;
+    medianHoursToBook: number | null;
+};
+
+/**
+ * Bookings and revenue attributed to WhatsApp in the range.
+ *
+ * The two tiers are returned separately and never pre-summed. `confirmed*` is
+ * the click tier alone, because that is the figure that survives someone asking
+ * how it was measured — the phone-match tier is a real signal but it is an
+ * inference, and a hotel deciding a budget on it should know which is which.
+ */
+export async function attributionSummary(range: DateRange): Promise<AttributionSummary> {
+    const result = await db.execute<{
+        click_bookings: number; click_revenue: number;
+        phone_bookings: number; phone_revenue: number;
+        median_hours: number | null;
+    }>(sql`
+        SELECT
+            COUNT(*) FILTER (WHERE kind = 'click')::int                        AS "click_bookings",
+            COALESCE(SUM(revenue) FILTER (WHERE kind = 'click'), 0)::int       AS "click_revenue",
+            COUNT(*) FILTER (WHERE kind = 'phone_match')::int                  AS "phone_bookings",
+            COALESCE(SUM(revenue) FILTER (WHERE kind = 'phone_match'), 0)::int AS "phone_revenue",
+            PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY hours_to_book)
+                FILTER (WHERE kind = 'click')                                  AS "median_hours"
+        FROM wa_booking_attribution
+        WHERE created_at >= ${range.from} AND created_at <= ${range.to}
+    `);
+
+    const row = result.rows[0];
+    const clickBookings = Number(row?.click_bookings) || 0;
+    const clickRevenue = Number(row?.click_revenue) || 0;
+
+    return {
+        clickBookings,
+        clickRevenue,
+        phoneBookings: Number(row?.phone_bookings) || 0,
+        phoneRevenue: Number(row?.phone_revenue) || 0,
+        confirmedBookings: clickBookings,
+        confirmedRevenue: clickRevenue,
+        medianHoursToBook: row?.median_hours == null ? null : Math.round(Number(row.median_hours)),
+    };
+}
+
+/**
+ * Per-arm numbers for an A/B test, for every campaign sharing a parent.
+ *
+ * The parent row itself is included, because the usual shape is "campaign X, and
+ * a variant B of it" rather than two children of an abstract parent.
+ */
+export async function variantStats(parentCampaignId: string): Promise<VariantStats[]> {
+    const result = await db.execute<{
+        campaign_id: string; label: string | null;
+        sent: number; delivered: number; read: number;
+        opted_out: number; clicks: number; bookings: number; revenue: number;
+    }>(sql`
+        SELECT
+            c.id::text                                                   AS "campaign_id",
+            COALESCE(c.variant_label, 'A')                               AS "label",
+            COUNT(m.id) FILTER (WHERE m.sent_at IS NOT NULL)::int         AS "sent",
+            COUNT(m.id) FILTER (WHERE m.delivered_at IS NOT NULL)::int    AS "delivered",
+            COUNT(m.id) FILTER (WHERE m.read_at IS NOT NULL)::int         AS "read",
+            c.opted_out_count::int                                        AS "opted_out",
+            (SELECT COUNT(DISTINCT cl.message_id)
+               FROM wa_clicks cl
+              WHERE cl.campaign_id = c.id AND cl.is_bot = false)::int      AS "clicks",
+            (SELECT COUNT(*)
+               FROM wa_booking_attribution a
+              WHERE a.campaign_id = c.id AND a.kind = 'click')::int        AS "bookings",
+            (SELECT COALESCE(SUM(a.revenue), 0)
+               FROM wa_booking_attribution a
+              WHERE a.campaign_id = c.id AND a.kind = 'click')::int        AS "revenue"
+        FROM wa_campaigns c
+        LEFT JOIN wa_messages m ON m.campaign_id = c.id
+        WHERE c.id = ${parentCampaignId} OR c.variant_of = ${parentCampaignId}
+        GROUP BY c.id, c.variant_label, c.opted_out_count
+        ORDER BY COALESCE(c.variant_label, 'A')
+    `);
+
+    return result.rows.map((row) => {
+        const delivered = Number(row.delivered) || 0;
+        const clicks = Number(row.clicks) || 0;
+        return {
+            campaignId: row.campaign_id,
+            label: row.label ?? 'A',
+            sent: Number(row.sent) || 0,
+            delivered,
+            read: Number(row.read) || 0,
+            optedOut: Number(row.opted_out) || 0,
+            clicks,
+            bookings: Number(row.bookings) || 0,
+            revenue: Number(row.revenue) || 0,
+            readRate: delivered ? (Number(row.read) || 0) / delivered : 0,
+            clickRate: delivered ? clicks / delivered : 0,
+            optOutRate: delivered ? (Number(row.opted_out) || 0) / delivered : 0,
+        };
+    });
 }
 
 export type DailyPoint = {
@@ -368,16 +499,17 @@ export async function consentSnapshot(): Promise<ConsentSnapshot> {
 
 /** Everything the analytics screen needs, in one round of queries. */
 export async function analyticsOverview(range: DateRange) {
-    const [funnelData, trends, cost, templates, hours, consent] = await Promise.all([
+    const [funnelData, trends, cost, templates, hours, consent, attribution] = await Promise.all([
         funnel(range),
         dailyTrends(range),
         costSummary(range),
         templateLeaderboard(range),
         bestTimeToSend(range),
         consentSnapshot(),
+        attributionSummary(range),
     ]);
 
-    return { range, funnel: funnelData, trends, cost, templates, hours, consent };
+    return { range, funnel: funnelData, trends, cost, templates, hours, consent, attribution };
 }
 
 export type AnalyticsOverview = Awaited<ReturnType<typeof analyticsOverview>>;

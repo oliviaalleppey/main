@@ -31,9 +31,10 @@ function check(label: string, condition: boolean) {
 const FIXTURE: AnalyticsOverview = {
     range: { from: new Date('2026-07-01T00:00:00Z'), to: new Date('2026-07-31T00:00:00Z') },
     funnel: {
-        queued: 1000, sent: 940, delivered: 900, read: 603, replied: 51,
+        queued: 1000, sent: 940, delivered: 900, read: 603, clicked: 117, replied: 51,
         failed: 40, skipped: 60, optedOut: 9,
-        deliveryRate: 900 / 940, readRate: 603 / 900, optOutRate: 9 / 900,
+        deliveryRate: 900 / 940, readRate: 603 / 900, clickRate: 117 / 900,
+        optOutRate: 9 / 900,
     },
     trends: [
         { day: '2026-07-01', sent: 400, delivered: 380, read: 250, failed: 20, costPaise: 41234 },
@@ -59,6 +60,14 @@ const FIXTURE: AnalyticsOverview = {
     consent: {
         total: 1200, optedIn: 800, pending: 300, optedOut: 80, suppressed: 20,
         withProof: 760, proofPercent: 95,
+    },
+    // Awkward on purpose, like the costs above: 1234567 paise is ₹12,345.67, so a
+    // missing /100 cannot coincidentally look plausible.
+    attribution: {
+        clickBookings: 7, clickRevenue: 1234567,
+        phoneBookings: 3, phoneRevenue: 456789,
+        confirmedBookings: 7, confirmedRevenue: 1234567,
+        medianHoursToBook: 19,
     },
 };
 
@@ -93,7 +102,19 @@ check('a sub-rupee amount keeps its paise', summaryCell('Cost per delivered')?.v
 check('cost per read keeps its paise', summaryCell('Cost per read')?.v === 1.61);
 check('the budget is converted', summaryCell('Monthly budget')?.v === 5000);
 check('money cells carry a rupee format', summaryCell('Total spend')?.z === '₹#,##0.00');
+// These rows sit past where the format loop's old hard-coded bound stopped, so
+// they also prove the bound now follows the sheet's real extent.
+check('attributed revenue is converted to rupees', summaryCell('Attributed revenue')?.v === 12345.67);
+check('assisted revenue is converted to rupees', summaryCell('Assisted revenue')?.v === 4567.89);
+check('attributed revenue carries a rupee format', summaryCell('Attributed revenue')?.z === '₹#,##0.00');
 check('a daily cost is converted', (book.Sheets['Daily']['F2'] as XLSX.CellObject).v === 412.34);
+
+console.log('\n--- the two attribution tiers stay separable ---');
+check('deterministic bookings are reported', summaryCell('Attributed bookings')?.v === 7);
+check('assisted bookings are reported separately', summaryCell('Assisted bookings')?.v === 3);
+check('the two tiers are never pre-summed into one cell',
+    summaryCell('Attributed bookings')?.v !== 10 && summaryCell('Assisted bookings')?.v !== 10);
+check('median hours to book survives', summaryCell('Median hours to book')?.v === 19);
 
 console.log('\n--- percentages are stored on one scale ---');
 // Everything must be a fraction, so Excel's percent format displays it correctly

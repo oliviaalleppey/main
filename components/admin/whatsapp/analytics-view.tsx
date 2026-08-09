@@ -8,9 +8,9 @@ import { formatCurrency } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 
 type Funnel = {
-    queued: number; sent: number; delivered: number; read: number; replied: number;
-    failed: number; skipped: number; optedOut: number;
-    deliveryRate: number; readRate: number; optOutRate: number;
+    queued: number; sent: number; delivered: number; read: number; clicked: number;
+    replied: number; failed: number; skipped: number; optedOut: number;
+    deliveryRate: number; readRate: number; clickRate: number; optOutRate: number;
 };
 
 type DailyPoint = { day: string; sent: number; delivered: number; read: number; failed: number; costPaise: number };
@@ -30,9 +30,17 @@ type Consent = {
     suppressed: number; withProof: number; proofPercent: number;
 };
 
+type Attribution = {
+    clickBookings: number; clickRevenue: number;
+    phoneBookings: number; phoneRevenue: number;
+    confirmedBookings: number; confirmedRevenue: number;
+    medianHoursToBook: number | null;
+};
+
 type Overview = {
     funnel: Funnel; trends: DailyPoint[]; cost: Cost;
     templates: TemplateStat[]; hours: HourStat[]; consent: Consent;
+    attribution: Attribution;
 };
 
 const RANGES = [7, 30, 90];
@@ -90,7 +98,7 @@ export function AnalyticsView() {
 
     if (!data) return null;
 
-    const { funnel, trends, cost, templates, hours, consent } = data;
+    const { funnel, trends, cost, templates, hours, consent, attribution } = data;
     const peakSent = Math.max(1, ...trends.map((point) => point.sent));
 
     const stages = [
@@ -98,6 +106,7 @@ export function AnalyticsView() {
         { label: 'Sent', value: funnel.sent },
         { label: 'Delivered', value: funnel.delivered },
         { label: 'Read', value: funnel.read },
+        { label: 'Clicked', value: funnel.clicked },
         { label: 'Replied', value: funnel.replied },
     ];
     const widest = Math.max(1, ...stages.map((stage) => stage.value));
@@ -166,15 +175,56 @@ export function AnalyticsView() {
                     ))}
                 </div>
 
-                <div className="mt-4 grid grid-cols-2 gap-3 border-t border-gray-100 pt-3 sm:grid-cols-4">
+                <div className="mt-4 grid grid-cols-2 gap-3 border-t border-gray-100 pt-3 sm:grid-cols-5">
                     <Stat label="Delivery rate" value={percent(funnel.deliveryRate)} />
                     <Stat label="Read rate" value={percent(funnel.readRate)} />
+                    <Stat label="Click rate" value={percent(funnel.clickRate)} />
                     <Stat
                         label="Opt-out rate"
                         value={percent(funnel.optOutRate)}
                         warn={funnel.optOutRate > 0.03}
                     />
                     <Stat label="Failed" value={funnel.failed.toLocaleString('en-IN')} warn={funnel.failed > 0} />
+                </div>
+            </section>
+
+            <section className="rounded-lg border border-gray-200 bg-white p-4">
+                <h2 className="text-sm font-semibold text-gray-900">Bookings from WhatsApp</h2>
+
+                <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    <Stat label="Attributed bookings" value={attribution.confirmedBookings.toLocaleString('en-IN')} />
+                    <Stat label="Attributed revenue" value={formatCurrency(attribution.confirmedRevenue)} />
+                    <Stat
+                        label="Median time to book"
+                        value={attribution.medianHoursToBook === null ? '—' : `${attribution.medianHoursToBook}h`}
+                    />
+                    <Stat
+                        label="Cost per booking"
+                        value={
+                            attribution.confirmedBookings
+                                ? formatCurrency(Math.round(cost.totalPaise / attribution.confirmedBookings))
+                                : '—'
+                        }
+                    />
+                </div>
+
+                {/*
+                  The assisted tier is shown below a divider and labelled, never
+                  folded into the headline figures above. It is a real signal —
+                  it catches the guest who read on their phone and booked on a
+                  laptop — but it is an inference, and a hotel setting a budget
+                  should be able to see which half of the number is which.
+                */}
+                <div className="mt-4 border-t border-gray-100 pt-3">
+                    <p className="text-xs text-gray-500">
+                        <span className="font-medium text-gray-700">
+                            Plus {attribution.phoneBookings.toLocaleString('en-IN')} assisted
+                            {' '}({formatCurrency(attribution.phoneRevenue)})
+                        </span>
+                        {' — '}
+                        guests who were messaged and then booked on a matching number without
+                        following the link. Inferred, not tracked. Not included above.
+                    </p>
                 </div>
             </section>
 

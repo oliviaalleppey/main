@@ -3,7 +3,8 @@ import { db } from '@/lib/db';
 import { waCampaigns, waMessages, waContacts, waTemplates, waAudiences, guestProfiles } from '@/lib/db/schema';
 import { and, eq, sql } from 'drizzle-orm';
 import { buildFilterClause, eligibilityClause, type AudienceFilter } from './audiences';
-import { isRePermissionTemplate } from './template-lint';
+import { isRePermissionTemplate, parseComponents, dynamicUrlButtonIndex } from './template-lint';
+import { generateToken } from './attribution';
 import { getSettings } from './settings';
 import { estimateCostPaise, PRICE_PAISE } from './types';
 
@@ -199,6 +200,13 @@ export async function buildCampaignQueue(campaignId: string): Promise<BuildResul
     const staticValues = (campaign.staticVariables ?? {}) as Record<string, string>;
     const variableCount = template.variableCount ?? 0;
 
+    // Click tokens are minted here, one per recipient, and only when the template
+    // actually carries a dynamic URL button. Minting them at queue build rather
+    // than at send time means the token exists before the message goes out, so a
+    // click that arrives while the dispatcher is still working still resolves.
+    const parsed = parseComponents(template.components ?? []);
+    const trackClicks = dynamicUrlButtonIndex(parsed.buttons) !== null;
+
     let queued = 0;
     const CHUNK = 500;
 
@@ -234,6 +242,7 @@ export async function buildCampaignQueue(campaignId: string): Promise<BuildResul
                 status: 'queued' as const,
                 idempotencyKey: idempotencyKey(campaignId, contact.id, template.id),
                 variables,
+                clickToken: trackClicks ? generateToken() : null,
                 cost: PRICE_PAISE[template.category] ?? PRICE_PAISE.MARKETING,
                 pricingCategory: template.category,
             };

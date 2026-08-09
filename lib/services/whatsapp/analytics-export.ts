@@ -82,7 +82,7 @@ export function analyticsFilename(overview: AnalyticsOverview): string {
 }
 
 export function buildAnalyticsWorkbook(overview: AnalyticsOverview): Buffer {
-    const { range, funnel, trends, cost, templates, hours, consent } = overview;
+    const { range, funnel, trends, cost, templates, hours, consent, attribution } = overview;
     const book = XLSX.utils.book_new();
 
     // --- Summary -----------------------------------------------------------
@@ -94,13 +94,23 @@ export function buildAnalyticsWorkbook(overview: AnalyticsOverview): Buffer {
         ['Sent', funnel.sent],
         ['Delivered', funnel.delivered],
         ['Read', funnel.read],
+        ['Clicked', funnel.clicked, 'Distinct messages whose link was opened by a human. Link-preview fetches are excluded.'],
         ['Replied', funnel.replied],
         ['Failed', funnel.failed],
         ['Skipped', funnel.skipped, 'Blocked by the consent gate at send time, not an error'],
         ['Opted out', funnel.optedOut],
         ['Delivery rate', funnel.deliveryRate, 'delivered / sent'],
         ['Read rate', funnel.readRate, 'read / delivered'],
+        ['Click rate', funnel.clickRate, 'clicked / delivered — not over read, because read receipts are opt-in and undercount'],
         ['Opt-out rate', funnel.optOutRate, 'opted out / delivered'],
+        ['', ''],
+        ['Attributed bookings', attribution.confirmedBookings,
+            'Guests who followed a campaign link and then booked. Deterministic.'],
+        ['Attributed revenue', rupees(attribution.confirmedRevenue), 'Booking value at the time of attribution'],
+        ['Assisted bookings', attribution.phoneBookings,
+            'Messaged, did not click, booked on a matching number inside the window. An inference — do not add this to the line above without saying so.'],
+        ['Assisted revenue', rupees(attribution.phoneRevenue), 'Same caveat as assisted bookings'],
+        ['Median hours to book', attribution.medianHoursToBook ?? 0, 'From click to booking'],
         ['', ''],
         ['Total spend', rupees(cost.totalPaise)],
         ['  Marketing', rupees(cost.marketingPaise)],
@@ -121,9 +131,13 @@ export function buildAnalyticsWorkbook(overview: AnalyticsOverview): Buffer {
     ]);
 
     // Stamp formats on the summary's value column, which is mixed by nature.
-    const moneyRows = ['Total spend', '  Marketing', '  Utility', 'Cost per delivered', 'Cost per read', 'Month to date', 'Monthly budget'];
-    const percentRows = ['Delivery rate', 'Read rate', 'Opt-out rate', 'Budget used', 'Consent proof'];
-    for (let r = 1; r <= 40; r++) {
+    const moneyRows = ['Total spend', '  Marketing', '  Utility', 'Cost per delivered', 'Cost per read', 'Month to date', 'Monthly budget', 'Attributed revenue', 'Assisted revenue'];
+    const percentRows = ['Delivery rate', 'Read rate', 'Click rate', 'Opt-out rate', 'Budget used', 'Consent proof'];
+    // Bounded by the sheet's real extent rather than a fixed number: a hard-coded
+    // limit silently stops formatting the rows added past it, and an unformatted
+    // rupee figure in a money column reads as paise.
+    const summaryRows = XLSX.utils.decode_range(summary['!ref'] as string).e.r;
+    for (let r = 1; r <= summaryRows; r++) {
         const label = (summary[XLSX.utils.encode_cell({ c: 0, r })] as XLSX.CellObject | undefined)?.v;
         const cell = summary[XLSX.utils.encode_cell({ c: 1, r })] as XLSX.CellObject | undefined;
         if (!cell || cell.t !== 'n' || typeof label !== 'string') continue;

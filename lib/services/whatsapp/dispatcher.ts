@@ -5,8 +5,10 @@ import { getProvider } from './index';
 import { canSend, incrementMarketingCounters, type MessageCategory } from './consent';
 import { getSettings, isWithinQuietHours, quietHoursEndAt, setEnabled } from './settings';
 import { evaluateStopRules, haltCampaign, refreshCampaignCounters } from './campaigns';
-import { renderTemplateText, isRePermissionTemplate } from './template-lint';
-import { classifyError, WhatsAppError } from './types';
+import {
+    renderTemplateText, isRePermissionTemplate, parseComponents, dynamicUrlButtonIndex,
+} from './template-lint';
+import { classifyError, WhatsAppError, type TemplateComponent } from './types';
 
 /**
  * The queue worker.
@@ -64,6 +66,8 @@ type ClaimedRow = {
     templateCategory: string | null;
     templateStatus: string | null;
     templateBody: string | null;
+    clickToken: string | null;
+    templateComponents: unknown[] | null;
 };
 
 /**
@@ -105,6 +109,7 @@ async function claimBatch(limit: number): Promise<ClaimedRow[]> {
             msg.variables                AS "variables",
             msg.attempts                 AS "attempts",
             msg.cost                     AS "cost",
+            msg.click_token              AS "clickToken",
             (SELECT phone              FROM wa_contacts WHERE id = msg.contact_id)  AS "phone",
             (SELECT consent_status::text FROM wa_contacts WHERE id = msg.contact_id) AS "consentStatus",
             (SELECT consent_at         FROM wa_contacts WHERE id = msg.contact_id)  AS "consentAt",
@@ -114,7 +119,8 @@ async function claimBatch(limit: number): Promise<ClaimedRow[]> {
             (SELECT language           FROM wa_templates WHERE id = msg.template_id) AS "templateLanguage",
             (SELECT category::text     FROM wa_templates WHERE id = msg.template_id) AS "templateCategory",
             (SELECT status::text       FROM wa_templates WHERE id = msg.template_id) AS "templateStatus",
-            (SELECT body_text          FROM wa_templates WHERE id = msg.template_id) AS "templateBody"
+            (SELECT body_text          FROM wa_templates WHERE id = msg.template_id) AS "templateBody",
+            (SELECT components         FROM wa_templates WHERE id = msg.template_id) AS "templateComponents"
     `);
 
     return result.rows as ClaimedRow[];
@@ -255,14 +261,37 @@ export async function dispatch(options: { limit?: number } = {}): Promise<Dispat
             .sort((a, b) => Number(a) - Number(b))
             .map((key) => variables[key]);
 
+        const components: TemplateComponent[] = [];
+        if (orderedValues.length) {
+            components.push({
+                type: 'body',
+                parameters: orderedValues.map((text) => ({ type: 'text', text })),
+            });
+        }
+
+        // The click token rides in the template's dynamic URL button. Both
+        // conditions have to hold: the message must carry a token, and the
+        // template must actually have a dynamic button to put it in. Sending a
+        // button parameter for a static button is not ignored — Meta rejects the
+        // whole message — so this is an AND, never an assumption either way.
+        const buttonIndex = message.clickToken
+            ? dynamicUrlButtonIndex(parseComponents(message.templateComponents ?? []).buttons)
+            : null;
+        if (message.clickToken && buttonIndex !== null) {
+            components.push({
+                type: 'button',
+                sub_type: 'url',
+                index: String(buttonIndex),
+                parameters: [{ type: 'text', text: message.clickToken }],
+            });
+        }
+
         try {
             const sendResult = await provider.sendTemplate({
                 to: message.phone,
                 templateName: message.templateName!,
                 language: message.templateLanguage ?? 'en',
-                components: orderedValues.length
-                    ? [{ type: 'body', parameters: orderedValues.map((text) => ({ type: 'text', text })) }]
-                    : undefined,
+                components: components.length ? components : undefined,
             });
 
             await db

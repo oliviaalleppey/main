@@ -30,6 +30,32 @@ export const RE_PERMISSION_TEMPLATES = (
     .map((name) => name.trim().toLowerCase())
     .filter(Boolean);
 
+/**
+ * Which button carries the click token, by position among the template's buttons.
+ *
+ * Meta indexes button parameters by their position in the registered template,
+ * so this is read off the buttons rather than assumed to be 0 — every marketing
+ * template gets an auto-added opt-out button, which is very often button 0.
+ *
+ * Returns null when there is no dynamic URL button, and the dispatcher then
+ * sends no button component at all. Sending a parameter for a button that is
+ * static is not harmlessly ignored: Meta rejects the whole message.
+ *
+ * It lives in this file rather than with the rest of attribution because this
+ * file imports nothing, so the campaign wizard can call it in the browser to
+ * decide whether to offer the link-destination fields. attribution.ts imports
+ * the database, and pulling that into a client bundle is not an option.
+ */
+export function dynamicUrlButtonIndex(
+    buttons: { type?: string; url?: string }[] | null | undefined,
+): number | null {
+    if (!buttons?.length) return null;
+    const index = buttons.findIndex(
+        (button) => button?.type === 'URL' && /\{\{\s*1\s*\}\}/.test(button.url ?? ''),
+    );
+    return index === -1 ? null : index;
+}
+
 export function isRePermissionTemplate(templateName: string | null | undefined): boolean {
     if (!templateName) return false;
     return RE_PERMISSION_TEMPLATES.includes(templateName.trim().toLowerCase());
