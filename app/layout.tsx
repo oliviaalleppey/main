@@ -8,6 +8,7 @@ import { getColorPalette } from "@/lib/db/actions/settings-actions";
 import { Toaster } from "sonner";
 import JsonLd from "@/components/seo/json-ld";
 import GoogleAnalytics from "@/components/analytics/google-analytics";
+import MetaPixel from "@/components/analytics/meta-pixel";
 import { hotelSchema, websiteSchema } from "@/lib/structured-data";
 import { BRAND, SITE_URL } from "@/lib/seo";
 
@@ -134,6 +135,7 @@ export default async function RootLayout({
       <body className="font-sans subpixel-antialiased" suppressHydrationWarning>
         <JsonLd data={[hotelSchema(), websiteSchema()]} />
         <GoogleAnalytics />
+        <MetaPixel />
         <SessionProvider session={session}>
           <FrontendLayout>
             {children}
