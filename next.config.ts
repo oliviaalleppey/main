@@ -18,6 +18,10 @@ const nextConfig: NextConfig = {
       { source: '/accommodation', destination: '/rooms', permanent: true },
       { source: '/policies', destination: '/refund-policy', permanent: true },
       { source: '/book', destination: '/book/search', permanent: false },
+      // The printed menu is handed out as oliviaalleppey.com/menu (QR codes,
+      // WhatsApp replies), but only /menu.pdf existed, so the short form 404'd.
+      // Temporary so we can later swap it for a real HTML page at /menu.
+      { source: '/menu', destination: '/menu.pdf', permanent: false },
     ];
   },
   images: {

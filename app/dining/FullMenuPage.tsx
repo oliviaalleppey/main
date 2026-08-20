@@ -180,7 +180,7 @@ export default function FullMenuPage({ outletName, outletTagline, hours }: Props
                     <div className="max-w-5xl mx-auto px-5 md:px-10">
                         <div className="flex">
                             {([
-                                { key: 'breakfast', label: 'Breakfast', sub: '7:00 – 10:00 am' },
+                                { key: 'breakfast', label: 'Breakfast', sub: '7:00 – 10:30 am' },
                                 { key: 'lunch-dinner', label: 'Lunch & Dinner', sub: '12:30 – 3 pm · 7 – 10:30 pm' },
                                 { key: 'beverages', label: 'Beverages', sub: 'All Day' },
                             ] as { key: Tab; label: string; sub: string }[]).map(tab => (
