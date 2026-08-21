@@ -126,8 +126,8 @@ const BEVERAGES: MenuSection[] = [
     {
         title: 'Coffee',
         items: [
-            { name: 'Cappuccino', price: 190 },
-            { name: 'Cafe Latte', price: 190 },
+            { name: 'Cappuccino', price: 245 },
+            { name: 'Cafe Latte', price: 245 },
             { name: 'Espresso', desc: 'Single Shot / Double Shot', price: '150 / 190' },
             { name: 'Caffè Macchiato', price: 190 },
             { name: 'Caffè Americano', price: 150 },
