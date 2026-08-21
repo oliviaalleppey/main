@@ -17,6 +17,11 @@ const nextConfig: NextConfig = {
       // crawlers see the permanent move rather than a 200 that bounces.
       { source: '/accommodation', destination: '/rooms', permanent: true },
       { source: '/policies', destination: '/refund-policy', permanent: true },
+      // /experiences was linked from the main nav, the footer and the homepage
+      // but never built, so every page carried links to a 404. /discover covers
+      // the same ground. Note fragments are client-side, so /experiences#yoga
+      // lands on /discover#yoga — those anchors do not exist there yet.
+      { source: '/experiences', destination: '/discover', permanent: true },
       { source: '/book', destination: '/book/search', permanent: false },
       // The printed menu is handed out as oliviaalleppey.com/menu (QR codes,
       // WhatsApp replies), but only /menu.pdf existed, so the short form 404'd.
