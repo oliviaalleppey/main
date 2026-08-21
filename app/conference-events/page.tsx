@@ -12,7 +12,7 @@ export const revalidate = 3600;
 export const metadata: Metadata = pageMetadata({
     title: 'Conference & Events Venues in Alappuzha',
     description:
-        'Host conferences, corporate events and celebrations at Olivia Alleppey. A 5,035 sq ft Grand Ballroom seating up to 550, divisible meeting rooms, a board room and a poolside venue in Alappuzha, Kerala.',
+        'Conference and event venues at Olivia Alleppey, Alappuzha, Kerala. A Grand Ballroom seating 550, divisible meeting rooms, a board room and a poolside venue.',
     path: '/conference-events',
 });
 

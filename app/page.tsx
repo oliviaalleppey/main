@@ -15,7 +15,7 @@ export const revalidate = 60;
 export const metadata: Metadata = pageMetadata({
   title: "Olivia Alleppey - Luxury 5-Star Hotel in Alappuzha, Kerala",
   description:
-    "Book your luxury stay at Olivia Alleppey, a 5-star backwater retreat at Finishing Point, Alappuzha. Lake-view rooms and suites, spa, fine dining and Kerala backwater experiences.",
+    "Book a luxury stay at Olivia Alleppey, a 5-star backwater retreat in Alappuzha, Kerala. Lake-view rooms and suites, spa, fine dining and backwater cruises.",
   path: "/",
 });
 

@@ -6,7 +6,7 @@ import { getMembershipImages } from '@/app/admin/media/actions';
 export const metadata = pageMetadata({
     title: 'The Olivia Lifestyle Membership',
     description:
-        'The Olivia Lifestyle Membership — year-round access to the pool, gym and spa, priority dining and banquet privileges, and member rates at Olivia Alleppey, Alappuzha.',
+        'The Olivia Lifestyle Membership — year-round pool, gym and spa access, priority dining and banquet privileges, and member rates in Alappuzha, Kerala.',
     path: '/membership',
 });
 

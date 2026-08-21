@@ -5,7 +5,7 @@ import { pageMetadata } from '@/lib/seo';
 export const metadata: Metadata = pageMetadata({
     title: 'Wedding Venues in Alappuzha, Kerala',
     description:
-        'Celebrate your wedding at Olivia Alleppey. Backwater-facing lawns, a 5,035 sq ft Grand Ballroom for up to 550 guests, bespoke catering and dedicated planning in Alappuzha, Kerala.',
+        'Wedding venues at Olivia Alleppey, Alappuzha. Backwater-facing lawns, a Grand Ballroom for 550 guests, bespoke catering and dedicated planning in Kerala.',
     path: '/wedding',
 });
 

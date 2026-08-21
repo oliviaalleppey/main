@@ -9,7 +9,7 @@ import { breadcrumbSchema, restaurantSchema } from '@/lib/structured-data';
 export const metadata: Metadata = pageMetadata({
     title: 'Finishing Point Restaurant Menu',
     description:
-        'The full à la carte menu at Finishing Point, the all-day dining restaurant at Olivia Alleppey, Alappuzha — Kerala favourites and global classics, 7:00 am to 11:00 pm.',
+        'The full à la carte menu at Finishing Point, the all-day restaurant at Olivia Alleppey, Alappuzha — Kerala favourites and global classics, 7am to 11pm.',
     path: '/dining/finishing-point',
 });
 

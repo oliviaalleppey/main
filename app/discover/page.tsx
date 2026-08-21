@@ -8,7 +8,7 @@ import DiscoverClient from './DiscoverClient';
 export const metadata = pageMetadata({
     title: 'Discover Alappuzha & Our Story',
     description:
-        'Discover Olivia Alleppey and the Kerala backwaters around it — our story, the property, and the houseboat cruises, beaches and heritage experiences that surround Finishing Point, Alappuzha.',
+        'Discover Olivia Alleppey and the Kerala backwaters — our story, the property, and the houseboat cruises, beaches and heritage around Alappuzha.',
     path: '/discover',
 });
 

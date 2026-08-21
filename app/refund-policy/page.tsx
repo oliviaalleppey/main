@@ -5,7 +5,7 @@ import { pageMetadata } from '@/lib/seo';
 export const metadata: Metadata = pageMetadata({
     title: 'Refund Policy',
     description:
-        'Read the Refund Policy for Olivia Alleppey, including refundable and non-refundable bookings, cancellation windows, no-shows, early departures, and refund timelines.',
+        'The Refund Policy for Olivia Alleppey — refundable and non-refundable bookings, cancellation windows, no-shows, early departures and refund timelines.',
     path: '/refund-policy',
 });
 

@@ -5,7 +5,7 @@ import { pageMetadata } from '@/lib/seo';
 export const metadata: Metadata = pageMetadata({
     title: 'Contact Us',
     description:
-        'Contact Olivia Alleppey at Finishing Point, Alappuzha, Kerala 688013. Call +91 8075 416 514 or email reservation@oliviaalleppey.com for reservations and enquiries.',
+        'Contact Olivia Alleppey at Finishing Point, Alappuzha, Kerala 688013. Call +91 8075 416 514 or email reservation@oliviaalleppey.com for reservations.',
     path: '/contact',
 });
 

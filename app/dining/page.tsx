@@ -6,7 +6,7 @@ import DiningClient from './DiningClient';
 export const metadata: Metadata = pageMetadata({
     title: 'Restaurants & Bars in Alappuzha',
     description:
-        'Dining at Olivia Alleppey — Finishing Point all-day dining, Kaayal, The Oak Room, Club 9, Aqua Pool Lounge, Brew Bar and 24-hour in-room dining, blending Kerala heritage with global flavours.',
+        'Restaurants and bars at Olivia Alleppey, Alappuzha — Finishing Point all-day dining, Kaayal, The Oak Room, Club 9 and 24-hour in-room dining in Kerala.',
     path: '/dining',
 });
 

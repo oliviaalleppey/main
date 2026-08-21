@@ -13,7 +13,7 @@ export const revalidate = 0;
 export const metadata: Metadata = pageMetadata({
     title: "Rooms & Suites",
     description:
-        "Explore luxury rooms and suites at Olivia Alleppey, Alappuzha. Lake-view and canal-view rooms, balcony suites and the Boat Race Suite, with premium amenities and direct-booking rates.",
+        "Luxury rooms and suites at Olivia Alleppey, Alappuzha. Lake-view and canal-view rooms, balcony suites and the Boat Race Suite, with direct-booking rates.",
     path: "/rooms",
 });
 

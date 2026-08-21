@@ -7,7 +7,7 @@ import GalleryClient from './GalleryClient';
 export const metadata = pageMetadata({
     title: 'Photo Gallery',
     description:
-        'Explore Olivia Alleppey through our curated gallery — rooms and suites, dining venues, the spa, pool and banquet spaces at our 5-star hotel in Alappuzha, Kerala.',
+        'Explore Olivia Alleppey in pictures — rooms and suites, dining venues, the spa, pool and banquet spaces at our 5-star hotel in Alappuzha, Kerala.',
     path: '/gallery',
 });
 
