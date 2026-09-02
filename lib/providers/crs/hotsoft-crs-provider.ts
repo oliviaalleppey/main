@@ -66,6 +66,27 @@ function priceRemainingNights(cells: NightlyCharge[], key: 'rate' | 'tax', heade
     });
 }
 
+/**
+ * The RatePlanId attribute for one room.
+ *
+ * Every room this hotel sells carries a rate plan, so the empty case is a data
+ * fault rather than a normal path. It used to fall back to 'EP' silently, which
+ * is both a different vocabulary from the `rp_<room>_standard` codes we send
+ * otherwise and the wrong meal plan for a property whose standard rate includes
+ * breakfast. The fallback is kept so a missing plan cannot fail the push, but it
+ * is no longer quiet about it.
+ */
+function resolveRatePlanAttribute(ratePlanId: string): string {
+    if (!ratePlanId) {
+        console.warn(
+            '[Hotsoft] Booking room has no rate plan; falling back to "EP". ' +
+            'This is a data fault — the room should carry a rate plan.'
+        );
+        return getHotsoftRatePlanId('EP');
+    }
+    return getHotsoftRatePlanId(ratePlanId);
+}
+
 /** The nightly figures for one room, but only if they cover the stay exactly. */
 function nightlyFigures(values: number[] | undefined, nights: number): number[] | null {
     if (!Array.isArray(values) || values.length !== nights) return null;
@@ -101,7 +122,7 @@ export function buildBookingRequestXml(request: CRSCreateReservationRequest): st
                 '@_Date': formatDateToHotsoft(currentDate.toISOString()),
                 '@_NoOfRooms': '1', // We assume 1 room per room block given the CRSCreateReservationRequest definition
                 '@_NoOfPax': (room.adults + room.children).toString(), // NoOfPax per room
-                '@_RatePlanId': getHotsoftRatePlanId(room.ratePlanId || 'EP'), // Default to European Plan if undefined
+                '@_RatePlanId': resolveRatePlanAttribute(room.ratePlanId),
                 '@_ChildPax': room.children.toString(),
             });
             charges.push({

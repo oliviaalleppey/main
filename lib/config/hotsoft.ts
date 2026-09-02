@@ -47,7 +47,26 @@ export function getHotsoftRoomId(internalSlugOrId: string): string {
 
 /**
  * Returns the Hotsoft Rate Plan Code for a given internal rate plan name or code.
+ *
+ * The table above is keyed by meal-plan names, and this hotel's rate plans are not
+ * named that way — they are one "Standard Rate" per room, coded
+ * `rp_<room-slug>_standard`. So every booking falls through and sends the internal
+ * code verbatim. Hotsoft accepts it (booking OL-3008-VBZA came back Confirmed and
+ * they quoted the field back to us unchanged), so the pass-through is left alone
+ * deliberately: changing what we send without their say-so risks breaking an
+ * integration that currently works.
+ *
+ * The fall-through is logged rather than silent, so that if it ever does start
+ * mattering there is a trail, instead of a wrong code discovered from a folio.
  */
 export function getHotsoftRatePlanId(internalRatePlan: string): string {
-    return HOTSOFT_RATE_PLAN_MAPPING[internalRatePlan] || internalRatePlan;
+    const mapped = HOTSOFT_RATE_PLAN_MAPPING[internalRatePlan];
+    if (!mapped) {
+        console.warn(
+            `[Hotsoft] Rate plan "${internalRatePlan}" has no entry in HOTSOFT_RATE_PLAN_MAPPING; ` +
+            `sending it through unchanged. Add a mapping once Hotsoft confirms the code they expect.`
+        );
+        return internalRatePlan;
+    }
+    return mapped;
 }
