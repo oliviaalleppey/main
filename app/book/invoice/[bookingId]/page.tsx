@@ -8,12 +8,23 @@ import { PrintButton } from '@/components/invoice/print-button';
 import { amountInWords, formatRoomName } from '@/lib/utils';
 
 // Hotel Details
+//
+// `name` is the legal entity registered to the GSTIN below, which is what a tax
+// invoice has to carry. components/footer.tsx and every page in
+// components/legal/ tie that GSTIN to Olivia Hospitalities Private Limited; this
+// invoice was the only place saying "Olivia International", a different name
+// against the same registration. The brand is kept as a trading name.
+//
+// The first landline was also a digit short: 477225088 against the 4772250888
+// published everywhere else.
 const HOTEL_DETAILS = {
-    name: 'Olivia International',
+    name: 'Olivia Hospitalities Private Limited',
+    tradeName: 'Olivia Alleppey',
     address: 'Finishing Point, Punnamada, Alappuzha, Kerala - 688013, India',
-    phone: '+91/0 477225088, +91/0 4772250800, +91 8075 416 514',
+    phone: '+91/0 4772250888, +91/0 4772250800, +91 8075 416 514',
     email: 'reservation@oliviaalleppey.com',
-    gstin: '32AABCO1416E1Z6'
+    gstin: '32AABCO1416E1Z6',
+    cin: 'U55101KL2007PTC020204',
 };
 
 export default async function InvoicePage({ params }: { params: Promise<{ bookingId: string }> }) {
@@ -93,10 +104,12 @@ export default async function InvoicePage({ params }: { params: Promise<{ bookin
                     <div>
                         <h1 className="text-2xl font-bold text-[#4A235A] uppercase">{HOTEL_DETAILS.name}</h1>
                         <p className="whitespace-pre-line text-xs leading-relaxed">
+                            (Trading as {HOTEL_DETAILS.tradeName})<br />
                             {HOTEL_DETAILS.address}<br />
                             PH: {HOTEL_DETAILS.phone}<br />
                             {HOTEL_DETAILS.email}<br />
-                            <strong>GSTNO: {HOTEL_DETAILS.gstin}</strong>
+                            <strong>GSTNO: {HOTEL_DETAILS.gstin}</strong><br />
+                            CIN: {HOTEL_DETAILS.cin}
                         </p>
                     </div>
                     <div className="text-right">
