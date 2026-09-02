@@ -1,10 +1,11 @@
 
 import { db } from '@/lib/db';
-import { bookings, bookingConfirmations, bookingItems } from '@/lib/db/schema';
+import { bookings, bookingConfirmations, bookingItems, bookingAddOns } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+import { groupTaxByRate, splitStayIntoNightlyCharges } from '@/lib/services/tax';
 import { notFound } from 'next/navigation';
 import { PrintButton } from '@/components/invoice/print-button';
-import { formatRoomName } from '@/lib/utils';
+import { amountInWords, formatRoomName } from '@/lib/utils';
 
 // Hotel Details
 const HOTEL_DETAILS = {
@@ -49,6 +50,35 @@ export default async function InvoicePage({ params }: { params: Promise<{ bookin
     const totalTax = (booking.taxAmount || 0) / 100;
     const cgst = totalTax / 2;
     const sgst = totalTax / 2;
+
+    // A tax invoice has to show the rate, and one booking can carry more than one:
+    // the ₹7,500 slab is per room per night, and add-ons are always 18%. So the tax
+    // is broken back out per rate rather than shown as a single figure.
+    const addOns = await db.query.bookingAddOns.findMany({
+        where: eq(bookingAddOns.bookingId, booking.id),
+    });
+    const addOnSubtotal = addOns.reduce((sum, entry) => sum + (entry.subtotal || 0), 0);
+    const addOnTax = Math.round(addOnSubtotal * 0.18);
+
+    const stayNights = Math.max(
+        1,
+        Math.ceil(
+            (new Date(booking.checkOut as string).getTime() - new Date(booking.checkIn as string).getTime())
+            / (1000 * 60 * 60 * 24)
+        )
+    );
+    const taxRows = groupTaxByRate(
+        splitStayIntoNightlyCharges({
+            items: items.map((item) => ({
+                pricePerNight: item.pricePerNight,
+                subtotal: item.subtotal,
+                rooms: Math.max(1, item.quantity || 1),
+            })),
+            nights: stayNights,
+            roomTaxTotal: Math.max(0, (booking.taxAmount || 0) - addOnTax),
+        }),
+        [{ rate: 18, taxableValue: addOnSubtotal, tax: addOnTax }],
+    );
 
     const invoiceDate = booking.confirmedAt ? new Date(booking.confirmedAt).toLocaleDateString('en-IN') : new Date().toLocaleDateString('en-IN');
     const checkIn = new Date(booking.checkIn).toLocaleString('en-IN');
@@ -101,13 +131,17 @@ export default async function InvoicePage({ params }: { params: Promise<{ bookin
                 </div>
                 <div className="grid grid-cols-4 text-xs border-b border-gray-400 divide-x divide-gray-400">
                     <div className="p-1"><span className="text-blue-900 font-bold">Room Type :</span> {roomTypeLabel}</div>
-                    <div className="p-1"><span className="text-blue-900 font-bold">Resv No :</span> {booking.bookingNumber?.slice(0, 8)}</div>
+                    {/* Not truncated: OL-3008-VBZA was printing as "OL-3008-", which is
+                        not a reservation anyone can look up. */}
+                    <div className="p-1"><span className="text-blue-900 font-bold">Resv No :</span> {booking.bookingNumber}</div>
                     <div className="p-1 col-span-1"></div>
                     <div className="p-1"><span className="text-blue-900 font-bold">Invoice Date :</span> {invoiceDate}</div>
                 </div>
                 <div className="grid grid-cols-4 text-xs border-b border-gray-400 divide-x divide-gray-400">
                     <div className="p-1"><span className="text-blue-900 font-bold">Check-In :</span> {checkIn}</div>
-                    <div className="p-1"><span className="text-blue-900 font-bold">Tariff :</span> {(primaryItem?.pricePerNight || 0 / 100).toFixed(2)}</div>
+                    {/* `x || 0 / 100` parses as `x || (0/100)`, so this printed raw
+                        paise — a tariff of 10,499.00 came out as 1049900.00. */}
+                    <div className="p-1"><span className="text-blue-900 font-bold">Tariff :</span> {((primaryItem?.pricePerNight || 0) / 100).toFixed(2)}</div>
                     <div className="p-1 col-span-1"></div>
                     <div className="p-1"><span className="text-blue-900 font-bold">GRC No :</span> -</div>
                 </div>
@@ -135,14 +169,22 @@ export default async function InvoicePage({ params }: { params: Promise<{ bookin
                                 <div className="font-bold">
                                     Room Tariff [{roomTypeLabel}] x {totalRoomCount} room{totalRoomCount > 1 ? 's' : ''}
                                 </div>
-                                <div className="text-gray-500 mt-1">CGST</div>
-                                <div className="text-gray-500">SGST</div>
+                                {taxRows.map((row) => (
+                                    <div key={row.rate} className="text-gray-500 mt-1">
+                                        <div>CGST @ {row.rate / 2}% (on {(row.taxableValue / 100).toFixed(2)})</div>
+                                        <div>SGST @ {row.rate / 2}% (on {(row.taxableValue / 100).toFixed(2)})</div>
+                                    </div>
+                                ))}
                             </td>
                             <td className="p-2 border-r border-gray-400 text-center align-top">996311</td>
                             <td className="p-2 text-right align-top">
                                 <div className="font-bold">{taxableValue.toFixed(2)}</div>
-                                <div className="mt-1">{cgst.toFixed(2)}</div>
-                                <div>{sgst.toFixed(2)}</div>
+                                {taxRows.map((row) => (
+                                    <div key={row.rate} className="mt-1">
+                                        <div>{(row.tax / 200).toFixed(2)}</div>
+                                        <div>{(row.tax / 200).toFixed(2)}</div>
+                                    </div>
+                                ))}
                             </td>
                         </tr>
                     </tbody>
@@ -164,14 +206,14 @@ export default async function InvoicePage({ params }: { params: Promise<{ bookin
 
                 {/* Amount in words */}
                 <div className="p-2 text-xs border-t border-b border-gray-400 font-bold text-blue-900 bg-gray-100 print:bg-transparent">
-                    Amount in Words: Rupees {formatCurrency((grandTotal))} Only
+                    Amount in Words: {amountInWords(booking.totalAmount)} Only
                 </div>
 
                 {/* Settlement Info */}
                 <div className="grid grid-cols-2 text-xs border-b border-gray-400">
                     <div className="p-2 border-r border-gray-400">
                         <span className="font-bold text-blue-900">Settlement:</span>
-                        <div className="mt-1">Rayzorpay / Online Transfer</div>
+                        <div className="mt-1">Easebuzz / Online Transfer</div>
                     </div>
                     <div className="p-2 text-right">
                         <span className="font-bold text-blue-900">Company:</span>

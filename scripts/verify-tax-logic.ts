@@ -6,6 +6,8 @@ import {
     calculateRoomTax,
     calculateRoomTaxForNightlyRates,
     getRoomTaxRateForNightlyRate,
+    groupTaxByRate,
+    splitStayIntoNightlyCharges,
     GST_ACCOMMODATION_THRESHOLD_PAISE,
 } from '../lib/services/tax';
 
@@ -74,6 +76,39 @@ check(
     // 33_334 + 33_334 + 33_333 → 5% each, all below threshold
     Math.round(33_334 * 0.05) * 2 + Math.round(33_333 * 0.05)
 );
+
+console.log('\n--- invoice: tax grouped by rate (CGST/SGST are half each) ---');
+{
+    const twoNights = splitStayIntoNightlyCharges({
+        items: [{ pricePerNight: 1_049_900, subtotal: 2_099_800, rooms: 1 }],
+        nights: 2,
+        roomTaxTotal: 377_964,
+    });
+
+    const roomsOnly = groupTaxByRate(twoNights);
+    check('one rate band', roomsOnly.length, 1, String);
+    check('band is 18%', roomsOnly[0].rate, 18, (v) => `${v}%`);
+    check('taxable value', roomsOnly[0].taxableValue, 2_099_800);
+    check('tax', roomsOnly[0].tax, 377_964);
+    check('CGST is half', roomsOnly[0].tax / 2, 188_982);
+
+    // Add-ons are always 18%, so with an 18% room they merge into one band.
+    const withAddOn = groupTaxByRate(twoNights, [{ rate: 18, taxableValue: 100_000, tax: 18_000 }]);
+    check('still one band at 18%', withAddOn.length, 1, String);
+    check('add-on folded in', withAddOn[0].tax, 395_964);
+
+    // A 5% room plus an 18% add-on must itemise separately.
+    const cheapStay = splitStayIntoNightlyCharges({
+        items: [{ pricePerNight: 500_000, subtotal: 1_000_000, rooms: 1 }],
+        nights: 2,
+        roomTaxTotal: 50_000,
+    });
+    const mixed = groupTaxByRate(cheapStay, [{ rate: 18, taxableValue: 100_000, tax: 18_000 }]);
+    check('two rate bands', mixed.length, 2, String);
+    check('5% band tax', mixed[0].tax, 50_000);
+    check('18% band tax', mixed[1].tax, 18_000);
+    check('bands sum to the booking tax', mixed[0].tax + mixed[1].tax, 68_000);
+}
 
 console.log(failures === 0 ? '\nAll checks passed.' : `\n${failures} check(s) FAILED.`);
 process.exit(failures === 0 ? 0 : 1);

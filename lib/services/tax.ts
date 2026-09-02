@@ -168,6 +168,48 @@ export function splitStayIntoNightlyCharges(input: {
     });
 }
 
+/**
+ * Taxable value and tax, grouped by the GST rate that produced it.
+ *
+ * A tax invoice has to itemise per rate rather than per booking. One stay can
+ * straddle the ₹7,500 slab, and add-ons are taxed at 18% whatever the room cost,
+ * so a single combined figure hides which rate applied to what. CGST and SGST are
+ * always half each of the rate — 2.5 + 2.5 at 5%, 9 + 9 at 18% — so the caller
+ * halves these rather than being handed a third and fourth number to reconcile.
+ *
+ * `extra` covers anything taxed outside the room slabs, i.e. add-ons.
+ * Amounts in paise, in and out.
+ */
+export function groupTaxByRate(
+    charges: { nightlyRates: number[]; nightlyTaxes: number[] }[],
+    extra: { rate: number; taxableValue: number; tax: number }[] = []
+): { rate: number; taxableValue: number; tax: number }[] {
+    const buckets = new Map<number, { taxableValue: number; tax: number }>();
+
+    const add = (rate: number, taxableValue: number, tax: number) => {
+        const bucket = buckets.get(rate) ?? { taxableValue: 0, tax: 0 };
+        bucket.taxableValue += taxableValue;
+        bucket.tax += tax;
+        buckets.set(rate, bucket);
+    };
+
+    for (const room of charges) {
+        room.nightlyRates.forEach((nightly, index) => {
+            add(getRoomTaxRateForNightlyRate(nightly), nightly, room.nightlyTaxes[index] ?? 0);
+        });
+    }
+
+    for (const entry of extra) {
+        if (entry.taxableValue > 0 || entry.tax > 0) {
+            add(entry.rate, entry.taxableValue, entry.tax);
+        }
+    }
+
+    return [...buckets.entries()]
+        .map(([rate, bucket]) => ({ rate, ...bucket }))
+        .sort((a, b) => a.rate - b.rate);
+}
+
 /** Resolve the nightly rates for a stay and total the tax in one step. */
 export function calculateRoomTax(input: {
     nightlyRates?: number[] | null;
