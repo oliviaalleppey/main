@@ -6,11 +6,14 @@ import { mapCrsRoomTypeMatchesInternal } from '@/lib/config/crs';
 import { getBookingProvider } from '@/lib/providers/crs/factory';
 import type { CRSRatePlan } from '@/lib/providers/crs/types';
 import { ensureRoomTypeMinOccupancyColumn } from '@/lib/db/schema-guard';
+import { calculateRoomTaxForNightlyRates } from './tax';
 
 export interface SearchResult {
     roomType: typeof roomTypes.$inferSelect;
     price: number;
     totalPrice: number;
+    /** Per-room rate for each night of the stay. Drives the per-night tax slab. */
+    nightlyRates: number[];
     taxesAndFees: number;
     breakdown: { label: string; amount: number }[];
     available: boolean;
@@ -69,13 +72,14 @@ export async function getAvailableRoomsForSearch(
         // so the UI can explain the situation instead of looking like "0 rooms exist".
         return {
             rooms: allRoomTypes.map((type) => {
+                const nightlyRates = new Array(nights).fill(type.basePrice);
                 const totalPrice = type.basePrice * nights;
-                const taxRateDecimal = ((type as { taxRate?: number }).taxRate ?? 12) / 100;
                 return {
                     roomType: type,
                     price: type.basePrice,
                     totalPrice,
-                    taxesAndFees: Math.round(totalPrice * taxRateDecimal),
+                    nightlyRates,
+                    taxesAndFees: calculateRoomTaxForNightlyRates(nightlyRates),
                     breakdown: [],
                     available: false,
                     availableRooms: 0,
@@ -154,6 +158,7 @@ export async function getAvailableRoomsForSearch(
 
             // Calculate total price day-by-day honoring local overrides and seasonal rules
             let totalPrice = 0;
+            const nightlyRates: number[] = [];
             const current = new Date(checkIn);
             for (let i = 0; i < nights; i++) {
                 const dateStr = current.toISOString().split('T')[0];
@@ -173,20 +178,28 @@ export async function getAvailableRoomsForSearch(
                 }
 
                 // ADD the extra person surcharge explicitly.
-                totalPrice += (nightlyBase + extraPersonSurchargePerNight);
+                const nightlyRate = nightlyBase + extraPersonSurchargePerNight;
+                nightlyRates.push(nightlyRate);
+                totalPrice += nightlyRate;
 
                 current.setDate(current.getDate() + 1);
             }
 
+            // pricePerNight is a display average only — never a tax input, since
+            // averaging can land in a different slab than any night actually did.
             const pricePerNight = Math.round(totalPrice / nights);
-            const taxRateDecimal = ((type as { taxRate?: number }).taxRate ?? 12) / 100;
-            const taxes = Math.round(totalPrice * taxRateDecimal);
+            const taxes = calculateRoomTaxForNightlyRates(nightlyRates);
 
             // Construct local rate plans matching the CRSRatePlan interface, enriched with local DB flags
             const roomRatePlans = localRatePlans
                 .filter(rp => rp.roomTypeId === type.id)
                 .map(rp => {
-                    const rawPrice = Math.round(pricePerNight * ((rp.basePriceModifier ?? 100) / 100));
+                    const modifier = (rp.basePriceModifier ?? 100) / 100;
+                    // Apply the plan's modifier night by night so each night keeps its
+                    // own rate — and therefore its own slab — under the discount.
+                    const planNightlyRates = nightlyRates.map((rate) => Math.round(rate * modifier));
+                    const planStayTax = calculateRoomTaxForNightlyRates(planNightlyRates);
+                    const rawPrice = Math.round(pricePerNight * modifier);
                     const inclusions = [];
                     if (rp.includesBreakfast) inclusions.push('Breakfast included');
                     if (rp.includesAirportTransfer) inclusions.push('Airport Transfer');
@@ -201,7 +214,11 @@ export async function getAvailableRoomsForSearch(
                         id: rp.id,
                         name: rp.name,
                         amount: rawPrice,
-                        tax: Math.round(rawPrice * taxRateDecimal),
+                        // `tax` stays a per-night display figure; `stayTax` and
+                        // `nightlyRates` are what quotes and booking totals must use.
+                        tax: Math.round(planStayTax / nights),
+                        stayTax: planStayTax,
+                        nightlyRates: planNightlyRates,
                         currency: 'INR',
                         description: rp.description || '',
                         inclusions: inclusions,
@@ -240,6 +257,7 @@ export async function getAvailableRoomsForSearch(
                 roomType: type,
                 price: pricePerNight,
                 totalPrice,
+                nightlyRates,
                 taxesAndFees: taxes,
                 breakdown: [],
                 available: isAvailable,

@@ -2,6 +2,7 @@ import { db } from '../db';
 import { roomTypes, roomInventory, pricingRules, occupancyPricing, bookings, bookingItems, rooms } from '../db/schema';
 import { and, eq, gte, lte, sql, desc } from 'drizzle-orm';
 import { ensureRoomTypeMinOccupancyColumn } from '@/lib/db/schema-guard';
+import { getRoomTaxRateForNightlyRate } from './tax';
 
 export interface PricingContext {
     roomTypeId: string;
@@ -28,13 +29,10 @@ export interface PricingResult {
 
 /**
  * Extra bed / extra person GST slab based on room nightly price.
- * Rule:
- * - <= ₹7,499  → 5%
- * - >  ₹7,499  → 18%
+ * Same slab as the room itself — see lib/services/tax.ts for the thresholds.
  */
 export function getExtraPersonTaxRateForRoomPrice(roomPricePaise: number): number {
-    const roomPriceRupees = (roomPricePaise || 0) / 100;
-    return roomPriceRupees <= 7499 ? 5 : 18;
+    return getRoomTaxRateForNightlyRate(roomPricePaise || 0);
 }
 
 /**

@@ -23,6 +23,7 @@ import {
     applyDiscount, validateOfferCode, betterOf, normalizeCode,
     type QuoteBase, type DiscountedQuote,
 } from '@/lib/services/offers';
+import { calculateRoomTax } from '@/lib/services/tax';
 
 type SelectedAddOnInput = {
     addOnId: string;
@@ -37,6 +38,8 @@ type RoomSelectionInput = {
     quoteSnapshot?: {
         pricePerNight?: number;
         totalPrice?: number;
+        /** Per-room rate for each night. Authoritative input for the tax slab. */
+        nightlyRates?: number[];
         taxesAndFees?: number;
         externalRatePlanId?: string;
         capturedAt?: string;
@@ -47,6 +50,7 @@ type SessionCartData = {
     quoteSnapshot?: {
         pricePerNight?: number;
         totalPrice?: number;
+        nightlyRates?: number[];
         taxesAndFees?: number;
         capturedAt?: string;
     };
@@ -108,6 +112,16 @@ function sanitizeSelectedAddOns(value: unknown): SelectedAddOnInput[] {
         .filter((entry): entry is SelectedAddOnInput => entry !== null);
 }
 
+function sanitizeNightlyRates(value: unknown): number[] | undefined {
+    if (!Array.isArray(value) || value.length === 0) return undefined;
+
+    const rates = value
+        .map((entry) => (typeof entry === 'number' ? entry : Number.parseInt(String(entry), 10)))
+        .filter((entry) => Number.isFinite(entry) && entry >= 0);
+
+    return rates.length === value.length ? rates : undefined;
+}
+
 function sanitizeRoomCount(value: unknown): number {
     const parsed = typeof value === 'number'
         ? value
@@ -147,6 +161,7 @@ function sanitizeRoomSelections(value: unknown): RoomSelectionInput[] {
                 totalPrice: typeof (quote as { totalPrice?: unknown }).totalPrice === 'number'
                     ? (quote as { totalPrice: number }).totalPrice
                     : undefined,
+                nightlyRates: sanitizeNightlyRates((quote as { nightlyRates?: unknown }).nightlyRates),
                 taxesAndFees: typeof (quote as { taxesAndFees?: unknown }).taxesAndFees === 'number'
                     ? (quote as { taxesAndFees: number }).taxesAndFees
                     : undefined,
@@ -192,6 +207,7 @@ function normalizeQuoteSnapshotForQuantity(
     quoteSnapshot: RoomSelectionInput['quoteSnapshot'],
     previousQuantity: number,
     nextQuantity: number,
+    nights: number,
 ): RoomSelectionInput['quoteSnapshot'] {
     if (!quoteSnapshot) return undefined;
 
@@ -200,8 +216,18 @@ function normalizeQuoteSnapshotForQuantity(
     const scaledTotalPrice = typeof quoteSnapshot.totalPrice === 'number'
         ? Math.round((quoteSnapshot.totalPrice / safePrevious) * safeNext)
         : undefined;
+    // nightlyRates stays per-room; only the room count changes here. Recompute the
+    // tax rather than scaling it, so rounding stays per night rather than compounding.
     const scaledTaxesAndFees = typeof quoteSnapshot.taxesAndFees === 'number'
-        ? Math.round((quoteSnapshot.taxesAndFees / safePrevious) * safeNext)
+        ? calculateRoomTax({
+            nightlyRates: quoteSnapshot.nightlyRates,
+            pricePerNight: quoteSnapshot.pricePerNight,
+            totalPricePerRoom: typeof quoteSnapshot.totalPrice === 'number'
+                ? quoteSnapshot.totalPrice / safePrevious
+                : undefined,
+            nights,
+            quantity: safeNext,
+        })
         : undefined;
 
     return {
@@ -523,12 +549,16 @@ async function sessionMoney(sessionId: string): Promise<{ base: QuoteBase; promo
             ? Math.max(quoted, computed)
             : computed;
 
-        const taxRate = roomData.taxRate ?? 12;
-        const computedTaxes = Math.round(lineSubtotal * (taxRate / 100));
-        const quotedTaxes = selection.quoteSnapshot?.taxesAndFees;
-        const lineTaxes = typeof quotedTaxes === 'number' && quotedTaxes > 0
-            ? quotedTaxes
-            : computedTaxes;
+        // Always recompute tax from the nightly rates. A quoted tax figure cannot be
+        // trusted as a stay total — a per-night figure stored here is what caused
+        // multi-night stays to be taxed for a single night.
+        const lineTaxes = calculateRoomTax({
+            nightlyRates: selection.quoteSnapshot?.nightlyRates,
+            pricePerNight,
+            totalPricePerRoom: lineSubtotal / quantity,
+            nights,
+            quantity,
+        });
 
         roomSubtotal += lineSubtotal;
         roomTax += lineTaxes;
@@ -575,6 +605,7 @@ export async function startBookingSession(
     quoteSnapshot?: {
         pricePerNight: number;
         totalPrice: number;
+        nightlyRates?: number[];
         taxesAndFees: number;
         externalRatePlanId?: string;
     },
@@ -587,6 +618,9 @@ export async function startBookingSession(
         const checkOutDate = new Date(searchParams.checkOut);
         const checkInDateOnly = toDateOnlyString(checkInDate);
         const checkOutDateOnly = toDateOnlyString(checkOutDate);
+        const sessionNights = Math.max(1, Math.ceil(
+            (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)
+        ));
         const cookieStore = await cookies();
 
         let session = null as (typeof bookingSessions.$inferSelect | null);
@@ -665,11 +699,19 @@ export async function startBookingSession(
             (selection) => selection.roomTypeId !== roomType.id
         );
 
+        // totalPrice/taxesAndFees cover every room; nightlyRates stays per-room and
+        // is deliberately not scaled — quantity is applied when the tax is computed.
         const normalizedQuoteSnapshot = quoteSnapshot
             ? {
                 ...quoteSnapshot,
                 totalPrice: quoteSnapshot.totalPrice * safeRoomCount,
-                taxesAndFees: quoteSnapshot.taxesAndFees * safeRoomCount,
+                taxesAndFees: calculateRoomTax({
+                    nightlyRates: quoteSnapshot.nightlyRates,
+                    pricePerNight: quoteSnapshot.pricePerNight,
+                    totalPricePerRoom: quoteSnapshot.totalPrice,
+                    nights: sessionNights,
+                    quantity: safeRoomCount,
+                }),
                 capturedAt: new Date().toISOString(),
             }
             : undefined;
@@ -818,6 +860,10 @@ export async function updateSessionRoomSelectionQuantity(roomTypeId: string, qua
     }
 
     const nextQuantity = sanitizeRoomCount(quantity);
+    const sessionNights = Math.max(1, Math.ceil(
+        (new Date(toDateOnlyString(session.checkOut)).getTime()
+            - new Date(toDateOnlyString(session.checkIn)).getTime()) / (1000 * 60 * 60 * 24)
+    ));
     let didUpdate = false;
     const nextSelections = existingSelections.map((selection) => {
         if (selection.roomTypeId !== normalizedRoomTypeId) {
@@ -833,6 +879,7 @@ export async function updateSessionRoomSelectionQuantity(roomTypeId: string, qua
                 selection.quoteSnapshot,
                 previousQuantity,
                 nextQuantity,
+                sessionNights,
             ),
         };
     });
@@ -1023,6 +1070,9 @@ export async function updateSessionSearch(params: { checkIn: Date; checkOut: Dat
     }
 
     // Changing search params invalidates current room prices/availability, so we Auto-Requote
+    const nights = Math.max(1, Math.ceil(
+        (params.checkOut.getTime() - params.checkIn.getTime()) / (1000 * 60 * 60 * 24)
+    ));
     let autoRequoteSnapshot: any = undefined;
     let autoSelectRatePlanId: string | null = session.selectedRatePlanId;
     let autoSelectRoomTypeId: string | null = session.selectedRoomTypeId;
@@ -1047,10 +1097,19 @@ export async function updateSessionSearch(params: { checkIn: Date; checkOut: Dat
                     }
                     
                     if (matchedRatePlan) {
+                        const planNightlyRates = matchedRatePlan.nightlyRates
+                            ?? new Array(nights).fill(matchedRatePlan.amount);
                         autoRequoteSnapshot = {
                             pricePerNight: matchedRatePlan.amount,
-                            totalPrice: matchedRatePlan.amount,
-                            taxesAndFees: matchedRatePlan.tax || Math.round(matchedRatePlan.amount * ((matchedRoom.roomType.taxRate || 12) / 100)),
+                            // `amount` is per night, so the stay total is amount × nights.
+                            // Storing the per-night figure here understated multi-night stays.
+                            totalPrice: planNightlyRates.reduce((sum, rate) => sum + rate, 0),
+                            nightlyRates: planNightlyRates,
+                            taxesAndFees: calculateRoomTax({
+                                nightlyRates: planNightlyRates,
+                                pricePerNight: matchedRatePlan.amount,
+                                nights,
+                            }),
                             externalRatePlanId: matchedRatePlan.id,
                             capturedAt: new Date().toISOString()
                         };
@@ -1098,7 +1157,7 @@ export async function updateSessionRoom(
     roomTypeId: string, 
     quantity: number, 
     ratePlanId?: string,
-    quoteSnapshot?: { pricePerNight: number; totalPrice: number; taxesAndFees: number; externalRatePlanId?: string; }
+    quoteSnapshot?: { pricePerNight: number; totalPrice: number; nightlyRates?: number[]; taxesAndFees: number; externalRatePlanId?: string; }
 ) {
     const sessionId = (await cookies()).get('booking_session')?.value;
     if (!sessionId) {

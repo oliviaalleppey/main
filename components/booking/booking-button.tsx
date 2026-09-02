@@ -16,6 +16,7 @@ interface BookingButtonProps {
     quoteSnapshot?: {
         pricePerNight: number;
         totalPrice: number;
+        nightlyRates?: number[];
         taxesAndFees: number;
         externalRatePlanId?: string;
     };

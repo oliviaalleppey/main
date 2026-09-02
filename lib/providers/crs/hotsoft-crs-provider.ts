@@ -3,6 +3,7 @@ import { XMLBuilder, XMLParser } from 'fast-xml-parser';
 import { db } from '../../db';
 import { roomTypes } from '../../db/schema';
 import { eq } from 'drizzle-orm';
+import { spreadEvenly } from '../../services/tax';
 import type {
     BookingProvider,
     CRSAvailabilityRequest,
@@ -31,15 +32,137 @@ function formatDateTimeToHotsoft(dateString: string): string {
     return `${day}/${month}/${year} ${hours}:${minutes}`;
 }
 
+// We configure the builder to handle attributes, as Hotsoft makes heavy use of XML attributes
+const xmlBuilder = new XMLBuilder({
+    ignoreAttributes: false,
+    attributeNamePrefix: '@_',
+    format: true,
+});
+
+/** Paise to the rupees-and-paise string every money attribute in the payload uses. */
+function toAmountAttribute(paise: number): string {
+    return (paise / 100).toFixed(2);
+}
+
+/** One night of one room, priced the way Hotsoft wants its nightly lines. */
+type NightlyCharge = { rate: number | null; tax: number | null };
+
+/**
+ * Price the nights the caller left blank.
+ *
+ * booking-service supplies the per-night split; older callers and the test
+ * scripts don't. Rather than drop the attributes Hotsoft asked for, spread
+ * whatever the header total leaves over evenly across the unpriced nights, so
+ * the nightly lines still add back up to Amount and Taxes.
+ */
+function priceRemainingNights(cells: NightlyCharge[], key: 'rate' | 'tax', headerTotalPaise: number): void {
+    const unpriced = cells.filter((cell) => cell[key] === null);
+    if (!unpriced.length) return;
+
+    const alreadyPriced = cells.reduce((sum, cell) => sum + (cell[key] ?? 0), 0);
+    const share = spreadEvenly(Math.max(0, headerTotalPaise - alreadyPriced), unpriced.length);
+    unpriced.forEach((cell, index) => {
+        cell[key] = share[index];
+    });
+}
+
+/** The nightly figures for one room, but only if they cover the stay exactly. */
+function nightlyFigures(values: number[] | undefined, nights: number): number[] | null {
+    if (!Array.isArray(values) || values.length !== nights) return null;
+    return values.every((value) => Number.isFinite(value) && value >= 0) ? values : null;
+}
+
+/**
+ * Build the BookingRequest XML for a reservation.
+ *
+ * Exported so the payload can be inspected without touching the network —
+ * see scripts/verify-hotsoft-rates.ts.
+ */
+export function buildBookingRequestXml(request: CRSCreateReservationRequest): string {
+    // Build the <Rates> array: one node per room, per night.
+    const rates: any[] = [];
+    const charges: NightlyCharge[] = [];
+
+    for (const room of request.rooms) {
+        // Need to calculate how many nights. (Simplified assumption: booking is for total nights between checkIn/checkOut)
+        const checkIn = new Date(request.checkIn);
+        const checkOut = new Date(request.checkOut);
+        const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
+
+        const roomRates = nightlyFigures(room.nightlyRates, nights);
+        const roomTaxes = nightlyFigures(room.nightlyTaxes, nights);
+
+        for (let i = 0; i < nights; i++) {
+            const currentDate = new Date(checkIn);
+            currentDate.setDate(currentDate.getDate() + i);
+
+            rates.push({
+                '@_ID': getHotsoftRoomId(room.roomTypeId),
+                '@_Date': formatDateToHotsoft(currentDate.toISOString()),
+                '@_NoOfRooms': '1', // We assume 1 room per room block given the CRSCreateReservationRequest definition
+                '@_NoOfPax': (room.adults + room.children).toString(), // NoOfPax per room
+                '@_RatePlanId': getHotsoftRatePlanId(room.ratePlanId || 'EP'), // Default to European Plan if undefined
+                '@_ChildPax': room.children.toString(),
+            });
+            charges.push({
+                rate: roomRates ? Math.round(roomRates[i]) : null,
+                tax: roomTaxes ? Math.round(roomTaxes[i]) : null,
+            });
+        }
+    }
+
+    // Rate and Tax are per room, per night, and pre-tax on the Rate side — the
+    // same basis as Amount and Taxes in the header.
+    if (charges.length) {
+        priceRemainingNights(charges, 'rate', request.payment?.subtotal ?? 0);
+        priceRemainingNights(charges, 'tax', request.payment?.taxAmount ?? 0);
+        rates.forEach((node, index) => {
+            node['@_Rate'] = toAmountAttribute(charges[index].rate ?? 0);
+            node['@_Tax'] = toAmountAttribute(charges[index].tax ?? 0);
+        });
+    }
+
+    const xmlPayload = xmlBuilder.build({
+        BookingRequest: {
+            '@_xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+            '@_xmlns:xsd': 'http://www.w3.org/2001/XMLSchema',
+            '@_accessKey': HOTSOFT_CONFIG.appKey, // Following example from BookingRequest XML Documentation
+            GuestDetails: {
+                '@_Title': request.primaryGuest.title || '', // Can be extracted if added to DB, empty for now
+                '@_GuestName': `${request.primaryGuest.firstName} ${request.primaryGuest.lastName}`.trim(),
+                '@_EmailId': request.primaryGuest.email || '',
+                '@_MobileNo': request.primaryGuest.phone || '',
+            },
+            CheckinDetails: {
+                '@_CheckInDateTime': formatDateTimeToHotsoft(request.checkIn),
+                '@_CheckOutDateTime': formatDateTimeToHotsoft(request.checkOut),
+                '@_TotalPax': (request.rooms.reduce((sum, r) => sum + r.adults + r.children, 0)).toString(),
+                '@_Children': (request.rooms.reduce((sum, r) => sum + r.children, 0)).toString(),
+                '@_Amount': typeof request.payment?.subtotal === 'number' ? toAmountAttribute(request.payment.subtotal) : '0.00',
+                '@_Taxes': typeof request.payment?.taxAmount === 'number' ? toAmountAttribute(request.payment.taxAmount) : '0.00',
+                '@_TotalAmount': typeof request.payment?.amount === 'number' ? toAmountAttribute(request.payment.amount) : '0.00',
+            },
+            BookingDetails: {
+                '@_HotelID': HOTSOFT_CONFIG.hotelId,
+                '@_BookingNo': request.reservationRef,
+                '@_BookingDate': formatDateToHotsoft(new Date().toISOString()),
+                '@_BookedBy': `${request.primaryGuest.firstName} ${request.primaryGuest.lastName}`.trim(),
+                '@_OTA': 'Website',
+                '@_BookingStatus': 'Confirmed',
+                '@_AllInclusiveRates': 'Yes',
+                '@_Instructions': request.comments || '',
+            },
+            Rates: {
+                RoomType: rates
+            }
+        }
+    });
+
+    return `<?xml version="1.0" encoding="UTF-8"?>\n${xmlPayload}`;
+}
+
 export class HotsoftCrsProvider implements BookingProvider {
     readonly source = 'hotsoft_crs' as const;
-
-    // We configure the builder to handle attributes, as Hotsoft makes heavy use of XML attributes
-    private xmlBuilder = new XMLBuilder({
-        ignoreAttributes: false,
-        attributeNamePrefix: '@_',
-        format: true,
-    });
 
     private xmlParser = new XMLParser({
         ignoreAttributes: false,
@@ -79,7 +202,7 @@ export class HotsoftCrsProvider implements BookingProvider {
                 AvailType: '1',
             };
 
-            const xmlPayload = this.xmlBuilder.build({
+            const xmlPayload = xmlBuilder.build({
                 Hotsoft: {
                     Login: { AppKey: HOTSOFT_CONFIG.appKey },
                     HOTEL_DET: hotelDet
@@ -164,69 +287,7 @@ export class HotsoftCrsProvider implements BookingProvider {
             };
         }
 
-        const checkInDate = formatDateToHotsoft(request.checkIn);
-
-        // Build the <Rates> array
-        const rates: any[] = [];
-
-        for (const room of request.rooms) {
-            // Need to calculate how many nights. (Simplified assumption: booking is for total nights between checkIn/checkOut)
-            const checkIn = new Date(request.checkIn);
-            const checkOut = new Date(request.checkOut);
-            const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
-
-            for (let i = 0; i < nights; i++) {
-                const currentDate = new Date(checkIn);
-                currentDate.setDate(currentDate.getDate() + i);
-
-                rates.push({
-                    '@_ID': getHotsoftRoomId(room.roomTypeId),
-                    '@_Date': formatDateToHotsoft(currentDate.toISOString()),
-                    '@_NoOfRooms': '1', // We assume 1 room per room block given the CRSCreateReservationRequest definition
-                    '@_NoOfPax': (room.adults + room.children).toString(), // NoOfPax per room
-                    '@_RatePlanId': getHotsoftRatePlanId(room.ratePlanId || 'EP'), // Default to European Plan if undefined
-                    '@_ChildPax': room.children.toString(),
-                });
-            }
-        }
-
-        const xmlPayload = this.xmlBuilder.build({
-            BookingRequest: {
-                '@_xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-                '@_xmlns:xsd': 'http://www.w3.org/2001/XMLSchema',
-                '@_accessKey': HOTSOFT_CONFIG.appKey, // Following example from BookingRequest XML Documentation
-                GuestDetails: {
-                    '@_Title': request.primaryGuest.title || '', // Can be extracted if added to DB, empty for now
-                    '@_GuestName': `${request.primaryGuest.firstName} ${request.primaryGuest.lastName}`.trim(),
-                    '@_EmailId': request.primaryGuest.email || '',
-                    '@_MobileNo': request.primaryGuest.phone || '',
-                },
-                CheckinDetails: {
-                    '@_CheckInDateTime': formatDateTimeToHotsoft(request.checkIn),
-                    '@_CheckOutDateTime': formatDateTimeToHotsoft(request.checkOut),
-                    '@_TotalPax': (request.rooms.reduce((sum, r) => sum + r.adults + r.children, 0)).toString(),
-                    '@_Children': (request.rooms.reduce((sum, r) => sum + r.children, 0)).toString(),
-                    '@_Amount': typeof request.payment?.subtotal === 'number' ? (request.payment.subtotal / 100).toFixed(2) : '0.00',
-                    '@_Taxes': typeof request.payment?.taxAmount === 'number' ? (request.payment.taxAmount / 100).toFixed(2) : '0.00',
-                    '@_TotalAmount': typeof request.payment?.amount === 'number' ? (request.payment.amount / 100).toFixed(2) : '0.00',
-                },
-                BookingDetails: {
-                    '@_HotelID': HOTSOFT_CONFIG.hotelId,
-                    '@_BookingNo': request.reservationRef,
-                    '@_BookingDate': formatDateToHotsoft(new Date().toISOString()),
-                    '@_BookedBy': `${request.primaryGuest.firstName} ${request.primaryGuest.lastName}`.trim(),
-                    '@_OTA': 'Website',
-                    '@_BookingStatus': 'Confirmed',
-                    '@_AllInclusiveRates': 'Yes',
-                    '@_Instructions': request.comments || '',
-                },
-                Rates: {
-                    RoomType: rates
-                }
-            }
-        });
-
-        const fullXml = `<?xml version="1.0" encoding="UTF-8"?>\n${xmlPayload}`;
+        const fullXml = buildBookingRequestXml(request);
 
         try {
             console.log(`[Hotsoft] Pushing Reservation to ${HOTSOFT_CONFIG.bookingUrl}`);
@@ -312,7 +373,7 @@ export class HotsoftCrsProvider implements BookingProvider {
                 AvailType: '1',
             };
 
-            const xmlPayload = this.xmlBuilder.build({
+            const xmlPayload = xmlBuilder.build({
                 Hotsoft: {
                     Login: { AppKey: HOTSOFT_CONFIG.appKey },
                     HOTEL_DET: hotelDet
@@ -390,7 +451,7 @@ export class HotsoftCrsProvider implements BookingProvider {
             AvailType: '1',
         };
 
-        const xmlPayload = this.xmlBuilder.build({
+        const xmlPayload = xmlBuilder.build({
             Hotsoft: {
                 Login: { AppKey: HOTSOFT_CONFIG.appKey },
                 HOTEL_DET: hotelDet

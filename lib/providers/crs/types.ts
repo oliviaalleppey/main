@@ -16,8 +16,12 @@ export interface CRSAvailabilityRequest {
 export interface CRSRatePlan {
     id: string;
     name: string;
-    amount: number; // paise
-    tax: number; // paise
+    amount: number; // paise, per night
+    tax: number; // paise, per night — display only
+    /** Whole-stay tax, summed per night across its own slab. */
+    stayTax?: number; // paise
+    /** Per-room rate for each night under this plan. */
+    nightlyRates?: number[]; // paise
     currency: string;
     description?: string;
     inclusions?: string[];
@@ -51,6 +55,14 @@ export interface CRSCreateReservationRequest {
         adults: number;
         children: number;
         guestName: string;
+        /**
+         * Pre-tax tariff for this one room, night by night, in paise. One entry per
+         * night of the stay, in date order. Hotsoft prices its nightly lines from
+         * these, so they must sum to this room's share of the booking subtotal.
+         */
+        nightlyRates?: number[];
+        /** GST for this one room, night by night, in paise. Same length and order. */
+        nightlyTaxes?: number[];
     }[];
     primaryGuest: {
         title: string;

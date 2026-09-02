@@ -19,6 +19,7 @@ import { CheckoutStepper } from '@/components/booking/checkout-stepper';
 import { SearchStayEditor } from '@/components/booking/search-stay-editor';
 import { CheckoutRoomList } from '@/components/booking/checkout-room-list';
 import { getAvailableRoomsForSearch } from '@/lib/services/search';
+import { calculateRoomTax } from '@/lib/services/tax';
 import { updateSessionSearch, calculateSessionQuote } from '@/app/book/actions';
 import { PromoCodeField } from '@/components/booking/promo-code-field';
 import { GuestForm } from '@/components/booking/guest-form';
@@ -62,6 +63,8 @@ type GuestDetails = {
 type QuoteSnapshot = {
     pricePerNight?: number;
     totalPrice?: number;
+    /** Per-room rate for each night. Authoritative input for the tax slab. */
+    nightlyRates?: number[];
     taxesAndFees?: number;
     externalRatePlanId?: string;
     capturedAt?: string;
@@ -117,6 +120,11 @@ const sanitizeRoomSelections = (value: unknown): RoomSelection[] => {
                     : undefined,
                 totalPrice: typeof (quote as { totalPrice?: unknown }).totalPrice === 'number'
                     ? (quote as { totalPrice: number }).totalPrice
+                    : undefined,
+                nightlyRates: Array.isArray((quote as { nightlyRates?: unknown }).nightlyRates)
+                    ? ((quote as { nightlyRates: unknown[] }).nightlyRates.filter(
+                        (rate): rate is number => typeof rate === 'number' && Number.isFinite(rate) && rate >= 0
+                    ))
                     : undefined,
                 taxesAndFees: typeof (quote as { taxesAndFees?: unknown }).taxesAndFees === 'number'
                     ? (quote as { taxesAndFees: number }).taxesAndFees
@@ -214,12 +222,15 @@ export default async function CheckoutPage({
             const subtotal = typeof quotedSubtotal === 'number' && quotedSubtotal > 0
                 ? Math.max(quotedSubtotal, computedSubtotal)
                 : computedSubtotal;
-            const taxRate = (room as any).taxRate ?? 12;
-            const computedTaxes = Math.round(computedSubtotal * (taxRate / 100));
-            const quotedTaxes = selection.quoteSnapshot?.taxesAndFees;
-            const taxesAndFees = typeof quotedTaxes === 'number' && quotedTaxes > 0
-                ? quotedTaxes
-                : computedTaxes;
+            // Tax is summed night by night, each night on its own slab — never from a
+            // stored scalar, which may be a per-night figure or a stale rate.
+            const taxesAndFees = calculateRoomTax({
+                nightlyRates: selection.quoteSnapshot?.nightlyRates,
+                pricePerNight: quotedPricePerNight,
+                totalPricePerRoom: subtotal / quantity,
+                nights,
+                quantity,
+            });
 
             return {
                 room,

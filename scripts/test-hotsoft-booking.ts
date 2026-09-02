@@ -54,6 +54,9 @@ async function testBookingPush() {
                         '@_NoOfPax': '2',
                         '@_RatePlanId': 'EP',
                         '@_ChildPax': '0',
+                        // Per room, per night — one night here, so these match the header.
+                        '@_Rate': '4.24',
+                        '@_Tax': '0.76',
                     }
                 ]
             }

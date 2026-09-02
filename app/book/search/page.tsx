@@ -380,6 +380,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                                                         quoteSnapshot={{
                                                             pricePerNight: result.price,
                                                             totalPrice: result.totalPrice,
+                                                            nightlyRates: result.nightlyRates,
                                                             taxesAndFees: result.taxesAndFees,
                                                             externalRatePlanId: bestRatePlan?.id,
                                                         }}

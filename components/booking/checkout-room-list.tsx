@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react';
 import Image from 'next/image';
 import { formatRoomName } from '@/lib/utils';
 import { updateSessionRoom } from '@/app/book/actions';
+import { calculateRoomTaxForNightlyRates } from '@/lib/services/tax';
 import { Loader2, Check, User, Info, Tag } from 'lucide-react';
 
 interface CheckoutRoomListProps {
@@ -75,7 +76,11 @@ function CheckoutRoomCard({ result, isSelected }: { result: any, isSelected: boo
         : null;
 
     const basePrice = bestRatePlan ? bestRatePlan.amount / 100 : 0;
-    const taxes = bestRatePlan?.tax ? bestRatePlan.tax / 100 : basePrice * ((result.roomType.taxRate || 12) / 100);
+    const bestNightlyRates: number[] = (bestRatePlan as any)?.nightlyRates
+        ?? (result.nightlyRates?.length ? result.nightlyRates : [bestRatePlan?.amount ?? 0]);
+    const bestStayTax: number = (bestRatePlan as any)?.stayTax
+        ?? calculateRoomTaxForNightlyRates(bestNightlyRates);
+    const taxes = Math.round(bestStayTax / Math.max(1, bestNightlyRates.length)) / 100;
     const total = basePrice + taxes;
 
     return (
@@ -163,7 +168,12 @@ function CheckoutRoomCard({ result, isSelected }: { result: any, isSelected: boo
                         ) : (
                             result.ratePlans.map((plan: any) => {
                                 const pBase = plan.amount / 100;
-                                const pTaxes = plan.tax ? plan.tax / 100 : pBase * ((result.roomType.taxRate || 12) / 100);
+                                const planNightlyRates: number[] = plan.nightlyRates
+                                    ?? new Array(Math.max(1, result.nightlyRates?.length || 1)).fill(plan.amount);
+                                const planStayTax: number = plan.stayTax
+                                    ?? calculateRoomTaxForNightlyRates(planNightlyRates);
+                                // Displayed per night, matching the "/Night" label below.
+                                const pTaxes = Math.round(planStayTax / planNightlyRates.length) / 100;
                                 const pTotal = pBase + pTaxes;
 
                                 return (
@@ -210,8 +220,10 @@ function CheckoutRoomCard({ result, isSelected }: { result: any, isSelected: boo
                                             <button
                                                 onClick={() => handleSelect(plan.id, {
                                                     pricePerNight: plan.amount,
-                                                    totalPrice: plan.amount,
-                                                    taxesAndFees: plan.tax || Math.round(plan.amount * ((result.roomType.taxRate || 12) / 100)),
+                                                    // Stay total and stay tax — plan.amount/plan.tax are per night.
+                                                    totalPrice: planNightlyRates.reduce((sum: number, rate: number) => sum + rate, 0),
+                                                    nightlyRates: planNightlyRates,
+                                                    taxesAndFees: planStayTax,
                                                 })}
                                                 disabled={isPending || !result.bookable}
                                                 className={`mt-4 w-full lg:w-32 px-4 py-2.5 flex justify-center items-center text-sm font-semibold transition-all ${

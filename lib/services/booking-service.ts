@@ -19,7 +19,6 @@ import { SessionExpiration } from './session-expiration';
 import { BookingLockService } from './booking-lock';
 import { sendBookingConfirmation, sendBookingAlertToStaff } from './email';
 import { fireAutomation } from './whatsapp/automations';
-import { applyDiscount, validateOfferCode, redeemOffer, releaseOffer } from './offers';
 import { bookingStateMachine } from './booking-state-machine';
 import { eq, inArray } from 'drizzle-orm';
 import crypto from 'crypto';
@@ -29,6 +28,8 @@ import type { BookingProvider, CRSCreateReservationRequest } from '@/lib/provide
 import { resolveMaxChildren, validateGuestMixForRoomType } from './occupancy';
 import { ensureRoomTypeMinOccupancyColumn } from '@/lib/db/schema-guard';
 import { formatRoomName } from '@/lib/utils';
+import { calculateRoomTax, splitStayIntoNightlyCharges } from './tax';
+import { applyDiscount, validateOfferCode, redeemOffer, releaseOffer } from './offers';
 
 type CreateSessionInput = {
     checkIn: Date | string;
@@ -58,6 +59,7 @@ type SessionCartData = {
     quoteSnapshot?: {
         pricePerNight?: number;
         totalPrice?: number;
+        nightlyRates?: number[];
         taxesAndFees?: number;
         externalRatePlanId?: string;
         capturedAt?: string;
@@ -76,6 +78,7 @@ type SessionCartData = {
         quoteSnapshot?: {
             pricePerNight?: number;
             totalPrice?: number;
+            nightlyRates?: number[];
             taxesAndFees?: number;
             externalRatePlanId?: string;
             capturedAt?: string;
@@ -141,6 +144,7 @@ type NormalizedRoomSelection = {
     quoteSnapshot?: {
         pricePerNight?: number;
         totalPrice?: number;
+        nightlyRates?: number[];
         taxesAndFees?: number;
         externalRatePlanId?: string;
         capturedAt?: string;
@@ -176,6 +180,11 @@ function sanitizeRoomSelections(value: unknown): NormalizedRoomSelection[] {
                     : undefined,
                 totalPrice: typeof (quote as { totalPrice?: unknown }).totalPrice === 'number'
                     ? (quote as { totalPrice: number }).totalPrice
+                    : undefined,
+                nightlyRates: Array.isArray((quote as { nightlyRates?: unknown }).nightlyRates)
+                    ? ((quote as { nightlyRates: unknown[] }).nightlyRates.filter(
+                        (rate): rate is number => typeof rate === 'number' && Number.isFinite(rate) && rate >= 0
+                    ))
                     : undefined,
                 taxesAndFees: typeof (quote as { taxesAndFees?: unknown }).taxesAndFees === 'number'
                     ? (quote as { taxesAndFees: number }).taxesAndFees
@@ -653,17 +662,18 @@ export class BookingService {
             });
 
             const roomSubtotal = roomLineItems.reduce((sum, line) => sum + line.subtotal, 0);
+            // This is the figure that gets written to the booking, so it is recomputed
+            // from the nightly rates rather than trusting any stored tax scalar. Each
+            // night takes its own slab; a stay spanning the threshold is taxed correctly.
             const roomTaxAmount = roomLineItems.reduce((sum, line) => {
-                // If quoteSnapshot exists, subtotal already matches that quote; tax details are stored in quoteSnapshot when available.
-                // In checkout, we compute room tax from the room type taxRate if quote tax isn't present.
-                // Here, we mirror checkout by using stored selection.quoteSnapshot.taxesAndFees when present.
                 const selection = roomSelections.find((s) => s.roomTypeId === line.roomTypeId);
-                const quotedTaxes = selection?.quoteSnapshot?.taxesAndFees;
-                if (typeof quotedTaxes === 'number' && quotedTaxes > 0) return sum + quotedTaxes;
-
-                const roomType = roomTypeMap.get(line.roomTypeId)!;
-                const taxRate = (roomType as { taxRate?: number }).taxRate ?? 12;
-                return sum + Math.round(line.subtotal * (taxRate / 100));
+                return sum + calculateRoomTax({
+                    nightlyRates: selection?.quoteSnapshot?.nightlyRates,
+                    pricePerNight: line.pricePerNight,
+                    totalPricePerRoom: line.subtotal / line.quantity,
+                    nights,
+                    quantity: line.quantity,
+                });
             }, 0);
 
             // Add-ons are taxed separately at 18%.
@@ -852,7 +862,10 @@ export class BookingService {
         const booking = await db.query.bookings.findFirst({
             where: eq(bookings.id, bookingId),
             with: {
-                items: true
+                items: true,
+                // Needed to split the booking's tax back into its room and add-on
+                // halves when pricing the CRS payload's nightly lines.
+                addOns: true
             }
         });
 
@@ -957,6 +970,28 @@ export class BookingService {
             const adultsDistribution = distributeGuests(booking.adults || 1, totalRooms, 1);
             const childrenDistribution = distributeGuests(booking.children || 0, totalRooms, 0);
 
+            // The CRS prices every night of every room and reconciles those lines
+            // against the header totals, so hand it a split of what the booking
+            // actually carries. Add-on tax rides in the same column as room tax and
+            // has to come back out first — the nightly lines are rooms only.
+            const stayNights = Math.max(
+                1,
+                Math.ceil(
+                    (new Date(booking.checkOut as string).getTime() - new Date(booking.checkIn as string).getTime())
+                    / (1000 * 60 * 60 * 24)
+                )
+            );
+            const addOnSubtotal = (booking.addOns || []).reduce((sum, entry) => sum + (entry.subtotal || 0), 0);
+            const nightlyCharges = splitStayIntoNightlyCharges({
+                items: bookingRoomItems.map((item) => ({
+                    pricePerNight: item.pricePerNight,
+                    subtotal: item.subtotal,
+                    rooms: sanitizeRoomCount(item.quantity),
+                })),
+                nights: stayNights,
+                roomTaxTotal: Math.max(0, (booking.taxAmount || 0) - Math.round(addOnSubtotal * 0.18)),
+            });
+
             let roomCursor = 0;
             const reservationRooms: CRSCreateReservationRequest['rooms'] = [];
 
@@ -984,6 +1019,9 @@ export class BookingService {
                         adults: adultsDistribution[roomCursor] || 0,
                         children: childrenDistribution[roomCursor] || 0,
                         guestName: booking.guestName,
+                        // Same order the split was built in: items in order, rooms within an item in order.
+                        nightlyRates: nightlyCharges[roomCursor]?.nightlyRates,
+                        nightlyTaxes: nightlyCharges[roomCursor]?.nightlyTaxes,
                     });
                     roomCursor += 1;
                 }
