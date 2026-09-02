@@ -9,6 +9,7 @@
 import 'dotenv/config';
 import { XMLParser } from 'fast-xml-parser';
 import { buildBookingRequestXml } from '../lib/providers/crs/hotsoft-crs-provider';
+import { getHotsoftRatePlanId } from '../lib/config/hotsoft';
 import { splitStayIntoNightlyCharges } from '../lib/services/tax';
 import type { CRSCreateReservationRequest } from '../lib/providers/crs/types';
 
@@ -110,8 +111,8 @@ console.log('--- OL-3008-VBZA, exactly as Hotsoft asked for it back ---');
 
     const emitted = xml.split('<Rates>')[1].split('</Rates>')[0].trim().split('\n').map((line) => line.trim());
     const wanted = [
-        '<RoomType ID="91374" Date="31/08/2026" NoOfRooms="1" NoOfPax="1" RatePlanId="rp_lake-view-balcony_standard" ChildPax="0" Rate="10499.00" Tax="944.91"></RoomType>',
-        '<RoomType ID="91374" Date="01/09/2026" NoOfRooms="1" NoOfPax="1" RatePlanId="rp_lake-view-balcony_standard" ChildPax="0" Rate="10499.00" Tax="944.91"></RoomType>',
+        '<RoomType ID="91374" Date="31/08/2026" NoOfRooms="1" NoOfPax="1" RatePlanId="C" ChildPax="0" Rate="10499.00" Tax="944.91"></RoomType>',
+        '<RoomType ID="91374" Date="01/09/2026" NoOfRooms="1" NoOfPax="1" RatePlanId="C" ChildPax="0" Rate="10499.00" Tax="944.91"></RoomType>',
     ];
 
     check('two nightly lines', emitted.length, 2, String);
@@ -119,6 +120,23 @@ console.log('--- OL-3008-VBZA, exactly as Hotsoft asked for it back ---');
     checkText('night 2 matches their spec character for character', emitted[1], wanted[1]);
     check('rates sum to Amount', sumAttribute(xml, 'Rate'), 2_099_800);
     check('taxes sum to Taxes', sumAttribute(xml, 'Tax'), 188_982);
+}
+
+console.log('\n--- RatePlanId is the single letter Hotsoft asked for ---');
+{
+    // Datamate, 2026-09-02: "RatePlanId should be C for CP, A for AP, M for MAP
+    // and E for EP." Every Olivia rate includes breakfast, so all six rooms are C.
+    for (const plan of [
+        'rp_boat-race-suite_standard', 'rp_canal-view-king_standard',
+        'rp_canal-view-superior-family_standard', 'rp_lake-view-balcony_standard',
+        'rp_lake-view-balcony-suite_standard', 'rp_lake-view-twin_standard',
+    ]) {
+        checkText(`${plan} -> C`, getHotsoftRatePlanId(plan), 'C');
+    }
+    checkText('EP -> E', getHotsoftRatePlanId('EP'), 'E');
+    checkText('AP -> A', getHotsoftRatePlanId('AP'), 'A');
+    checkText('MAP -> M', getHotsoftRatePlanId('MAP'), 'M');
+    checkText('C stays C', getHotsoftRatePlanId('C'), 'C');
 }
 
 console.log('\n--- the same stay once the per-night GST fix ships ---');

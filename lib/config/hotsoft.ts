@@ -25,17 +25,44 @@ export const HOTSOFT_ROOM_MAPPING: Record<string, string> = {
     'lake-view-twin-room': '91376',
 };
 
-// Mapping from Olivia Internal Rate Plans to Hotsoft Rate Plan Codes
+/**
+ * Mapping from Olivia internal rate plans to Hotsoft rate plan codes.
+ *
+ * Hotsoft wants a SINGLE LETTER, confirmed by Datamate on 2026-09-02:
+ * "RatePlanId should be C for CP, A for AP, M for MAP and E for EP". The
+ * two-letter forms this table used to emit were wrong on both sides — they
+ * never matched our plan codes, and they were not what Hotsoft parses either.
+ *
+ * Olivia sells one plan per room, "Standard Rate", and every one of them
+ * includes breakfast — so all six map to C (Continental Plan). Manulal:
+ * "If the hotel supports only CP you can pass C as RatePlanId."
+ *
+ * A new room type needs a row here. Anything missing falls through and is
+ * logged by getHotsoftRatePlanId() rather than failing silently.
+ */
 export const HOTSOFT_RATE_PLAN_MAPPING: Record<string, string> = {
-    'American Plan': 'AP',
-    'Continental Plan': 'CP',
-    'European Plan': 'EP',
-    'Modified American': 'MAP',
-    // Fallbacks to standard codes based on DB naming conventions
-    'AP': 'AP',
-    'CP': 'CP',
-    'EP': 'EP',
-    'MAP': 'MAP',
+    // Olivia's rate plan codes, one per room type — all breakfast-inclusive.
+    'rp_boat-race-suite_standard': 'C',
+    'rp_canal-view-king_standard': 'C',
+    'rp_canal-view-superior-family_standard': 'C',
+    'rp_lake-view-balcony_standard': 'C',
+    'rp_lake-view-balcony-suite_standard': 'C',
+    'rp_lake-view-twin_standard': 'C',
+
+    // Meal-plan names and codes, in case a plan is ever named that way.
+    'American Plan': 'A',
+    'Continental Plan': 'C',
+    'European Plan': 'E',
+    'Modified American': 'M',
+    'AP': 'A',
+    'CP': 'C',
+    'EP': 'E',
+    'MAP': 'M',
+    // Already-correct single letters pass through unchanged.
+    'A': 'A',
+    'C': 'C',
+    'E': 'E',
+    'M': 'M',
 };
 
 /**
@@ -46,18 +73,11 @@ export function getHotsoftRoomId(internalSlugOrId: string): string {
 }
 
 /**
- * Returns the Hotsoft Rate Plan Code for a given internal rate plan name or code.
+ * Returns the Hotsoft rate plan code for a given internal rate plan name or code.
  *
- * The table above is keyed by meal-plan names, and this hotel's rate plans are not
- * named that way — they are one "Standard Rate" per room, coded
- * `rp_<room-slug>_standard`. So every booking falls through and sends the internal
- * code verbatim. Hotsoft accepts it (booking OL-3008-VBZA came back Confirmed and
- * they quoted the field back to us unchanged), so the pass-through is left alone
- * deliberately: changing what we send without their say-so risks breaking an
- * integration that currently works.
- *
- * The fall-through is logged rather than silent, so that if it ever does start
- * mattering there is a trail, instead of a wrong code discovered from a folio.
+ * A fall-through means Hotsoft gets a value it does not recognise, which is how
+ * `rp_lake-view-balcony_standard` reached them in the first place, so it is
+ * logged rather than silent.
  */
 export function getHotsoftRatePlanId(internalRatePlan: string): string {
     const mapped = HOTSOFT_RATE_PLAN_MAPPING[internalRatePlan];

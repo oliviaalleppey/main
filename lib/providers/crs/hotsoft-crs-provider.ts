@@ -70,19 +70,19 @@ function priceRemainingNights(cells: NightlyCharge[], key: 'rate' | 'tax', heade
  * The RatePlanId attribute for one room.
  *
  * Every room this hotel sells carries a rate plan, so the empty case is a data
- * fault rather than a normal path. It used to fall back to 'EP' silently, which
- * is both a different vocabulary from the `rp_<room>_standard` codes we send
- * otherwise and the wrong meal plan for a property whose standard rate includes
- * breakfast. The fallback is kept so a missing plan cannot fail the push, but it
- * is no longer quiet about it.
+ * fault rather than a normal path. The fallback is the property's own plan — CP,
+ * sent as 'C' — because every Olivia rate includes breakfast; the old 'EP'
+ * default would have told Hotsoft the stay was room-only and put the front desk
+ * in a position to bill a guest again for a breakfast they had already paid for.
+ * The fallback stays so a missing plan cannot fail the push, but it is not quiet.
  */
 function resolveRatePlanAttribute(ratePlanId: string): string {
     if (!ratePlanId) {
         console.warn(
-            '[Hotsoft] Booking room has no rate plan; falling back to "EP". ' +
+            '[Hotsoft] Booking room has no rate plan; falling back to "C" (CP). ' +
             'This is a data fault — the room should carry a rate plan.'
         );
-        return getHotsoftRatePlanId('EP');
+        return getHotsoftRatePlanId('CP');
     }
     return getHotsoftRatePlanId(ratePlanId);
 }
