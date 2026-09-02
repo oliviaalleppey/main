@@ -122,6 +122,35 @@ console.log('--- OL-3008-VBZA, exactly as Hotsoft asked for it back ---');
     check('taxes sum to Taxes', sumAttribute(xml, 'Tax'), 188_982);
 }
 
+console.log('\n--- dates and policy times do not depend on the server timezone ---');
+{
+    // check_in / check_out are DATE columns. Rendering them through Date and
+    // local getters moved the date a whole day west of UTC; it only looked right
+    // because Vercel runs UTC. Re-run the same build under several zones.
+    const request = reservation({
+        nights: 2,
+        items: [{ pricePerNight: 1_049_900, subtotal: 2_099_800, rooms: 1 }],
+        bookingTax: 377_964,
+    });
+    const dateOnly = { ...request, checkIn: '2026-08-31', checkOut: '2026-09-02' };
+
+    const originalTz = process.env.TZ;
+    const seen = new Set<string>();
+    for (const tz of ['UTC', 'Asia/Kolkata', 'America/Los_Angeles', 'Pacific/Kiritimati']) {
+        process.env.TZ = tz;
+        const xml = buildBookingRequestXml(dateOnly);
+        const checkin = /CheckInDateTime="([^"]+)"/.exec(xml)?.[1] ?? '';
+        const checkout = /CheckOutDateTime="([^"]+)"/.exec(xml)?.[1] ?? '';
+        const firstNight = nightlyLines(xml)[0].Date;
+        seen.add(`${checkin}|${checkout}|${firstNight}`);
+        checkText(`${tz.padEnd(20)} check-in`, checkin, '31/08/2026 14:00');
+        checkText(`${tz.padEnd(20)} check-out`, checkout, '02/09/2026 11:00');
+        checkText(`${tz.padEnd(20)} first night`, firstNight, '31/08/2026');
+    }
+    if (originalTz === undefined) delete process.env.TZ; else process.env.TZ = originalTz;
+    check('identical output in every timezone', seen.size, 1, String);
+}
+
 console.log('\n--- RatePlanId is the single letter Hotsoft asked for ---');
 {
     // Datamate, 2026-09-02: "RatePlanId should be C for CP, A for AP, M for MAP

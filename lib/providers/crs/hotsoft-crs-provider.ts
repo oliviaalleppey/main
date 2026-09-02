@@ -4,6 +4,7 @@ import { db } from '../../db';
 import { roomTypes } from '../../db/schema';
 import { eq } from 'drizzle-orm';
 import { spreadEvenly } from '../../services/tax';
+import { hotelToday } from '../../services/offers';
 import type {
     BookingProvider,
     CRSAvailabilityRequest,
@@ -12,24 +13,65 @@ import type {
     CRSReservationResponse,
 } from './types';
 
-// Format Date to dd/MM/yyyy
+/**
+ * The hotel's published check-in and check-out times — see lib/structured-data.ts
+ * and the room pages. Hotsoft wants wall-clock time at the property, so these are
+ * literal and never converted: Alappuzha is IST, and a stay beginning on the 31st
+ * begins on the 31st no matter where this code runs.
+ *
+ * These used to be rendered from the date value itself, which meant every guest
+ * was reported to the PMS as arriving and leaving at midnight.
+ */
+const HOTEL_CHECK_IN_TIME = '14:00';
+const HOTEL_CHECK_OUT_TIME = '11:00';
+
+/** The leading YYYY-MM-DD of a DATE column value or an ISO timestamp. */
+const DATE_ONLY = /^(\d{4})-(\d{2})-(\d{2})/;
+
+/**
+ * dd/MM/yyyy, without routing a date-only value through `Date`.
+ *
+ * `check_in` and `check_out` are DATE columns carrying no time at all. Parsing
+ * '2026-08-31' with `new Date()` gives UTC midnight, and reading it back with
+ * local getters shifts the date a full day anywhere west of UTC — Hotsoft would
+ * be told the guest arrives on the 30th. It only ever looked correct because
+ * Vercel happens to run in UTC. Falling back to UTC getters for anything that is
+ * not date-shaped keeps the same value everywhere.
+ */
 function formatDateToHotsoft(dateString: string): string {
+    const match = DATE_ONLY.exec(dateString);
+    if (match) {
+        const [, year, month, day] = match;
+        return `${day}/${month}/${year}`;
+    }
+
     const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    return `${day}/${month}/${date.getUTCFullYear()}`;
 }
 
-// Format DateTime to dd/MM/yyyy HH:mm
-function formatDateTimeToHotsoft(dateString: string): string {
-    const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${day}/${month}/${year} ${hours}:${minutes}`;
+/** dd/MM/yyyy HH:mm, with the hotel's own policy time rather than a parsed one. */
+function formatDateTimeToHotsoft(dateString: string, time: string): string {
+    return `${formatDateToHotsoft(dateString)} ${time}`;
+}
+
+/** The date `days` nights after a date-only value, as YYYY-MM-DD. */
+function addNights(dateString: string, days: number): string {
+    const match = DATE_ONLY.exec(dateString);
+    const base = match
+        ? Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
+        : new Date(dateString).getTime();
+    return new Date(base + days * 86_400_000).toISOString().slice(0, 10);
+}
+
+/** Whole nights between two date-only values, counted in UTC so no zone can skew it. */
+function nightsBetween(checkIn: string, checkOut: string): number {
+    const from = DATE_ONLY.exec(checkIn);
+    const to = DATE_ONLY.exec(checkOut);
+    const start = from ? Date.UTC(Number(from[1]), Number(from[2]) - 1, Number(from[3])) : new Date(checkIn).getTime();
+    const end = to ? Date.UTC(Number(to[1]), Number(to[2]) - 1, Number(to[3])) : new Date(checkOut).getTime();
+    return Math.ceil((end - start) / 86_400_000);
 }
 
 // We configure the builder to handle attributes, as Hotsoft makes heavy use of XML attributes
@@ -105,21 +147,16 @@ export function buildBookingRequestXml(request: CRSCreateReservationRequest): st
     const charges: NightlyCharge[] = [];
 
     for (const room of request.rooms) {
-        // Need to calculate how many nights. (Simplified assumption: booking is for total nights between checkIn/checkOut)
-        const checkIn = new Date(request.checkIn);
-        const checkOut = new Date(request.checkOut);
-        const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
+        // Nights between checkIn/checkOut, counted in whole days.
+        const nights = nightsBetween(request.checkIn, request.checkOut);
 
         const roomRates = nightlyFigures(room.nightlyRates, nights);
         const roomTaxes = nightlyFigures(room.nightlyTaxes, nights);
 
         for (let i = 0; i < nights; i++) {
-            const currentDate = new Date(checkIn);
-            currentDate.setDate(currentDate.getDate() + i);
-
             rates.push({
                 '@_ID': getHotsoftRoomId(room.roomTypeId),
-                '@_Date': formatDateToHotsoft(currentDate.toISOString()),
+                '@_Date': formatDateToHotsoft(addNights(request.checkIn, i)),
                 '@_NoOfRooms': '1', // We assume 1 room per room block given the CRSCreateReservationRequest definition
                 '@_NoOfPax': (room.adults + room.children).toString(), // NoOfPax per room
                 '@_RatePlanId': resolveRatePlanAttribute(room.ratePlanId),
@@ -155,8 +192,8 @@ export function buildBookingRequestXml(request: CRSCreateReservationRequest): st
                 '@_MobileNo': request.primaryGuest.phone || '',
             },
             CheckinDetails: {
-                '@_CheckInDateTime': formatDateTimeToHotsoft(request.checkIn),
-                '@_CheckOutDateTime': formatDateTimeToHotsoft(request.checkOut),
+                '@_CheckInDateTime': formatDateTimeToHotsoft(request.checkIn, HOTEL_CHECK_IN_TIME),
+                '@_CheckOutDateTime': formatDateTimeToHotsoft(request.checkOut, HOTEL_CHECK_OUT_TIME),
                 '@_TotalPax': (request.rooms.reduce((sum, r) => sum + r.adults + r.children, 0)).toString(),
                 '@_Children': (request.rooms.reduce((sum, r) => sum + r.children, 0)).toString(),
                 '@_Amount': typeof request.payment?.subtotal === 'number' ? toAmountAttribute(request.payment.subtotal) : '0.00',
@@ -166,7 +203,9 @@ export function buildBookingRequestXml(request: CRSCreateReservationRequest): st
             BookingDetails: {
                 '@_HotelID': HOTSOFT_CONFIG.hotelId,
                 '@_BookingNo': request.reservationRef,
-                '@_BookingDate': formatDateToHotsoft(new Date().toISOString()),
+                // The hotel's own date, not the server's — a booking pushed after
+                // 18:30 IST would otherwise be stamped with the previous day.
+                '@_BookingDate': formatDateToHotsoft(hotelToday()),
                 '@_BookedBy': `${request.primaryGuest.firstName} ${request.primaryGuest.lastName}`.trim(),
                 '@_OTA': 'Website',
                 '@_BookingStatus': 'Confirmed',
