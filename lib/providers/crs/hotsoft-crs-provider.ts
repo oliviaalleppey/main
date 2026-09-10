@@ -135,6 +135,18 @@ function nightlyFigures(values: number[] | undefined, nights: number): number[] 
     return values.every((value) => Number.isFinite(value) && value >= 0) ? values : null;
 }
 
+/** One <RoomType> node: every room of one type, on one plan, for one night. */
+type NightlyLine = {
+    id: string;
+    date: string;
+    ratePlanId: string;
+    rooms: number;
+    pax: number;
+    children: number;
+    /** Indexes into the per-room, per-night charges this line rolls up. */
+    cells: number[];
+};
+
 /**
  * Build the BookingRequest XML for a reservation.
  *
@@ -142,26 +154,35 @@ function nightlyFigures(values: number[] | undefined, nights: number): number[] 
  * see scripts/verify-hotsoft-rates.ts.
  */
 export function buildBookingRequestXml(request: CRSCreateReservationRequest): string {
-    // Build the <Rates> array: one node per room, per night.
-    const rates: any[] = [];
+    // Price every night of every room first — that is the level the booking's
+    // totals reconcile at — then fold them into one <RoomType> per room type,
+    // rate plan and night. Hotsoft reads NoOfRooms and NoOfPax off that node and
+    // takes Rate and Tax as per-room figures. One node per physical room repeats
+    // the same ID and Date, and Hotsoft kept a single node's room and guest count
+    // while adding up all of their money: OL-1009-HL0Y, three rooms for three
+    // adults, reached the PMS as one room for one adult at three times the tariff.
     const charges: NightlyCharge[] = [];
+    const lines = new Map<string, NightlyLine>();
+    const nights = nightsBetween(request.checkIn, request.checkOut);
 
     for (const room of request.rooms) {
-        // Nights between checkIn/checkOut, counted in whole days.
-        const nights = nightsBetween(request.checkIn, request.checkOut);
-
         const roomRates = nightlyFigures(room.nightlyRates, nights);
         const roomTaxes = nightlyFigures(room.nightlyTaxes, nights);
+        const id = getHotsoftRoomId(room.roomTypeId);
+        const ratePlanId = resolveRatePlanAttribute(room.ratePlanId);
 
         for (let i = 0; i < nights; i++) {
-            rates.push({
-                '@_ID': getHotsoftRoomId(room.roomTypeId),
-                '@_Date': formatDateToHotsoft(addNights(request.checkIn, i)),
-                '@_NoOfRooms': '1', // We assume 1 room per room block given the CRSCreateReservationRequest definition
-                '@_NoOfPax': (room.adults + room.children).toString(), // NoOfPax per room
-                '@_RatePlanId': resolveRatePlanAttribute(room.ratePlanId),
-                '@_ChildPax': room.children.toString(),
-            });
+            const date = formatDateToHotsoft(addNights(request.checkIn, i));
+            const key = `${id}|${ratePlanId}|${date}`;
+            let line = lines.get(key);
+            if (!line) {
+                line = { id, date, ratePlanId, rooms: 0, pax: 0, children: 0, cells: [] };
+                lines.set(key, line);
+            }
+            line.rooms += 1;
+            line.pax += room.adults + room.children;
+            line.children += room.children;
+            line.cells.push(charges.length);
             charges.push({
                 rate: roomRates ? Math.round(roomRates[i]) : null,
                 tax: roomTaxes ? Math.round(roomTaxes[i]) : null,
@@ -170,15 +191,25 @@ export function buildBookingRequestXml(request: CRSCreateReservationRequest): st
     }
 
     // Rate and Tax are per room, per night, and pre-tax on the Rate side — the
-    // same basis as Amount and Taxes in the header.
-    if (charges.length) {
-        priceRemainingNights(charges, 'rate', request.payment?.subtotal ?? 0);
-        priceRemainingNights(charges, 'tax', request.payment?.taxAmount ?? 0);
-        rates.forEach((node, index) => {
-            node['@_Rate'] = toAmountAttribute(charges[index].rate ?? 0);
-            node['@_Tax'] = toAmountAttribute(charges[index].tax ?? 0);
-        });
-    }
+    // same basis as Amount and Taxes in the header, once multiplied by NoOfRooms.
+    // Rooms sharing a node are priced alike, so the per-room figure is exact; only
+    // a total that doesn't divide evenly across the rooms rounds, by under a paisa
+    // per room, and the header keeps the booking's own figures regardless.
+    priceRemainingNights(charges, 'rate', request.payment?.subtotal ?? 0);
+    priceRemainingNights(charges, 'tax', request.payment?.taxAmount ?? 0);
+    const perRoom = (line: NightlyLine, key: 'rate' | 'tax') =>
+        toAmountAttribute(Math.round(line.cells.reduce((sum, cell) => sum + (charges[cell][key] ?? 0), 0) / line.rooms));
+
+    const rates = Array.from(lines.values()).map((line) => ({
+        '@_ID': line.id,
+        '@_Date': line.date,
+        '@_NoOfRooms': line.rooms.toString(),
+        '@_NoOfPax': line.pax.toString(),
+        '@_RatePlanId': line.ratePlanId,
+        '@_ChildPax': line.children.toString(),
+        '@_Rate': perRoom(line, 'rate'),
+        '@_Tax': perRoom(line, 'tax'),
+    }));
 
     const xmlPayload = xmlBuilder.build({
         BookingRequest: {
