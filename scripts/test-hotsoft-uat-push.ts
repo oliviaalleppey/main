@@ -12,15 +12,22 @@
  * UAT_ROOMS books that many rooms of the one type (default 1) — the shape that
  * broke in OL-1009-HL0Y, and the one Datamate asked to see pushed to UAT.
  *
+ * UAT_ROOM_MIX books several room types at once, as ID:rooms:rupees-a-night,
+ * comma-separated, and overrides UAT_ROOM_ID and UAT_ROOMS. Each room is taxed
+ * night by night on its own slab, so a mix either side of Rs 7,500 carries 5%
+ * on one type and 18% on the other, the way a real booking would.
+ *
  * Run:
  *   HOTSOFT_APP_KEY=DM20022026OLIVIAUAT8001WI HOTSOFT_HOTEL_ID=8001 \
  *   HOTSOFT_BOOKING_URL=https://purplekeys.co.in/OliviaUAT/OTAbookingsUpdate.aspx \
  *   UAT_ROOMS=3 npx tsx scripts/test-hotsoft-uat-push.ts
+ *
+ *   ... UAT_ROOM_MIX="80016:1:10499,80012:2:7499" npx tsx scripts/test-hotsoft-uat-push.ts
  */
 import 'dotenv/config';
 import { XMLParser } from 'fast-xml-parser';
 import { buildBookingRequestXml } from '../lib/providers/crs/hotsoft-crs-provider';
-import { splitStayIntoNightlyCharges } from '../lib/services/tax';
+import { calculateRoomTaxForNightlyRates, splitStayIntoNightlyCharges } from '../lib/services/tax';
 import { HOTSOFT_CONFIG } from '../lib/config/hotsoft';
 
 const PRODUCTION_HOTEL_ID = '9137';
@@ -28,6 +35,25 @@ const PRODUCTION_HOTEL_ID = '9137';
 const UAT_ROOM_ID = process.env.UAT_ROOM_ID || '80016';
 /** Rooms of that type in the one booking. */
 const UAT_ROOMS = Math.max(1, Math.floor(Number(process.env.UAT_ROOMS) || 1));
+
+/** One room type in the test booking. */
+type RoomLine = { roomId: string; rooms: number; pricePerNight: number };
+
+/** The booking's room types: UAT_ROOM_MIX if set, otherwise UAT_ROOMS of UAT_ROOM_ID at Rs 10,499. */
+function roomLines(): RoomLine[] {
+    const mix = process.env.UAT_ROOM_MIX?.trim();
+    if (!mix) return [{ roomId: UAT_ROOM_ID, rooms: UAT_ROOMS, pricePerNight: 1_049_900 }];
+
+    return mix.split(',').map((part) => {
+        const [roomId, rooms, rupees] = part.trim().split(':');
+        if (!roomId) throw new Error(`UAT_ROOM_MIX entry "${part}" has no room id`);
+        return {
+            roomId,
+            rooms: Math.max(1, Math.floor(Number(rooms) || 1)),
+            pricePerNight: Math.round((Number(rupees) || 10_499) * 100),
+        };
+    });
+}
 
 async function main() {
     if (HOTSOFT_CONFIG.hotelId === PRODUCTION_HOTEL_ID) {
@@ -42,25 +68,30 @@ async function main() {
         process.exit(1);
     }
 
-    // Two nights at Rs 10,499 a room — both above the Rs 7,500 slab, so 18% on each.
-    const pricePerNight = 1_049_900;
     const nights = 2;
-    const roomSubtotal = pricePerNight * nights * UAT_ROOMS;
-    const roomTax = 377_964 * UAT_ROOMS;
+    const lines = roomLines();
+    const items = lines.map((line) => ({
+        pricePerNight: line.pricePerNight,
+        subtotal: line.pricePerNight * nights * line.rooms,
+        rooms: line.rooms,
+    }));
+    const roomSubtotal = items.reduce((sum, item) => sum + item.subtotal, 0);
+    const roomTax = lines.reduce(
+        (sum, line) => sum + calculateRoomTaxForNightlyRates(new Array(nights).fill(line.pricePerNight), line.rooms),
+        0
+    );
 
-    const charges = splitStayIntoNightlyCharges({
-        items: [{ pricePerNight, subtotal: roomSubtotal, rooms: UAT_ROOMS }],
-        nights,
-        roomTaxTotal: roomTax,
-    });
+    // One entry per physical room, items in order — the same order the charges come back in.
+    const roomIds = lines.flatMap((line) => new Array<string>(line.rooms).fill(line.roomId));
+    const charges = splitStayIntoNightlyCharges({ items, nights, roomTaxTotal: roomTax });
 
     const reference = `OL-UAT-${Date.now().toString().slice(-6)}`;
     const xml = buildBookingRequestXml({
         reservationRef: reference,
         checkIn: '2026-11-10',
         checkOut: '2026-11-12',
-        rooms: charges.map((room) => ({
-            roomTypeId: UAT_ROOM_ID,
+        rooms: charges.map((room, index) => ({
+            roomTypeId: roomIds[index],
             ratePlanId: 'rp_lake-view-balcony_standard', // must come out as "C"
             adults: 2,
             children: 0,
@@ -84,7 +115,8 @@ async function main() {
         comments: 'Automated integration test — please ignore',
     });
 
-    console.log(`Hotel ${HOTSOFT_CONFIG.hotelId} at ${HOTSOFT_CONFIG.bookingUrl}, ${UAT_ROOMS} room(s)\n`);
+    const summary = lines.map((line) => `${line.rooms} x ${line.roomId} @ Rs ${line.pricePerNight / 100}`).join(', ');
+    console.log(`Hotel ${HOTSOFT_CONFIG.hotelId} at ${HOTSOFT_CONFIG.bookingUrl}, ${summary}\n`);
     console.log(xml);
 
     const response = await fetch(HOTSOFT_CONFIG.bookingUrl, {
