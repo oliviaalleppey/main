@@ -20,6 +20,17 @@ export type BookingStatus =
     | 'cancelled'
     | 'completed';
 
+/**
+ * States that mean the guest's money is confirmed in.
+ *
+ * Reaching any of these sets bookings.payment_status to 'success'. The reverse is
+ * deliberately not done here: 'failed' is also how a CRS rejection is recorded
+ * *after* a successful charge, so marking payment failed from this state would
+ * tell a paying guest they never paid. Only the gateway webhook, which knows the
+ * payment's own outcome, may set 'failed' — see app/api/payment/easebuzz/route.ts.
+ */
+const PAID_STATES: BookingStatus[] = ['payment_success', 'booking_requested', 'confirmed', 'completed'];
+
 const ALLOWED_TRANSITIONS: Record<BookingStatus, BookingStatus[]> = {
     'initiated': ['pending_payment', 'failed', 'expired'],
     'pending': ['pending_payment', 'failed', 'expired', 'cancelled'], // Legacy compat
@@ -95,6 +106,10 @@ export class BookingStateMachine {
                     // Specific timestamp updates based on state
                     ...(newState === 'confirmed' ? { confirmedAt: now } : {}),
                     ...(newState === 'cancelled' ? { cancelledAt: now, cancellationReason: context?.reason } : {}),
+                    // Money is in. Cancelling a paid booking leaves this at 'success'
+                    // until an actual refund moves it — a cancellation is not a refund.
+                    ...(PAID_STATES.includes(newState) ? { paymentStatus: 'success' as const } : {}),
+                    ...(newState === 'refunded' ? { paymentStatus: 'refunded' as const } : {}),
                 })
                 .where(eq(bookings.id, bookingId));
 

@@ -1,11 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { payments, bookingLogs } from '@/lib/db/schema';
+import { payments, bookings, bookingLogs } from '@/lib/db/schema';
 import { BookingService } from '@/lib/services/booking-service';
 import { EasebuzzService } from '@/lib/services/easebuzz';
 import { and, eq, ne } from 'drizzle-orm';
 
 const bookingService = new BookingService();
+
+/**
+ * The gateway fields worth keeping for reconciliation and support, without
+ * storing the whole payload (it carries `cardnum`, `upi_va` and the guest's
+ * contact details, which have no business sitting in the payments table).
+ */
+function buildGatewayMetadata(postData: Record<string, string>) {
+    return {
+        easepayid: postData.easepayid || null,
+        bankRefNum: postData.bank_ref_num || null,
+        mode: postData.mode || null,               // CC, UPI, NB …
+        bankName: postData.bank_name || null,
+        netAmountDebit: postData.net_amount_debit || null,
+        pgType: postData.PG_TYPE || null,
+        unmappedStatus: postData.unmappedstatus || null,
+        addedOn: postData.addedon || null,
+    };
+}
 
 export async function POST(req: NextRequest) {
     let rawText = '';
@@ -82,10 +100,16 @@ export async function POST(req: NextRequest) {
             const successUpdates = await db.update(payments)
                 .set({
                     status: 'success',
-                    easebuzzTransactionId: postData.easebuzz_transaction_id,
+                    // Easebuzz returns `easepayid` (its own payment reference) and
+                    // `bank_ref_num`. There is no `easebuzz_transaction_id` field —
+                    // reading one left both id columns null on every payment taken so
+                    // far, leaving nothing to reconcile against a settlement report.
+                    easebuzzTransactionId: postData.easepayid || null,
+                    gatewayTransactionId: postData.bank_ref_num || null,
                     easebuzzHash: postData.hash,
                     paymentVerifiedAt: new Date(),
                     paymentMethod: postData.payment_source || 'easebuzz',
+                    metadata: buildGatewayMetadata(postData),
                     updatedAt: new Date(),
                 })
                 .where(and(
@@ -129,8 +153,10 @@ export async function POST(req: NextRequest) {
             const updatedRows = await db.update(payments)
                 .set({
                     status: 'failed',
-                    easebuzzTransactionId: postData.easebuzz_transaction_id,
+                    easebuzzTransactionId: postData.easepayid || null,
+                    gatewayTransactionId: postData.bank_ref_num || null,
                     easebuzzHash: postData.hash,
+                    metadata: buildGatewayMetadata(postData),
                     updatedAt: new Date(),
                 })
                 .where(and(
@@ -156,6 +182,13 @@ export async function POST(req: NextRequest) {
             try {
                 const bookingId = updatedRows[0]?.bookingId;
                 if (bookingId) {
+                    // This is the only place that knows the *payment* failed, as opposed
+                    // to the booking failing after a successful charge. The state machine
+                    // therefore never writes 'failed' itself.
+                    await db.update(bookings)
+                        .set({ paymentStatus: 'failed', updatedAt: new Date() })
+                        .where(eq(bookings.id, bookingId));
+
                     await bookingService.markAsFailed(bookingId, postData.error_message || postData.error || 'Payment failed at gateway');
                 }
             } catch (failErr) {
