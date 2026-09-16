@@ -112,11 +112,14 @@ async function main() {
             taxAmount: roomTax,
             amount: roomSubtotal + roomTax,
         },
-        comments: 'Automated integration test — please ignore',
+        // Named in the instructions so Datamate can tell the two GST test pushes
+        // apart on the FO screen without cross-referencing references by hand.
+        comments: `Automated integration test, AllInclusiveRates=${HOTSOFT_CONFIG.allInclusiveRates} — please ignore`,
     });
 
     const summary = lines.map((line) => `${line.rooms} x ${line.roomId} @ Rs ${line.pricePerNight / 100}`).join(', ');
-    console.log(`Hotel ${HOTSOFT_CONFIG.hotelId} at ${HOTSOFT_CONFIG.bookingUrl}, ${summary}\n`);
+    console.log(`Hotel ${HOTSOFT_CONFIG.hotelId} at ${HOTSOFT_CONFIG.bookingUrl}, ${summary}`);
+    console.log(`AllInclusiveRates=${HOTSOFT_CONFIG.allInclusiveRates}\n`);
     console.log(xml);
 
     const response = await fetch(HOTSOFT_CONFIG.bookingUrl, {

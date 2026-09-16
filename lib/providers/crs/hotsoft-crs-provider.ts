@@ -240,7 +240,7 @@ export function buildBookingRequestXml(request: CRSCreateReservationRequest): st
                 '@_BookedBy': `${request.primaryGuest.firstName} ${request.primaryGuest.lastName}`.trim(),
                 '@_OTA': 'Website',
                 '@_BookingStatus': 'Confirmed',
-                '@_AllInclusiveRates': 'Yes',
+                '@_AllInclusiveRates': HOTSOFT_CONFIG.allInclusiveRates,
                 '@_Instructions': request.comments || '',
             },
             Rates: {

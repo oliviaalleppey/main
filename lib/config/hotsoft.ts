@@ -4,6 +4,28 @@ export const HOTSOFT_CONFIG = {
     availabilityUrl: process.env.HOTSOFT_AVAILABILITY_URL || '',
     bookingUrl: process.env.HOTSOFT_BOOKING_URL || '',
     timeoutMs: process.env.HOTSOFT_TIMEOUT_MS ? parseInt(process.env.HOTSOFT_TIMEOUT_MS, 10) : 15000,
+    /**
+     * The BookingDetails/@AllInclusiveRates flag.
+     *
+     * We send a tax-exclusive Rate with Tax alongside it, so "No" is what this
+     * payload actually describes — but "Yes" is what has been going out since the
+     * integration was built, and it is the suspect in Datamate's 2026-09-16
+     * report that the GST column is blank once a CRS booking reaches the FO
+     * module: a PMS that honours the flag would read the amount as already
+     * inclusive and post no GST. Their confirmation letter renders our CGST/SGST
+     * correctly, so the figures do arrive; only FO loses them.
+     *
+     * It stays 'Yes' by default, because flipping it blind on live bookings
+     * risks the opposite fault — GST counted twice on a real guest folio. The
+     * env var exists so UAT can be pushed both ways, and so the answer can ship
+     * without a deploy once Datamate confirms which one they parse.
+     *
+     * Case-insensitive, because the value gets typed into a Vercel env var by
+     * hand and a lowercase "no" silently meaning "Yes" is exactly the sort of
+     * misconfiguration nobody would think to check for. Anything that is not a
+     * recognisable "no" keeps today's behaviour.
+     */
+    allInclusiveRates: process.env.HOTSOFT_ALL_INCLUSIVE_RATES?.trim().toLowerCase() === 'no' ? 'No' : 'Yes',
 };
 
 // Mapping from Olivia Internal Room Slugs / IDs to Hotsoft CRS Room IDs
