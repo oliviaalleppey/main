@@ -31,6 +31,98 @@ const VP_EMAIL = process.env.HOTEL_VP_EMAIL || 'vp@oliviaalleppey.com';
 const HOTEL_PHONE = process.env.HOTEL_PHONE || '+91 8075 416 514';
 const HOTEL_PHONE_TEL = HOTEL_PHONE.replace(/\s+/g, '');
 
+/** One add-on the guest bought with the room. Money in paise. */
+export type BookingEmailAddOn = {
+  name: string;
+  quantity: number;
+  unitPrice: number;
+  subtotal: number;
+};
+
+/**
+ * What a booking charged, split the way the admin booking page splits it.
+ * Money in paise; the lines add up to `total`, which is what the guest paid.
+ */
+export type BookingEmailCharges = {
+  nights: number;
+  /** Room tariff before any discount. */
+  roomSubtotal: number;
+  discount: number;
+  promoCode: string | null;
+  roomTax: number;
+  addOns: BookingEmailAddOn[];
+  addOnTax: number;
+  total: number;
+};
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/** Paise as rupees, with paise shown only when there are some: ₹650, ₹44,409.30. */
+function formatRupees(paise: number): string {
+  const digits = paise % 100 === 0 ? 0 : 2;
+  return `₹${(paise / 100).toLocaleString('en-IN', { minimumFractionDigits: digits, maximumFractionDigits: digits })}`;
+}
+
+/**
+ * The add-ons table and the charges summary, shared by the guest and staff
+ * emails so both show the same figures. Styles are inline because that is
+ * what mail clients reliably keep.
+ */
+function renderCharges(charges: BookingEmailCharges, palette: { rule: string; muted: string; total: string }): string {
+  const cell = `padding:8px 0;border-bottom:1px solid ${palette.rule};`;
+  // Figures keep to one line and hold their distance from the column before.
+  const figure = `${cell}padding-left:12px;white-space:nowrap;`;
+  const label = `color:${palette.muted};font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;`;
+
+  const addOnTable = charges.addOns.length ? `
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:14px;margin:0 0 16px;">
+      <tr>
+        <th align="left" style="${cell}${label}">Add-on</th>
+        <th align="center" style="${figure}${label}">Qty</th>
+        <th align="right" style="${figure}${label}">Unit price</th>
+        <th align="right" style="${figure}${label}">Subtotal</th>
+      </tr>
+      ${charges.addOns.map((addOn) => `
+      <tr>
+        <td style="${cell}">${escapeHtml(addOn.name)}</td>
+        <td align="center" style="${figure}">${addOn.quantity}</td>
+        <td align="right" style="${figure}">${formatRupees(addOn.unitPrice)}</td>
+        <td align="right" style="${figure}font-weight:600;">${formatRupees(addOn.subtotal)}</td>
+      </tr>`).join('')}
+    </table>` : '';
+
+  const lines: [string, string][] = [
+    [`Room charges (${charges.nights} night${charges.nights === 1 ? '' : 's'})`, formatRupees(charges.roomSubtotal)],
+  ];
+  if (charges.discount > 0) {
+    lines.push([charges.promoCode ? `Discount (${escapeHtml(charges.promoCode)})` : 'Discount', `−${formatRupees(charges.discount)}`]);
+  }
+  lines.push(['Room tax (GST)', formatRupees(charges.roomTax)]);
+  if (charges.addOns.length) {
+    lines.push(['Add-ons', formatRupees(charges.addOns.reduce((sum, addOn) => sum + addOn.subtotal, 0))]);
+    lines.push(['Add-ons tax (GST)', formatRupees(charges.addOnTax)]);
+  }
+
+  return `${addOnTable}
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:14px;">
+      ${lines.map(([name, amount]) => `
+      <tr>
+        <td style="${cell}">${name}</td>
+        <td align="right" style="${figure}">${amount}</td>
+      </tr>`).join('')}
+      <tr>
+        <td style="padding:12px 0 0;font-weight:700;color:${palette.total};">Total Amount</td>
+        <td align="right" style="padding:12px 0 0;font-size:18px;font-weight:700;color:${palette.total};">${formatRupees(charges.total)}</td>
+      </tr>
+    </table>`;
+}
+
 
 /**
  * Send booking confirmation email to guest
@@ -42,7 +134,7 @@ export async function sendBookingConfirmation(params: {
   checkIn: string;
   checkOut: string;
   roomType: string;
-  totalAmount: number;
+  charges: BookingEmailCharges;
 }) {
   try {
     const resend = getResendClient();
@@ -50,7 +142,7 @@ export async function sendBookingConfirmation(params: {
       return { skipped: true };
     }
 
-    const { to, guestName, bookingNumber, checkIn, checkOut, roomType, totalAmount } = params;
+    const { to, guestName, bookingNumber, checkIn, checkOut, roomType, charges } = params;
 
     const { data, error } = await resend.emails.send({
       from: `${HOTEL_NAME} <${FROM_EMAIL}>`,
@@ -69,7 +161,6 @@ export async function sendBookingConfirmation(params: {
               .content { background: #F8F6F4; padding: 30px; }
               .booking-details { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
               .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #E8E6E3; }
-              .total { font-size: 20px; font-weight: bold; color: #C9A961; }
               .footer { text-align: center; padding: 20px; color: #B8AFA4; font-size: 14px; }
             </style>
           </head>
@@ -101,10 +192,11 @@ export async function sendBookingConfirmation(params: {
                     <span>Room Type:</span>
                     <strong>${roomType}</strong>
                   </div>
-                  <div class="detail-row total">
-                    <span>Total Amount:</span>
-                    <strong>₹${(totalAmount / 100).toLocaleString('en-IN')}</strong>
-                  </div>
+                </div>
+
+                <div class="booking-details">
+                  <h2>Charges</h2>
+                  ${renderCharges(charges, { rule: '#E8E6E3', muted: '#8A8178', total: '#1A1A1A' })}
                 </div>
                 
                 <p>We look forward to welcoming you to our luxury property in Alappuzha, Kerala.</p>
@@ -147,13 +239,13 @@ export async function sendBookingAlertToStaff(params: {
   adults: number;
   children: number;
   roomType: string;
-  totalAmount: number;
+  charges: BookingEmailCharges;
 }) {
   try {
     const resend = getResendClient();
     if (!resend) return { skipped: true };
 
-    const { guestName, guestEmail, guestPhone, bookingNumber, confirmationNumber, checkIn, checkOut, nights, adults, children, roomType, totalAmount } = params;
+    const { guestName, guestEmail, guestPhone, bookingNumber, confirmationNumber, checkIn, checkOut, nights, adults, children, roomType, charges } = params;
 
     const { data, error } = await resend.emails.send({
       from: `${HOTEL_NAME} System <${FROM_EMAIL}>`,
@@ -178,7 +270,6 @@ export async function sendBookingAlertToStaff(params: {
               .label { color: #6B7280; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
               .value { color: #1C1C1C; font-size: 14px; font-weight: 600; text-align: right; }
               .value a { color: #C9A84C; text-decoration: none; }
-              .amount { font-size: 18px; color: #0D4A4A; font-weight: 700; }
               .cta-wrap { text-align: center; padding: 8px 0 4px; }
               .cta-btn { display: inline-block; background: #0D4A4A; color: #fff !important; text-decoration: none !important; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 14px 36px; border-radius: 8px; }
               .footer { background: #FAF6EF; border-top: 1px solid #E8E0D5; text-align: center; padding: 16px 32px; font-size: 12px; color: #9CA3AF; }
@@ -205,7 +296,9 @@ export async function sendBookingAlertToStaff(params: {
                   <div class="row"><span class="label">Check-out</span><span class="value">${checkOut}</span></div>
                   <div class="row"><span class="label">Nights</span><span class="value">${nights}</span></div>
                   <div class="row"><span class="label">Guests</span><span class="value">${adults} adult${adults !== 1 ? 's' : ''}${children ? `, ${children} child${children !== 1 ? 'ren' : ''}` : ''}</span></div>
-                  <div class="row"><span class="label">Total Paid</span><span class="value amount">₹${(totalAmount / 100).toLocaleString('en-IN')}</span></div>
+                </div>
+                <div class="card" style="padding: 6px 16px 14px;">
+                  ${renderCharges(charges, { rule: '#EDE8DF', muted: '#6B7280', total: '#0D4A4A' })}
                 </div>
                 <div class="cta-wrap">
                   <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'https://oliviaalleppey.com'}/admin/bookings" class="cta-btn">View in Admin →</a>

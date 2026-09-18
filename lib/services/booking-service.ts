@@ -17,7 +17,7 @@ import {
 import { IdempotencyService } from './idempotency';
 import { SessionExpiration } from './session-expiration';
 import { BookingLockService } from './booking-lock';
-import { sendBookingConfirmation, sendBookingAlertToStaff } from './email';
+import { sendBookingConfirmation, sendBookingAlertToStaff, type BookingEmailCharges } from './email';
 import { fireAutomation } from './whatsapp/automations';
 import { bookingStateMachine } from './booking-state-machine';
 import { eq, inArray } from 'drizzle-orm';
@@ -864,8 +864,9 @@ export class BookingService {
             with: {
                 items: true,
                 // Needed to split the booking's tax back into its room and add-on
-                // halves when pricing the CRS payload's nightly lines.
-                addOns: true
+                // halves when pricing the CRS payload's nightly lines, and named
+                // so the confirmation emails can list what the guest ordered.
+                addOns: { with: { addOn: { columns: { name: true } } } }
             }
         });
 
@@ -982,6 +983,8 @@ export class BookingService {
                 )
             );
             const addOnSubtotal = (booking.addOns || []).reduce((sum, entry) => sum + (entry.subtotal || 0), 0);
+            const addOnTax = Math.round(addOnSubtotal * 0.18);
+            const roomTax = Math.max(0, (booking.taxAmount || 0) - addOnTax);
             const nightlyCharges = splitStayIntoNightlyCharges({
                 items: bookingRoomItems.map((item) => ({
                     pricePerNight: item.pricePerNight,
@@ -989,7 +992,7 @@ export class BookingService {
                     rooms: sanitizeRoomCount(item.quantity),
                 })),
                 nights: stayNights,
-                roomTaxTotal: Math.max(0, (booking.taxAmount || 0) - Math.round(addOnSubtotal * 0.18)),
+                roomTaxTotal: roomTax,
             });
 
             let roomCursor = 0;
@@ -1110,6 +1113,24 @@ export class BookingService {
             const checkInStr = checkInDate.toLocaleDateString('en-IN');
             const checkOutStr = checkOutDate.toLocaleDateString('en-IN');
 
+            // The same split the charge was built from (applyDiscount), so the
+            // lines in both emails add back up to what the guest paid.
+            const charges: BookingEmailCharges = {
+                nights,
+                roomSubtotal: bookingRoomItems.reduce((sum, item) => sum + item.subtotal, 0),
+                discount: booking.discountAmount || 0,
+                promoCode: booking.promoCode,
+                roomTax,
+                addOns: (booking.addOns || []).map((entry) => ({
+                    name: entry.addOn?.name || 'Add-on',
+                    quantity: entry.quantity || 1,
+                    unitPrice: entry.price,
+                    subtotal: entry.subtotal,
+                })),
+                addOnTax,
+                total: booking.totalAmount,
+            };
+
             await Promise.all([
                 sendBookingConfirmation({
                     to: booking.guestEmail,
@@ -1118,7 +1139,7 @@ export class BookingService {
                     checkIn: checkInStr,
                     checkOut: checkOutStr,
                     roomType: primaryRoomTypeName,
-                    totalAmount: booking.totalAmount
+                    charges,
                 }).catch(e => console.error(`Failed to send guest confirmation email for ${bookingId}:`, e)),
 
                 sendBookingAlertToStaff({
@@ -1133,7 +1154,7 @@ export class BookingService {
                     adults: booking.adults || 1,
                     children: booking.children || 0,
                     roomType: primaryRoomTypeName,
-                    totalAmount: booking.totalAmount,
+                    charges,
                 }).catch(e => console.error(`Failed to send staff booking alert for ${bookingId}:`, e)),
 
                 // WhatsApp booking confirmation. This only queues a message for the
