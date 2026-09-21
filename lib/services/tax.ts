@@ -40,6 +40,54 @@ export function calculateRoomTaxForNightlyRates(nightlyRates: number[], quantity
     return perRoom * rooms;
 }
 
+/**
+ * Add-on tax (GST on everything sold alongside the room).
+ *
+ * Unlike a room, an add-on carries its own rate — the Tax % on the add-on in
+ * the admin — because a cake and an airport transfer are not taxed alike. The
+ * rate is 18 for every add-on the hotel sells today, and that is the value a
+ * new one is created with, so it stands in when a line has no rate of its own.
+ *
+ * A booking's lines keep the rate they were sold at, so editing an add-on's
+ * Tax % changes what the next guest pays and never what an old invoice says.
+ */
+export const DEFAULT_ADD_ON_TAX_RATE = 18; // percent
+
+/**
+ * GST across a set of add-on lines, each at its own rate.
+ *
+ * Rounded per line rather than on the total: lines at different rates cannot be
+ * summed before they are taxed, and the checkout page has always priced them
+ * this way. Every add-on tax figure in the app routes through here — what the
+ * guest is quoted, what is charged, and what the invoice reports.
+ */
+export function calculateAddOnTax(lines: { subtotal: number; taxRate?: number | null }[]): number {
+    return lines.reduce((sum, line) => {
+        const subtotal = Number.isFinite(line.subtotal) && line.subtotal > 0 ? line.subtotal : 0;
+        const rate = typeof line.taxRate === 'number' && Number.isFinite(line.taxRate) && line.taxRate >= 0
+            ? line.taxRate
+            : DEFAULT_ADD_ON_TAX_RATE;
+        return sum + Math.round(subtotal * (rate / 100));
+    }, 0);
+}
+
+/** Add-on tax grouped by rate, for the rate-wise breakdown a tax invoice needs. */
+export function groupAddOnTaxByRate(
+    lines: { subtotal: number; taxRate?: number | null }[],
+): { rate: number; taxableValue: number; tax: number }[] {
+    const buckets = new Map<number, { taxableValue: number; tax: number }>();
+    for (const line of lines) {
+        const rate = typeof line.taxRate === 'number' && Number.isFinite(line.taxRate) && line.taxRate >= 0
+            ? line.taxRate
+            : DEFAULT_ADD_ON_TAX_RATE;
+        const bucket = buckets.get(rate) ?? { taxableValue: 0, tax: 0 };
+        bucket.taxableValue += line.subtotal;
+        bucket.tax += calculateAddOnTax([line]);
+        buckets.set(rate, bucket);
+    }
+    return [...buckets.entries()].map(([rate, bucket]) => ({ rate, ...bucket }));
+}
+
 /** Split a stay total across nights without losing or inventing paise. */
 export function spreadEvenly(total: number, nights: number): number[] {
     const base = Math.floor(total / nights);

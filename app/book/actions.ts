@@ -14,6 +14,7 @@ import { db } from '@/lib/db';
 import { addOns, bookingSessions, ratePlans, roomTypes } from '@/lib/db/schema';
 import { and, eq, inArray } from 'drizzle-orm';
 import { ensureRoomTypeMinOccupancyColumn } from '@/lib/db/schema-guard';
+import { calculateAddOnTax } from '@/lib/services/tax';
 import { mapCrsRoomTypeMatchesInternal } from '@/lib/config/crs';
 import { getBookingProvider } from '@/lib/providers/crs/factory';
 import { formatRoomName } from '@/lib/utils';
@@ -579,6 +580,7 @@ async function sessionMoney(sessionId: string): Promise<{ base: QuoteBase; promo
         .select({
             id: addOns.id,
             price: addOns.price,
+            taxRate: addOns.taxRate,
         })
         .from(addOns)
         .where(and(
@@ -586,16 +588,20 @@ async function sessionMoney(sessionId: string): Promise<{ base: QuoteBase; promo
             eq(addOns.isActive, true),
         ));
 
-    const addOnPriceMap = new Map(addOnRows.map((row) => [row.id, row.price]));
-    const addOnSubtotal = selectedAddOns.reduce((sum, selected) => {
-        const price = addOnPriceMap.get(selected.addOnId);
-        if (!price) return sum;
-        return sum + (price * selected.quantity);
-    }, 0);
+    const addOnMap = new Map(addOnRows.map((row) => [row.id, row]));
+    const addOnLines = selectedAddOns
+        .map((selected) => {
+            const addOn = addOnMap.get(selected.addOnId);
+            if (!addOn?.price) return null;
+            return { subtotal: addOn.price * selected.quantity, taxRate: addOn.taxRate };
+        })
+        .filter((line): line is { subtotal: number; taxRate: number | null } => line !== null);
 
-    // Add-ons GST is always 18% (add-ons are separate from room taxes), and a
-    // promo code never touches them.
-    const addOnTax = Math.round(addOnSubtotal * 0.18);
+    const addOnSubtotal = addOnLines.reduce((sum, line) => sum + line.subtotal, 0);
+    // Add-ons carry their own GST rate (they are separate from room taxes), and a
+    // promo code never touches them. Same helper the charge itself uses, so the
+    // amount verified here cannot drift from the amount collected.
+    const addOnTax = calculateAddOnTax(addOnLines);
     return { base: { roomSubtotal, roomTax, addOnSubtotal, addOnTax }, promoCode };
 }
 

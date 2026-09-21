@@ -1,6 +1,7 @@
 import { db } from '../db';
-import { bookings, bookingAddOns, roomInventory, guestProfiles } from '../db/schema';
-import { eq, and } from 'drizzle-orm';
+import { addOns, bookings, bookingAddOns, roomInventory, guestProfiles } from '../db/schema';
+import { eq, and, inArray } from 'drizzle-orm';
+import { DEFAULT_ADD_ON_TAX_RATE } from './tax';
 
 interface CreateBookingParams {
     // Room & Dates
@@ -95,11 +96,21 @@ export async function createPendingBooking(params: CreateBookingParams): Promise
 
         // 4. Add selected add-ons
         if (params.selectedAddOns && params.selectedAddOns.length > 0) {
+            // The rate belongs on the line, so a later edit to the add-on cannot
+            // change what this booking was taxed. Read here rather than trusted
+            // from the caller, which is where the prices in this path come from.
+            const rateRows = await db
+                .select({ id: addOns.id, taxRate: addOns.taxRate })
+                .from(addOns)
+                .where(inArray(addOns.id, params.selectedAddOns.map((addon) => addon.addOnId)));
+            const rateById = new Map(rateRows.map((row) => [row.id, row.taxRate]));
+
             const addOnRecords = params.selectedAddOns.map(addon => ({
                 bookingId: booking.id,
                 addOnId: addon.addOnId,
                 quantity: addon.quantity,
                 price: addon.price,
+                taxRate: rateById.get(addon.addOnId) ?? DEFAULT_ADD_ON_TAX_RATE,
                 subtotal: addon.price * addon.quantity,
             }));
 

@@ -2,7 +2,7 @@
 import { db } from '@/lib/db';
 import { bookings, bookingConfirmations, bookingItems, bookingAddOns } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
-import { groupTaxByRate, splitStayIntoNightlyCharges } from '@/lib/services/tax';
+import { calculateAddOnTax, groupAddOnTaxByRate, groupTaxByRate, splitStayIntoNightlyCharges } from '@/lib/services/tax';
 import { notFound } from 'next/navigation';
 import { PrintButton } from '@/components/invoice/print-button';
 import { amountInWords, formatRoomName } from '@/lib/utils';
@@ -69,7 +69,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ bookin
         where: eq(bookingAddOns.bookingId, booking.id),
     });
     const addOnSubtotal = addOns.reduce((sum, entry) => sum + (entry.subtotal || 0), 0);
-    const addOnTax = Math.round(addOnSubtotal * 0.18);
+    const addOnTax = calculateAddOnTax(addOns);
 
     const stayNights = Math.max(
         1,
@@ -88,7 +88,8 @@ export default async function InvoicePage({ params }: { params: Promise<{ bookin
             nights: stayNights,
             roomTaxTotal: Math.max(0, (booking.taxAmount || 0) - addOnTax),
         }),
-        [{ rate: 18, taxableValue: addOnSubtotal, tax: addOnTax }],
+        // Add-ons can sit at more than one rate, and the invoice has to show each.
+        groupAddOnTaxByRate(addOns),
     );
 
     const invoiceDate = booking.confirmedAt ? new Date(booking.confirmedAt).toLocaleDateString('en-IN') : new Date().toLocaleDateString('en-IN');

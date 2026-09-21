@@ -505,6 +505,9 @@ export const bookingAddOns = pgTable('booking_add_ons', {
     quantity: integer('quantity').default(1),
     price: integer('price').notNull(),
     subtotal: integer('subtotal').notNull(),
+    // The rate this line was sold at, kept beside the price for the same reason:
+    // editing the add-on later must not change what an old booking was charged.
+    taxRate: integer('tax_rate').default(18), // GST % charged on this line
     createdAt: timestamp('created_at').defaultNow(),
 });
 

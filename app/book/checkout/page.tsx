@@ -19,7 +19,7 @@ import { CheckoutStepper } from '@/components/booking/checkout-stepper';
 import { SearchStayEditor } from '@/components/booking/search-stay-editor';
 import { CheckoutRoomList } from '@/components/booking/checkout-room-list';
 import { getAvailableRoomsForSearch } from '@/lib/services/search';
-import { calculateRoomTax } from '@/lib/services/tax';
+import { calculateAddOnTax, calculateRoomTax, DEFAULT_ADD_ON_TAX_RATE } from '@/lib/services/tax';
 import { updateSessionSearch, calculateSessionQuote } from '@/app/book/actions';
 import { PromoCodeField } from '@/components/booking/promo-code-field';
 import { GuestForm } from '@/components/booking/guest-form';
@@ -271,16 +271,14 @@ export default async function CheckoutPage({
             name: addOn.name,
             quantity: selectedAddOnMap.get(addOn.id) || 0,
             price: addOn.price,
-            taxRate: addOn.taxRate ?? 18,
+            taxRate: addOn.taxRate ?? DEFAULT_ADD_ON_TAX_RATE,
             subtotal: addOn.price * (selectedAddOnMap.get(addOn.id) || 0),
         }))
         .filter((entry) => entry.quantity > 0);
 
     const addOnsTotal = selectedAddOnRows.reduce((sum, entry) => sum + entry.subtotal, 0);
-    // Calculate tax for each add-on based on its specific tax rate
-    const addOnsTax = selectedAddOnRows.reduce((sum, entry) => {
-        return sum + Math.round(entry.subtotal * (entry.taxRate / 100));
-    }, 0);
+    // Each add-on at its own rate, through the helper the charge itself uses.
+    const addOnsTax = calculateAddOnTax(selectedAddOnRows);
     const taxesAndFeesTotal = roomTaxesAndFees + addOnsTax;
     const totalPrice = roomSubtotal + addOnsTotal + taxesAndFeesTotal;
 

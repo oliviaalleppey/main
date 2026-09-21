@@ -28,7 +28,7 @@ import type { BookingProvider, CRSCreateReservationRequest } from '@/lib/provide
 import { resolveMaxChildren, validateGuestMixForRoomType } from './occupancy';
 import { ensureRoomTypeMinOccupancyColumn } from '@/lib/db/schema-guard';
 import { formatRoomName } from '@/lib/utils';
-import { calculateRoomTax, splitStayIntoNightlyCharges } from './tax';
+import { calculateAddOnTax, calculateRoomTax, splitStayIntoNightlyCharges, DEFAULT_ADD_ON_TAX_RATE } from './tax';
 import { applyDiscount, validateOfferCode, redeemOffer, releaseOffer } from './offers';
 
 type CreateSessionInput = {
@@ -622,23 +622,26 @@ export class BookingService {
                     id: addOns.id,
                     name: addOns.name,
                     price: addOns.price,
+                    taxRate: addOns.taxRate,
                 })
                     .from(addOns)
                     .where(inArray(addOns.id, selectedAddOnIds))
                 : [];
 
-            const addOnPriceMap = new Map(addOnRows.map((row) => [row.id, row.price]));
+            const addOnMap = new Map(addOnRows.map((row) => [row.id, row]));
             const selectedAddOnsWithPrice = normalizedSelectedAddOns
                 .map((entry) => {
-                    const price = addOnPriceMap.get(entry.addOnId);
-                    if (!price) return null;
+                    const addOn = addOnMap.get(entry.addOnId);
+                    if (!addOn?.price) return null;
                     return {
                         ...entry,
-                        price,
-                        subtotal: price * entry.quantity,
+                        price: addOn.price,
+                        // Sold at today's rate, and kept on the line from here on.
+                        taxRate: addOn.taxRate ?? DEFAULT_ADD_ON_TAX_RATE,
+                        subtotal: addOn.price * entry.quantity,
                     };
                 })
-                .filter((entry): entry is { addOnId: string; quantity: number; price: number; subtotal: number } => entry !== null);
+                .filter((entry): entry is { addOnId: string; quantity: number; price: number; taxRate: number; subtotal: number } => entry !== null);
 
             const addOnSubtotal = selectedAddOnsWithPrice.reduce((sum, entry) => sum + entry.subtotal, 0);
             const roomLineItems = roomSelections.map((selection) => {
@@ -676,8 +679,8 @@ export class BookingService {
                 });
             }, 0);
 
-            // Add-ons are taxed separately at 18%.
-            const addOnTaxAmount = Math.round(addOnSubtotal * 0.18);
+            // Add-ons are taxed separately, each at its own rate.
+            const addOnTaxAmount = calculateAddOnTax(selectedAddOnsWithPrice);
 
             // Promo code. Only the code is carried on the session; its value is
             // recomputed here against the final cart, so a code applied before
@@ -780,6 +783,7 @@ export class BookingService {
                         addOnId: entry.addOnId,
                         quantity: entry.quantity,
                         price: entry.price,
+                        taxRate: entry.taxRate,
                         subtotal: entry.subtotal,
                     }))
                 );
@@ -983,7 +987,8 @@ export class BookingService {
                 )
             );
             const addOnSubtotal = (booking.addOns || []).reduce((sum, entry) => sum + (entry.subtotal || 0), 0);
-            const addOnTax = Math.round(addOnSubtotal * 0.18);
+            // Each line at the rate it was sold at, so this matches what was charged.
+            const addOnTax = calculateAddOnTax(booking.addOns || []);
             const roomTax = Math.max(0, (booking.taxAmount || 0) - addOnTax);
             const nightlyCharges = splitStayIntoNightlyCharges({
                 items: bookingRoomItems.map((item) => ({
