@@ -45,8 +45,12 @@ export type BookingEmailAddOn = {
  */
 export type BookingEmailCharges = {
   nights: number;
-  /** Room tariff before any discount. */
-  roomSubtotal: number;
+  /**
+   * One entry per room type on the booking, priced before any discount.
+   * A booking can hold several, and a guest who booked two kinds of room
+   * should see both rather than whichever happened to be first.
+   */
+  rooms: { name: string; quantity: number; subtotal: number }[];
   discount: number;
   promoCode: string | null;
   roomTax: number;
@@ -61,6 +65,14 @@ function escapeHtml(value: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+/** "Lake View Twin Room", or "2 &times; Lake View Twin Room, Deluxe Room" for a mixed booking. */
+function describeRooms(rooms: BookingEmailCharges['rooms']): string {
+  const described = rooms
+    .map((room) => `${room.quantity > 1 ? `${room.quantity} &times; ` : ''}${escapeHtml(room.name)}`)
+    .join(', ');
+  return described || 'Room';
 }
 
 /** Paise as rupees, with paise shown only when there are some: ₹650, ₹44,409.30. */
@@ -97,9 +109,11 @@ function renderCharges(charges: BookingEmailCharges, palette: { rule: string; mu
       </tr>`).join('')}
     </table>` : '';
 
-  const lines: [string, string][] = [
-    [`Room charges (${charges.nights} night${charges.nights === 1 ? '' : 's'})`, formatRupees(charges.roomSubtotal)],
-  ];
+  const stay = `${charges.nights} night${charges.nights === 1 ? '' : 's'}`;
+  const lines: [string, string][] = charges.rooms.map((room) => [
+    `${escapeHtml(room.name)}${room.quantity > 1 ? ` &times; ${room.quantity}` : ''} (${stay})`,
+    formatRupees(room.subtotal),
+  ]);
   if (charges.discount > 0) {
     lines.push([charges.promoCode ? `Discount (${escapeHtml(charges.promoCode)})` : 'Discount', `−${formatRupees(charges.discount)}`]);
   }
@@ -133,7 +147,6 @@ export async function sendBookingConfirmation(params: {
   bookingNumber: string;
   checkIn: string;
   checkOut: string;
-  roomType: string;
   charges: BookingEmailCharges;
 }) {
   try {
@@ -142,7 +155,7 @@ export async function sendBookingConfirmation(params: {
       return { skipped: true };
     }
 
-    const { to, guestName, bookingNumber, checkIn, checkOut, roomType, charges } = params;
+    const { to, guestName, bookingNumber, checkIn, checkOut, charges } = params;
 
     const { data, error } = await resend.emails.send({
       from: `${HOTEL_NAME} <${FROM_EMAIL}>`,
@@ -195,7 +208,7 @@ export async function sendBookingConfirmation(params: {
                   </div>
                   <div class="detail-row">
                     <span>Room Type:</span>
-                    <strong>${roomType}</strong>
+                    <strong>${describeRooms(charges.rooms)}</strong>
                   </div>
                 </div>
 
@@ -243,14 +256,13 @@ export async function sendBookingAlertToStaff(params: {
   nights: number;
   adults: number;
   children: number;
-  roomType: string;
   charges: BookingEmailCharges;
 }) {
   try {
     const resend = getResendClient();
     if (!resend) return { skipped: true };
 
-    const { guestName, guestEmail, guestPhone, bookingNumber, confirmationNumber, checkIn, checkOut, nights, adults, children, roomType, charges } = params;
+    const { guestName, guestEmail, guestPhone, bookingNumber, confirmationNumber, checkIn, checkOut, nights, adults, children, charges } = params;
 
     const { data, error } = await resend.emails.send({
       from: `${HOTEL_NAME} System <${FROM_EMAIL}>`,
@@ -296,7 +308,7 @@ export async function sendBookingAlertToStaff(params: {
                   <div class="row"><span class="label">Phone</span><span class="value"><a href="tel:${guestPhone.replace(/\s+/g, '')}">${guestPhone}</a></span></div>
                 </div>
                 <div class="card">
-                  <div class="row"><span class="label">Room Type</span><span class="value">${roomType}</span></div>
+                  <div class="row"><span class="label">Room Type</span><span class="value">${describeRooms(charges.rooms)}</span></div>
                   <div class="row"><span class="label">Check-in</span><span class="value">${checkIn}</span></div>
                   <div class="row"><span class="label">Check-out</span><span class="value">${checkOut}</span></div>
                   <div class="row"><span class="label">Nights</span><span class="value">${nights}</span></div>

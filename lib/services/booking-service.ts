@@ -1130,7 +1130,11 @@ export class BookingService {
             // lines in both emails add back up to what the guest paid.
             const charges: BookingEmailCharges = {
                 nights,
-                roomSubtotal: bookingRoomItems.reduce((sum, item) => sum + item.subtotal, 0),
+                rooms: bookingRoomItems.map((item) => ({
+                    name: roomTypeMap.get(item.roomTypeId)?.name || 'Room',
+                    quantity: sanitizeRoomCount(item.quantity),
+                    subtotal: item.subtotal,
+                })),
                 discount: booking.discountAmount || 0,
                 promoCode: booking.promoCode,
                 roomTax,
@@ -1151,7 +1155,6 @@ export class BookingService {
                     bookingNumber: booking.bookingNumber,
                     checkIn: checkInStr,
                     checkOut: checkOutStr,
-                    roomType: primaryRoomTypeName,
                     charges,
                 }).catch(e => console.error(`Failed to send guest confirmation email for ${bookingId}:`, e)),
 
@@ -1166,7 +1169,6 @@ export class BookingService {
                     nights,
                     adults: booking.adults || 1,
                     children: booking.children || 0,
-                    roomType: primaryRoomTypeName,
                     charges,
                 }).catch(e => console.error(`Failed to send staff booking alert for ${bookingId}:`, e)),
 
