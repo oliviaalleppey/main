@@ -4,6 +4,7 @@ import { getGuestBookingById } from "@/lib/services/guest-bookings";
 import { format } from "date-fns";
 import Image from "next/image";
 import { AutoPrint, PrintButton } from "@/components/booking/invoice-actions";
+import { calculateAddOnTax, splitStayIntoNightlyCharges } from "@/lib/services/tax";
 
 export const metadata = {
     title: "Reservation Confirmation | Olivia International Hotel",
@@ -38,9 +39,33 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
     const nights = Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24));
     const createdDate = new Date(booking.createdAt || new Date());
 
-    // Calculate split taxes (assuming equal CGST / SGST split for the display)
-    const totalTax = (booking.taxAmount || 0) / 100;
-    const splitTax = totalTax / 2;
+    // Tax belongs to the line that carried it. Add-ons are taxed at their own
+    // rate, and what is left is the rooms' — split over the room lines the way
+    // the stay was priced, night by night. Putting the booking's whole tax on
+    // the first row, as this page used to, overstated that row by the add-ons'
+    // tax and by every other room's, and left the rows not summing to the total.
+    const addOnTaxPaise = calculateAddOnTax(booking.addOns || []);
+    const roomTaxPaise = Math.max(0, (booking.taxAmount || 0) - addOnTaxPaise);
+    const roomCharges = splitStayIntoNightlyCharges({
+        items: (booking.items || []).map((item: { pricePerNight: number; subtotal: number; quantity: number | null }) => ({
+            pricePerNight: item.pricePerNight,
+            subtotal: item.subtotal,
+            rooms: Math.max(1, item.quantity || 1),
+        })),
+        nights: Math.max(1, nights),
+        roomTaxTotal: roomTaxPaise,
+    });
+
+    /** Tax on one room line: every room of that type, across the stay. */
+    let chargeCursor = 0;
+    const roomLineTax = (booking.items || []).map((item: { quantity: number | null }) => {
+        const rooms = Math.max(1, item.quantity || 1);
+        const tax = roomCharges
+            .slice(chargeCursor, chargeCursor + rooms)
+            .reduce((sum, room) => sum + room.nightlyTaxes.reduce((nightly, value) => nightly + value, 0), 0);
+        chargeCursor += rooms;
+        return tax;
+    });
 
     return (
         <main className="min-h-screen bg-white text-black font-sans text-[12px] leading-relaxed p-8 max-w-[1000px] mx-auto print:p-0">
@@ -134,9 +159,10 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
                 <tbody>
                     {booking.items?.map((item: any, idx: number) => {
                         const ratePerNight = (item.pricePerNight / 100).toFixed(2);
-                        const cgst = splitTax.toFixed(2);
-                        const sgst = splitTax.toFixed(2);
-                        const totalLineItem = ((item.subtotal + (booking.taxAmount || 0)) / 100).toFixed(2);
+                        const lineTax = roomLineTax[idx] || 0;
+                        const cgst = (lineTax / 2 / 100).toFixed(2);
+                        const sgst = (lineTax / 2 / 100).toFixed(2);
+                        const totalLineItem = ((item.subtotal + lineTax) / 100).toFixed(2);
 
                         return (
                             <tr key={item.id} className="border-b border-black">
@@ -152,15 +178,17 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
                                 <td className="border-r border-black p-2">0</td>
                                 <td className="border-r border-black p-2">{ratePerNight}</td>
                                 <td className="border-r border-black p-2">0.00</td>
-                                <td className="border-r border-black p-2">{idx === 0 ? cgst : '0.00'}</td>
-                                <td className="border-r border-black p-2">{idx === 0 ? sgst : '0.00'}</td>
-                                <td className="border-r border-black p-2 font-medium">{idx === 0 ? totalLineItem : ((item.subtotal)/100).toFixed(2)}</td>
+                                <td className="border-r border-black p-2">{cgst}</td>
+                                <td className="border-r border-black p-2">{sgst}</td>
+                                <td className="border-r border-black p-2 font-medium">{totalLineItem}</td>
                                 <td className="p-2"></td>
                             </tr>
                         );
                     })}
                     {/* Add-ons inside the table if they exist, to act as extra lines */}
-                    {booking.addOns?.map((addon: any) => (
+                    {booking.addOns?.map((addon: any) => {
+                      const addonTax = calculateAddOnTax([addon]);
+                      return (
                         <tr key={addon.id} className="border-b border-black">
                             <td className="border-r border-black p-2 text-left uppercase">{addon.name}</td>
                             <td className="border-r border-black p-2 whitespace-nowrap">-</td>
@@ -174,12 +202,13 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
                             <td className="border-r border-black p-2">-</td>
                             <td className="border-r border-black p-2">{(addon.price / 100).toFixed(2)}</td>
                             <td className="border-r border-black p-2">0.00</td>
-                            <td className="border-r border-black p-2">-</td>
-                            <td className="border-r border-black p-2">-</td>
-                            <td className="border-r border-black p-2 font-medium">{(addon.subtotal / 100).toFixed(2)}</td>
+                            <td className="border-r border-black p-2">{(addonTax / 2 / 100).toFixed(2)}</td>
+                            <td className="border-r border-black p-2">{(addonTax / 2 / 100).toFixed(2)}</td>
+                            <td className="border-r border-black p-2 font-medium">{((addon.subtotal + addonTax) / 100).toFixed(2)}</td>
                             <td className="p-2">ADDON</td>
                         </tr>
-                    ))}
+                      );
+                    })}
                     
                     {/* Totals Row */}
                     <tr>

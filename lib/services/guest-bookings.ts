@@ -92,6 +92,9 @@ export async function getGuestBookingById(email: string, bookingId: string) {
                 price: bookingAddOns.price,
                 quantity: bookingAddOns.quantity,
                 subtotal: bookingAddOns.subtotal,
+                // The rate this line was sold at, so an invoice can show the
+                // tax each add-on actually carried.
+                taxRate: bookingAddOns.taxRate,
             })
             .from(bookingAddOns)
             .innerJoin(addOns, eq(bookingAddOns.addOnId, addOns.id))
