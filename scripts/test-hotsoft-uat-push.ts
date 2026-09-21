@@ -12,6 +12,11 @@
  * UAT_ROOMS books that many rooms of the one type (default 1) — the shape that
  * broke in OL-1009-HL0Y, and the one Datamate asked to see pushed to UAT.
  *
+ * UAT_ADD_ONS puts add-ons on the booking, as name:qty:rupees, comma-separated,
+ * so the Instructions text the front office reads can be checked on the FO
+ * screen. It defaults to the two from OL-1809-HUOL, the booking Datamate asked
+ * about; UAT_ADD_ONS=none pushes a booking with no add-ons at all.
+ *
  * UAT_ROOM_MIX books several room types at once, as ID:rooms:rupees-a-night,
  * comma-separated, and overrides UAT_ROOM_ID and UAT_ROOMS. Each room is taxed
  * night by night on its own slab, so a mix either side of Rs 7,500 carries 5%
@@ -27,7 +32,7 @@
 import 'dotenv/config';
 import { XMLParser } from 'fast-xml-parser';
 import { buildBookingRequestXml } from '../lib/providers/crs/hotsoft-crs-provider';
-import { calculateRoomTaxForNightlyRates, splitStayIntoNightlyCharges } from '../lib/services/tax';
+import { calculateAddOnTax, calculateRoomTaxForNightlyRates, splitStayIntoNightlyCharges } from '../lib/services/tax';
 import { HOTSOFT_CONFIG } from '../lib/config/hotsoft';
 
 const PRODUCTION_HOTEL_ID = '9137';
@@ -38,6 +43,25 @@ const UAT_ROOMS = Math.max(1, Math.floor(Number(process.env.UAT_ROOMS) || 1));
 
 /** One room type in the test booking. */
 type RoomLine = { roomId: string; rooms: number; pricePerNight: number };
+
+/** The add-ons on the test booking — the pair from OL-1809-HUOL unless told otherwise. */
+function addOnLines(): { name: string; quantity: number; subtotal: number }[] {
+    const configured = process.env.UAT_ADD_ONS?.trim();
+    if (configured === 'none') return [];
+    if (!configured) {
+        return [
+            { name: 'Advance Welcome chocolate truffle Cake order 500 gram', quantity: 1, subtotal: 65_000 },
+            { name: 'Fruit Basket & Chocolates', quantity: 1, subtotal: 100_000 },
+        ];
+    }
+
+    return configured.split(',').map((part) => {
+        const [name, qty, rupees] = part.trim().split(':');
+        if (!name) throw new Error(`UAT_ADD_ONS entry "${part}" has no name`);
+        const quantity = Math.max(1, Math.floor(Number(qty) || 1));
+        return { name, quantity, subtotal: Math.round((Number(rupees) || 0) * 100) * quantity };
+    });
+}
 
 /** The booking's room types: UAT_ROOM_MIX if set, otherwise UAT_ROOMS of UAT_ROOM_ID at Rs 10,499. */
 function roomLines(): RoomLine[] {
@@ -85,6 +109,12 @@ async function main() {
     const roomIds = lines.flatMap((line) => new Array<string>(line.rooms).fill(line.roomId));
     const charges = splitStayIntoNightlyCharges({ items, nights, roomTaxTotal: roomTax });
 
+    // Add-ons ride in the header totals but not in the nightly lines, exactly as a
+    // real booking does — that difference is what Datamate is looking into.
+    const addOns = addOnLines();
+    const addOnSubtotal = addOns.reduce((sum, addOn) => sum + addOn.subtotal, 0);
+    const addOnTax = calculateAddOnTax(addOns);
+
     const reference = `OL-UAT-${Date.now().toString().slice(-6)}`;
     const xml = buildBookingRequestXml({
         reservationRef: reference,
@@ -108,16 +138,19 @@ async function main() {
         },
         payment: {
             method: 'online',
-            subtotal: roomSubtotal,
-            taxAmount: roomTax,
-            amount: roomSubtotal + roomTax,
+            subtotal: roomSubtotal + addOnSubtotal,
+            taxAmount: roomTax + addOnTax,
+            amount: roomSubtotal + addOnSubtotal + roomTax + addOnTax,
         },
         // Named in the instructions so Datamate can tell the two GST test pushes
         // apart on the FO screen without cross-referencing references by hand.
         comments: `Automated integration test, AllInclusiveRates=${HOTSOFT_CONFIG.allInclusiveRates} — please ignore`,
+        addOns,
+        addOnTax,
     });
 
-    const summary = lines.map((line) => `${line.rooms} x ${line.roomId} @ Rs ${line.pricePerNight / 100}`).join(', ');
+    const summary = lines.map((line) => `${line.rooms} x ${line.roomId} @ Rs ${line.pricePerNight / 100}`).join(', ')
+        + (addOns.length ? `, add-ons Rs ${addOnSubtotal / 100} + GST Rs ${addOnTax / 100}` : ', no add-ons');
     console.log(`Hotel ${HOTSOFT_CONFIG.hotelId} at ${HOTSOFT_CONFIG.bookingUrl}, ${summary}`);
     console.log(`AllInclusiveRates=${HOTSOFT_CONFIG.allInclusiveRates}\n`);
     console.log(xml);
