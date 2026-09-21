@@ -1054,6 +1054,14 @@ export class BookingService {
                     taxAmount: booking.taxAmount ?? undefined,
                 },
                 comments: booking.specialRequests || undefined,
+                // Named in Instructions because the payload has nowhere else to
+                // carry them — see the CRS request type.
+                addOns: (booking.addOns || []).map((entry) => ({
+                    name: entry.addOn?.name || 'Add-on',
+                    quantity: entry.quantity || 1,
+                    subtotal: entry.subtotal,
+                })),
+                addOnTax,
             };
 
             const reservationResponse = await this.provider.createReservation(createReservationRequest);

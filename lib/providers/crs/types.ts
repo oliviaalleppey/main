@@ -83,6 +83,17 @@ export interface CRSCreateReservationRequest {
         transactionId?: string;
     };
     comments?: string;
+    /**
+     * What the guest bought on top of the room, in paise.
+     *
+     * The booking request has no element for extra services, so these do not
+     * appear in the nightly lines and Hotsoft cannot price them. They are named
+     * in Instructions instead, which is the part of a reservation the front
+     * office reads — otherwise the desk first hears of a cake on arrival.
+     */
+    addOns?: { name: string; quantity: number; subtotal: number }[];
+    /** GST on those add-ons, in paise. Part of the header's Taxes. */
+    addOnTax?: number;
 }
 
 export interface CRSReservationResponse {

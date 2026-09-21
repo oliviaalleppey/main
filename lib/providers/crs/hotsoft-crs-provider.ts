@@ -129,6 +129,47 @@ function resolveRatePlanAttribute(ratePlanId: string): string {
     return getHotsoftRatePlanId(ratePlanId);
 }
 
+/** Rupees for the Instructions text: plain ASCII, since the PMS renders it as typed. */
+function toRupeeText(paise: number): string {
+    return `Rs.${(paise / 100).toFixed(2)}`;
+}
+
+/** Hotsoft truncates a long Instructions value, so the text is kept short enough to survive. */
+const INSTRUCTIONS_MAX_LENGTH = 500;
+
+/**
+ * The Instructions value: the guest's own request, then what they pre-paid for.
+ *
+ * Add-ons have nowhere else to go in a BookingRequest — the nightly lines are
+ * rooms only — so the desk would otherwise see a total it cannot account for
+ * and no sign of the cake it is supposed to have ready. Marked prepaid so
+ * nobody bills the guest a second time, and the add-on tax is named because it
+ * is inside the header's Taxes while the add-on amount is not inside its Amount.
+ */
+function buildInstructions(request: CRSCreateReservationRequest): string {
+    const parts: string[] = [];
+    const comments = request.comments?.trim();
+    if (comments) parts.push(comments);
+
+    const addOns = (request.addOns || []).filter((addOn) => addOn.quantity > 0);
+    if (addOns.length) {
+        const items = addOns
+            .map((addOn) => `${addOn.name.trim()} x${addOn.quantity} ${toRupeeText(addOn.subtotal)}`)
+            .join('; ');
+        const total = addOns.reduce((sum, addOn) => sum + addOn.subtotal, 0);
+        const tax = request.addOnTax ?? 0;
+        parts.push(
+            `PREPAID ADD-ONS (already paid, do not bill again): ${items}. ` +
+            `Add-ons total ${toRupeeText(total)} plus GST ${toRupeeText(tax)}.`
+        );
+    }
+
+    const instructions = parts.join(' | ');
+    return instructions.length > INSTRUCTIONS_MAX_LENGTH
+        ? `${instructions.slice(0, INSTRUCTIONS_MAX_LENGTH - 3)}...`
+        : instructions;
+}
+
 /** The nightly figures for one room, but only if they cover the stay exactly. */
 function nightlyFigures(values: number[] | undefined, nights: number): number[] | null {
     if (!Array.isArray(values) || values.length !== nights) return null;
@@ -241,7 +282,7 @@ export function buildBookingRequestXml(request: CRSCreateReservationRequest): st
                 '@_OTA': 'Website',
                 '@_BookingStatus': 'Confirmed',
                 '@_AllInclusiveRates': HOTSOFT_CONFIG.allInclusiveRates,
-                '@_Instructions': request.comments || '',
+                '@_Instructions': buildInstructions(request),
             },
             Rates: {
                 RoomType: rates
