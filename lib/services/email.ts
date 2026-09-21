@@ -157,7 +157,12 @@ export async function sendBookingConfirmation(params: {
             <style>
               body { font-family: 'Inter', Arial, sans-serif; line-height: 1.6; color: #1A1A1A; }
               .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-              .header { background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-primary) 100%); color: #FFFEF9; padding: 30px; text-align: center; }
+              /* The brand colour is written out here rather than taken from the
+                 site's CSS variables: nothing defines those inside a mail
+                 client, so the header lost its background and its cream text
+                 was left invisible on white. The div repeats it inline for
+                 clients that drop this block altogether. */
+              .header { background-color: #991E29; background-image: linear-gradient(135deg, #991E29 0%, #7A1821 100%); color: #FFFEF9; padding: 30px; text-align: center; }
               .content { background: #F8F6F4; padding: 30px; }
               .booking-details { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
               .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #E8E6E3; }
@@ -166,9 +171,9 @@ export async function sendBookingConfirmation(params: {
           </head>
           <body>
             <div class="container">
-              <div class="header">
-                <h1>${HOTEL_NAME}</h1>
-                <p>Booking Confirmation</p>
+              <div class="header" style="background-color:#991E29;color:#FFFEF9;padding:30px;text-align:center;">
+                <h1 style="margin:0;">${HOTEL_NAME}</h1>
+                <p style="margin:6px 0 0;">Booking Confirmation</p>
               </div>
               <div class="content">
                 <p>Dear ${guestName},</p>
@@ -353,7 +358,7 @@ export async function sendInquiryAcknowledgment(params: {
             <style>
               body { font-family: 'Inter', Arial, sans-serif; line-height: 1.6; color: #1A1A1A; }
               .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-              .header { background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-primary) 100%); color: #FFFEF9; padding: 30px; text-align: center; }
+              .header { background-color: #991E29; background-image: linear-gradient(135deg, #991E29 0%, #7A1821 100%); color: #FFFEF9; padding: 30px; text-align: center; }
               .content { background: #F8F6F4; padding: 30px; }
               .footer { text-align: center; padding: 20px; color: #B8AFA4; font-size: 14px; }
             </style>
@@ -434,7 +439,7 @@ export async function sendEventInquiryToReservations(params: {
             <style>
               body { font-family: 'Inter', Arial, sans-serif; line-height: 1.6; color: #1A1A1A; }
               .container { max-width: 680px; margin: 0 auto; padding: 20px; }
-              .header { background: var(--brand-primary); color: #FFFEF9; padding: 24px 28px; }
+              .header { background-color: #991E29; color: #FFFEF9; padding: 24px 28px; }
               .content { background: #F8F6F4; padding: 24px 28px; }
               .card { background: #FFFFFF; border: 1px solid #ECE5D8; border-radius: 8px; padding: 18px; }
               .row { display: flex; justify-content: space-between; gap: 20px; padding: 8px 0; border-bottom: 1px solid #F2EDE4; }
@@ -507,7 +512,7 @@ export async function sendMembershipApplicationAcknowledgment(params: {
             <style>
               body { font-family: 'Inter', Arial, sans-serif; line-height: 1.6; color: #1A1A1A; }
               .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-              .header { background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-primary) 100%); color: #FFFEF9; padding: 30px; text-align: center; }
+              .header { background-color: #991E29; background-image: linear-gradient(135deg, #991E29 0%, #7A1821 100%); color: #FFFEF9; padding: 30px; text-align: center; }
               .content { background: #F8F6F4; padding: 30px; }
               .footer { text-align: center; padding: 20px; color: #B8AFA4; font-size: 14px; }
             </style>
