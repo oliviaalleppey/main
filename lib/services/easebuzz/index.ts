@@ -4,13 +4,26 @@ const EASEBUZZ_API_KEY = process.env.EASEBUZZ_API_KEY || '';
 const EASEBUZZ_SALT = process.env.EASEBUZZ_SALT || '';
 const EASEBUZZ_ENV = process.env.EASEBUZZ_ENV || 'test';
 
-const INITIATE_URL = EASEBUZZ_ENV === 'production'
+/**
+ * Easebuzz's own SDK keys this off the string 'prod', our README documents
+ * 'live', and the code used to test for 'production'. Any of the three now
+ * means production, because the failure mode of getting this wrong is silent:
+ * real cards get sent to testpay, which accepts nothing.
+ */
+const IS_PRODUCTION = ['production', 'prod', 'live'].includes(EASEBUZZ_ENV.trim().toLowerCase());
+
+const INITIATE_URL = IS_PRODUCTION
     ? 'https://pay.easebuzz.in/payment/initiateLink'
     : 'https://testpay.easebuzz.in/payment/initiateLink';
 
-const PAY_BASE_URL = EASEBUZZ_ENV === 'production'
+const PAY_BASE_URL = IS_PRODUCTION
     ? 'https://pay.easebuzz.in/pay'
     : 'https://testpay.easebuzz.in/pay';
+
+// Transaction API v2 lives on the dashboard host, not the pay host.
+const DASHBOARD_URL = IS_PRODUCTION
+    ? 'https://dashboard.easebuzz.in'
+    : 'https://testdashboard.easebuzz.in';
 
 export class EasebuzzService {
     static get isConfigured() {
@@ -169,6 +182,74 @@ export class EasebuzzService {
         return {
             accessKey: json.data,
             payUrl: `${PAY_BASE_URL}/${json.data}`,
+        };
+    }
+
+    /**
+     * Transaction API v2 — the authoritative status of a txnid, straight from
+     * Easebuzz. This is the only way to find out what happened to a payment
+     * whose browser never came back to us (guest closed the tab, lost signal,
+     * killed the app mid-3DS), which is otherwise invisible: no webhook is
+     * ever sent for those, so the payment row sits `pending` forever.
+     *
+     * Reference: easebuzz/paywitheasebuzz-php-lib -> easebuzz-lib/transaction.php
+     *   ENDPOINT:      POST {dashboardBaseUrl}/transaction/v2/retrieve
+     *   HASH SEQUENCE: key|txnid|SALT
+     *
+     * Returns the gateway's transaction record, or null when Easebuzz has no
+     * record of the txnid at all (guest never reached the hosted page).
+     */
+    static async fetchTransactionStatus(txnid: string): Promise<{
+        found: boolean;
+        status: string | null;
+        fields: Record<string, string>;
+        raw: unknown;
+    }> {
+        const hash = crypto
+            .createHash('sha512')
+            .update(`${EASEBUZZ_API_KEY}|${txnid}|${EASEBUZZ_SALT}`)
+            .digest('hex');
+
+        const response = await fetch(`${DASHBOARD_URL}/transaction/v2/retrieve`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ key: EASEBUZZ_API_KEY, txnid, hash }).toString(),
+        });
+
+        const text = await response.text();
+
+        let json: any;
+        try {
+            json = JSON.parse(text);
+        } catch {
+            throw new Error(`Easebuzz transaction API returned non-JSON: ${text.slice(0, 300)}`);
+        }
+
+        // Easebuzz is inconsistent about the envelope across its APIs and
+        // versions — `msg` on some, `data` on others, and `msg` is sometimes a
+        // bare string carrying an error instead of the transaction. Rather than
+        // bet on one shape, accept any of them and treat anything unrecognised
+        // as "no record", so a shape change degrades to leaving the payment
+        // pending rather than silently marking a paid booking failed.
+        const envelope = json?.msg ?? json?.data ?? null;
+        const record = Array.isArray(envelope) ? envelope[0] : envelope;
+
+        if (!record || typeof record !== 'object' || typeof record.status === 'undefined') {
+            return { found: false, status: null, fields: {}, raw: json };
+        }
+
+        const fields: Record<string, string> = {};
+        for (const [key, value] of Object.entries(record)) {
+            if (value !== null && value !== undefined && typeof value !== 'object') {
+                fields[key] = String(value);
+            }
+        }
+
+        return {
+            found: true,
+            status: String(record.status),
+            fields,
+            raw: json,
         };
     }
 }
