@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { redirect } from 'next/navigation';
-import { auth } from '@/auth';
 import { db } from '@/lib/db';
+import { getAdminAccess, hasSection } from '@/lib/admin/guard';
 import { waAuditLog } from '@/lib/db/schema';
-import { can, isWhatsAppRole, type Capability } from './roles';
+import { can, type Capability, type WhatsAppRole } from './roles';
 
 /**
  * Shared auth + audit helpers for the WhatsApp admin API.
@@ -51,17 +51,36 @@ export class ForbiddenError extends Error {
  * not quietly widen access to a route nobody re-examined.
  */
 export async function requireAdmin(request: Request): Promise<AdminActor> {
-    const session = await auth();
-    if (!session || session.user?.role !== 'admin') {
+    const actor = await resolveWhatsAppActor();
+    if (!actor || actor.role !== 'admin') {
         throw new UnauthorizedError();
     }
 
-    return {
-        id: (session.user as { id?: string }).id,
-        email: session.user?.email ?? undefined,
-        ip: request.headers.get('x-forwarded-for')?.split(',')[0]?.trim(),
-        role: session.user?.role,
-    };
+    return { ...actor, ip: request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() };
+}
+
+/**
+ * Who is asking, and which WhatsApp role they act as — read from the database,
+ * not the session token.
+ *
+ * The admin panel's roles are now `admin` and `staff` (lib/admin/guard.ts), and
+ * neither `marketing`, `frontdesk` nor `viewer` can be stored: the user_role
+ * enum does not hold them. Reading the token's role here meant a staff member
+ * granted the WhatsApp section got 401 on every WhatsApp request. So the
+ * panel's access decides it: an administrator acts as `admin`; staff holding the
+ * WhatsApp section act as `viewer`, because section grants are read-only today —
+ * read across the module, phone numbers masked, nothing sent or changed.
+ */
+async function resolveWhatsAppActor(): Promise<(AdminActor & { role: WhatsAppRole }) | null> {
+    const access = await getAdminAccess();
+    if (!access) return null;
+
+    let role: WhatsAppRole | null = null;
+    if (access.isAdmin) role = 'admin';
+    else if (hasSection(access, 'whatsapp')) role = 'viewer';
+    if (!role) return null;
+
+    return { id: access.userId, email: access.email, role };
 }
 
 /**
@@ -71,18 +90,12 @@ export async function requireAdmin(request: Request): Promise<AdminActor> {
  * ForbiddenError when there is one but it lacks the capability.
  */
 export async function requireCapability(request: Request, capability: Capability): Promise<AdminActor> {
-    const session = await auth();
-    const role = session?.user?.role;
+    const actor = await resolveWhatsAppActor();
 
-    if (!session || !isWhatsAppRole(role)) throw new UnauthorizedError();
-    if (!can(role, capability)) throw new ForbiddenError(capability);
+    if (!actor) throw new UnauthorizedError();
+    if (!can(actor.role, capability)) throw new ForbiddenError(capability);
 
-    return {
-        id: (session.user as { id?: string }).id,
-        email: session.user?.email ?? undefined,
-        ip: request.headers.get('x-forwarded-for')?.split(',')[0]?.trim(),
-        role,
-    };
+    return { ...actor, ip: request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() };
 }
 
 /**
@@ -100,17 +113,12 @@ export async function requireCapability(request: Request, capability: Capability
  * problem is the pointless loop ForbiddenError exists to avoid.
  */
 export async function requirePageCapability(capability: Capability): Promise<AdminActor> {
-    const session = await auth();
-    const role = session?.user?.role;
+    const actor = await resolveWhatsAppActor();
 
-    if (!session || !isWhatsAppRole(role)) redirect('/signin');
-    if (!can(role, capability)) redirect('/admin/whatsapp');
+    if (!actor) redirect('/signin');
+    if (!can(actor.role, capability)) redirect('/admin/whatsapp');
 
-    return {
-        id: (session.user as { id?: string }).id,
-        email: session.user?.email ?? undefined,
-        role,
-    };
+    return actor;
 }
 
 /** Turn a thrown error into the right response. Keeps route handlers flat. */

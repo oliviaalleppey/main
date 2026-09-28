@@ -1,12 +1,18 @@
 import Link from 'next/link';
 import { WhatsAppSubNav } from '@/components/admin/whatsapp/sub-nav';
 import { resolveProviderName } from '@/lib/services/whatsapp';
+import { requireSection } from '@/lib/admin/guard';
 
 export const metadata = {
     title: 'WhatsApp — Olivia Admin',
 };
 
-export default function WhatsAppLayout({ children }: { children: React.ReactNode }) {
+export default async function WhatsAppLayout({ children }: { children: React.ReactNode }) {
+    // One guard for every page in the module. None of the sixteen pages under
+    // here called requireSection, so any staff member could open them whatever
+    // they had been granted; the APIs behind them are checked separately.
+    await requireSection('whatsapp');
+
     const provider = resolveProviderName();
 
     return (
