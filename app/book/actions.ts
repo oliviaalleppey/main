@@ -836,10 +836,16 @@ export async function startBookingSession(
             },
         }).where(eq(bookingSessions.id, session.id));
 
+        // The cookie only carries the session id; how long the session lives is
+        // bookingSessions.expiresAt, which the checkout page enforces and which
+        // is extended as the guest works through checkout. A 15-minute cookie
+        // set once here outran that: a guest who changed rooms at minute 14 was
+        // shown "15 minutes left" and bounced to search a minute later.
         cookieStore.set('booking_session', session.id, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            maxAge: 60 * 15,
+            sameSite: 'lax',
+            maxAge: 60 * 60 * 2,
         });
 
         // 4. Redirect to unified checkout

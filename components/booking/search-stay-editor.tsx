@@ -18,7 +18,7 @@ interface SearchStayEditorProps {
      * picker's value is local midnight, which in IST is 18:30 the previous day in
      * UTC, and the server read that back as the day before the guest chose.
      */
-    onUpdate?: (checkIn: string, checkOut: string, adults: number, children: number, rooms: number) => void;
+    onUpdate?: (checkIn: string, checkOut: string, adults: number, children: number, rooms: number) => void | Promise<void>;
 }
 
 export function SearchStayEditor({
@@ -48,14 +48,18 @@ export function SearchStayEditor({
         if (!date?.from || !date?.to) return;
 
         if (onUpdate) {
-            startTransition(() => {
-                onUpdate(
+            startTransition(async () => {
+                await onUpdate(
                     format(date.from!, 'yyyy-MM-dd'),
                     format(date.to!, 'yyyy-MM-dd'),
                     guests.adults,
                     guests.children,
                     guests.rooms,
                 );
+                // The update is not awaited by anything else, so the checkout
+                // summary kept showing the old dates and price until a manual
+                // reload. Re-render the server components now that it has landed.
+                router.refresh();
             });
             return;
         }
