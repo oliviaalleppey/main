@@ -376,7 +376,7 @@ export default async function CheckoutPage({
                         {roomLineItems.length > 0 ? roomLineItems.map(item => (
                             <div key={item.room.id} className="text-sm font-semibold text-gray-900 leading-tight flex flex-col sm:flex-row sm:items-center">
                                 <span>{formatRoomName(item.room.name)}</span>
-                                <span className="text-xs font-medium text-gray-500 sm:ml-2 mt-0.5 sm:mt-0">{formatCurrency(item.subtotal)} Room/Night</span>
+                                <span className="text-xs font-medium text-gray-500 sm:ml-2 mt-0.5 sm:mt-0">{formatCurrency(item.quotedPricePerNight)} Room/Night</span>
                             </div>
                         )) : <span className="text-sm text-gray-500 font-semibold">No room selected.</span>}
                     </div>

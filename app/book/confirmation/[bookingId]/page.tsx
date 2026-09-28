@@ -138,8 +138,8 @@ export default async function ConfirmationPage({ params }: { params: Promise<{ b
                     <div className="grid grid-cols-2 gap-4 pb-4 border-b border-gray-100">
                         <span className="text-gray-500">Dates</span>
                         <span className="font-medium text-right">
-                            {new Date(booking.checkIn).toLocaleDateString()} - <br />
-                            {new Date(booking.checkOut).toLocaleDateString()}
+                            {new Date(booking.checkIn).toLocaleDateString('en-IN', { timeZone: 'UTC' })} - <br />
+                            {new Date(booking.checkOut).toLocaleDateString('en-IN', { timeZone: 'UTC' })}
                         </span>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
