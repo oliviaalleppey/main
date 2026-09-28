@@ -12,7 +12,7 @@ const bookingService = new BookingService();
 // ... imports ...
 import { db } from '@/lib/db';
 import { addOns, bookingSessions, ratePlans, roomTypes } from '@/lib/db/schema';
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray, isNull, lt, ne, or } from 'drizzle-orm';
 import { ensureRoomTypeMinOccupancyColumn } from '@/lib/db/schema-guard';
 import { calculateAddOnTax } from '@/lib/services/tax';
 import { mapCrsRoomTypeMatchesInternal } from '@/lib/config/crs';
@@ -1060,6 +1060,34 @@ export async function initiateEasebuzzPaymentAction(): Promise<{
     const limit = await RateLimiter.check(ip, 'initiateEasebuzzPaymentAction');
     if (!limit.allowed) return { success: false, error: 'Too many attempts. Please try again.' };
 
+    // Claim the session for payment. This UPDATE is the lock: a double-click or a
+    // second tab finds step already 'payment' and gets no row back. Without it
+    // each click created its own booking and payment row — finalizeBooking's
+    // idempotency key includes a fresh `OL-${Date.now()}` txnid, so it never
+    // matched. A claim older than two minutes is treated as abandoned, so a
+    // request that died mid-way cannot lock the guest out of paying.
+    const staleClaim = new Date(Date.now() - 2 * 60 * 1000);
+    const claimed = await db.update(bookingSessions)
+        .set({ step: 'payment', updatedAt: new Date() })
+        .where(and(
+            eq(bookingSessions.id, sessionId),
+            or(
+                isNull(bookingSessions.step),
+                ne(bookingSessions.step, 'payment'),
+                lt(bookingSessions.updatedAt, staleClaim),
+            ),
+        ))
+        .returning({ id: bookingSessions.id });
+    if (!claimed.length) {
+        return { success: false, error: 'Your payment is already being set up. Please wait a moment.' };
+    }
+
+    // Hand the claim back on any failure, so the guest can simply try again.
+    const releaseClaim = () => db.update(bookingSessions)
+        .set({ step: 'details', updatedAt: new Date() })
+        .where(eq(bookingSessions.id, sessionId))
+        .catch((e) => console.error('Failed to release payment claim:', e));
+
     try {
         const expectedAmount = await calculateSessionPayableAmount(sessionId);
 
@@ -1070,6 +1098,7 @@ export async function initiateEasebuzzPaymentAction(): Promise<{
         const guestDetails = cartData?.guestDetails as { firstName?: string; lastName?: string; email?: string; phone?: string } | undefined;
 
         if (!guestDetails?.firstName || !guestDetails?.email || !guestDetails?.phone) {
+            await releaseClaim();
             return { success: false, error: 'Guest details are incomplete. Please fill in the guest form again.' };
         }
 
@@ -1081,7 +1110,10 @@ export async function initiateEasebuzzPaymentAction(): Promise<{
             orderId: txnId,
         });
 
-        if (!booking) return { success: false, error: 'Failed to create booking record.' };
+        if (!booking) {
+            await releaseClaim();
+            return { success: false, error: 'Failed to create booking record.' };
+        }
 
         await captureWhatsAppAttribution(booking.id);
 
@@ -1112,6 +1144,7 @@ export async function initiateEasebuzzPaymentAction(): Promise<{
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Payment initiation failed.';
         console.error('Easebuzz payment initiation failed:', message);
+        await releaseClaim();
         return { success: false, error: message };
     }
 }
