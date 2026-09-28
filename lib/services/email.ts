@@ -343,6 +343,162 @@ export async function sendBookingAlertToStaff(params: {
 }
 
 /**
+ * Why a paid booking has not reached a confirmed reservation.
+ *
+ * `rejected` — Hotsoft refused it outright, and the booking is marked failed.
+ * `stalled`  — Hotsoft kept failing retryably until the watchdog gave up.
+ * Either way the guest has paid and holds no room, and until now the only
+ * trace of it was a row in booking_logs.
+ */
+export type UnconfirmedPaymentReason = 'rejected' | 'stalled';
+
+/**
+ * Urgent alert to reservations: money taken, no reservation in the PMS.
+ */
+export async function sendUnconfirmedPaymentAlertToStaff(params: {
+  bookingId: string;
+  bookingNumber: string;
+  guestName: string;
+  guestEmail: string;
+  guestPhone: string;
+  checkIn: string;
+  checkOut: string;
+  totalAmount: number;
+  reason: UnconfirmedPaymentReason;
+  detail: string;
+}) {
+  try {
+    const resend = getResendClient();
+    if (!resend) return { skipped: true };
+
+    const { bookingId, bookingNumber, checkIn, checkOut, totalAmount, reason } = params;
+    const guestName = escapeHtml(params.guestName);
+    const guestEmail = escapeHtml(params.guestEmail);
+    const guestPhone = escapeHtml(params.guestPhone);
+    const detail = escapeHtml(params.detail || 'No reason given');
+    const headline = reason === 'rejected'
+      ? 'Hotsoft rejected this reservation'
+      : 'Hotsoft has not confirmed this reservation after repeated retries';
+    const adminUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://oliviaalleppey.com'}/admin/bookings/${bookingId}`;
+
+    const { data, error } = await resend.emails.send({
+      from: `${HOTEL_NAME} System <${FROM_EMAIL}>`,
+      to: [RESERVATION_TEAM_EMAIL, FOM_EMAIL],
+      bcc: ['mail@oliviaalleppey.com'],
+      subject: `ACTION NEEDED — Paid but not confirmed: ${bookingNumber} | ${params.guestName.replace(/[\r\n]/g, ' ')}`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head><meta charset="utf-8"></head>
+          <body style="font-family:Arial,sans-serif;line-height:1.6;color:#1A1A1A;background:#F4F0E8;margin:0;padding:0;">
+            <div style="max-width:620px;margin:32px auto;background:#fff;border-radius:12px;overflow:hidden;">
+              <div style="background:#991E29;color:#fff;padding:24px 32px;">
+                <h2 style="margin:0;font-size:20px;">Paid booking needs manual confirmation</h2>
+                <p style="margin:6px 0 0;opacity:0.85;font-size:13px;">${headline}</p>
+              </div>
+              <div style="padding:28px 32px;">
+                <p>The guest's payment of <strong>${formatRupees(totalAmount)}</strong> was received, but there is
+                  <strong>no confirmed reservation in the PMS</strong>. Please create or confirm the room manually
+                  in Hotsoft and contact the guest. The guest has been told their payment was received and that
+                  reservations will confirm their room.</p>
+                <table style="width:100%;border-collapse:collapse;font-size:14px;">
+                  <tr><td style="padding:6px 0;color:#6B7280;">Booking No.</td><td style="padding:6px 0;text-align:right;font-weight:600;">${bookingNumber}</td></tr>
+                  <tr><td style="padding:6px 0;color:#6B7280;">Guest</td><td style="padding:6px 0;text-align:right;font-weight:600;">${guestName}</td></tr>
+                  <tr><td style="padding:6px 0;color:#6B7280;">Email</td><td style="padding:6px 0;text-align:right;">${guestEmail}</td></tr>
+                  <tr><td style="padding:6px 0;color:#6B7280;">Phone</td><td style="padding:6px 0;text-align:right;">${guestPhone}</td></tr>
+                  <tr><td style="padding:6px 0;color:#6B7280;">Check-in</td><td style="padding:6px 0;text-align:right;">${checkIn}</td></tr>
+                  <tr><td style="padding:6px 0;color:#6B7280;">Check-out</td><td style="padding:6px 0;text-align:right;">${checkOut}</td></tr>
+                  <tr><td style="padding:6px 0;color:#6B7280;">Amount paid</td><td style="padding:6px 0;text-align:right;font-weight:600;">${formatRupees(totalAmount)}</td></tr>
+                </table>
+                <p style="margin-top:20px;font-size:13px;color:#6B7280;">CRS response: ${detail}</p>
+                <p style="text-align:center;margin-top:24px;">
+                  <a href="${adminUrl}" style="display:inline-block;background:#0D4A4A;color:#fff;text-decoration:none;font-size:13px;font-weight:700;padding:14px 36px;border-radius:8px;">Open booking in admin →</a>
+                </p>
+              </div>
+            </div>
+          </body>
+        </html>
+      `,
+    });
+
+    if (error) {
+      console.error('Error sending unconfirmed-payment alert:', error);
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Failed to send unconfirmed-payment alert:', error);
+    throw new Error('Failed to send unconfirmed-payment alert');
+  }
+}
+
+/**
+ * Tell a guest whose payment went through but whose room is not yet confirmed
+ * that the money arrived and a person is on it. Without this they heard nothing
+ * at all — the confirmation email only goes out once the CRS confirms.
+ */
+export async function sendPaymentReceivedPendingToGuest(params: {
+  to: string;
+  guestName: string;
+  bookingNumber: string;
+  checkIn: string;
+  checkOut: string;
+  totalAmount: number;
+}) {
+  try {
+    const resend = getResendClient();
+    if (!resend) return { skipped: true };
+
+    const { to, bookingNumber, checkIn, checkOut, totalAmount } = params;
+    const guestName = escapeHtml(params.guestName);
+
+    const { data, error } = await resend.emails.send({
+      from: `${HOTEL_NAME} <${FROM_EMAIL}>`,
+      to: [to],
+      bcc: [RESERVATION_TEAM_EMAIL],
+      subject: `Payment received — ${bookingNumber}`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head><meta charset="utf-8"></head>
+          <body style="font-family:Arial,sans-serif;line-height:1.6;color:#1A1A1A;margin:0;padding:0;">
+            <div style="max-width:600px;margin:0 auto;padding:20px;">
+              <div style="background-color:#991E29;color:#FFFEF9;padding:30px;text-align:center;">
+                <h1 style="margin:0;">${HOTEL_NAME}</h1>
+                <p style="margin:6px 0 0;">Payment received</p>
+              </div>
+              <div style="background:#F8F6F4;padding:30px;">
+                <p>Dear ${guestName},</p>
+                <p>We have received your payment of <strong>${formatRupees(totalAmount)}</strong> for booking
+                  <strong>${bookingNumber}</strong> (${checkIn} to ${checkOut}).</p>
+                <p>Our reservations team is completing the confirmation of your room personally and will be in
+                  touch with you shortly. There is no need to book or pay again.</p>
+                <p>If you have any questions, please contact us and quote your booking number.</p>
+              </div>
+              <div style="text-align:center;padding:20px;color:#8A8178;font-size:14px;">
+                <p>${HOTEL_NAME}<br>Alappuzha, Kerala, India</p>
+                <p>Email: <a href="mailto:${FROM_EMAIL}" style="color:#C9A84C;">${FROM_EMAIL}</a> &nbsp;|&nbsp; Phone: <a href="tel:${HOTEL_PHONE_TEL}" style="color:#C9A84C;">${HOTEL_PHONE}</a></p>
+              </div>
+            </div>
+          </body>
+        </html>
+      `,
+    });
+
+    if (error) {
+      console.error('Error sending payment-received email:', error);
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Failed to send payment-received email:', error);
+    throw new Error('Failed to send payment-received email');
+  }
+}
+
+/**
  * Send inquiry acknowledgment email
  */
 export async function sendInquiryAcknowledgment(params: {

@@ -64,7 +64,15 @@ export default async function ConfirmationPage({ params }: { params: Promise<{ b
     let icon = <CheckCircle2 className="w-10 h-10 text-green-600" />;
     let iconBg = "bg-green-100";
 
-    if (booking.status === 'failed') {
+    if (booking.status === 'failed' && booking.paymentStatus === 'success') {
+        // Paid, but the hotel system did not take the reservation. Reservations
+        // has been alerted and will confirm by hand; "Booking Failed" here told a
+        // guest who had paid that they had nothing, and sent them to book again.
+        statusTitle = "Payment Received";
+        statusMsg = "Your payment was successful. Our reservations team is confirming your room personally and will contact you shortly. Please do not book or pay again.";
+        icon = <CheckCircle2 className="w-10 h-10 text-amber-600" />;
+        iconBg = "bg-amber-50";
+    } else if (booking.status === 'failed') {
         statusTitle = "Booking Failed";
         statusMsg = "There was an issue completing your reservation. Please contact support.";
         icon = <div className="text-red-600 text-4xl">!</div>; // Icon placeholder
@@ -140,7 +148,9 @@ export default async function ConfirmationPage({ params }: { params: Promise<{ b
                     </div>
                     <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-100">
                         <span className="text-gray-500">Status</span>
-                        <span className="font-medium text-right capitalize">{(booking.status || 'unknown').replace('_', ' ')}</span>
+                        <span className="font-medium text-right capitalize">{booking.status === 'failed' && booking.paymentStatus === 'success'
+                            ? 'Awaiting confirmation'
+                            : (booking.status || 'unknown').replace('_', ' ')}</span>
                     </div>
                 </div>
 

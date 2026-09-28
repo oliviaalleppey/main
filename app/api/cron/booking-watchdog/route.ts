@@ -87,6 +87,18 @@ export async function GET(request: Request) {
                     requestPayload: { retryCount: newRetryCount, finalizeResult }
                 });
 
+                // Last automatic attempt, still not confirmed: from here on the
+                // watchdog only logs, so this is the one moment to get a person
+                // on it. Fires once — the count never reaches MAX_RETRIES again.
+                // A 'failed' result has already been reported by finalizeFromWebhook.
+                if (newRetryCount === MAX_RETRIES && !finalizeResult.success && finalizeResult.status === 'pending_retry') {
+                    await bookingService.notifyPaidButUnconfirmed(
+                        booking.id,
+                        'stalled',
+                        finalizeResult.message || `No CRS confirmation after ${MAX_RETRIES} attempts`,
+                    );
+                }
+
                 results.push({
                     id: booking.id,
                     status: finalizeResult.success ? 'confirmed' : (finalizeResult.status || 'pending_retry'),

@@ -17,7 +17,14 @@ import {
 import { IdempotencyService } from './idempotency';
 import { SessionExpiration } from './session-expiration';
 import { BookingLockService } from './booking-lock';
-import { sendBookingConfirmation, sendBookingAlertToStaff, type BookingEmailCharges } from './email';
+import {
+    sendBookingConfirmation,
+    sendBookingAlertToStaff,
+    sendUnconfirmedPaymentAlertToStaff,
+    sendPaymentReceivedPendingToGuest,
+    type BookingEmailCharges,
+    type UnconfirmedPaymentReason,
+} from './email';
 import { fireAutomation } from './whatsapp/automations';
 import { bookingStateMachine } from './booking-state-machine';
 import { eq, inArray } from 'drizzle-orm';
@@ -1218,6 +1225,7 @@ export class BookingService {
             }
 
             // Attempt failure transition if not already failed
+            let endedFailed = false;
             try {
                 const b = await db.query.bookings.findFirst({
                     where: eq(bookings.id, bookingId), columns: { status: true }
@@ -1227,7 +1235,17 @@ export class BookingService {
                         reason: `Webhook finalize exception: ${message}`
                     });
                 }
+                // Either it already was failed (the CRS rejection path sets it
+                // before throwing) or the transition above just made it so.
+                endedFailed = !!b && b.status !== 'confirmed';
             } catch { /* ignore secondary failure */ }
+
+            // This method only runs after a verified payment, and returns early for
+            // a booking that was already failed — so reaching here means this call
+            // is the one that turned a paid booking into a failed one. Say so, once.
+            if (endedFailed) {
+                await this.notifyPaidButUnconfirmed(bookingId, 'rejected', message);
+            }
 
             return {
                 success: false,
@@ -1237,6 +1255,57 @@ export class BookingService {
         } finally {
             // 8. RELEASE LOCK (Mandatory)
             await BookingLockService.releaseLock(bookingId);
+        }
+    }
+
+    /**
+     * The guest has paid and there is no reservation in the PMS.
+     *
+     * Emails reservations (who must fix it by hand) and the guest (who would
+     * otherwise hear nothing, since the confirmation email waits on the CRS).
+     * Never throws: this runs on failure paths, and a mail problem must not
+     * replace the real error or break the watchdog's loop.
+     */
+    async notifyPaidButUnconfirmed(bookingId: string, reason: UnconfirmedPaymentReason, detail: string) {
+        try {
+            const booking = await db.query.bookings.findFirst({ where: eq(bookings.id, bookingId) });
+            if (!booking || booking.paymentStatus !== 'success') return;
+
+            const checkIn = new Date(booking.checkIn).toLocaleDateString('en-IN');
+            const checkOut = new Date(booking.checkOut).toLocaleDateString('en-IN');
+
+            await Promise.all([
+                sendUnconfirmedPaymentAlertToStaff({
+                    bookingId,
+                    bookingNumber: booking.bookingNumber,
+                    guestName: booking.guestName,
+                    guestEmail: booking.guestEmail,
+                    guestPhone: booking.guestPhone,
+                    checkIn,
+                    checkOut,
+                    totalAmount: booking.totalAmount,
+                    reason,
+                    detail,
+                }).catch((e) => console.error(`Failed to send unconfirmed-payment alert for ${bookingId}:`, e)),
+                sendPaymentReceivedPendingToGuest({
+                    to: booking.guestEmail,
+                    guestName: booking.guestName,
+                    bookingNumber: booking.bookingNumber,
+                    checkIn,
+                    checkOut,
+                    totalAmount: booking.totalAmount,
+                }).catch((e) => console.error(`Failed to send payment-received email for ${bookingId}:`, e)),
+            ]);
+
+            await db.insert(bookingLogs).values({
+                bookingId,
+                action: 'paid_unconfirmed_alert_sent',
+                level: 'warning',
+                errorMessage: detail,
+                requestPayload: { reason },
+            });
+        } catch (error) {
+            console.error(`notifyPaidButUnconfirmed failed for ${bookingId}:`, error);
         }
     }
 
