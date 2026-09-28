@@ -2,8 +2,11 @@ import { db } from '@/lib/db';
 import { roomTypes } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { PricingRuleForm } from '@/components/admin/pricing-rule-form';
+import { requireSection } from '@/lib/admin/guard';
 
 export default async function CreatePricingRulePage() {
+    await requireSection('pricing');
+
     const allRoomTypes = await db.select({
         id: roomTypes.id,
         name: roomTypes.name,

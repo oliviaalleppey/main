@@ -3,6 +3,7 @@ import GalleryAdminManager from './GalleryAdminManager';
 import { db } from '@/lib/db';
 import { galleryImages, siteSettings } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+import { requireSection } from '@/lib/admin/guard';
 
 export const metadata = {
     title: 'Gallery Management | Admin',
@@ -17,6 +18,8 @@ const DEFAULT_TABS = [
 ];
 
 export default async function AdminGalleryPage() {
+    await requireSection('gallery');
+
     const [images, tabSetting] = await Promise.all([
         db.select().from(galleryImages)
             .where(eq(galleryImages.category, 'gallery'))

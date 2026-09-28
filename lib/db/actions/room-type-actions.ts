@@ -4,11 +4,14 @@ import { db } from '@/lib/db';
 import { roomTypes } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
+import { requireAdminAction } from '@/lib/admin/guard';
 
 export async function updateRoomTypeSorting(updates: { id: string, sortOrder: number }[]) {
     if (!Array.isArray(updates) || updates.length === 0) return { success: true };
-    
+
     try {
+        await requireAdminAction();
+
         await db.transaction(async (tx) => {
             for (const update of updates) {
                 await tx.update(roomTypes)

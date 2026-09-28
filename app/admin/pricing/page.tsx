@@ -7,8 +7,11 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Calendar, TrendingUp } from 'lucide-react';
 import { PricingManager } from '@/components/admin/pricing-manager';
+import { requireSection } from '@/lib/admin/guard';
 
 export default async function PricingRulesPage() {
+    await requireSection('pricing');
+
     const activeRoomTypes = await db.select({
         id: roomTypes.id,
         name: roomTypes.name,

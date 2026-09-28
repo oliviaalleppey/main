@@ -1,10 +1,11 @@
 import { db } from '@/lib/db';
 import { bookings, payments, bookingItems, bookingGuests, bookingConfirmations, bookingLogs, roomTypes, bookingAddOns, addOns } from '@/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
-import { notFound, redirect } from 'next/navigation';
-import { auth } from '@/auth';
+import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, CheckCircle2, Clock, XCircle, AlertTriangle } from 'lucide-react';
+import { requireSection } from '@/lib/admin/guard';
+import { calculateAddOnTax } from '@/lib/services/tax';
 
 interface PageProps {
     params: Promise<{ id: string }>;
@@ -56,8 +57,7 @@ function Field({ label, value, className = '' }: { label: string; value: React.R
 }
 
 export default async function BookingDetailPage({ params }: PageProps) {
-    const session = await auth();
-    if (!session || session.user?.role !== 'admin') redirect('/signin');
+    await requireSection('bookings');
 
     const { id } = await params;
 
@@ -101,10 +101,11 @@ export default async function BookingDetailPage({ params }: PageProps) {
 
     const crsConfirmation = confirmationRows[0];
     
-    const addOnsTax = addOnRows.reduce((sum, row) => {
-        const taxRate = row.addOn?.taxRate ? parseFloat(String(row.addOn.taxRate)) : 18;
-        return sum + Math.round(row.subtotal * (taxRate / 100));
-    }, 0);
+    // The rate on the line is what this booking was charged; the add-on's own
+    // rate is only a fallback for lines taken before the line carried one.
+    const addOnsTax = calculateAddOnTax(
+        addOnRows.map((row) => ({ subtotal: row.subtotal, taxRate: row.taxRate ?? row.addOn?.taxRate })),
+    );
     const roomTaxesAndFees = Math.max(0, (booking.taxAmount || 0) - addOnsTax);
 
     const roomSubtotal = bookingItemRows.reduce((a, i) => a + (i.subtotal || 0), 0);

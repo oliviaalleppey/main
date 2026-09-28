@@ -1,4 +1,3 @@
-import { auth } from '@/auth';
 import { db } from '@/lib/db';
 import { bookingConfirmations, bookings, bookingItems, roomTypes } from '@/lib/db/schema';
 import { AutoRefreshControl } from '@/components/admin/auto-refresh-control';
@@ -6,9 +5,9 @@ import { PendingConfirmationsTable, type PendingConfirmationItem } from '@/compo
 import { RunWatchdogButton } from '@/components/admin/run-watchdog-button';
 import { BookingFilters } from '@/components/admin/booking-filters';
 import { and, desc, eq, gte, inArray, lte, ilike, sql } from 'drizzle-orm';
-import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { DeleteBookingButton } from './DeleteBookingButton';
+import { requireSection } from '@/lib/admin/guard';
 
 const MAX_RETRIES = Number(process.env.BOOKING_WATCHDOG_MAX_RETRIES || 12);
 
@@ -34,8 +33,7 @@ interface PageProps {
 }
 
 export default async function AdminBookingsPage({ searchParams }: PageProps) {
-    const session = await auth();
-    if (!session || session.user?.role !== 'admin') redirect('/signin');
+    await requireSection('bookings');
 
     const params = await searchParams;
     const { status, roomType, dateFrom, dateTo, guest, bookingNum } = params;

@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getConferenceVenueImages, getConferenceSectionImages } from '../../../../admin/media/actions';
 
+// Deliberately unauthenticated despite the /api/admin/ path: the public site
+// fetches this to render images that are already published. Read-only, and
+// adding an auth check here would blank those pages for visitors.
 export async function GET() {
     try {
         const [venueImages, sectionImages] = await Promise.all([

@@ -33,7 +33,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                         token.id = dbUser.id;
                     }
                     
-                    // Automatically grant admin rights to specific emails
+                    // The master administrator accounts. These are hard-coded on
+                    // purpose: they are the accounts that hand out everyone else's
+                    // access on /admin/staff, so they must not themselves be
+                    // revocable from inside the panel — otherwise one wrong click
+                    // locks the hotel out of its own admin.
                     const defaultAdmins = ['it@oliviaalleppey.com', 'mail@oliviaalleppey.com'];
                     if (defaultAdmins.includes(user.email)) {
                         token.role = 'admin';

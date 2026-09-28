@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getBookingProvider } from '@/lib/providers/crs/factory';
 import { ArrowLeft, BedDouble, Calendar, Ban, Activity, ChevronLeft, ChevronRight } from 'lucide-react';
+import { requireSection } from '@/lib/admin/guard';
 
 interface PageProps {
     params: Promise<{ id: string }>;
@@ -22,6 +23,8 @@ function getDates(start: Date, days: number): Date[] {
 }
 
 export default async function RoomAvailabilityPage({ params, searchParams }: PageProps) {
+    await requireSection('availability');
+
     const { id } = await params;
     const sParams = await searchParams;
 

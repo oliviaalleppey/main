@@ -16,13 +16,13 @@ import {
 } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
-import { auth } from '@/auth';
+import { requireAdminAction } from '@/lib/admin/guard';
 
 export async function deleteBookingAction(id: string) {
-    const session = await auth();
-    if (!session || session.user?.role !== 'admin') {
-        throw new Error('Unauthorized');
-    }
+    // Deleting a booking erases the reservation and its payment history. Staff
+    // granted the bookings section can read them; removing one stays with the
+    // administrator regardless of what they hold.
+    await requireAdminAction();
 
     try {
         // Delete all related records first to satisfy foreign key constraints

@@ -1,6 +1,9 @@
 import { RoomTypeForm } from '@/components/admin/room-type-form';
+import { requireSection } from '@/lib/admin/guard';
 
-export default function NewRoomTypePage() {
+export default async function NewRoomTypePage() {
+    await requireSection('rooms');
+
     return (
         <div className="max-w-4xl mx-auto space-y-6">
             <div>

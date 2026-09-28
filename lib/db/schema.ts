@@ -1132,7 +1132,10 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
 // AUTHENTICATION (NextAuth.js)
 // ============================================
 
-export const userRoleEnum = pgEnum('user_role', ['user', 'admin']);
+// 'staff' holds no permissions of its own — it is the marker that says "look this
+// person up in admin_section_grants". A staff member with no grant rows can sign
+// in and see nothing, which is the correct starting state for a new hire.
+export const userRoleEnum = pgEnum('user_role', ['user', 'admin', 'staff']);
 
 export const users = pgTable("user", {
     id: text("id")
@@ -1144,6 +1147,31 @@ export const users = pgTable("user", {
     image: text("image"),
     role: userRoleEnum('role').default('user'),
 });
+
+/**
+ * Which admin sections a staff member may open. One row per granted section.
+ *
+ * Presence is permission: no row means no access, so a new staff account starts
+ * with nothing and revoking is a DELETE rather than a flag that could be read the
+ * wrong way round. `canWrite` is false everywhere today — staff are view-only —
+ * but it exists now so that giving the front desk the ability to confirm a
+ * booking later is a data change rather than another migration.
+ *
+ * Read fresh on every admin request rather than carried in the session token, so
+ * that revoking access takes effect on the staff member's next page load instead
+ * of whenever they happen to sign in again.
+ */
+export const adminSectionGrants = pgTable('admin_section_grants', {
+    userId: text('user_id')
+        .notNull()
+        .references(() => users.id, { onDelete: 'cascade' }),
+    section: varchar('section', { length: 64 }).notNull(),
+    canWrite: boolean('can_write').notNull().default(false),
+    grantedBy: varchar('granted_by', { length: 255 }),
+    grantedAt: timestamp('granted_at').defaultNow(),
+}, (table) => ({
+    pk: primaryKey({ columns: [table.userId, table.section] }),
+}));
 
 export const accounts = pgTable(
     "account",

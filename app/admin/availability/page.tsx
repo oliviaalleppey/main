@@ -6,6 +6,7 @@ import { BedDouble, ArrowLeft, Calendar, CheckCircle2, AlertCircle, XCircle, Min
 import { HotsoftCrsProvider } from '@/lib/providers/crs/hotsoft-crs-provider';
 import { Suspense } from 'react';
 import { AvailabilityToolbar } from './toolbar';
+import { requireSection } from '@/lib/admin/guard';
 
 export const revalidate = 300; // 5 minutes
 
@@ -153,6 +154,8 @@ function DayHeader({ dateStr, isToday, compact = false }: { dateStr: string; isT
 }
 
 export default async function AdminAvailabilityPage({ searchParams }: { searchParams: Promise<{ view?: string; date?: string }> }) {
+    await requireSection('availability');
+
     const params = await searchParams;
     const todayStr = new Date().toISOString().slice(0, 10);
     const view = params.view || 'week';

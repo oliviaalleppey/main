@@ -1,8 +1,14 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { sql } from 'drizzle-orm';
+import { denyUnlessAdmin } from '@/lib/admin/guard';
 
+// This endpoint executes DDL against the production database. It had no auth
+// check at all, which meant anyone who found the URL could run it.
 export async function POST() {
+    const denied = await denyUnlessAdmin();
+    if (denied) return denied;
+
     try {
         // Create the housekeeping_status enum if it doesn't exist
         await db.execute(sql`

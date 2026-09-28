@@ -1,11 +1,10 @@
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
 import { and, desc, eq, gte, inArray, sql } from 'drizzle-orm';
-import { auth } from '@/auth';
 import { db } from '@/lib/db';
 import { bookings } from '@/lib/db/schema';
 import { getBookingProvider } from '@/lib/providers/crs/factory';
 import { BOOKING_FLOW_MODE } from '@/lib/config/booking-flow-mode';
+import { requireSection } from '@/lib/admin/guard';
 import {
     CalendarCheck,
     CalendarX,
@@ -38,10 +37,7 @@ function formatDate(dateStr: string): string {
 }
 
 export default async function AdminDashboard() {
-    const session = await auth();
-    if (!session || session.user?.role !== 'admin') {
-        redirect('/signin');
-    }
+    await requireSection('dashboard');
 
     const today = new Date().toISOString().split('T')[0];
     const tomorrow = new Date();

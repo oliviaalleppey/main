@@ -6,6 +6,7 @@ import { siteSettings, galleryImages, roomTypes } from '@/lib/db/schema';
 import { eq, desc, inArray, sql } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import sharp from 'sharp';
+import { requireAdminAction } from '@/lib/admin/guard';
 
 async function toWebP(file: File): Promise<{ buffer: Buffer; filename: string }> {
     try {
@@ -20,6 +21,8 @@ async function toWebP(file: File): Promise<{ buffer: Buffer; filename: string }>
 }
 
 export async function uploadHeroMedia(formData: FormData) {
+    await requireAdminAction();
+
     const file = formData.get('media') as File;
     if (!file) throw new Error('No file provided');
 
@@ -72,6 +75,8 @@ export async function getHeroMedia() {
 
 // Upload with category and page
 export async function uploadMedia(formData: FormData) {
+    await requireAdminAction();
+
     const file = formData.get('media') as File;
     const category = formData.get('category') as string;
     const page = formData.get('page') as string;
@@ -146,6 +151,8 @@ export async function getMediaByPage(pageName: string) {
 
 // Delete media
 export async function deleteMedia(id: string) {
+    await requireAdminAction();
+
     await db.delete(galleryImages).where(eq(galleryImages.id, id));
     revalidatePath('/admin/media');
     return { success: true };
@@ -167,6 +174,8 @@ export async function getPageHeaders() {
 
 // Set page header (upload file or save URL)
 export async function setPageHeader(page: string, formData: FormData) {
+    await requireAdminAction();
+
     const file = formData.get('media') as File | null;
     const manualUrl = formData.get('url') as string | null;
 
@@ -223,6 +232,8 @@ export async function getRoomTypesWithImages() {
 
 // Update a room type's image array (reorder, delete, replace)
 export async function updateRoomTypeImages(roomTypeId: string, images: string[]) {
+    await requireAdminAction();
+
     await db
         .update(roomTypes)
         .set({ images, updatedAt: new Date() } as any)
@@ -234,6 +245,8 @@ export async function updateRoomTypeImages(roomTypeId: string, images: string[])
 
 // Upload a single room image with WebP conversion (for replace)
 export async function uploadRoomImageFile(formData: FormData): Promise<{ url: string }> {
+    await requireAdminAction();
+
     const file = formData.get('media') as File;
     if (!file || file.size === 0) throw new Error('No file provided');
 
@@ -275,6 +288,8 @@ export async function getAmenityImages(): Promise<Record<string, string>> {
 }
 
 export async function setAmenityImage(amenityKey: string, formData: FormData) {
+    await requireAdminAction();
+
     const file = formData.get('media') as File | null;
     const manualUrl = formData.get('url') as string | null;
 
@@ -338,6 +353,8 @@ export async function getDiningImages(): Promise<Record<string, string>> {
 }
 
 export async function setDiningImage(slug: string, formData: FormData) {
+    await requireAdminAction();
+
     const file = formData.get('media') as File | null;
     const manualUrl = formData.get('url') as string | null;
 
@@ -417,6 +434,8 @@ export async function getMembershipImages(): Promise<Record<string, string>> {
 }
 
 export async function setMembershipImage(privilegeKey: string, formData: FormData) {
+    await requireAdminAction();
+
     const file = formData.get('media') as File | null;
     const manualUrl = formData.get('url') as string | null;
 
@@ -503,6 +522,8 @@ export async function getDiscoverExperienceImages(): Promise<Record<string, stri
 }
 
 export async function setDiscoverExperienceImage(expKey: string, formData: FormData) {
+    await requireAdminAction();
+
     const file = formData.get('media') as File | null;
     const manualUrl = formData.get('url') as string | null;
 
@@ -545,6 +566,8 @@ export async function setDiscoverExperienceImage(expKey: string, formData: FormD
 
 // Bulk import media from existing URLs
 export async function bulkImportMedia(urls: string[], category: string) {
+    await requireAdminAction();
+
     if (!urls.length) return { success: false, count: 0 };
 
     const values = urls.map(url => ({
@@ -562,6 +585,8 @@ export async function bulkImportMedia(urls: string[], category: string) {
 
 // Add a tab slug to one or more gallery images (does not remove existing tabs)
 export async function addGalleryImageTab(ids: string | string[], tabSlug: string) {
+    await requireAdminAction();
+
     const idList = Array.isArray(ids) ? ids : [ids];
     await Promise.all(idList.map(id =>
         db.execute(
@@ -575,6 +600,8 @@ export async function addGalleryImageTab(ids: string | string[], tabSlug: string
 
 // Remove a single tab slug from one image
 export async function removeGalleryImageTab(id: string, tabSlug: string) {
+    await requireAdminAction();
+
     await db.execute(
         sql`UPDATE gallery_images SET tabs = (SELECT jsonb_agg(t) FROM jsonb_array_elements_text(tabs) t WHERE t != ${tabSlug}) WHERE id = ${id}::uuid`
     );
@@ -585,6 +612,8 @@ export async function removeGalleryImageTab(id: string, tabSlug: string) {
 
 // Clear all tabs for images (used when removing a tab definition)
 export async function clearTabFromImages(tabSlug: string) {
+    await requireAdminAction();
+
     await db.execute(
         sql`UPDATE gallery_images SET tabs = (SELECT COALESCE(jsonb_agg(t), '[]'::jsonb) FROM jsonb_array_elements_text(tabs) t WHERE t != ${tabSlug})`
     );
@@ -595,6 +624,8 @@ export async function clearTabFromImages(tabSlug: string) {
 
 // Save custom gallery tab labels to siteSettings
 export async function saveGalleryTabLabels(tabs: { slug: string; label: string }[]) {
+    await requireAdminAction();
+
     const { siteSettings } = await import('@/lib/db/schema');
     await db.insert(siteSettings)
         .values({ key: 'gallery_tabs', value: tabs })
@@ -606,6 +637,8 @@ export async function saveGalleryTabLabels(tabs: { slug: string; label: string }
 
 // Reorder gallery images by persisting new sortOrder values
 export async function reorderGalleryImages(orderedIds: string[]) {
+    await requireAdminAction();
+
     await Promise.all(
         orderedIds.map((id, index) =>
             db.update(galleryImages).set({ sortOrder: index }).where(eq(galleryImages.id, id))
@@ -618,6 +651,8 @@ export async function reorderGalleryImages(orderedIds: string[]) {
 
 // Save URL as media (for client-side direct uploads)
 export async function saveMediaUrl(url: string, category: string, title: string) {
+    await requireAdminAction();
+
     const result = await db.insert(galleryImages).values({
         title: title || 'Untitled',
         imageUrl: url,
@@ -645,6 +680,8 @@ export async function getWeddingVenueImages(): Promise<Record<string, string>> {
 }
 
 export async function setWeddingVenueImage(venueKey: string, formData: FormData) {
+    await requireAdminAction();
+
     const file = formData.get('media') as File | null;
     const manualUrl = formData.get('url') as string | null;
 
@@ -701,6 +738,8 @@ export async function getWeddingSectionImages(): Promise<Record<string, string>>
 }
 
 export async function setWeddingSectionImage(sectionKey: string, formData: FormData) {
+    await requireAdminAction();
+
     const file = formData.get('media') as File | null;
     const manualUrl = formData.get('url') as string | null;
 
@@ -757,6 +796,8 @@ export async function getConferenceVenueImages(): Promise<Record<string, string>
 }
 
 export async function setConferenceVenueImage(venueKey: string, formData: FormData) {
+    await requireAdminAction();
+
     const file = formData.get('media') as File | null;
     const manualUrl = formData.get('url') as string | null;
 
@@ -813,6 +854,8 @@ export async function getConferenceSectionImages(): Promise<Record<string, strin
 }
 
 export async function setConferenceSectionImage(sectionKey: string, formData: FormData) {
+    await requireAdminAction();
+
     const file = formData.get('media') as File | null;
     const manualUrl = formData.get('url') as string | null;
 

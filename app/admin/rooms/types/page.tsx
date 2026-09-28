@@ -4,8 +4,11 @@ import Link from 'next/link';
 import { Plus } from 'lucide-react';
 import { ensureRoomTypeMinOccupancyColumn } from '@/lib/db/schema-guard';
 import { RoomTypesList } from '@/components/admin/room-types-list';
+import { requireSection } from '@/lib/admin/guard';
 
 export default async function RoomTypesPage() {
+    await requireSection('rooms');
+
     await ensureRoomTypeMinOccupancyColumn();
 
     const allRoomTypes = await db.query.roomTypes.findMany({

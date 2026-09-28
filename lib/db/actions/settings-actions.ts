@@ -5,6 +5,12 @@ import { siteSettings } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { type ColorPalette, DEFAULT_PALETTE } from '@/lib/config/palette';
+import { requireAdminAction } from '@/lib/admin/guard';
+
+// The two getters below are deliberately left open: getColorPalette is called
+// from the site's root layout on every public page, and the hero images are on
+// the homepage. Both return content that is already visible to the world. Only
+// the writers are guarded.
 
 const HERO_IMAGES_KEY = 'hero_images';
 
@@ -26,6 +32,8 @@ export async function getHeroImages() {
 }
 
 export async function updateHeroImages(images: HeroImage[]) {
+    await requireAdminAction();
+
     const existing = await db.query.siteSettings.findFirst({
         where: eq(siteSettings.key, HERO_IMAGES_KEY),
     });
@@ -65,6 +73,8 @@ export async function getColorPalette(): Promise<ColorPalette> {
 }
 
 export async function updateColorPalette(palette: ColorPalette): Promise<void> {
+    await requireAdminAction();
+
     const existing = await db.query.siteSettings.findFirst({
         where: eq(siteSettings.key, COLOR_PALETTE_KEY),
     });

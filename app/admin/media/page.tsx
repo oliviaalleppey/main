@@ -1,5 +1,6 @@
 import { getAllMedia, getPageHeaders, getRoomTypesWithImages, getAmenityImages, getDiningImages, getWeddingVenueImages, getWeddingSectionImages, getConferenceVenueImages, getConferenceSectionImages, getMembershipImages, getDiscoverExperienceImages } from './actions';
 import MediaCenter from './MediaCenter';
+import { requireSection } from '@/lib/admin/guard';
 
 export const metadata = {
     title: 'Media Center | Admin',
@@ -14,6 +15,8 @@ interface MediaItem {
 }
 
 export default async function MediaPage() {
+    await requireSection('media');
+
     const [allMedia, pageHeaders, rooms, amenityImages, diningImages, weddingVenueImages, weddingSectionImages, conferenceVenueImages, conferenceSectionImages, membershipImages, discoverImages] = await Promise.all([
         getAllMedia(),
         getPageHeaders(),

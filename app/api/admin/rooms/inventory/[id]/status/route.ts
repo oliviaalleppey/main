@@ -4,6 +4,7 @@ import { rooms } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
+import { denyUnlessAdmin } from '@/lib/admin/guard';
 
 const statusSchema = z.object({
     housekeepingStatus: z.enum(['clean', 'dirty', 'touch_up', 'inspect', 'out_of_service']),
@@ -13,6 +14,9 @@ export async function PATCH(
     request: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
+    const denied = await denyUnlessAdmin();
+    if (denied) return denied;
+
     try {
         const { id } = await params;
         const body = await request.json();

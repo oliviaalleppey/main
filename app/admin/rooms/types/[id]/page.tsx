@@ -4,8 +4,11 @@ import { eq } from 'drizzle-orm';
 import { notFound } from 'next/navigation';
 import { RoomTypeForm } from '@/components/admin/room-type-form';
 import { ensureRoomTypeMinOccupancyColumn } from '@/lib/db/schema-guard';
+import { requireSection } from '@/lib/admin/guard';
 
 export default async function EditRoomTypePage({ params }: { params: Promise<{ id: string }> }) {
+    await requireSection('rooms');
+
     await ensureRoomTypeMinOccupancyColumn();
 
     const { id } = await params;

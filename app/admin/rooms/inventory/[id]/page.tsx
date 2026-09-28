@@ -3,8 +3,11 @@ import { rooms, roomTypes, roomAttributes, roomAttributeValues } from '@/lib/db/
 import { eq } from 'drizzle-orm';
 import { notFound } from 'next/navigation';
 import { RoomDetailClient } from '@/components/admin/room-detail-client';
+import { requireSection } from '@/lib/admin/guard';
 
 export default async function EditRoomPage({ params }: { params: Promise<{ id: string }> }) {
+    await requireSection('rooms');
+
     const { id } = await params;
 
     // Fetch room with room type details

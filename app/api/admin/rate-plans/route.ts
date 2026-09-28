@@ -2,9 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { ratePlans } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+import { denyUnlessAdmin, denyUnlessSection } from '@/lib/admin/guard';
 
 // GET - List all rate plans
 export async function GET() {
+    const denied = await denyUnlessSection('pricing');
+    if (denied) return denied;
+
     try {
         const allRatePlans = await db.query.ratePlans.findMany({
             with: {
@@ -25,6 +29,9 @@ export async function GET() {
 
 // POST - Create new rate plan
 export async function POST(request: NextRequest) {
+    const denied = await denyUnlessAdmin();
+    if (denied) return denied;
+
     try {
         const data = await request.json();
 

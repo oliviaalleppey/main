@@ -5,8 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import Link from 'next/link';
 import { Plus, Pencil, Filter } from 'lucide-react';
+import { requireSection } from '@/lib/admin/guard';
 
 export default async function RoomInventoryPage() {
+    await requireSection('rooms');
+
     const allRooms = await getRooms();
     const allRoomTypes = await db.select().from(roomTypes);
 

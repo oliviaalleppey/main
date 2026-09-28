@@ -6,8 +6,11 @@ import Link from 'next/link';
 import { Plus, Pencil, Tag, Calendar, Clock } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { eq } from 'drizzle-orm';
+import { requireSection } from '@/lib/admin/guard';
 
 export default async function RatePlansPage() {
+    await requireSection('pricing');
+
     const allRatePlans = await db.query.ratePlans.findMany({
         with: {
             roomType: true,

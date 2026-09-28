@@ -1,8 +1,11 @@
 import { db } from '@/lib/db';
 import { roomTypes } from '@/lib/db/schema';
 import { RoomForm } from '@/components/admin/room-form';
+import { requireSection } from '@/lib/admin/guard';
 
 export default async function NewRoomPage() {
+    await requireSection('rooms');
+
     const allRoomTypes = await db.select({
         id: roomTypes.id,
         name: roomTypes.name,

@@ -4,12 +4,15 @@ import RatePlanForm from '@/components/admin/rate-plan-form';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { requireSection } from '@/lib/admin/guard';
 
 export default async function NewRatePlanPage({
     searchParams,
 }: {
     searchParams: Promise<{ roomTypeId?: string }>;
 }) {
+    await requireSection('pricing');
+
     const { roomTypeId } = await searchParams;
     const allRoomTypes = await db.select().from(roomTypes);
 
