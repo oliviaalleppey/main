@@ -48,3 +48,7 @@ public/images/*
 # Claude Code worktrees are separate git checkouts; committing one records a
 # gitlink to a local path nobody else has.
 .claude/worktrees/
+
+# Exports from the bookings table carry guest names, emails, phones and
+# addresses. Keep them on disk, never in git history.
+reports/*Revenue-Report*
