@@ -365,7 +365,7 @@ export default async function CheckoutPage({
                         initialAdults={session.adults || 1}
                         initialChildren={session.children || 0}
                         initialRooms={Math.max(1, totalRoomCount)}
-                        onUpdate={async (checkIn, checkOut, adults, children) => {
+                        onUpdate={async (checkIn: string, checkOut: string, adults: number, children: number) => {
                             "use server";
                             await updateSessionSearch({ checkIn, checkOut, adults, children });
                         }}

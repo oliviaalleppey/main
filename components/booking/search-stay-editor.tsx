@@ -13,7 +13,12 @@ interface SearchStayEditorProps {
     initialAdults: number;
     initialChildren: number;
     initialRooms: number;
-    onUpdate?: (checkIn: Date, checkOut: Date, adults: number, children: number, rooms: number) => void;
+    /**
+     * Dates arrive as the guest's calendar day, 'yyyy-MM-dd'. Not a Date: the
+     * picker's value is local midnight, which in IST is 18:30 the previous day in
+     * UTC, and the server read that back as the day before the guest chose.
+     */
+    onUpdate?: (checkIn: string, checkOut: string, adults: number, children: number, rooms: number) => void;
 }
 
 export function SearchStayEditor({
@@ -44,7 +49,13 @@ export function SearchStayEditor({
 
         if (onUpdate) {
             startTransition(() => {
-                onUpdate(date.from!, date.to!, guests.adults, guests.children, guests.rooms);
+                onUpdate(
+                    format(date.from!, 'yyyy-MM-dd'),
+                    format(date.to!, 'yyyy-MM-dd'),
+                    guests.adults,
+                    guests.children,
+                    guests.rooms,
+                );
             });
             return;
         }

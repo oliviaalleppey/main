@@ -342,6 +342,72 @@ async function persistSessionRoomSelections(
     };
 }
 
+type ServerRoomQuote = {
+    /** Per-room figures; callers scale by room count as they need. */
+    pricePerNight: number;
+    totalPricePerRoom: number;
+    nightlyRates: number[];
+    ratePlanId: string | null;
+    availableRooms: number;
+};
+
+/**
+ * A room's price for a stay, worked out here and never taken from the browser.
+ *
+ * The quote snapshot used to arrive as an argument to the server actions below,
+ * and everything downstream — the checkout total, the Easebuzz charge, the rates
+ * pushed to Hotsoft — trusted it. Anyone editing that request could book a
+ * ₹16,000 room for ₹10. This asks the same pricing engine the search page uses
+ * (CRS base, date overrides, seasonal rules, extra-person surcharge, rate-plan
+ * modifier), so the only price a guest can end up with is one we published.
+ *
+ * It also returns live availability, from the same CRS call, so callers do not
+ * need a second round trip to Hotsoft.
+ */
+async function quoteRoomFromServer(params: {
+    checkIn: string;
+    checkOut: string;
+    adults: number;
+    children: number;
+    roomTypeId: string;
+    ratePlanId?: string | null;
+    totalRooms: number;
+}): Promise<{ ok: true; quote: ServerRoomQuote } | { ok: false; message: string }> {
+    const search = await getAvailableRoomsForSearch(
+        new Date(params.checkIn),
+        new Date(params.checkOut),
+        { adults: params.adults, children: params.children },
+        params.totalRooms,
+    );
+
+    const result = search.rooms.find((room) => room.roomType.id === params.roomTypeId);
+    if (!result) {
+        return { ok: false, message: search.error || 'This room cannot be booked for your dates and guests.' };
+    }
+    if (!result.bookable) {
+        return { ok: false, message: result.availabilityMessage || 'This room is no longer available for your dates.' };
+    }
+
+    const plans = result.ratePlans as Array<{ id: string; isDefault?: boolean; nightlyRates?: number[] }>;
+    const plan = plans.find((candidate) => candidate.id === params.ratePlanId)
+        ?? plans.find((candidate) => candidate.isDefault)
+        ?? plans[0];
+
+    const nightlyRates = plan?.nightlyRates?.length ? plan.nightlyRates : result.nightlyRates;
+    const totalPricePerRoom = nightlyRates.reduce((sum, rate) => sum + rate, 0);
+
+    return {
+        ok: true,
+        quote: {
+            pricePerNight: Math.round(totalPricePerRoom / Math.max(1, nightlyRates.length)),
+            totalPricePerRoom,
+            nightlyRates,
+            ratePlanId: plan?.id ?? null,
+            availableRooms: result.availableRooms,
+        },
+    };
+}
+
 /**
  * The room and add-on money for a session, split the way applyDiscount() needs it.
  *
@@ -678,49 +744,50 @@ export async function startBookingSession(
             return { error: `No rate plan available for room: ${roomSlug}` };
         }
 
-        const provider = getBookingProvider();
-        const availability = await provider.checkAvailability({
-            checkIn: checkInDateOnly,
-            checkOut: checkOutDateOnly,
-            adults: 1,
-            children: 0,
-        });
-
-        if (availability.status !== 'success') {
-            return { error: availability.message || 'Live availability check failed.' };
-        }
-
-        const matchedAvailability = availability.rooms.find((room) => mapCrsRoomTypeMatchesInternal({
-            internalRoomTypeId: roomType.id,
-            internalRoomTypeSlug: roomType.slug,
-            crsRoomTypeId: room.roomTypeId,
-        }));
-
-        if (!matchedAvailability || matchedAvailability.availableCount < safeRoomCount) {
-            return { error: `Only ${matchedAvailability?.availableCount || 0} room(s) available for ${formatRoomName(roomType.name)}.` };
-        }
-
         const cartData = (session.cartData as SessionCartData | null) || {};
         const existingSelections = getSessionRoomSelections(session, cartData).filter(
             (selection) => selection.roomTypeId !== roomType.id
         );
+        const cartRoomCount = existingSelections.reduce(
+            (sum, selection) => sum + sanitizeRoomCount(selection.quantity),
+            0
+        ) + safeRoomCount;
+
+        // The browser's quoteSnapshot argument is ignored: the price is ours to
+        // set, not the request's. See quoteRoomFromServer.
+        void quoteSnapshot;
+        const priced = await quoteRoomFromServer({
+            checkIn: checkInDateOnly,
+            checkOut: checkOutDateOnly,
+            adults: searchParams.adults,
+            children: searchParams.children,
+            roomTypeId: roomType.id,
+            ratePlanId: ratePlan.id,
+            totalRooms: cartRoomCount,
+        });
+        if (!priced.ok) {
+            return { error: priced.message };
+        }
+        if (priced.quote.availableRooms < safeRoomCount) {
+            return { error: `Only ${priced.quote.availableRooms} room(s) available for ${formatRoomName(roomType.name)}.` };
+        }
 
         // totalPrice/taxesAndFees cover every room; nightlyRates stays per-room and
         // is deliberately not scaled — quantity is applied when the tax is computed.
-        const normalizedQuoteSnapshot = quoteSnapshot
-            ? {
-                ...quoteSnapshot,
-                totalPrice: quoteSnapshot.totalPrice * safeRoomCount,
-                taxesAndFees: calculateRoomTax({
-                    nightlyRates: quoteSnapshot.nightlyRates,
-                    pricePerNight: quoteSnapshot.pricePerNight,
-                    totalPricePerRoom: quoteSnapshot.totalPrice,
-                    nights: sessionNights,
-                    quantity: safeRoomCount,
-                }),
-                capturedAt: new Date().toISOString(),
-            }
-            : undefined;
+        const normalizedQuoteSnapshot = {
+            pricePerNight: priced.quote.pricePerNight,
+            totalPrice: priced.quote.totalPricePerRoom * safeRoomCount,
+            nightlyRates: priced.quote.nightlyRates,
+            taxesAndFees: calculateRoomTax({
+                nightlyRates: priced.quote.nightlyRates,
+                pricePerNight: priced.quote.pricePerNight,
+                totalPricePerRoom: priced.quote.totalPricePerRoom,
+                nights: sessionNights,
+                quantity: safeRoomCount,
+            }),
+            externalRatePlanId: priced.quote.ratePlanId ?? undefined,
+            capturedAt: new Date().toISOString(),
+        };
 
         const nextSelections: RoomSelectionInput[] = [
             ...existingSelections,
@@ -765,7 +832,7 @@ export async function startBookingSession(
                     ratePlanId: ratePlan.id,
                     quantity: safeRoomCount,
                 },
-                quoteSnapshot: normalizedQuoteSnapshot || cartData.quoteSnapshot,
+                quoteSnapshot: normalizedQuoteSnapshot,
             },
         }).where(eq(bookingSessions.id, session.id));
 
@@ -1049,10 +1116,32 @@ export async function initiateEasebuzzPaymentAction(): Promise<{
     }
 }
 
-export async function updateSessionSearch(params: { checkIn: Date; checkOut: Date; adults: number; children: number }) {
+/**
+ * Dates are the guest's calendar days as 'yyyy-MM-dd' strings. They used to be
+ * Date objects built from the picker at local midnight, which toDateOnlyString()
+ * read back in UTC — so in IST every edited stay moved one day earlier, and the
+ * guest was charged for, and Hotsoft was sent, nights they never chose.
+ */
+export async function updateSessionSearch(input: { checkIn: string; checkOut: string; adults: number; children: number }) {
     const sessionId = (await cookies()).get('booking_session')?.value;
     if (!sessionId) {
         return { success: false, message: 'Booking session expired. Please search again.' };
+    }
+
+    const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
+    if (!DATE_ONLY.test(String(input.checkIn)) || !DATE_ONLY.test(String(input.checkOut))) {
+        return { success: false, message: 'Please choose valid dates.' };
+    }
+    // UTC midnight of each calendar day, the same basis every other date here uses.
+    const params = {
+        checkIn: new Date(`${input.checkIn}T00:00:00Z`),
+        checkOut: new Date(`${input.checkOut}T00:00:00Z`),
+        adults: Math.max(1, Math.floor(Number(input.adults) || 1)),
+        children: Math.max(0, Math.floor(Number(input.children) || 0)),
+    };
+    if (Number.isNaN(params.checkIn.getTime()) || Number.isNaN(params.checkOut.getTime())
+        || params.checkOut <= params.checkIn) {
+        return { success: false, message: 'Check-out must be after check-in.' };
     }
 
     const session = await db.query.bookingSessions.findFirst({
@@ -1195,32 +1284,32 @@ export async function updateSessionRoom(
     }
     if (!ratePlan) return { success: false, message: `No rate plan available.` };
 
+    // A rate plan id from the browser is only honoured if it belongs to this room.
+    if (ratePlan.roomTypeId !== roomType.id) return { success: false, message: `No rate plan available.` };
+
+    const safeQuantity = sanitizeRoomCount(quantity);
     const checkInDateOnly = toDateOnlyString(session.checkIn);
     const checkOutDateOnly = toDateOnlyString(session.checkOut);
-    const provider = getBookingProvider();
-    
-    const adultsPerRoom = Math.max(1, Math.ceil((session.adults || 1) / quantity));
-    const childrenPerRoom = Math.max(0, Math.ceil((session.children || 0) / quantity));
+    const nights = Math.max(1, Math.ceil(
+        (new Date(checkOutDateOnly).getTime() - new Date(checkInDateOnly).getTime()) / (1000 * 60 * 60 * 24)
+    ));
 
-    const availability = await provider.checkAvailability({
+    // The browser's quoteSnapshot argument is ignored — see quoteRoomFromServer.
+    void quoteSnapshot;
+    const priced = await quoteRoomFromServer({
         checkIn: checkInDateOnly,
         checkOut: checkOutDateOnly,
-        adults: adultsPerRoom,
-        children: childrenPerRoom,
+        adults: session.adults || 1,
+        children: session.children || 0,
+        roomTypeId: roomType.id,
+        ratePlanId: ratePlan.id,
+        totalRooms: safeQuantity,
     });
-    
-    if (availability.status !== 'success') {
-        return { success: false, message: availability.message || 'Availability check failed.' };
+    if (!priced.ok) {
+        return { success: false, message: priced.message };
     }
-
-    const matchedAvailability = availability.rooms.find((room) => mapCrsRoomTypeMatchesInternal({
-        internalRoomTypeId: roomType.id,
-        internalRoomTypeSlug: roomType.slug,
-        crsRoomTypeId: room.roomTypeId,
-    }));
-
-    if (!matchedAvailability || matchedAvailability.availableCount < quantity) {
-        return { success: false, message: `Only ${matchedAvailability?.availableCount || 0} room(s) available.` };
+    if (priced.quote.availableRooms < safeQuantity) {
+        return { success: false, message: `Only ${priced.quote.availableRooms} room(s) available.` };
     }
 
     const nextSelections: RoomSelectionInput[] = [
@@ -1228,8 +1317,21 @@ export async function updateSessionRoom(
             roomTypeId: roomType.id,
             roomSlug: roomType.slug,
             ratePlanId: ratePlan.id,
-            quantity: quantity,
-            quoteSnapshot: quoteSnapshot || undefined,
+            quantity: safeQuantity,
+            quoteSnapshot: {
+                pricePerNight: priced.quote.pricePerNight,
+                totalPrice: priced.quote.totalPricePerRoom * safeQuantity,
+                nightlyRates: priced.quote.nightlyRates,
+                taxesAndFees: calculateRoomTax({
+                    nightlyRates: priced.quote.nightlyRates,
+                    pricePerNight: priced.quote.pricePerNight,
+                    totalPricePerRoom: priced.quote.totalPricePerRoom,
+                    nights,
+                    quantity: safeQuantity,
+                }),
+                externalRatePlanId: ratePlan.id,
+                capturedAt: new Date().toISOString(),
+            },
         },
     ];
 
