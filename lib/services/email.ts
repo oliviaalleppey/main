@@ -155,7 +155,9 @@ export async function sendBookingConfirmation(params: {
       return { skipped: true };
     }
 
-    const { to, guestName, bookingNumber, checkIn, checkOut, charges } = params;
+    const { to, bookingNumber, checkIn, checkOut, charges } = params;
+    // Typed by the guest on the booking form; never let it become markup.
+    const guestName = escapeHtml(params.guestName);
 
     const { data, error } = await resend.emails.send({
       from: `${HOTEL_NAME} <${FROM_EMAIL}>`,
@@ -262,12 +264,17 @@ export async function sendBookingAlertToStaff(params: {
     const resend = getResendClient();
     if (!resend) return { skipped: true };
 
-    const { guestName, guestEmail, guestPhone, bookingNumber, confirmationNumber, checkIn, checkOut, nights, adults, children, charges } = params;
+    const { bookingNumber, confirmationNumber, checkIn, checkOut, nights, adults, children, charges } = params;
+    // Guest-typed fields go into a staff inbox; escaped so a booking cannot plant
+    // links or markup there.
+    const guestName = escapeHtml(params.guestName);
+    const guestEmail = escapeHtml(params.guestEmail);
+    const guestPhone = escapeHtml(params.guestPhone);
 
     const { data, error } = await resend.emails.send({
       from: `${HOTEL_NAME} System <${FROM_EMAIL}>`,
       to: [RESERVATION_TEAM_EMAIL, FOM_EMAIL],
-      subject: `New Booking — ${bookingNumber} | ${guestName} | ${checkIn}`,
+      subject: `New Booking — ${bookingNumber} | ${params.guestName.replace(/[\r\n]/g, ' ')} | ${checkIn}`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -345,12 +352,15 @@ export async function sendBookingAlertToStaff(params: {
 /**
  * Why a paid booking has not reached a confirmed reservation.
  *
- * `rejected` — Hotsoft refused it outright, and the booking is marked failed.
- * `stalled`  — Hotsoft kept failing retryably until the watchdog gave up.
+ * `rejected`     — Hotsoft refused it outright, and the booking is marked failed.
+ * `stalled`      — Hotsoft kept failing retryably until the watchdog gave up.
+ * `late_success` — Easebuzz reported success after we had already recorded the
+ *                  payment as failed; the guest was told it failed.
+ *                  Reservations must refund it or honour it.
  * Either way the guest has paid and holds no room, and until now the only
  * trace of it was a row in booking_logs.
  */
-export type UnconfirmedPaymentReason = 'rejected' | 'stalled';
+export type UnconfirmedPaymentReason = 'rejected' | 'stalled' | 'late_success';
 
 /**
  * Urgent alert to reservations: money taken, no reservation in the PMS.
@@ -376,9 +386,11 @@ export async function sendUnconfirmedPaymentAlertToStaff(params: {
     const guestEmail = escapeHtml(params.guestEmail);
     const guestPhone = escapeHtml(params.guestPhone);
     const detail = escapeHtml(params.detail || 'No reason given');
-    const headline = reason === 'rejected'
-      ? 'Hotsoft rejected this reservation'
-      : 'Hotsoft has not confirmed this reservation after repeated retries';
+    const headline = {
+      rejected: 'Hotsoft rejected this reservation',
+      stalled: 'Hotsoft has not confirmed this reservation after repeated retries',
+      late_success: 'Easebuzz reported this payment successful after it was recorded as failed. The guest was shown a failed payment — refund it or honour the booking',
+    }[reason];
     const adminUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://oliviaalleppey.com'}/admin/bookings/${bookingId}`;
 
     const { data, error } = await resend.emails.send({
@@ -399,8 +411,9 @@ export async function sendUnconfirmedPaymentAlertToStaff(params: {
               <div style="padding:28px 32px;">
                 <p>The guest's payment of <strong>${formatRupees(totalAmount)}</strong> was received, but there is
                   <strong>no confirmed reservation in the PMS</strong>. Please create or confirm the room manually
-                  in Hotsoft and contact the guest. The guest has been told their payment was received and that
-                  reservations will confirm their room.</p>
+                  in Hotsoft and contact the guest.${reason === 'late_success'
+                    ? ' The guest has <strong>not</strong> been told the payment went through, and may have booked again.'
+                    : ' The guest has been told their payment was received and that reservations will confirm their room.'}</p>
                 <table style="width:100%;border-collapse:collapse;font-size:14px;">
                   <tr><td style="padding:6px 0;color:#6B7280;">Booking No.</td><td style="padding:6px 0;text-align:right;font-weight:600;">${bookingNumber}</td></tr>
                   <tr><td style="padding:6px 0;color:#6B7280;">Guest</td><td style="padding:6px 0;text-align:right;font-weight:600;">${guestName}</td></tr>

@@ -53,6 +53,12 @@ export default async function PaymentFailedPage({
     const mode = typeof metadata?.mode === 'string' && metadata.mode !== 'NA' ? metadata.mode : '';
     const easepayid = typeof metadata?.easepayid === 'string' ? metadata.easepayid : '';
 
+    // The gateway has not said yes or no yet: Easebuzz sent the guest back with a
+    // pending/unknown status, and the reconciler will settle it within minutes.
+    // Telling this guest "you have not been charged" was not true — the money
+    // may well arrive — and invited a second payment for the same room.
+    const awaitingBank = payment?.status === 'pending';
+
     const hotelPhone = process.env.HOTEL_PHONE || '';
     const reservationEmail = process.env.HOTEL_RESERVATION_EMAIL || '';
 
@@ -60,15 +66,28 @@ export default async function PaymentFailedPage({
         <div className="min-h-screen bg-[var(--surface-cream)] py-20 px-6 flex items-center justify-center">
             <div className="bg-white max-w-2xl w-full p-8 sm:p-12 rounded-2xl shadow-sm border border-gray-100">
                 <div className="flex justify-center mb-6">
-                    <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center">
-                        <AlertCircle className="w-10 h-10 text-red-600" />
+                    <div className={`w-20 h-20 ${awaitingBank ? 'bg-amber-50' : 'bg-red-50'} rounded-full flex items-center justify-center`}>
+                        <AlertCircle className={`w-10 h-10 ${awaitingBank ? 'text-amber-600' : 'text-red-600'}`} />
                     </div>
                 </div>
 
-                <h1 className="text-3xl font-serif mb-2 text-center">Payment not completed</h1>
-                <p className="text-gray-500 mb-8 text-center">
-                    Your card has not been charged and no room has been held.
-                </p>
+                {awaitingBank ? (
+                    <>
+                        <h1 className="text-3xl font-serif mb-2 text-center">Waiting for your bank</h1>
+                        <p className="text-gray-500 mb-8 text-center">
+                            Your bank has not yet confirmed this payment. This usually takes a few minutes.
+                            Please do not pay again &mdash; if the payment goes through, you will receive a
+                            confirmation email automatically.
+                        </p>
+                    </>
+                ) : (
+                    <>
+                        <h1 className="text-3xl font-serif mb-2 text-center">Payment not completed</h1>
+                        <p className="text-gray-500 mb-8 text-center">
+                            Your card has not been charged and no room has been held.
+                        </p>
+                    </>
+                )}
 
                 {reason && (
                     <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-8">
@@ -79,6 +98,7 @@ export default async function PaymentFailedPage({
                     </div>
                 )}
 
+{!awaitingBank && (
                 <div className="bg-amber-50 border border-amber-200 text-amber-900 text-sm rounded-lg p-4 mb-8">
                     <p className="font-medium mb-1">If you see a debit on your account</p>
                     <p>
@@ -87,6 +107,7 @@ export default async function PaymentFailedPage({
                         for you.
                     </p>
                 </div>
+                )}
 
                 {booking && (
                     <div className="space-y-4 text-left mb-10 text-sm">
@@ -123,6 +144,16 @@ export default async function PaymentFailedPage({
                 )}
 
                 <div className="flex flex-col sm:flex-row gap-3">
+                    {awaitingBank && booking && (
+                        <Link
+                            href={`/book/payment-failed/${booking.id}`}
+                            className="flex-1 inline-flex items-center justify-center gap-2 bg-[var(--text-dark)] text-white px-6 py-3 rounded-lg text-sm font-medium hover:opacity-90 transition"
+                        >
+                            <RotateCcw className="w-4 h-4" />
+                            Check payment status
+                        </Link>
+                    )}
+                    {!awaitingBank && (
                     <Link
                         href="/book/search"
                         className="flex-1 inline-flex items-center justify-center gap-2 bg-[var(--text-dark)] text-white px-6 py-3 rounded-lg text-sm font-medium hover:opacity-90 transition"
@@ -130,6 +161,7 @@ export default async function PaymentFailedPage({
                         <RotateCcw className="w-4 h-4" />
                         Try booking again
                     </Link>
+                    )}
                     {hotelPhone && (
                         <a
                             href={`tel:${hotelPhone.replace(/\s/g, '')}`}

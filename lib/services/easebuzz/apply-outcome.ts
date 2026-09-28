@@ -1,6 +1,7 @@
 import { db } from '@/lib/db';
 import { payments, bookings, bookingLogs } from '@/lib/db/schema';
 import { BookingService } from '@/lib/services/booking-service';
+import { sendUnconfirmedPaymentAlertToStaff } from '@/lib/services/email';
 import { and, eq, ne } from 'drizzle-orm';
 
 const bookingService = new BookingService();
@@ -144,6 +145,25 @@ export async function applyGatewayOutcome(opts: {
                 level: 'warning',
                 errorMessage: 'Received a success after payment was already marked failed. Ignoring auto-confirmation.',
             });
+
+            // The guest's money was taken and they were shown a failure page. The
+            // log row above is not enough — nobody reads it until the guest calls.
+            const booking = await db.query.bookings.findFirst({ where: eq(bookings.id, paymentRecord.bookingId) });
+            if (booking) {
+                await sendUnconfirmedPaymentAlertToStaff({
+                    bookingId: booking.id,
+                    bookingNumber: booking.bookingNumber,
+                    guestName: booking.guestName,
+                    guestEmail: booking.guestEmail,
+                    guestPhone: booking.guestPhone,
+                    checkIn: new Date(booking.checkIn).toLocaleDateString('en-IN', { timeZone: 'UTC' }),
+                    checkOut: new Date(booking.checkOut).toLocaleDateString('en-IN', { timeZone: 'UTC' }),
+                    totalAmount: receivedAmountPaise,
+                    reason: 'late_success',
+                    detail: `Easebuzz ${fields.easepayid || ''} status success, source ${source}`.trim(),
+                }).catch((e) => console.error(`Failed to send late-success alert for ${booking.id}:`, e));
+            }
+
             return {
                 ok: true,
                 code: 'late_success_ignored',
