@@ -3,6 +3,7 @@ import { auth } from '@/auth';
 import {
     dispatch, activateScheduledCampaigns, pauseCampaignsWithBadTemplates,
 } from '@/lib/services/whatsapp/dispatcher';
+import { trackCronRun } from '@/lib/services/cron-runs';
 
 export const dynamic = 'force-dynamic';
 /** Vercel's default is 10s; a batch of sends needs longer. */
@@ -18,7 +19,7 @@ export const maxDuration = 60;
  * A cron that returns 500 fails silently in a dashboard nobody reads; a 200 with
  * `"stopped": "..."` is visible in the response body and the logs.
  */
-export async function GET(request: Request) {
+async function handleGet(request: Request) {
     try {
         const authHeader = request.headers.get('authorization');
         const cronAuthorized = !!process.env.CRON_SECRET && authHeader === `Bearer ${process.env.CRON_SECRET}`;
@@ -56,4 +57,9 @@ export async function GET(request: Request) {
             { status: 200 },
         );
     }
+}
+
+/** Recorded in cron_runs so the admin dashboard can show when this last ran. */
+export async function GET(request: Request) {
+    return trackCronRun('whatsapp-dispatch', request, () => handleGet(request));
 }

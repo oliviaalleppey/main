@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { fireAutomation, dueForSchedule } from '@/lib/services/whatsapp/automations';
+import { trackCronRun } from '@/lib/services/cron-runs';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -16,7 +17,7 @@ export const maxDuration = 60;
  * Answers 200 with a report even when parts fail. A 500 from a cron is invisible;
  * a 200 carrying `{ errors: [...] }` shows up in the response body.
  */
-export async function GET(request: Request) {
+async function handleGet(request: Request) {
     // Same gate as booking-watchdog and whatsapp-dispatch: a CRON_SECRET bearer
     // token, or an admin session so it can be triggered by hand from the panel.
     const authHeader = request.headers.get('authorization');
@@ -61,4 +62,9 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json({ ok: true, ran: new Date().toISOString(), report });
+}
+
+/** Recorded in cron_runs so the admin dashboard can show when this last ran. */
+export async function GET(request: Request) {
+    return trackCronRun('whatsapp-automations', request, () => handleGet(request));
 }

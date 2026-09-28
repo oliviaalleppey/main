@@ -5,6 +5,7 @@ import { EasebuzzService } from '@/lib/services/easebuzz';
 import { applyGatewayOutcome, normaliseGatewayStatus } from '@/lib/services/easebuzz/apply-outcome';
 import { and, eq, gt, lt, isNotNull, asc } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
+import { trackCronRun } from '@/lib/services/cron-runs';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,7 +34,7 @@ export const dynamic = 'force-dynamic';
  * maxAgeDays is honoured in dry-run only, so the write window cannot be widened
  * from a URL.
  */
-export async function GET(request: Request) {
+async function handleGet(request: Request) {
     try {
         const authHeader = request.headers.get('authorization');
         // An unset CRON_SECRET must not make "Bearer undefined" a valid token —
@@ -201,4 +202,9 @@ export async function GET(request: Request) {
         console.error('[payment-reconciliation] failed:', message);
         return NextResponse.json({ error: message }, { status: 500 });
     }
+}
+
+/** Recorded in cron_runs so the admin dashboard can show when this last ran. */
+export async function GET(request: Request) {
+    return trackCronRun('payment-reconciliation', request, () => handleGet(request));
 }

@@ -5,6 +5,7 @@ import { bookings } from '@/lib/db/schema';
 import { getBookingProvider } from '@/lib/providers/crs/factory';
 import { BOOKING_FLOW_MODE } from '@/lib/config/booking-flow-mode';
 import { requireSection } from '@/lib/admin/guard';
+import { getCronHealth, type CronJobHealth } from '@/lib/services/cron-runs';
 import {
     CalendarCheck,
     CalendarX,
@@ -16,6 +17,7 @@ import {
     CheckCircle2,
     Clock,
     XCircle,
+    Timer,
 } from 'lucide-react';
 
 const MAX_RETRIES = Number(process.env.BOOKING_WATCHDOG_MAX_RETRIES || 12);
@@ -36,8 +38,33 @@ function formatDate(dateStr: string): string {
     });
 }
 
+function formatAgo(date: Date | null, now: number): string {
+    if (!date) return 'never';
+    const minutes = Math.round((now - date.getTime()) / 60000);
+    if (minutes < 1) return 'just now';
+    if (minutes < 60) return `${minutes} min ago`;
+    const hours = Math.round(minutes / 60);
+    if (hours < 48) return `${hours} h ago`;
+    return `${Math.round(hours / 24)} days ago`;
+}
+
+function formatEvery(minutes: number | null, schedule: string): string {
+    if (minutes === null) return schedule;
+    if (minutes < 60) return `every ${minutes} min`;
+    if (minutes === 60) return 'hourly';
+    if (minutes === 24 * 60) return 'daily';
+    return `every ${minutes} min`;
+}
+
+const CRON_STATE: Record<CronJobHealth['state'], { label: string; color: string }> = {
+    ok: { label: 'Running', color: 'text-emerald-700 bg-emerald-50' },
+    failing: { label: 'Last run failed', color: 'text-amber-700 bg-amber-50' },
+    late: { label: 'Overdue', color: 'text-red-700 bg-red-50' },
+    never: { label: 'No scheduled run yet', color: 'text-gray-700 bg-gray-100' },
+};
+
 export default async function AdminDashboard() {
-    await requireSection('dashboard');
+    const access = await requireSection('dashboard');
 
     const today = new Date().toISOString().split('T')[0];
     const tomorrow = new Date();
@@ -106,6 +133,26 @@ export default async function AdminDashboard() {
         providerStatus = 'degraded';
         providerMessage = 'Unreachable';
     }
+
+    // Scheduled jobs are operations detail, shown to administrators only. A
+    // missing cron_runs table (migration 0010 not applied) must not take the
+    // dashboard down with it.
+    let cronHealth: CronJobHealth[] | null = null;
+    let cronHealthError: string | null = null;
+    let nowMs = 0;
+    if (access.isAdmin) {
+        try {
+            const health = await getCronHealth();
+            cronHealth = health.jobs;
+            nowMs = health.checkedAt.getTime();
+        } catch (error) {
+            cronHealthError = error instanceof Error ? error.message : 'Could not read cron_runs';
+        }
+    }
+    const cronProblems = (cronHealth ?? []).filter((job) => job.state === 'late' || job.state === 'failing').length;
+    // "All on schedule" is only true once every job has been seen running from
+    // Vercel's scheduler; before that the honest answer is that we don't know.
+    const cronUnseen = (cronHealth ?? []).filter((job) => job.state === 'never').length;
 
     const statusConfig: Record<string, { label: string; color: string }> = {
         confirmed: { label: 'Confirmed', color: 'text-emerald-700 bg-emerald-50' },
@@ -291,6 +338,72 @@ export default async function AdminDashboard() {
                     </table>
                 </div>
             </div>
+
+            {/* Scheduled Jobs — admins only */}
+            {access.isAdmin && (
+                <div className="rounded-xl border bg-white shadow-sm overflow-hidden">
+                    <div className="flex items-center justify-between px-6 py-4 border-b">
+                        <div className="flex items-center gap-2">
+                            <Timer className="w-4 h-4 text-gray-500" />
+                            <h2 className="text-base font-semibold text-gray-900">Scheduled Jobs</h2>
+                        </div>
+                        {cronHealth && (
+                            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${cronProblems > 0
+                                ? 'text-red-700 bg-red-50'
+                                : cronUnseen > 0 ? 'text-gray-700 bg-gray-100' : 'text-emerald-700 bg-emerald-50'}`}>
+                                {cronProblems > 0
+                                    ? `${cronProblems} need attention`
+                                    : cronUnseen > 0 ? `${cronUnseen} not seen from the scheduler yet` : 'All on schedule'}
+                            </span>
+                        )}
+                    </div>
+                    {cronHealthError ? (
+                        <p className="px-6 py-4 text-sm text-red-700">
+                            Could not read job history: {cronHealthError}. Apply drizzle/0010_cron_runs.sql.
+                        </p>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Job</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Schedule</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Last scheduled run</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-100">
+                                    {(cronHealth ?? []).map((job) => {
+                                        const state = CRON_STATE[job.state];
+                                        return (
+                                            <tr key={job.job}>
+                                                <td className="px-6 py-3 font-mono text-xs text-gray-900">{job.job}</td>
+                                                <td className="px-6 py-3 text-gray-600">{formatEvery(job.intervalMinutes, job.schedule)}</td>
+                                                <td className="px-6 py-3 text-gray-600">
+                                                    {formatAgo(job.lastScheduledAt, nowMs)}
+                                                    {job.lastTrigger === 'manual' && job.lastRunAt && (
+                                                        <span className="block text-xs text-gray-400">manual run {formatAgo(job.lastRunAt, nowMs)}</span>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-3">
+                                                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${state.color}`}>
+                                                        {state.label}
+                                                    </span>
+                                                    {job.lastFailureAt && job.lastError && (
+                                                        <span className="block text-xs text-gray-400 mt-1 max-w-xs truncate" title={job.lastError}>
+                                                            last failure {formatAgo(job.lastFailureAt, nowMs)}: {job.lastError}
+                                                        </span>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
+            )}
 
             {/* Quick Links */}
             <div className="grid gap-4 md:grid-cols-2">

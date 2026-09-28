@@ -1161,6 +1161,23 @@ export const users = pgTable("user", {
  * that revoking access takes effect on the staff member's next page load instead
  * of whenever they happen to sign in again.
  */
+/**
+ * The last run of each scheduled job — see drizzle/0010_cron_runs.sql and
+ * lib/services/cron-runs.ts. Keyed on the job name, one row per job.
+ */
+export const cronRuns = pgTable('cron_runs', {
+    job: varchar('job', { length: 64 }).primaryKey(),
+    lastRunAt: timestamp('last_run_at').notNull(),
+    lastTrigger: varchar('last_trigger', { length: 16 }).notNull(),
+    lastScheduledAt: timestamp('last_scheduled_at'),
+    lastStatus: varchar('last_status', { length: 16 }).notNull(),
+    lastHttpStatus: integer('last_http_status'),
+    lastDurationMs: integer('last_duration_ms'),
+    lastFailureAt: timestamp('last_failure_at'),
+    lastError: text('last_error'),
+    runCount: integer('run_count').notNull().default(0),
+});
+
 export const adminSectionGrants = pgTable('admin_section_grants', {
     userId: text('user_id')
         .notNull()

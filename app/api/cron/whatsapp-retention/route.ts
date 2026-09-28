@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { purgeRawEvents } from '@/lib/services/whatsapp/compliance';
+import { trackCronRun } from '@/lib/services/cron-runs';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,7 +12,7 @@ export const dynamic = 'force-dynamic';
  * for debugging and replay. Useful for days, indefensible for years, so it is
  * swept nightly. WHATSAPP_EVENT_RETENTION_DAYS overrides the 30-day default.
  */
-export async function GET(request: Request) {
+async function handleGet(request: Request) {
     const authHeader = request.headers.get('authorization');
     const cronAuthorized = !!process.env.CRON_SECRET && authHeader === `Bearer ${process.env.CRON_SECRET}`;
     const session = await auth();
@@ -34,4 +35,9 @@ export async function GET(request: Request) {
             { status: 200 },
         );
     }
+}
+
+/** Recorded in cron_runs so the admin dashboard can show when this last ran. */
+export async function GET(request: Request) {
+    return trackCronRun('whatsapp-retention', request, () => handleGet(request));
 }

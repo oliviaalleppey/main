@@ -4,10 +4,11 @@ import { bookings, bookingLogs } from '@/lib/db/schema';
 import { BookingService } from '@/lib/services/booking-service';
 import { eq, and, lt, inArray } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
+import { trackCronRun } from '@/lib/services/cron-runs';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: Request) {
+async function handleGet(request: Request) {
     const MAX_RETRIES = Number(process.env.BOOKING_WATCHDOG_MAX_RETRIES || 12);
 
     type WatchdogResult = {
@@ -139,4 +140,9 @@ export async function GET(request: Request) {
         console.error('Watchdog failed:', error);
         return NextResponse.json({ error: message }, { status: 500 });
     }
+}
+
+/** Recorded in cron_runs so the admin dashboard can show when this last ran. */
+export async function GET(request: Request) {
+    return trackCronRun('booking-watchdog', request, () => handleGet(request));
 }
