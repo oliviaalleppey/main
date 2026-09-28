@@ -642,14 +642,17 @@ export class HotsoftCrsProvider implements BookingProvider {
             const responseText = await response.text();
 
             if (!response.ok) {
-                let errorMsg = `HTTP Error ${response.status}`;
+                // The status code stays at the front of the message. booking-service
+                // decides retry-or-fail by matching it (5xx, timeouts); replacing it
+                // with the parsed body, as this used to, made a Hotsoft outage look
+                // like a permanent rejection and failed paid bookings on the spot.
+                let detail = responseText;
                 try {
-                    const parsedErr = this.xmlParser.parse(responseText);
-                    errorMsg = JSON.stringify(parsedErr);
-                } catch (e) {
-                    errorMsg = responseText;
+                    detail = JSON.stringify(this.xmlParser.parse(responseText));
+                } catch {
+                    // keep the raw text
                 }
-                throw new Error(errorMsg);
+                throw new Error(`HTTP Error ${response.status}: ${String(detail).slice(0, 500)}`);
             }
 
             // Parse success XML to Javascript Object
