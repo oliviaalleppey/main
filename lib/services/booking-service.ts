@@ -27,7 +27,7 @@ import {
 } from './email';
 import { fireAutomation } from './whatsapp/automations';
 import { bookingStateMachine } from './booking-state-machine';
-import { eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import crypto from 'crypto';
 import { mapCrsRoomTypeMatchesInternal, mapInternalRatePlanToCrs, mapInternalRoomTypeToCrs } from '@/lib/config/crs';
 import { getBookingProvider } from '@/lib/providers/crs/factory';
@@ -883,34 +883,52 @@ export class BookingService {
 
         if (!booking) throw new Error("Booking not found");
 
-        // 2. Check State
+        // 2. Check State (a cheap early exit; re-checked under the lock below)
         if (booking.status === 'confirmed') return { success: true, status: 'already_confirmed' };
         if (booking.status === 'failed' || booking.status === 'refunded') return { success: false, status: booking.status };
 
-        // 3. Confirm with CRS
-        // If we are here, payment is successful (webhook verified it)
-        // Check if we already requested
-
-        if (booking.status !== 'booking_requested') {
-            // Fix: Ensure we pass through payment_success state
-            if (booking.status === 'initiated' || booking.status === 'pending_payment') {
-                await bookingStateMachine.transition(bookingId, 'payment_success', {
-                    reason: 'Payment verified by webhook'
-                });
-            }
-
-            await bookingStateMachine.transition(bookingId, 'booking_requested', {
-                reason: 'Requesting CRS reservation after payment success'
-            });
-        }
-
-        // 4. ACQUIRE LOCK (Mandatory)
+        // 3. ACQUIRE LOCK before touching state.
+        //
+        // The payment redirect, the reconciler and the watchdog can all arrive
+        // for the same booking at once. The lock used to be taken after the state
+        // transitions, and losing it threw — which the payment route turned into a
+        // bare "Internal Error" page for a guest who had just paid. Losing it now
+        // just means someone else is finishing the job: the guest is shown the
+        // "payment received, confirmation pending" page and the watchdog follows up.
         const lockAcquired = await BookingLockService.acquireLock(bookingId, 'webhook_handler');
         if (!lockAcquired) {
-            throw new Error(`Booking ${bookingId} is currently being processed by another worker.`);
+            return {
+                success: false,
+                status: 'pending_retry',
+                retryable: true,
+                message: `Booking ${bookingId} is currently being processed by another worker.`,
+            };
         }
 
         try {
+            // Whoever held the lock before us may have finished the booking.
+            const current = await db.query.bookings.findFirst({
+                where: eq(bookings.id, bookingId),
+                columns: { status: true },
+            });
+            if (current?.status === 'confirmed') return { success: true, status: 'already_confirmed' };
+            if (current?.status === 'failed' || current?.status === 'refunded') {
+                return { success: false, status: current.status };
+            }
+
+            // 4. Confirm with CRS. Payment is verified if we are here.
+            if (current?.status !== 'booking_requested') {
+                if (current?.status === 'initiated' || current?.status === 'pending_payment') {
+                    await bookingStateMachine.transition(bookingId, 'payment_success', {
+                        reason: 'Payment verified by webhook'
+                    });
+                }
+
+                await bookingStateMachine.transition(bookingId, 'booking_requested', {
+                    reason: 'Requesting CRS reservation after payment success'
+                });
+            }
+
             const existingConfirmation = await db.query.bookingConfirmations.findFirst({
                 where: eq(bookingConfirmations.bookingId, bookingId),
                 columns: {
@@ -1269,7 +1287,16 @@ export class BookingService {
     async notifyPaidButUnconfirmed(bookingId: string, reason: UnconfirmedPaymentReason, detail: string) {
         try {
             const booking = await db.query.bookings.findFirst({ where: eq(bookings.id, bookingId) });
-            if (!booking || booking.paymentStatus !== 'success') return;
+            if (!booking) return;
+
+            // bookings.payment_status only turns 'success' through the state
+            // machine, so a booking that could not make that transition still
+            // reads 'pending' there. The payment row is the gateway's own verdict.
+            const paid = booking.paymentStatus === 'success' || !!(await db.query.payments.findFirst({
+                where: and(eq(payments.bookingId, bookingId), eq(payments.status, 'success')),
+                columns: { id: true },
+            }));
+            if (!paid) return;
 
             const checkIn = new Date(booking.checkIn).toLocaleDateString('en-IN');
             const checkOut = new Date(booking.checkOut).toLocaleDateString('en-IN');
