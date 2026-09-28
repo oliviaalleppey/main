@@ -1,4 +1,4 @@
-import { auth } from '@/auth';
+import { getAdminAccess } from '@/lib/admin/guard';
 import { db } from '@/lib/db';
 import { payments, bookings, bookingLogs } from '@/lib/db/schema';
 import { EasebuzzService } from '@/lib/services/easebuzz';
@@ -36,9 +36,11 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: Request) {
     try {
         const authHeader = request.headers.get('authorization');
-        const cronAuthorized = authHeader === `Bearer ${process.env.CRON_SECRET}`;
-        const session = await auth();
-        const adminAuthorized = !!session && session.user?.role === 'admin';
+        // An unset CRON_SECRET must not make "Bearer undefined" a valid token —
+        // these jobs confirm bookings and settle payments. Same guard as the
+        // WhatsApp crons.
+        const cronAuthorized = !!process.env.CRON_SECRET && authHeader === `Bearer ${process.env.CRON_SECRET}`;
+        const adminAuthorized = !cronAuthorized && !!(await getAdminAccess())?.isAdmin;
 
         if (!cronAuthorized && !adminAuthorized) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

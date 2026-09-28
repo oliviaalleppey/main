@@ -36,6 +36,13 @@ export default async function InvoicePage({ params }: { params: Promise<{ bookin
 
     if (!booking) return notFound();
 
+    // A tax invoice records money actually received. This page used to render
+    // one — GSTIN, CGST/SGST and all — for any booking id, including checkouts
+    // abandoned at the payment page and payments the bank declined.
+    if (booking.paymentStatus !== 'success' && booking.paymentStatus !== 'refunded') {
+        return notFound();
+    }
+
     const confirmation = await db.query.bookingConfirmations.findFirst({
         where: eq(bookingConfirmations.bookingId, booking.id)
     });
