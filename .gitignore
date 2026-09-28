@@ -44,3 +44,7 @@ next-env.d.ts
 public/images/*
 !public/images/*.svg
 
+
+# Claude Code worktrees are separate git checkouts; committing one records a
+# gitlink to a local path nobody else has.
+.claude/worktrees/
