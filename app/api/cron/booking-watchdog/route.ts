@@ -2,7 +2,7 @@ import { getAdminAccess } from '@/lib/admin/guard';
 import { db } from '@/lib/db';
 import { bookings, bookingLogs } from '@/lib/db/schema';
 import { BookingService } from '@/lib/services/booking-service';
-import { eq, and, lt, inArray } from 'drizzle-orm';
+import { eq, and, lt, inArray, isNull, or, asc } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { trackCronRun } from '@/lib/services/cron-runs';
 
@@ -33,12 +33,23 @@ async function handleGet(request: Request) {
         const now = new Date();
         const oneMinuteAgo = new Date(now.getTime() - 60000); // 60 seconds ago
 
-        // 1. Find stuck bookings (paid but still not confirmed)
+        // 1. Find stuck bookings (paid but still not confirmed) that still have
+        // automatic attempts left, oldest first.
+        //
+        // Bookings at the retry limit are left out of the query itself. They used
+        // to be fetched and skipped, which wrote a log row for each of them every
+        // five minutes forever — and, worse, ten of them would fill every slot of
+        // the batch and stop newer paid bookings being retried at all. By the time
+        // one reaches the limit, reservations has been emailed
+        // (notifyPaidButUnconfirmed) and the admin panel shows it as at risk; a
+        // manual retry from there still works.
         const stuckBookings = await db.query.bookings.findMany({
             where: and(
                 inArray(bookings.status, ['payment_success', 'booking_requested']),
-                lt(bookings.updatedAt, oneMinuteAgo)
+                lt(bookings.updatedAt, oneMinuteAgo),
+                or(isNull(bookings.retryCount), lt(bookings.retryCount, MAX_RETRIES)),
             ),
+            orderBy: [asc(bookings.updatedAt)],
             limit: 10
         });
 
@@ -50,26 +61,6 @@ async function handleGet(request: Request) {
 
             try {
                 const currentRetryCount = booking.retryCount || 0;
-
-                if (currentRetryCount >= MAX_RETRIES) {
-                    await db.insert(bookingLogs).values({
-                        bookingId: booking.id,
-                        action: 'watchdog_max_retries_pending_manual_review',
-                        level: 'warning',
-                        requestPayload: {
-                            retryCount: currentRetryCount,
-                            status: booking.status,
-                        }
-                    });
-
-                    results.push({
-                        id: booking.id,
-                        status: 'pending_manual_review',
-                        retryCount: currentRetryCount,
-                    });
-                    continue;
-                }
-
                 const newRetryCount = currentRetryCount + 1;
                 await db.update(bookings)
                     .set({ retryCount: newRetryCount, updatedAt: now })
