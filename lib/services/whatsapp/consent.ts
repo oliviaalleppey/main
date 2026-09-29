@@ -257,6 +257,18 @@ const STOP_PATTERNS: RegExp[] = [
     /\bmath[ie]\b/i,
     /\bband\s*kar/i,
     /\bmat\s+bhej/i,
+    /\bvendam\b/i,
+    // Native scripts. `\b` only knows ASCII word characters, so these cannot use
+    // it; each instead refuses a following vowel sign or virama, which is what
+    // turns the word into a different one. വേണ്ട ("don't want") is also the start
+    // of വേണ്ടി ("for") — "എനിക്ക് വേണ്ടി" means "for me", not "stop".
+    // മതി ("enough") is left out: it is also the start of മതിൽ ("wall").
+    /വേണ്ട(?![\u0D3E-\u0D4D\u0D57])/,                  // venda — don't want
+    /അയ(?:യ്)?ക്ക(?:േ)?ണ്ട(?![\u0D3E-\u0D4D\u0D57])/, // ayakkanda / ayaykkanda / ayakkenda — don't send
+    /നിർത്ത/,                                          // nirthu — stop
+    /मत\s*भेज/,                                        // mat bhejo — don't send
+    /बंद\s*कर/,                                        // band karo — stop
+    /வேண்டாம்/,                                        // vendam (Tamil) — don't want
 ];
 
 export function detectStopIntent(text: string | null | undefined): boolean {
