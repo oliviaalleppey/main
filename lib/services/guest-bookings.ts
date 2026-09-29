@@ -1,6 +1,15 @@
 import { db } from '../db';
 import { bookings, bookingItems, roomTypes, addOns, bookingAddOns } from '../db/schema';
-import { eq, desc, inArray } from 'drizzle-orm';
+import { eq, desc, inArray, sql } from 'drizzle-orm';
+
+/**
+ * Email addresses compare case-insensitively. A guest who booked as
+ * Asha@Gmail.com and signs in with Google as asha@gmail.com is the same person;
+ * the exact match this used showed them an empty My Bookings page.
+ */
+export function sameEmail(a: string | null | undefined, b: string | null | undefined): boolean {
+    return !!a && !!b && a.trim().toLowerCase() === b.trim().toLowerCase();
+}
 
 export async function getGuestBookings(email: string) {
     try {
@@ -25,7 +34,7 @@ export async function getGuestBookings(email: string) {
                 taxAmount: bookings.taxAmount,
             })
             .from(bookings)
-            .where(eq(bookings.guestEmail, email))
+            .where(sql`lower(trim(${bookings.guestEmail})) = ${email.trim().toLowerCase()}`)
             .orderBy(desc(bookings.createdAt));
 
         const bookingIds = userBookings.map((b) => b.id);
@@ -68,7 +77,7 @@ export async function getGuestBookingById(email: string, bookingId: string) {
             .limit(1)
             .then((res) => res[0]);
 
-        if (!bookingRecord || bookingRecord.guestEmail !== email) {
+        if (!bookingRecord || !sameEmail(bookingRecord.guestEmail, email)) {
             return null;
         }
 

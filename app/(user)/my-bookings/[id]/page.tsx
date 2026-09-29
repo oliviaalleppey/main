@@ -40,6 +40,8 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
     const now = new Date();
     const isPast = checkInDate < now;
     const isCancelled = booking.status === 'cancelled';
+    // The invoice page only exists for money actually received.
+    const hasInvoice = booking.paymentStatus === 'success' || booking.paymentStatus === 'refunded';
 
     return (
         <main className="min-h-screen bg-[var(--surface-cream)] pt-28 pb-20 px-4 md:px-8">
@@ -60,7 +62,7 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
                     </div>
 
                     <div className="flex gap-3">
-                        {!isCancelled && (
+                        {!isCancelled && hasInvoice && (
                             <Link href={`/my-bookings/${booking.id}/invoice`} target="_blank" className="flex items-center gap-2 bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-dark)] text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-sm">
                                 <Download className="w-4 h-4" />
                                 Print / Download Confirmation

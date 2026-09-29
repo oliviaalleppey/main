@@ -25,7 +25,9 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
 
     const booking = await getGuestBookingById(session.user.email, resolvedParams.id);
 
-    if (!booking) {
+    // Same rule as /book/invoice: a tax invoice records money actually received,
+    // so an unpaid or declined booking has none.
+    if (!booking || (booking.paymentStatus !== 'success' && booking.paymentStatus !== 'refunded')) {
         return (
             <div className="p-10 text-center font-sans">
                 <h1>Booking Not Found</h1>
