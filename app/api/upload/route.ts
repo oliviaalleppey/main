@@ -1,6 +1,6 @@
 import { handleUpload, type HandleUploadBody } from '@vercel/blob/client';
 import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { denyUnlessAdmin } from '@/lib/admin/guard';
 
 /**
  * Mints the short-lived client tokens the admin media screens use to upload
@@ -36,10 +36,11 @@ export async function POST(request: Request): Promise<NextResponse> {
     // session here would reject a legitimate callback. Guarding the branch rather
     // than the route keeps that true if onUploadCompleted is added later.
     if (body.type === 'blob.generate-client-token') {
-        const session = await auth();
-        if (!session || session.user?.role !== 'admin') {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
+        // Read from the database like the rest of the panel, so an administrator
+        // who has been removed loses upload access at once, not when their
+        // session token expires.
+        const denied = await denyUnlessAdmin();
+        if (denied) return denied;
     }
 
     try {

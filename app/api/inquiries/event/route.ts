@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { sendEventInquiryToReservations } from '@/lib/services/email';
+import { RateLimiter } from '@/lib/rate-limit';
 
 type EventInquiryPayload = {
     name?: string;
@@ -28,6 +29,17 @@ function escapeHtml(value: string): string {
 
 export async function POST(request: Request) {
     try {
+        // Each inquiry emails reservations and F&B. Without a limit the form can
+        // be scripted to flood both inboxes.
+        const ip = (request.headers.get('x-forwarded-for') || 'unknown').split(',')[0].trim();
+        const limit = await RateLimiter.check(ip, 'eventInquiry', { limit: 5, windowMs: 60 * 60 * 1000 });
+        if (!limit.allowed) {
+            return NextResponse.json(
+                { success: false, message: 'Too many inquiries from this connection. Please call or email us directly.' },
+                { status: 429 },
+            );
+        }
+
         const body = await request.json() as EventInquiryPayload;
 
         const name = clean(body.name, 120);
