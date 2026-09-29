@@ -16,7 +16,7 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
     const session = await auth();
 
     if (!session || !session.user?.email) {
-        redirect("/api/auth/signin?callbackUrl=/my-bookings");
+        redirect(`/signin?callbackUrl=${encodeURIComponent(`/my-bookings/${resolvedParams.id}`)}`);
     }
 
     const booking = await getGuestBookingById(session.user.email, resolvedParams.id);

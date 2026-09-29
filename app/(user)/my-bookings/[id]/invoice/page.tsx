@@ -20,7 +20,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
     const session = await auth();
 
     if (!session || !session.user?.email) {
-        redirect("/api/auth/signin?callbackUrl=/my-bookings");
+        redirect(`/signin?callbackUrl=${encodeURIComponent(`/my-bookings/${resolvedParams.id}/invoice`)}`);
     }
 
     const booking = await getGuestBookingById(session.user.email, resolvedParams.id);
