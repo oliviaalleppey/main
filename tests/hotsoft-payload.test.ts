@@ -4,7 +4,7 @@
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { buildBookingRequestXml } from '@/lib/providers/crs/hotsoft-crs-provider';
+import { availabilityDateRange, buildBookingRequestXml } from '@/lib/providers/crs/hotsoft-crs-provider';
 
 // Two Canal View King rooms, 2 nights at ₹8,995, plus a cake.
 const ROOM_RATE = 899500;
@@ -83,4 +83,11 @@ test('booking header identifies the website and keeps AllInclusiveRates at its d
     assert.equal(attr('BookingDetails', 'OTA'), 'Website');
     assert.equal(attr('BookingDetails', 'AllInclusiveRates'), 'Yes');
     assert.equal(attr('GuestDetails', 'GuestName'), 'Asha Nair');
+});
+
+test('availability covers every night of the stay, whatever the server time zone', () => {
+    // The suite runs in IST, where the old local-midnight arithmetic dropped the last night.
+    assert.deepEqual(availabilityDateRange('2026-11-10', '2026-11-12'), { from: '10/11/2026', to: '11/11/2026' });
+    assert.deepEqual(availabilityDateRange('2026-12-31', '2027-01-01'), { from: '31/12/2026', to: '31/12/2026' });
+    assert.deepEqual(availabilityDateRange('2026-02-28', '2026-03-02'), { from: '28/02/2026', to: '01/03/2026' });
 });

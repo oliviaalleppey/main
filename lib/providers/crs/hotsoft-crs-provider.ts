@@ -74,6 +74,20 @@ function nightsBetween(checkIn: string, checkOut: string): number {
     return Math.ceil((end - start) / 86_400_000);
 }
 
+/**
+ * The DtFrom / DtTo pair for an availability check: the nights of the stay, so
+ * the last night (the day before check-out), not the check-out day itself.
+ *
+ * This used to parse check-out as local midnight, step back a day and read it
+ * back in UTC — correct on Vercel, which runs in UTC, but a day short anywhere
+ * east of it: on an IST machine a two-night stay was checked for its first
+ * night only. Counted in UTC now, like every other date in this file.
+ */
+export function availabilityDateRange(checkIn: string, checkOut: string): { from: string; to: string } {
+    const lastNight = nightsBetween(checkIn, checkOut) > 0 ? addNights(checkOut, -1) : checkOut;
+    return { from: formatDateToHotsoft(checkIn), to: formatDateToHotsoft(lastNight) };
+}
+
 // We configure the builder to handle attributes, as Hotsoft makes heavy use of XML attributes
 const xmlBuilder = new XMLBuilder({
     ignoreAttributes: false,
@@ -319,18 +333,13 @@ export class HotsoftCrsProvider implements BookingProvider {
         let lastError = '';
 
         await Promise.all(roomTypesToCheck.map(async (roomType) => {
-            const checkOutDate = new Date(request.checkOut + 'T00:00:00');
-            const checkInDate = new Date(request.checkIn + 'T00:00:00');
-            
-            if (checkOutDate > checkInDate) {
-                checkOutDate.setDate(checkOutDate.getDate() - 1);
-            }
+            const range = availabilityDateRange(request.checkIn, request.checkOut);
 
             const hotelDet: any = {
                 HotelId: HOTSOFT_CONFIG.hotelId,
                 RoomType: getHotsoftRoomId(roomType),
-                DtFrom: formatDateToHotsoft(request.checkIn),
-                DtTo: formatDateToHotsoft(checkOutDate.toISOString()),
+                DtFrom: range.from,
+                DtTo: range.to,
                 AvailType: '1',
             };
 
