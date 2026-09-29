@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { waTemplates, adminUsers } from '@/lib/db/schema';
-import { and, eq, sql } from 'drizzle-orm';
+import { waTemplates } from '@/lib/db/schema';
+import { eq } from 'drizzle-orm';
+import { countAdministrators } from '@/lib/admin/guard';
 import { requireCapability, errorResponse, audit } from '@/lib/services/whatsapp/admin-guard';
 import { getProvider, resolveProviderName } from '@/lib/services/whatsapp';
 import { lintTemplate, hasBlockingIssues } from '@/lib/services/whatsapp/template-lint';
@@ -36,12 +37,8 @@ export async function POST(request: Request, { params }: Params) {
             return NextResponse.json({ error: 'Template not found' }, { status: 404 });
         }
 
-        // Only active admins count — a deactivated second account must not be what
-        // makes the two-person rule look satisfied.
-        const [{ count } = { count: 0 }] = await db
-            .select({ count: sql<number>`count(*)` })
-            .from(adminUsers)
-            .where(and(eq(adminUsers.isActive, true), eq(adminUsers.role, 'admin')));
+        // Administrators as the panel knows them — see countAdministrators.
+        const count = await countAdministrators();
 
         const selfSubmitted = !!template.submittedBy && template.submittedBy === actor.id;
 

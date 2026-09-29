@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/lib/db';
-import { waCampaigns, waTemplates, adminUsers } from '@/lib/db/schema';
-import { and, eq, sql } from 'drizzle-orm';
+import { waCampaigns, waTemplates } from '@/lib/db/schema';
+import { eq } from 'drizzle-orm';
+import { countAdministrators } from '@/lib/admin/guard';
 import { requireCapability, errorResponse, audit } from '@/lib/services/whatsapp/admin-guard';
 import { buildCampaignQueue } from '@/lib/services/whatsapp/campaigns';
 import { getSettings } from '@/lib/services/whatsapp/settings';
@@ -97,13 +98,8 @@ export async function POST(request: Request, { params }: Params) {
         let selfApproved = false;
 
         if (build.queued > threshold && !isResume) {
-            // Only active admins count — a deactivated second account must not be
-            // what makes the two-person rule look satisfied.
-            const [{ count } = { count: 0 }] = await db
-                .select({ count: sql<number>`count(*)` })
-                .from(adminUsers)
-                .where(and(eq(adminUsers.isActive, true), eq(adminUsers.role, 'admin')));
-            const adminCount = Number(count);
+            // Administrators as the panel knows them — see countAdministrators.
+            const adminCount = await countAdministrators();
 
             if (!campaign.approvedBy) {
                 await db

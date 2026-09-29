@@ -234,3 +234,21 @@ export function guardErrorResponse(error: unknown): NextResponse | null {
     }
     return null;
 }
+
+/**
+ * How many administrators the panel has, for the WhatsApp two-person rules
+ * (campaign start above the approval threshold, template submission to Meta).
+ *
+ * Counted from the `user` table, which is where roles live and whose ids
+ * approvedBy / submittedBy hold. Those rules used to count the legacy
+ * admin_users table, which nothing populates — so the count was 0, the
+ * "sole administrator" exception always applied, and one person could approve
+ * and launch their own campaign to thousands of guests.
+ */
+export async function countAdministrators(): Promise<number> {
+    const rows = await db
+        .select({ id: users.id })
+        .from(users)
+        .where(eq(users.role, 'admin'));
+    return rows.length;
+}
