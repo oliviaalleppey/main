@@ -32,3 +32,11 @@ test('My Bookings matches the booking email regardless of case and spaces', () =
     assert.equal(sameEmail(null, 'asha@gmail.com'), false);
     assert.equal(sameEmail('', ''), false);
 });
+
+test('newsletter addresses are normalised so one person is one subscriber', async () => {
+    const { normaliseSubscriberEmail } = await import('@/lib/validations/newsletter');
+    assert.equal(normaliseSubscriberEmail('  Asha@Gmail.COM '), 'asha@gmail.com');
+    assert.equal(normaliseSubscriberEmail('not-an-email'), null);
+    assert.equal(normaliseSubscriberEmail(42), null);
+    assert.equal(normaliseSubscriberEmail(`${'a'.repeat(250)}@x.co`), null);
+});

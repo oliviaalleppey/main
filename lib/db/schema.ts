@@ -1161,6 +1161,15 @@ export const users = pgTable("user", {
  * that revoking access takes effect on the staff member's next page load instead
  * of whenever they happen to sign in again.
  */
+/** Footer mailing-list sign-ups — see drizzle/0012_newsletter_subscribers.sql. */
+export const newsletterSubscribers = pgTable('newsletter_subscribers', {
+    id: uuid('id').primaryKey().defaultRandom(),
+    email: varchar('email', { length: 254 }).notNull().unique(),
+    source: varchar('source', { length: 64 }).notNull().default('website_footer'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    unsubscribedAt: timestamp('unsubscribed_at'),
+});
+
 /**
  * The last run of each scheduled job — see drizzle/0010_cron_runs.sql and
  * lib/services/cron-runs.ts. Keyed on the job name, one row per job.

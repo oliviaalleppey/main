@@ -1,7 +1,7 @@
 import Link from 'next/link';
-import { and, desc, eq, gte, inArray, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, inArray, isNull, sql } from 'drizzle-orm';
 import { db } from '@/lib/db';
-import { bookings } from '@/lib/db/schema';
+import { bookings, newsletterSubscribers } from '@/lib/db/schema';
 import { getBookingProvider } from '@/lib/providers/crs/factory';
 import { BOOKING_FLOW_MODE } from '@/lib/config/booking-flow-mode';
 import { requireSection } from '@/lib/admin/guard';
@@ -18,6 +18,7 @@ import {
     Clock,
     XCircle,
     Timer,
+    Mail,
 } from 'lucide-react';
 
 const MAX_RETRIES = Number(process.env.BOOKING_WATCHDOG_MAX_RETRIES || 12);
@@ -140,7 +141,16 @@ export default async function AdminDashboard() {
     let cronHealth: CronJobHealth[] | null = null;
     let cronHealthError: string | null = null;
     let nowMs = 0;
+    let subscriberCount: number | null = null;
     if (access.isAdmin) {
+        try {
+            const [row] = await db.select({ count: sql<number>`count(*)` })
+                .from(newsletterSubscribers)
+                .where(isNull(newsletterSubscribers.unsubscribedAt));
+            subscriberCount = Number(row?.count ?? 0);
+        } catch {
+            subscriberCount = null; // table missing: migration 0012 not applied
+        }
         try {
             const health = await getCronHealth();
             cronHealth = health.jobs;
@@ -402,6 +412,27 @@ export default async function AdminDashboard() {
                             </table>
                         </div>
                     )}
+                </div>
+            )}
+
+            {/* Mailing list — admins only */}
+            {access.isAdmin && subscriberCount !== null && (
+                <div className="rounded-xl border bg-white p-5 shadow-sm flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-sky-50 flex items-center justify-center flex-shrink-0">
+                            <Mail className="w-6 h-6 text-sky-600" />
+                        </div>
+                        <div>
+                            <p className="text-sm text-gray-500">Mailing list subscribers</p>
+                            <p className="text-2xl font-bold text-gray-900">{subscriberCount}</p>
+                        </div>
+                    </div>
+                    <a
+                        href="/api/admin/newsletter/export"
+                        className="text-sm text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1"
+                    >
+                        Download CSV <ArrowRight className="w-3.5 h-3.5" />
+                    </a>
                 </div>
             )}
 
