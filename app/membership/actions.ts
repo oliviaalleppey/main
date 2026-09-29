@@ -4,39 +4,30 @@ import { db } from '@/lib/db';
 import { membershipApplications } from '@/lib/db/schema';
 import { sendMembershipApplicationAcknowledgment, sendMembershipApplicationToAdmins } from '@/lib/services/email';
 import { z } from 'zod';
+import { membershipSchema, type MembershipFormData } from '@/lib/validations/membership';
 import { format } from 'date-fns';
+import { headers } from 'next/headers';
+import { RateLimiter } from '@/lib/rate-limit';
 
-const membershipSchema = z.object({
-  fullName: z.string().min(1, 'Full Name is required'),
-  dateOfBirth: z.string().optional(),
-  gender: z.string().optional(),
-  nationality: z.string().optional(),
-  memberPhotographUrl: z.string().optional(),
+/**
+ * Each submission emails an acknowledgement to whatever address was typed, from
+ * the hotel's own domain. Unlimited, the form was a way to send hotel-branded
+ * mail to anyone, which is also how a domain's deliverability gets ruined.
+ */
+const SUBMISSIONS_PER_HOUR = 3;
 
-  mobileNumber: z.string().min(1, 'Mobile Number is required'),
-  emailAddress: z.string().email('Invalid email address'),
-  alternateContactNumber: z.string().optional(),
-
-  residentialAddress: z.string().optional(),
-  city: z.string().optional(),
-  state: z.string().optional(),
-  country: z.string().optional(),
-  pinCode: z.string().optional(),
-
-  idType: z.string().optional(),
-  idNumber: z.string().optional(),
-
-  preferredModeOfCommunication: z.string().optional(),
-
-  emergencyName: z.string().optional(),
-  emergencyRelationship: z.string().optional(),
-  emergencyContactNumber: z.string().optional(),
-});
-
-export type MembershipFormData = z.infer<typeof membershipSchema>;
 
 export async function submitMembershipApplication(data: MembershipFormData) {
   try {
+    const ip = ((await headers()).get('x-forwarded-for') || 'unknown').split(',')[0].trim();
+    const limit = await RateLimiter.check(ip, 'submitMembershipApplication', {
+      limit: SUBMISSIONS_PER_HOUR,
+      windowMs: 60 * 60 * 1000,
+    });
+    if (!limit.allowed) {
+      return { success: false, error: 'Too many applications from this connection. Please try again in an hour, or contact us directly.' };
+    }
+
     const validatedData = membershipSchema.parse(data);
 
     // Save to database

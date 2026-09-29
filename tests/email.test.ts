@@ -109,3 +109,16 @@ test('cron alert goes to IT, names the job, and links the dashboard', async () =
     assert.ok(mail.html.includes('paid bookings that Hotsoft has not confirmed are not retried'));
     assert.ok(mail.html.includes('/admin'));
 });
+
+test('membership emails escape everything the public form sends', async () => {
+    sent.length = 0;
+    await email.sendMembershipApplicationToAdmins({
+        name: hostileName, email: 'x@y.com"><img src=x>', phone: '1<script>', dob: '<b>1990</b>', city: '<i>Kochi</i>',
+    });
+    await email.sendMembershipApplicationAcknowledgment({ to: 'x@y.com', name: hostileName });
+    assert.equal(sent.length, 2);
+    for (const mail of sent) {
+        assert.ok(noMarkupFromGuest(mail.html));
+        assert.ok(!mail.html.includes('<b>1990</b>') && !mail.html.includes('<i>Kochi</i>'));
+    }
+});

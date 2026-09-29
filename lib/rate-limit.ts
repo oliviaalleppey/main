@@ -6,7 +6,18 @@ export class RateLimiter {
     private static LIMIT = 5;
     private static WINDOW_MS = 60 * 1000; // 1 minute
 
-    static async check(ip: string, endpoint: string): Promise<{ allowed: boolean; remaining: number }> {
+    /**
+     * `options` overrides the default of 5 per minute for one endpoint — an
+     * endpoint that sends email to an address the caller types needs a far
+     * tighter limit than one that only reads.
+     */
+    static async check(
+        ip: string,
+        endpoint: string,
+        options: { limit?: number; windowMs?: number } = {},
+    ): Promise<{ allowed: boolean; remaining: number }> {
+        const limit = options.limit ?? this.LIMIT;
+        const windowMs = options.windowMs ?? this.WINDOW_MS;
         const now = new Date();
 
         // 1. Lazy cleanup of expired
@@ -22,7 +33,7 @@ export class RateLimiter {
         });
 
         if (record) {
-            if (record.hits! >= this.LIMIT) {
+            if (record.hits! >= limit) {
                 return { allowed: false, remaining: 0 };
             }
 
@@ -31,7 +42,7 @@ export class RateLimiter {
                 .set({ hits: record.hits! + 1 })
                 .where(eq(rateLimits.id, record.id));
 
-            return { allowed: true, remaining: this.LIMIT - (record.hits! + 1) };
+            return { allowed: true, remaining: limit - (record.hits! + 1) };
         }
 
         // 3. New Record
@@ -39,9 +50,9 @@ export class RateLimiter {
             ip,
             endpoint,
             hits: 1,
-            expiresAt: new Date(Date.now() + this.WINDOW_MS)
+            expiresAt: new Date(Date.now() + windowMs)
         });
 
-        return { allowed: true, remaining: this.LIMIT - 1 };
+        return { allowed: true, remaining: limit - 1 };
     }
 }

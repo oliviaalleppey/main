@@ -679,7 +679,9 @@ export async function sendMembershipApplicationAcknowledgment(params: {
       return { skipped: true };
     }
 
-    const { to, name } = params;
+    const { to } = params;
+    // Typed into the public membership form; never let it become markup.
+    const name = escapeHtml(params.name);
 
     const { data, error } = await resend.emails.send({
       from: `${HOTEL_NAME} Memberships <${FROM_EMAIL}>`,
@@ -747,13 +749,19 @@ export async function sendMembershipApplicationToAdmins(params: {
       return { skipped: true };
     }
 
-    const { name, email, phone, dob, city } = params;
+    // Every field comes from the public membership form, which anyone can
+    // submit, so all of it is escaped before it reaches the staff inbox.
+    const name = escapeHtml(params.name);
+    const email = escapeHtml(params.email);
+    const phone = escapeHtml(params.phone);
+    const dob = escapeHtml(params.dob);
+    const city = escapeHtml(params.city);
 
     const { data, error } = await resend.emails.send({
       from: `${HOTEL_NAME} System <${FROM_EMAIL}>`,
       to: [RESERVATION_TEAM_EMAIL, FNB_EMAIL, VP_EMAIL],
-      replyTo: email ? [email] : undefined,
-      subject: `New Membership Application - ${name}`,
+      replyTo: params.email ? [params.email] : undefined,
+      subject: `New Membership Application - ${params.name.replace(/[\r\n]/g, ' ')}`,
       html: `
         <!DOCTYPE html>
         <html>
