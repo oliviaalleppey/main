@@ -190,7 +190,10 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
                                 </td>
                                 <td className="px-5 py-3.5 text-right font-semibold text-gray-900">{formatCurrency(booking.totalAmount)}</td>
                                 <td className="px-5 py-3.5 text-right">
-                                    <DeleteBookingButton bookingId={booking.id} />
+                                    {/* Paid bookings are cancelled from their detail page, never deleted. */}
+                                    {booking.paymentStatus !== 'success' && booking.paymentStatus !== 'refunded' && (
+                                        <DeleteBookingButton bookingId={booking.id} />
+                                    )}
                                 </td>
                             </tr>
                         ))}

@@ -35,8 +35,11 @@ const ALLOWED_TRANSITIONS: Record<BookingStatus, BookingStatus[]> = {
     'initiated': ['pending_payment', 'failed', 'expired'],
     'pending': ['pending_payment', 'failed', 'expired', 'cancelled'], // Legacy compat
     'pending_payment': ['payment_success', 'failed', 'expired', 'cancelled'],
-    'payment_success': ['booking_requested', 'failed', 'refunded'],
-    'booking_requested': ['confirmed', 'failed', 'refunded'],
+    // Paid but not yet confirmed can be cancelled by an administrator — the guest
+    // may cancel before Hotsoft ever confirms. finalizeFromWebhook stops at a
+    // cancelled booking, so the watchdog does not push it to the CRS afterwards.
+    'payment_success': ['booking_requested', 'failed', 'refunded', 'cancelled'],
+    'booking_requested': ['confirmed', 'failed', 'refunded', 'cancelled'],
     'confirmed': ['completed', 'cancelled', 'refunded'],
     'failed': ['refunded'], // Can refund a failed booking if payment was taken
     'refunded': [], // Terminal

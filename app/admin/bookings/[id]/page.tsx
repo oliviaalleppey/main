@@ -3,9 +3,11 @@ import { bookings, payments, bookingItems, bookingGuests, bookingConfirmations, 
 import { eq, desc } from 'drizzle-orm';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, CheckCircle2, Clock, XCircle, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Clock, XCircle, AlertTriangle, RotateCcw } from 'lucide-react';
 import { requireSection } from '@/lib/admin/guard';
 import { calculateAddOnTax } from '@/lib/services/tax';
+import { canCancel, canMarkRefunded } from '@/lib/services/booking-admin-rules';
+import { BookingAdminActions } from './BookingAdminActions';
 
 interface PageProps {
     params: Promise<{ id: string }>;
@@ -34,6 +36,7 @@ const STATUS_CONFIG: Record<string, { label: string; icon: React.ElementType; tw
     initiated: { label: 'Initiated', icon: Clock, tw: 'bg-gray-50 text-gray-500 border-gray-200' },
     cancelled: { label: 'Cancelled', icon: XCircle, tw: 'bg-red-50 text-red-700 border-red-200' },
     failed: { label: 'Failed', icon: XCircle, tw: 'bg-red-50 text-red-700 border-red-200' },
+    refunded: { label: 'Refunded', icon: RotateCcw, tw: 'bg-gray-100 text-gray-700 border-gray-200' },
 };
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -57,7 +60,7 @@ function Field({ label, value, className = '' }: { label: string; value: React.R
 }
 
 export default async function BookingDetailPage({ params }: PageProps) {
-    await requireSection('bookings');
+    const access = await requireSection('bookings');
 
     const { id } = await params;
 
@@ -100,6 +103,16 @@ export default async function BookingDetailPage({ params }: PageProps) {
     ));
 
     const crsConfirmation = confirmationRows[0];
+
+    // Cancel and refund are administrator actions; staff holding the bookings
+    // section see the booking but not these controls.
+    const adminRules = {
+        status: booking.status,
+        paymentStatus: booking.paymentStatus,
+        hasSuccessfulPayment: paymentRows.some((p) => p.status === 'success'),
+    };
+    const showCancel = access.isAdmin && canCancel(adminRules);
+    const showMarkRefunded = access.isAdmin && canMarkRefunded(adminRules);
     
     // The rate on the line is what this booking was charged; the add-on's own
     // rate is only a fallback for lines taken before the line carried one.
@@ -134,7 +147,20 @@ export default async function BookingDetailPage({ params }: PageProps) {
                     )}
                 </div>
                 <p className="text-xs text-gray-400 flex-shrink-0">{formatDateTime(booking.createdAt!)}</p>
+                <BookingAdminActions
+                    bookingId={booking.id}
+                    bookingNumber={booking.bookingNumber}
+                    canCancel={showCancel}
+                    canMarkRefunded={showMarkRefunded}
+                />
             </div>
+            {booking.status === 'cancelled' && (
+                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">
+                    Cancelled{booking.cancelledAt ? ` on ${formatDateTime(booking.cancelledAt)}` : ''}
+                    {booking.cancellationReason ? ` — ${booking.cancellationReason}` : ''}.
+                    {booking.paymentStatus !== 'refunded' && ' Refund in Easebuzz and cancel the room in Hotsoft by hand, then mark it refunded here.'}
+                </div>
+            )}
 
             {/* Guest + Stay — 2 col */}
             <div className="grid md:grid-cols-2 gap-4">

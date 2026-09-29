@@ -102,6 +102,16 @@ function getErrorMessage(error: unknown): string {
     return error instanceof Error ? error.message : 'Unknown error';
 }
 
+/**
+ * States in which a booking must not be pushed to the CRS again. A cancelled
+ * booking in particular: an administrator cancelled it, and a watchdog retry or
+ * a replayed payment return must not reserve the room behind their back — or,
+ * failing that, mark it failed and send a "paid but unconfirmed" alert.
+ */
+export function isFinalizeStopped(status: string | null | undefined): boolean {
+    return status === 'failed' || status === 'refunded' || status === 'cancelled' || status === 'expired';
+}
+
 function sanitizeRoomCount(value: unknown): number {
     const parsed = typeof value === 'number'
         ? value
@@ -864,7 +874,7 @@ export class BookingService {
 
         // 2. Check State (a cheap early exit; re-checked under the lock below)
         if (booking.status === 'confirmed') return { success: true, status: 'already_confirmed' };
-        if (booking.status === 'failed' || booking.status === 'refunded') return { success: false, status: booking.status };
+        if (isFinalizeStopped(booking.status)) return { success: false, status: booking.status as string };
 
         // 3. ACQUIRE LOCK before touching state.
         //
@@ -891,8 +901,8 @@ export class BookingService {
                 columns: { status: true },
             });
             if (current?.status === 'confirmed') return { success: true, status: 'already_confirmed' };
-            if (current?.status === 'failed' || current?.status === 'refunded') {
-                return { success: false, status: current.status };
+            if (isFinalizeStopped(current?.status)) {
+                return { success: false, status: current?.status as string };
             }
 
             // 4. Confirm with CRS. Payment is verified if we are here.
