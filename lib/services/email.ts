@@ -824,3 +824,74 @@ export async function sendMembershipApplicationToAdmins(params: {
   }
 }
 
+
+/** One scheduled job, as the overdue/recovered alert lists it. */
+export type CronAlertJob = {
+  job: string;
+  every: string;
+  lastScheduledRun: string;
+};
+
+/**
+ * Tell IT a scheduled job has stopped running on schedule, or has recovered.
+ *
+ * These jobs retry unconfirmed paid bookings and settle stuck payments, so one
+ * that silently stops is a problem nobody sees until a guest calls. Sent once
+ * per incident: see alertOnOverdueJobs in lib/services/cron-runs.ts.
+ */
+export async function sendCronAlert(params: { kind: 'overdue' | 'recovered'; jobs: CronAlertJob[] }) {
+  try {
+    const resend = getResendClient();
+    if (!resend) return { skipped: true };
+
+    const { kind, jobs } = params;
+    const to = (process.env.CRON_ALERT_EMAIL || 'it@oliviaalleppey.com')
+      .split(',').map((address) => address.trim()).filter(Boolean);
+    const names = jobs.map((job) => job.job).join(', ');
+    const overdue = kind === 'overdue';
+    const dashboardUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://oliviaalleppey.com'}/admin`;
+
+    const rows = jobs.map((job) => `
+      <tr>
+        <td style="padding:6px 12px 6px 0;font-family:monospace;">${escapeHtml(job.job)}</td>
+        <td style="padding:6px 12px 6px 0;color:#6B7280;">${escapeHtml(job.every)}</td>
+        <td style="padding:6px 0;color:#6B7280;">last scheduled run: ${escapeHtml(job.lastScheduledRun)}</td>
+      </tr>`).join('');
+
+    const { data, error } = await resend.emails.send({
+      from: `${HOTEL_NAME} System <${FROM_EMAIL}>`,
+      to,
+      bcc: ['mail@oliviaalleppey.com'],
+      subject: overdue
+        ? `Scheduled job stopped: ${names}`
+        : `Scheduled job running again: ${names}`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head><meta charset="utf-8"></head>
+          <body style="font-family:Arial,sans-serif;line-height:1.6;color:#1A1A1A;">
+            <div style="max-width:620px;margin:24px auto;">
+              <h2 style="margin:0 0 8px;color:${overdue ? '#991E29' : '#0D4A4A'};">
+                ${overdue ? 'A scheduled job has stopped running' : 'Scheduled job is running again'}
+              </h2>
+              <p>${overdue
+                ? 'Vercel has not run the job(s) below on schedule. While they are stopped, paid bookings that Hotsoft has not confirmed are not retried and stuck payments are not settled. Check Vercel → the Olivia project → Settings → Cron Jobs.'
+                : 'The job(s) below are running on schedule again. No action needed.'}</p>
+              <table style="border-collapse:collapse;font-size:14px;">${rows}</table>
+              <p style="margin-top:20px;"><a href="${dashboardUrl}">Open the admin dashboard →</a> (Scheduled Jobs card)</p>
+            </div>
+          </body>
+        </html>
+      `,
+    });
+
+    if (error) {
+      console.error('Error sending cron alert:', error);
+      throw error;
+    }
+    return data;
+  } catch (error) {
+    console.error('Failed to send cron alert:', error);
+    throw new Error('Failed to send cron alert');
+  }
+}

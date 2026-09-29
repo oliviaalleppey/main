@@ -1176,6 +1176,8 @@ export const cronRuns = pgTable('cron_runs', {
     lastFailureAt: timestamp('last_failure_at'),
     lastError: text('last_error'),
     runCount: integer('run_count').notNull().default(0),
+    /** Set when the overdue alert for this job was sent; cleared on recovery. */
+    overdueAlertedAt: timestamp('overdue_alerted_at'),
 });
 
 export const adminSectionGrants = pgTable('admin_section_grants', {

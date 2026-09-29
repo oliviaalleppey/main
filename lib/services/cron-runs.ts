@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
-import { sql } from 'drizzle-orm';
+import { and, eq, isNotNull, isNull, sql } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { cronRuns } from '@/lib/db/schema';
+import { sendCronAlert } from './email';
 import vercelConfig from '../../vercel.json';
 
 /**
@@ -107,6 +108,10 @@ export async function trackCronRun(
         error,
     }).catch((e) => console.error(`[cron-runs] could not record ${job}:`, e));
 
+    // Every live job keeps an eye on the others, so any one still running can
+    // report one that has stopped.
+    await alertOnOverdueJobs().catch((e) => console.error('[cron-runs] overdue check failed:', e));
+
     return response;
 }
 
@@ -152,6 +157,7 @@ export type CronJobHealth = CronJob & {
     lastFailureAt: Date | null;
     lastError: string | null;
     runCount: number;
+    overdueAlertedAt: Date | null;
 };
 
 type CronRunRow = typeof cronRuns.$inferSelect;
@@ -195,6 +201,7 @@ export function judgeCronJob(
         lastFailureAt: row?.lastFailureAt ?? null,
         lastError: row?.lastError ?? null,
         runCount: row?.runCount ?? 0,
+        overdueAlertedAt: row?.overdueAlertedAt ?? null,
     };
 }
 
@@ -210,4 +217,80 @@ export async function getCronHealth(now = new Date()): Promise<{ checkedAt: Date
     // Returned so callers render "5 min ago" against the same instant the
     // verdicts were computed at, instead of reading the clock a second time.
     return { checkedAt: now, jobs };
+}
+
+/**
+ * Which jobs to report. Pure, so it can be tested.
+ *
+ * Overdue and not yet reported: alert. Reported, and now running on schedule
+ * again: say it recovered. A job that has never run from the scheduler is left
+ * alone — that is a fresh install, not an outage — and a job that is running
+ * but failing is shown on the dashboard rather than emailed.
+ */
+export function planCronAlerts(jobs: CronJobHealth[]): { overdue: CronJobHealth[]; recovered: CronJobHealth[] } {
+    return {
+        overdue: jobs.filter((job) => job.state === 'late' && !job.overdueAlertedAt),
+        recovered: jobs.filter((job) => job.overdueAlertedAt && (job.state === 'ok' || job.state === 'failing')),
+    };
+}
+
+function describeForAlert(job: CronJobHealth) {
+    const every = job.intervalMinutes === null ? job.schedule
+        : job.intervalMinutes < 60 ? `every ${job.intervalMinutes} min`
+            : job.intervalMinutes === 60 ? 'hourly'
+                : job.intervalMinutes === 24 * 60 ? 'daily' : `every ${job.intervalMinutes} min`;
+    const lastScheduledRun = job.lastScheduledAt
+        ? `${job.lastScheduledAt.toLocaleString('en-IN', {
+            timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false,
+        })} IST`
+        : 'never';
+    return { job: job.job, every, lastScheduledRun };
+}
+
+/**
+ * Email IT once when a job goes overdue and once when it recovers.
+ *
+ * Each alert is claimed with a conditional UPDATE on overdue_alerted_at before
+ * it is sent, so two jobs running this at the same moment cannot both send. If
+ * the email then fails, the claim is handed back so the next run tries again.
+ */
+export async function alertOnOverdueJobs(now = new Date()): Promise<{ overdue: string[]; recovered: string[] }> {
+    const { jobs } = await getCronHealth(now);
+    const plan = planCronAlerts(jobs);
+
+    const overdue: CronJobHealth[] = [];
+    for (const job of plan.overdue) {
+        const claimed = await db.update(cronRuns)
+            .set({ overdueAlertedAt: now })
+            .where(and(eq(cronRuns.job, job.job), isNull(cronRuns.overdueAlertedAt)))
+            .returning({ job: cronRuns.job });
+        if (claimed.length) overdue.push(job);
+    }
+
+    const recovered: CronJobHealth[] = [];
+    for (const job of plan.recovered) {
+        const claimed = await db.update(cronRuns)
+            .set({ overdueAlertedAt: null })
+            .where(and(eq(cronRuns.job, job.job), isNotNull(cronRuns.overdueAlertedAt)))
+            .returning({ job: cronRuns.job });
+        if (claimed.length) recovered.push(job);
+    }
+
+    if (overdue.length) {
+        try {
+            await sendCronAlert({ kind: 'overdue', jobs: overdue.map(describeForAlert) });
+        } catch (error) {
+            // Unclaim, so the next run retries rather than the outage going unreported.
+            for (const job of overdue) {
+                await db.update(cronRuns).set({ overdueAlertedAt: null }).where(eq(cronRuns.job, job.job));
+            }
+            throw error;
+        }
+    }
+    if (recovered.length) {
+        await sendCronAlert({ kind: 'recovered', jobs: recovered.map(describeForAlert) })
+            .catch((error) => console.error('[cron-runs] recovery alert failed:', error));
+    }
+
+    return { overdue: overdue.map((job) => job.job), recovered: recovered.map((job) => job.job) };
 }

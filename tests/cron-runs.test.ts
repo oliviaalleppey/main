@@ -3,7 +3,7 @@
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { CRON_JOBS, judgeCronJob, scheduleIntervalMinutes } from '@/lib/services/cron-runs';
+import { CRON_JOBS, judgeCronJob, planCronAlerts, scheduleIntervalMinutes } from '@/lib/services/cron-runs';
 
 const NOW = new Date('2026-09-29T12:00:00Z');
 const minutesAgo = (minutes: number) => new Date(NOW.getTime() - minutes * 60_000);
@@ -40,4 +40,18 @@ test('never, failing, and no lateness check for an unparsed schedule', () => {
     assert.equal(judgeCronJob(job(5), { lastScheduledAt: null, lastStatus: 'ok' }, NOW).state, 'never');
     assert.equal(judgeCronJob(job(5), { lastScheduledAt: minutesAgo(3), lastStatus: 'error' }, NOW).state, 'failing');
     assert.equal(judgeCronJob(job(null), { lastScheduledAt: minutesAgo(99999), lastStatus: 'ok' }, NOW).state, 'ok');
+});
+
+test('alerts once per incident: overdue jobs not yet reported, and reported jobs that recovered', () => {
+    const late = judgeCronJob({ ...job(5), job: 'late-new' }, { lastScheduledAt: minutesAgo(60), lastStatus: 'ok' }, NOW);
+    const lateAlready = judgeCronJob({ ...job(5), job: 'late-reported' },
+        { lastScheduledAt: minutesAgo(60), lastStatus: 'ok', overdueAlertedAt: minutesAgo(30) }, NOW);
+    const recovered = judgeCronJob({ ...job(5), job: 'recovered' },
+        { lastScheduledAt: minutesAgo(2), lastStatus: 'ok', overdueAlertedAt: minutesAgo(30) }, NOW);
+    const healthy = judgeCronJob({ ...job(5), job: 'healthy' }, { lastScheduledAt: minutesAgo(2), lastStatus: 'ok' }, NOW);
+    const neverRan = judgeCronJob({ ...job(5), job: 'never' }, undefined, NOW);
+
+    const plan = planCronAlerts([late, lateAlready, recovered, healthy, neverRan]);
+    assert.deepEqual(plan.overdue.map((entry) => entry.job), ['late-new']);
+    assert.deepEqual(plan.recovered.map((entry) => entry.job), ['recovered']);
 });

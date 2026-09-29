@@ -96,3 +96,16 @@ test('payment-received note goes to the guest and says not to pay again', async 
     assert.ok(mail.html.includes('₹21,228.20'));
     assert.ok(noMarkupFromGuest(mail.html));
 });
+
+test('cron alert goes to IT, names the job, and links the dashboard', async () => {
+    sent.length = 0;
+    await email.sendCronAlert({
+        kind: 'overdue',
+        jobs: [{ job: 'booking-watchdog', every: 'every 5 min', lastScheduledRun: '29 Sep, 09:40 IST' }],
+    });
+    const [mail] = sent;
+    assert.deepEqual(mail.to, ['it@oliviaalleppey.com']);
+    assert.equal(mail.subject, 'Scheduled job stopped: booking-watchdog');
+    assert.ok(mail.html.includes('paid bookings that Hotsoft has not confirmed are not retried'));
+    assert.ok(mail.html.includes('/admin'));
+});
