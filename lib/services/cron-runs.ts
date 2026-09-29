@@ -154,47 +154,58 @@ export type CronJobHealth = CronJob & {
     runCount: number;
 };
 
+type CronRunRow = typeof cronRuns.$inferSelect;
+
 /**
- * Every job in vercel.json with its last run, and a verdict.
+ * One job's verdict from its last recorded run. Pure, so it can be tested.
  *
  * `late` allows two missed runs plus five minutes of slack before it complains:
  * Vercel does not promise to fire on the exact minute, and one skipped tick is
  * not an outage. `never` means no scheduled run has been recorded at all —
- * expected for a few minutes after this ships, a problem after that.
+ * expected for a few minutes after this ships, a problem after that. A job with
+ * a schedule we cannot parse is never called late.
+ */
+export function judgeCronJob(
+    job: CronJob,
+    row: Pick<CronRunRow, 'lastScheduledAt' | 'lastStatus'> & Partial<CronRunRow> | undefined,
+    now: Date,
+): CronJobHealth {
+    const lastScheduledAt = row?.lastScheduledAt ?? null;
+
+    let state: CronJobHealth['state'] = 'ok';
+    if (!lastScheduledAt) {
+        state = 'never';
+    } else if (
+        job.intervalMinutes !== null &&
+        now.getTime() - lastScheduledAt.getTime() > (job.intervalMinutes * 2 + 5) * 60 * 1000
+    ) {
+        state = 'late';
+    } else if (row?.lastStatus === 'error') {
+        state = 'failing';
+    }
+
+    return {
+        ...job,
+        state,
+        lastRunAt: row?.lastRunAt ?? null,
+        lastTrigger: row?.lastTrigger ?? null,
+        lastScheduledAt,
+        lastStatus: row?.lastStatus ?? null,
+        lastDurationMs: row?.lastDurationMs ?? null,
+        lastFailureAt: row?.lastFailureAt ?? null,
+        lastError: row?.lastError ?? null,
+        runCount: row?.runCount ?? 0,
+    };
+}
+
+/**
+ * Every job in vercel.json with its last run, and a verdict (see judgeCronJob).
  */
 export async function getCronHealth(now = new Date()): Promise<{ checkedAt: Date; jobs: CronJobHealth[] }> {
     const rows = await db.select().from(cronRuns);
     const byJob = new Map(rows.map((row) => [row.job, row]));
 
-    const jobs = CRON_JOBS.map((job): CronJobHealth => {
-        const row = byJob.get(job.job);
-        const lastScheduledAt = row?.lastScheduledAt ?? null;
-
-        let state: CronJobHealth['state'] = 'ok';
-        if (!lastScheduledAt) {
-            state = 'never';
-        } else if (
-            job.intervalMinutes !== null &&
-            now.getTime() - lastScheduledAt.getTime() > (job.intervalMinutes * 2 + 5) * 60 * 1000
-        ) {
-            state = 'late';
-        } else if (row?.lastStatus === 'error') {
-            state = 'failing';
-        }
-
-        return {
-            ...job,
-            state,
-            lastRunAt: row?.lastRunAt ?? null,
-            lastTrigger: row?.lastTrigger ?? null,
-            lastScheduledAt,
-            lastStatus: row?.lastStatus ?? null,
-            lastDurationMs: row?.lastDurationMs ?? null,
-            lastFailureAt: row?.lastFailureAt ?? null,
-            lastError: row?.lastError ?? null,
-            runCount: row?.runCount ?? 0,
-        };
-    });
+    const jobs = CRON_JOBS.map((job) => judgeCronJob(job, byJob.get(job.job), now));
 
     // Returned so callers render "5 min ago" against the same instant the
     // verdicts were computed at, instead of reading the clock a second time.

@@ -10,7 +10,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "test": "TZ=Asia/Kolkata node --experimental-transform-types --experimental-test-module-mocks --no-warnings --import ./tests/setup/register.mjs --test \"tests/**/*.test.ts\""
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.1",

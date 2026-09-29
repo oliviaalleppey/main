@@ -19,6 +19,8 @@ import { mapCrsRoomTypeMatchesInternal } from '@/lib/config/crs';
 import { getBookingProvider } from '@/lib/providers/crs/factory';
 import { formatRoomName } from '@/lib/utils';
 import { getAvailableRoomsForSearch } from '@/lib/services/search';
+import { quoteRoomFromServer, snapshotForRooms } from '@/lib/services/server-quote';
+import { parseStayDates } from '@/lib/services/stay-dates';
 import { attributeBooking, offerCodeForClick, CLICK_COOKIE } from '@/lib/services/whatsapp/attribution';
 import {
     applyDiscount, validateOfferCode, betterOf, normalizeCode,
@@ -339,72 +341,6 @@ async function persistSessionRoomSelections(
     return {
         success: true,
         totalRooms: totalSelectedRooms,
-    };
-}
-
-type ServerRoomQuote = {
-    /** Per-room figures; callers scale by room count as they need. */
-    pricePerNight: number;
-    totalPricePerRoom: number;
-    nightlyRates: number[];
-    ratePlanId: string | null;
-    availableRooms: number;
-};
-
-/**
- * A room's price for a stay, worked out here and never taken from the browser.
- *
- * The quote snapshot used to arrive as an argument to the server actions below,
- * and everything downstream — the checkout total, the Easebuzz charge, the rates
- * pushed to Hotsoft — trusted it. Anyone editing that request could book a
- * ₹16,000 room for ₹10. This asks the same pricing engine the search page uses
- * (CRS base, date overrides, seasonal rules, extra-person surcharge, rate-plan
- * modifier), so the only price a guest can end up with is one we published.
- *
- * It also returns live availability, from the same CRS call, so callers do not
- * need a second round trip to Hotsoft.
- */
-async function quoteRoomFromServer(params: {
-    checkIn: string;
-    checkOut: string;
-    adults: number;
-    children: number;
-    roomTypeId: string;
-    ratePlanId?: string | null;
-    totalRooms: number;
-}): Promise<{ ok: true; quote: ServerRoomQuote } | { ok: false; message: string }> {
-    const search = await getAvailableRoomsForSearch(
-        new Date(params.checkIn),
-        new Date(params.checkOut),
-        { adults: params.adults, children: params.children },
-        params.totalRooms,
-    );
-
-    const result = search.rooms.find((room) => room.roomType.id === params.roomTypeId);
-    if (!result) {
-        return { ok: false, message: search.error || 'This room cannot be booked for your dates and guests.' };
-    }
-    if (!result.bookable) {
-        return { ok: false, message: result.availabilityMessage || 'This room is no longer available for your dates.' };
-    }
-
-    const plans = result.ratePlans as Array<{ id: string; isDefault?: boolean; nightlyRates?: number[] }>;
-    const plan = plans.find((candidate) => candidate.id === params.ratePlanId)
-        ?? plans.find((candidate) => candidate.isDefault)
-        ?? plans[0];
-
-    const nightlyRates = plan?.nightlyRates?.length ? plan.nightlyRates : result.nightlyRates;
-    const totalPricePerRoom = nightlyRates.reduce((sum, rate) => sum + rate, 0);
-
-    return {
-        ok: true,
-        quote: {
-            pricePerNight: Math.round(totalPricePerRoom / Math.max(1, nightlyRates.length)),
-            totalPricePerRoom,
-            nightlyRates,
-            ratePlanId: plan?.id ?? null,
-            availableRooms: result.availableRooms,
-        },
     };
 }
 
@@ -754,7 +690,7 @@ export async function startBookingSession(
         ) + safeRoomCount;
 
         // The browser's quoteSnapshot argument is ignored: the price is ours to
-        // set, not the request's. See quoteRoomFromServer.
+        // set, not the request's. See lib/services/server-quote.ts.
         void quoteSnapshot;
         const priced = await quoteRoomFromServer({
             checkIn: checkInDateOnly,
@@ -774,20 +710,7 @@ export async function startBookingSession(
 
         // totalPrice/taxesAndFees cover every room; nightlyRates stays per-room and
         // is deliberately not scaled — quantity is applied when the tax is computed.
-        const normalizedQuoteSnapshot = {
-            pricePerNight: priced.quote.pricePerNight,
-            totalPrice: priced.quote.totalPricePerRoom * safeRoomCount,
-            nightlyRates: priced.quote.nightlyRates,
-            taxesAndFees: calculateRoomTax({
-                nightlyRates: priced.quote.nightlyRates,
-                pricePerNight: priced.quote.pricePerNight,
-                totalPricePerRoom: priced.quote.totalPricePerRoom,
-                nights: sessionNights,
-                quantity: safeRoomCount,
-            }),
-            externalRatePlanId: priced.quote.ratePlanId ?? undefined,
-            capturedAt: new Date().toISOString(),
-        };
+        const normalizedQuoteSnapshot = snapshotForRooms(priced.quote, safeRoomCount, sessionNights);
 
         const nextSelections: RoomSelectionInput[] = [
             ...existingSelections,
@@ -1007,47 +930,6 @@ export async function removeSessionRoomSelection(roomTypeId: string) {
     return persistSessionRoomSelections(session, cartData, nextSelections);
 }
 
-export async function finalizeBookingAction(paymentDetails: {
-    method: string;
-    amount: number;
-    transactionId?: string;
-    orderId?: string;
-}) {
-    const sessionId = (await cookies()).get('booking_session')?.value;
-    if (!sessionId) redirect('/book/search');
-
-    // Rate Limit Check
-    const ip = (await headers()).get('x-forwarded-for') || 'unknown';
-    const limit = await RateLimiter.check(ip, 'finalizeBookingAction');
-    if (!limit.allowed) {
-        throw new Error('Too many attempts. Please try again later.');
-    }
-
-    try {
-        const expectedAmount = await calculateSessionPayableAmount(sessionId);
-        const booking = await bookingService.finalizeSession(sessionId, {
-            ...paymentDetails,
-            amount: expectedAmount,
-        });
-
-        if (!booking) {
-            throw new Error("Failed to finalize booking");
-        }
-
-        await captureWhatsAppAttribution(booking.id);
-
-        // Clear cookie
-        (await cookies()).delete('booking_session');
-
-        redirect(`/book/confirmation/${booking.id}`);
-    } catch (error: unknown) {
-        // Handle error (availability changed, price mismatch)
-        const message = error instanceof Error ? error.message : 'Booking finalization failed';
-        console.error('Booking Finalization Failed:', message);
-        redirect(`/book/checkout?error=${encodeURIComponent(message)}`);
-    }
-}
-
 /**
  * Easebuzz payment initiation:
  * 1. Creates pending booking in DB
@@ -1167,21 +1049,11 @@ export async function updateSessionSearch(input: { checkIn: string; checkOut: st
         return { success: false, message: 'Booking session expired. Please search again.' };
     }
 
-    const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
-    if (!DATE_ONLY.test(String(input.checkIn)) || !DATE_ONLY.test(String(input.checkOut))) {
-        return { success: false, message: 'Please choose valid dates.' };
+    const parsed = parseStayDates(input);
+    if (!parsed.ok) {
+        return { success: false, message: parsed.message };
     }
-    // UTC midnight of each calendar day, the same basis every other date here uses.
-    const params = {
-        checkIn: new Date(`${input.checkIn}T00:00:00Z`),
-        checkOut: new Date(`${input.checkOut}T00:00:00Z`),
-        adults: Math.max(1, Math.floor(Number(input.adults) || 1)),
-        children: Math.max(0, Math.floor(Number(input.children) || 0)),
-    };
-    if (Number.isNaN(params.checkIn.getTime()) || Number.isNaN(params.checkOut.getTime())
-        || params.checkOut <= params.checkIn) {
-        return { success: false, message: 'Check-out must be after check-in.' };
-    }
+    const params = parsed.stay;
 
     const session = await db.query.bookingSessions.findFirst({
         where: eq(bookingSessions.id, sessionId),
@@ -1333,7 +1205,7 @@ export async function updateSessionRoom(
         (new Date(checkOutDateOnly).getTime() - new Date(checkInDateOnly).getTime()) / (1000 * 60 * 60 * 24)
     ));
 
-    // The browser's quoteSnapshot argument is ignored — see quoteRoomFromServer.
+    // The browser's quoteSnapshot argument is ignored — see lib/services/server-quote.ts.
     void quoteSnapshot;
     const priced = await quoteRoomFromServer({
         checkIn: checkInDateOnly,
@@ -1357,20 +1229,7 @@ export async function updateSessionRoom(
             roomSlug: roomType.slug,
             ratePlanId: ratePlan.id,
             quantity: safeQuantity,
-            quoteSnapshot: {
-                pricePerNight: priced.quote.pricePerNight,
-                totalPrice: priced.quote.totalPricePerRoom * safeQuantity,
-                nightlyRates: priced.quote.nightlyRates,
-                taxesAndFees: calculateRoomTax({
-                    nightlyRates: priced.quote.nightlyRates,
-                    pricePerNight: priced.quote.pricePerNight,
-                    totalPricePerRoom: priced.quote.totalPricePerRoom,
-                    nights,
-                    quantity: safeQuantity,
-                }),
-                externalRatePlanId: ratePlan.id,
-                capturedAt: new Date().toISOString(),
-            },
+            quoteSnapshot: snapshotForRooms(priced.quote, safeQuantity, nights, ratePlan.id),
         },
     ];
 

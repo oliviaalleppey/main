@@ -14,7 +14,6 @@ import {
     roomTypes,
     ratePlans
 } from '@/lib/db/schema';
-import { IdempotencyService } from './idempotency';
 import { SessionExpiration } from './session-expiration';
 import { BookingLockService } from './booking-lock';
 import {
@@ -32,6 +31,7 @@ import crypto from 'crypto';
 import { mapCrsRoomTypeMatchesInternal, mapInternalRatePlanToCrs, mapInternalRoomTypeToCrs } from '@/lib/config/crs';
 import { getBookingProvider } from '@/lib/providers/crs/factory';
 import type { BookingProvider, CRSCreateReservationRequest } from '@/lib/providers/crs/types';
+import { isRetryableProviderError, isRetryableProviderMessage } from '@/lib/providers/crs/retryable';
 import { resolveMaxChildren, validateGuestMixForRoomType } from './occupancy';
 import { ensureRoomTypeMinOccupancyColumn } from '@/lib/db/schema-guard';
 import { formatRoomName } from '@/lib/utils';
@@ -100,19 +100,6 @@ type SessionCartData = {
 
 function getErrorMessage(error: unknown): string {
     return error instanceof Error ? error.message : 'Unknown error';
-}
-
-function isRetryableProviderMessage(message: string): boolean {
-    return /(timeout|timed out|temporar|unavailable|maintenance|network|fetch failed|aborted|5\d{2}|econn|enotfound|reset)/i.test(message);
-}
-
-function isRetryableProviderError(error: unknown): boolean {
-    const message = getErrorMessage(error);
-    if (isRetryableProviderMessage(message)) return true;
-
-    if (error instanceof Error && error.name === 'AbortError') return true;
-
-    return false;
 }
 
 function sanitizeRoomCount(value: unknown): number {
@@ -578,16 +565,10 @@ export class BookingService {
             }
         }
 
-        // 3. Idempotency Check
-        const idempotencyKey = IdempotencyService.generateKey({ sessionId, paymentDetails });
-        const existing = await IdempotencyService.check(idempotencyKey);
-        if (existing.exists && existing.response) {
-            if (existing.response.bookingId) {
-                const b = await db.query.bookings.findFirst({ where: eq(bookings.id, existing.response.bookingId) });
-                if (b) return b;
-            }
-        }
-        await IdempotencyService.lock(idempotencyKey, 'finalizeBooking', '/api/book/finalize');
+        // 3. Duplicate protection lives in initiateEasebuzzPaymentAction, which
+        // claims the session before calling this. The idempotency key that used
+        // to be checked here hashed a txnid made fresh on every attempt, so it
+        // never matched anything.
 
         let bookingId: string | null = null;
         // Hoisted so the catch can hand the offer back. A use claimed for a
@@ -834,8 +815,6 @@ export class BookingService {
             // verification: Booking must ONLY be confirmed after verified payment webhook.
             // Clarification: local booking row exists, but CRS confirmation happens asynchronously.
             // The DB record 'bookings' exists but is checking 'pending_payment'.
-
-            await IdempotencyService.complete(idempotencyKey, { bookingId: bookingId }, 200);
 
             return await db.query.bookings.findFirst({ where: eq(bookings.id, bookingId) });
 
