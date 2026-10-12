@@ -111,6 +111,8 @@ export default function PartyExperience({
     const [gate, setGate] = useState<'open' | 'leaving' | 'gone'>('open');
     const [playing, setPlaying] = useState(false);
     const [couples, setCouples] = useState(1);
+    // Reveal-on-scroll styles apply only once the script is running.
+    const [scripted, setScripted] = useState(false);
 
     const mask = content.maskImage || DEFAULT_PARTY_MASK;
     const photo = content.pageImage || DEFAULT_PARTY_PAGE_IMAGE;
@@ -195,7 +197,7 @@ export default function PartyExperience({
     useEffect(() => {
         const root = rootRef.current;
         if (!root) return;
-        root.classList.add('pt-js');
+        setScripted(true);
 
         const onMove = (e: PointerEvent) => {
             root.style.setProperty('--mx', `${e.clientX}px`);
@@ -337,7 +339,7 @@ export default function PartyExperience({
     const ticker = [...content.highlights, content.theme];
 
     return (
-        <div ref={rootRef} className={`pt${gate === 'open' ? ' pt-gated' : ''}`}>
+        <div ref={rootRef} className={`pt${scripted ? ' pt-js' : ''}${gate === 'open' ? ' pt-gated' : ''}`}>
             <div className="pt-bg" style={{ backgroundImage: `url("${photo}")` }} aria-hidden="true" />
             <div className="pt-grade" aria-hidden="true" />
             <div className="pt-grain" aria-hidden="true" />
