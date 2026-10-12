@@ -337,7 +337,7 @@ export default function PartyExperience({
     const ticker = [...content.highlights, content.theme];
 
     return (
-        <div ref={rootRef} className="pt">
+        <div ref={rootRef} className={`pt${gate === 'open' ? ' pt-gated' : ''}`}>
             <div className="pt-bg" style={{ backgroundImage: `url("${photo}")` }} aria-hidden="true" />
             <div className="pt-grade" aria-hidden="true" />
             <div className="pt-grain" aria-hidden="true" />
