@@ -463,7 +463,7 @@ export default function PartyExperience({
                     </section>
                 )}
 
-                <p className="pt-end pt-cinzel">{content.finePrint}</p>
+                <p className="pt-end pt-cinzel"><Link href="/">Olivia Alleppey</Link> · Alappuzha, Kerala</p>
             </main>
 
             <button type="button" className={`pt-music pt-cinzel${playing ? ' on' : ''}`} onClick={toggleMusic} aria-pressed={playing}>
