@@ -8,6 +8,9 @@ import ExperiencesStrip from '@/components/home/experiences-strip';
 import BrandMarquee from '@/components/home/brand-marquee';
 import EditorialStory from '@/components/home/editorial-story';
 import { getHeroMedia, getHomeHeroImages } from '@/app/admin/media/actions';
+import NewYearPopup from '@/components/home/new-year-popup';
+import { getPartyPopup } from '@/lib/db/actions/settings-actions';
+import { PARTY_END } from '@/lib/config/party-popup';
 import { pageMetadata } from '@/lib/seo';
 
 export const revalidate = 60;
@@ -20,10 +23,12 @@ export const metadata: Metadata = pageMetadata({
 });
 
 export default async function Home() {
-  const [heroMedia, homeHeroImages] = await Promise.all([
+  const [heroMedia, homeHeroImages, partyPopup] = await Promise.all([
     getHeroMedia(),
     getHomeHeroImages(),
+    getPartyPopup(),
   ]);
+  const showPartyPopup = partyPopup.enabled && Date.now() < new Date(PARTY_END).getTime();
   const heroSlides = homeHeroImages.map(img => ({ url: img.imageUrl, alt: img.title || 'Olivia International Hotel' }));
 
   return (
@@ -51,6 +56,10 @@ export default async function Home() {
 
       {/* Editorial Story */}
       <EditorialStory />
+
+      {showPartyPopup && (
+        <NewYearPopup pricePerCouple={partyPopup.pricePerCouple} delaySeconds={partyPopup.delaySeconds} />
+      )}
 
     </main>
   );
