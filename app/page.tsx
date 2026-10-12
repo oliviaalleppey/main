@@ -58,7 +58,7 @@ export default async function Home() {
       <EditorialStory />
 
       {showPartyPopup && (
-        <NewYearPopup pricePerCouple={partyPopup.pricePerCouple} delaySeconds={partyPopup.delaySeconds} />
+        <NewYearPopup content={partyPopup} />
       )}
 
     </main>

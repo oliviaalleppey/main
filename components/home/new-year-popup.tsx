@@ -2,7 +2,14 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { PARTY_END, PARTY_PATH, PARTY_START, formatRupees } from '@/lib/config/party-popup';
+import {
+    DEFAULT_PARTY_BACKGROUND,
+    DEFAULT_PARTY_MASK,
+    PARTY_END,
+    PARTY_START,
+    formatRupees,
+    type PartyPopupSettings,
+} from '@/lib/config/party-popup';
 import './new-year-popup.css';
 
 const DISMISSED_KEY = 'olivia_31st_night_dismissed';
@@ -53,13 +60,8 @@ function Countdown() {
     );
 }
 
-export default function NewYearPopup({
-    pricePerCouple,
-    delaySeconds,
-}: {
-    pricePerCouple: number;
-    delaySeconds: number;
-}) {
+export default function NewYearPopup({ content }: { content: PartyPopupSettings }) {
+    const { delaySeconds } = content;
     const [open, setOpen] = useState(false);
     const [leaving, setLeaving] = useState(false);
 
@@ -102,31 +104,31 @@ export default function NewYearPopup({
                     <i className="ny-corner ny-c3" /><i className="ny-corner ny-c4" />
                     <button type="button" className="ny-x" onClick={close} aria-label="Close">&#10005;</button>
 
-                    <div className="ny-photo"><span className="ny-tag">OLIVIA ALLEPPEY PRESENTS</span></div>
+                    <div className={`ny-photo${content.backgroundImage ? '' : ' ny-photo-default'}`} style={{ backgroundImage: `url("${content.backgroundImage || DEFAULT_PARTY_BACKGROUND}")` }}><span className="ny-tag">{content.presenter}</span></div>
 
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img className="ny-mask" src="/party/31st-night-mask.webp" alt="Golden masquerade mask with feathers" width={709} height={502} />
+                    <img className="ny-mask" src={content.maskImage || DEFAULT_PARTY_MASK} alt="Masquerade mask" width={709} height={502} />
 
                     <div className="ny-body">
-                        <p className="ny-pre">THE GRAND NEW YEAR&apos;S EVE</p>
-                        <h2 className="ny-h1" id="ny-title">31st <em>Night</em></h2>
-                        <p className="ny-theme">A celebrity masquerade</p>
+                        <p className="ny-pre">{content.eyebrow}</p>
+                        <h2 className="ny-h1" id="ny-title">{content.titleMain} <em>{content.titleAccent}</em></h2>
+                        <p className="ny-theme">{content.theme}</p>
                         <div className="ny-orn"><i /><b /><i /></div>
                         <ul className="ny-hl">
-                            <li>Live DJ</li><li>Open bar</li><li>Gala dinner</li><li>Kids&apos; care</li><li>Stay included</li>
+                            {content.highlights.map((item) => <li key={item}>{item}</li>)}
                         </ul>
                         <div className="ny-when">
-                            <div><small>DATE</small><p>31 December</p></div>
-                            <div><small>TIME</small><p>8 pm to 11:30</p></div>
-                            <div><small>DRESS</small><p>Mask on, glamour up</p></div>
+                            <div><small>DATE</small><p>{content.dateValue}</p></div>
+                            <div><small>TIME</small><p>{content.timeValue}</p></div>
+                            <div><small>DRESS</small><p>{content.dressValue}</p></div>
                         </div>
                         <Countdown />
-                        <div className="ny-price">PER COUPLE &middot; ROOM INCLUDED<b>{formatRupees(pricePerCouple)}</b></div>
+                        <div className="ny-price">{content.priceLabel}<b>{formatRupees(content.pricePerCouple)}</b></div>
                         <div className="ny-cta">
-                            <Link href={`${PARTY_PATH}#reserve`} className="ny-btn ny-main" onClick={remember}>Reserve your pass</Link>
-                            <Link href={`${PARTY_PATH}#enquire`} className="ny-btn ny-ghost" onClick={remember}>Enquire</Link>
+                            <Link href={content.reserveLink} className="ny-btn ny-main" onClick={remember}>{content.reserveLabel}</Link>
+                            <Link href={content.enquireLink} className="ny-btn ny-ghost" onClick={remember}>{content.enquireLabel}</Link>
                         </div>
-                        <p className="ny-fine">Only 300 passes<i>&#9670;</i>23 and above for the bar</p>
+                        <p className="ny-fine">{content.finePrint}</p>
                     </div>
                 </div>
             </div>
