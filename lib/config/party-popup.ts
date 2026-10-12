@@ -11,6 +11,10 @@ export type PartyPopupSettings = {
     /** Empty means the built-in image. */
     backgroundImage: string;
     maskImage: string;
+    /** Full-screen photo behind the /31st-night page. */
+    pageImage: string;
+    /** Uploaded track for the event page. Empty means the built-in synthesised loop. */
+    musicUrl: string;
 
     presenter: string;
     eyebrow: string;
@@ -36,6 +40,7 @@ export const PARTY_POPUP_KEY = 'party_popup_31st';
 
 export const DEFAULT_PARTY_BACKGROUND = '/party/31st-night-ballroom.webp';
 export const DEFAULT_PARTY_MASK = '/party/31st-night-mask.webp';
+export const DEFAULT_PARTY_PAGE_IMAGE = '/party/31st-night-party.webp';
 
 export const DEFAULT_PARTY_POPUP: PartyPopupSettings = {
     enabled: false,
@@ -44,6 +49,8 @@ export const DEFAULT_PARTY_POPUP: PartyPopupSettings = {
 
     backgroundImage: '',
     maskImage: '',
+    pageImage: '',
+    musicUrl: '',
 
     presenter: 'Olivia Alleppey presents',
     eyebrow: "The grand New Year's Eve",
@@ -117,6 +124,8 @@ export function normalisePartyPopup(raw: unknown): PartyPopupSettings {
 
         backgroundImage: image(value.backgroundImage),
         maskImage: image(value.maskImage),
+        pageImage: image(value.pageImage),
+        musicUrl: image(value.musicUrl),
 
         presenter: text(value.presenter, d.presenter, 60),
         eyebrow: text(value.eyebrow, d.eyebrow, 60),

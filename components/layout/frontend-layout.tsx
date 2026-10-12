@@ -19,6 +19,16 @@ export default function FrontendLayout({ children }: FrontendLayoutProps) {
         return <>{children}</>;
     }
 
+    // The 31st Night page is a full-screen experience with its own top bar.
+    if (pathname === '/31st-night') {
+        return (
+            <>
+                {children}
+                <CookieConsentBanner />
+            </>
+        );
+    }
+
     return (
         <div className="flex flex-col min-h-screen">
             <RosewoodHeader />

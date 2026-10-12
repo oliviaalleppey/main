@@ -52,7 +52,7 @@ export async function POST(request: Request): Promise<NextResponse> {
                 // this callback surfaces as the generic 400 below, and an
                 // unauthenticated caller should get a 401.
                 return {
-                    allowedContentTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm'],
+                    allowedContentTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm', 'audio/mpeg', 'audio/mp4', 'audio/wav', 'audio/ogg', 'audio/webm'],
                     addRandomSuffix: true,
                     maximumSizeInBytes: MAX_UPLOAD_BYTES,
                     tokenPayload: JSON.stringify({

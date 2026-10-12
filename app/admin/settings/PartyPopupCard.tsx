@@ -3,11 +3,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { upload } from '@vercel/blob/client';
 import { toast } from 'sonner';
-import { PartyPopper, Loader2, Save, ImagePlus, RotateCcw } from 'lucide-react';
+import { PartyPopper, Loader2, Save, ImagePlus, RotateCcw, Music } from 'lucide-react';
 import { getPartyPopup, updatePartyPopup } from '@/lib/db/actions/settings-actions';
 import {
     DEFAULT_PARTY_BACKGROUND,
     DEFAULT_PARTY_MASK,
+    DEFAULT_PARTY_PAGE_IMAGE,
     DEFAULT_PARTY_POPUP,
     type PartyPopupSettings,
 } from '@/lib/config/party-popup';
@@ -27,6 +28,7 @@ function ImageField({
     fallback,
     onChange,
     checker,
+    composite,
 }: {
     label: string;
     hint: string;
@@ -34,6 +36,8 @@ function ImageField({
     fallback: string;
     onChange: (url: string) => void;
     checker?: boolean;
+    /** The built-in ballroom file holds two photos side by side; preview the left one. */
+    composite?: boolean;
 }) {
     const input = useRef<HTMLInputElement>(null);
     const [busy, setBusy] = useState(false);
@@ -60,13 +64,15 @@ function ImageField({
                 className="flex h-36 items-center justify-center overflow-hidden rounded-md border"
                 style={checker ? { background: 'repeating-conic-gradient(#e5e5e5 0% 25%, #fff 0% 50%) 50% / 16px 16px' } : { background: '#f3f3f3' }}
             >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                    src={value || fallback}
-                    alt={label}
-                    className={checker ? 'h-full w-full object-contain' : 'h-full w-full object-cover'}
-                    style={!value && !checker ? { objectPosition: 'left center', width: '200%', maxWidth: 'none' } : undefined}
-                />
+                {!value && composite ? (
+                    <div
+                        className="h-full w-full"
+                        style={{ backgroundImage: `url("${fallback}")`, backgroundSize: '200% auto', backgroundPosition: '0 40%' }}
+                    />
+                ) : (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={value || fallback} alt={label} className={checker ? 'h-full w-full object-contain' : 'h-full w-full object-cover'} />
+                )}
             </div>
             <p className="text-xs text-muted-foreground">{hint}</p>
             <div className="flex gap-2">
@@ -79,6 +85,55 @@ function ImageField({
                     <Button type="button" variant="ghost" size="sm" onClick={() => onChange('')}>
                         <RotateCcw className="mr-2 h-4 w-4" />
                         Use default
+                    </Button>
+                )}
+            </div>
+        </div>
+    );
+}
+
+function MusicField({ value, onChange }: { value: string; onChange: (url: string) => void }) {
+    const input = useRef<HTMLInputElement>(null);
+    const [busy, setBusy] = useState(false);
+
+    async function pick(event: React.ChangeEvent<HTMLInputElement>) {
+        const file = event.target.files?.[0];
+        event.target.value = '';
+        if (!file) return;
+        setBusy(true);
+        try {
+            const blob = await upload(file.name, file, { access: 'public', handleUploadUrl: '/api/upload' });
+            onChange(blob.url);
+        } catch {
+            toast.error('Upload failed. Use an MP3, M4A, WAV or OGG file and try again.');
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    return (
+        <div className="space-y-2">
+            <Label>Event page music</Label>
+            {value ? (
+                <audio controls src={value} className="w-full" />
+            ) : (
+                <p className="rounded-md border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+                    Using the built-in lounge-house loop.
+                </p>
+            )}
+            <p className="text-xs text-muted-foreground">
+                Plays after a guest taps &quot;Enter the masquerade&quot;. Only upload music you have the rights to play publicly.
+            </p>
+            <div className="flex gap-2">
+                <input ref={input} type="file" accept="audio/mpeg,audio/mp4,audio/x-m4a,audio/wav,audio/ogg" className="hidden" onChange={pick} />
+                <Button type="button" variant="outline" size="sm" disabled={busy} onClick={() => input.current?.click()}>
+                    {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Music className="mr-2 h-4 w-4" />}
+                    {value ? 'Replace track' : 'Upload track'}
+                </Button>
+                {value && (
+                    <Button type="button" variant="ghost" size="sm" onClick={() => onChange('')}>
+                        <RotateCcw className="mr-2 h-4 w-4" />
+                        Use built-in loop
                     </Button>
                 )}
             </div>
@@ -188,11 +243,12 @@ export default function PartyPopupCard() {
             <CardContent className="space-y-8">
                 <section className="grid gap-6 sm:grid-cols-2">
                     <ImageField
-                        label="Background photo"
-                        hint="A wide photo works best. Shown at the top of the pop-up and behind the page heading."
+                        label="Pop-up photo"
+                        hint="A wide photo works best. Shown at the top of the homepage pop-up."
                         value={draft.backgroundImage}
                         fallback={DEFAULT_PARTY_BACKGROUND}
                         onChange={set('backgroundImage')}
+                        composite
                     />
                     <ImageField
                         label="Mask image"
@@ -202,6 +258,14 @@ export default function PartyPopupCard() {
                         onChange={set('maskImage')}
                         checker
                     />
+                    <ImageField
+                        label="Event page background"
+                        hint="The full-screen photo behind the /31st-night page. A tall photo works on phones and computers."
+                        value={draft.pageImage}
+                        fallback={DEFAULT_PARTY_PAGE_IMAGE}
+                        onChange={set('pageImage')}
+                    />
+                    <MusicField value={draft.musicUrl} onChange={set('musicUrl')} />
                 </section>
 
                 <section className="grid gap-4 sm:grid-cols-2">
