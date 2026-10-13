@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import PartyExperience from '@/components/party/party-experience';
+import ClassicExperience from '@/components/party/classic-experience';
 import { getPartyPopup } from '@/lib/db/actions/settings-actions';
 import {
     PARTY_BOOK_HREF,
@@ -51,7 +52,12 @@ export default async function ThirtyFirstNightPage() {
                     })}
                 />
             )}
-            <PartyExperience content={content} over={over} bookHref={PARTY_BOOK_HREF} />
+            {/* The Dark Night theme is the 12 October design, kept as its own page. */}
+            {content.pageTheme === 'noir' ? (
+                <ClassicExperience content={content} over={over} bookHref={PARTY_BOOK_HREF} />
+            ) : (
+                <PartyExperience content={content} over={over} bookHref={PARTY_BOOK_HREF} />
+            )}
         </>
     );
 }

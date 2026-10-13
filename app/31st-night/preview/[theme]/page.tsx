@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import PartyExperience from '@/components/party/party-experience';
+import ClassicExperience from '@/components/party/classic-experience';
 import { getPartyPopup } from '@/lib/db/actions/settings-actions';
 import { PARTY_BOOK_HREF, PARTY_END, PARTY_PAGE_THEMES, PARTY_THEMES, switchPartyTheme } from '@/lib/config/party-popup';
 
@@ -33,5 +34,7 @@ export default async function PartyThemePreview({ params }: { params: Promise<{ 
     const content = saved.pageTheme === name ? saved : switchPartyTheme(saved, name);
     const over = Date.now() >= new Date(PARTY_END).getTime();
 
-    return <PartyExperience content={content} over={over} bookHref={PARTY_BOOK_HREF} />;
+    // The Dark Night theme is the 12 October design, kept as its own page.
+    const Experience = content.pageTheme === 'noir' ? ClassicExperience : PartyExperience;
+    return <Experience content={content} over={over} bookHref={PARTY_BOOK_HREF} />;
 }

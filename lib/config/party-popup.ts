@@ -70,11 +70,11 @@ export const DEFAULT_PARTY_CROWD_IMAGE = '/party/31st-night-crowd.webp';
 export const DEFAULT_PARTY_LIGHTS_IMAGE = '/party/31st-night-lights.webp';
 /** Shown when the page is shared on WhatsApp and in search results. */
 export const DEFAULT_PARTY_SHARE_IMAGE = '/party/31st-night-party.webp';
-/** The Gatsby and Dark Night pages have their own looks; these are stills of their openings, for sharing. */
+/** The Gatsby page draws its own backgrounds; this is a still of its opening, for sharing. */
 export const GATSBY_SHARE_IMAGE = '/party/31st-night-gatsby.webp';
-export const NOIR_SHARE_IMAGE = '/party/31st-night-noir.webp';
-/** The candlelit mask photo behind the Dark Night page. */
+/** The candlelit mask photo behind the Dark Night page (the 12 October design), and its share picture. */
 export const NOIR_BACKDROP = '/party/31st-night-party.webp';
+export const NOIR_SHARE_IMAGE = NOIR_BACKDROP;
 
 /** The words that belong to a theme. Switching themes swaps them, unless someone has rewritten them. */
 type PartyThemeCopy = Pick<PartyPopupSettings, 'theme' | 'intro' | 'dressValue'>;
@@ -100,7 +100,7 @@ export const PARTY_THEMES: Record<PartyPageTheme, { name: string; about: string;
     },
     noir: {
         name: 'The Dark Night Masquerade',
-        about: 'Black-tie luxury for Kerala’s high society: the candlelit mask photo in red and black, gold accents, a touch of purple, a black card with every price and a mood board. Uses the mask below.',
+        about: 'The 12 October design: the candlelit mask photo in red and black, an “Enter the masquerade” gate, highlight cards and the admit-two pass, with the extra guest prices. Uses the mask below.',
         copy: {
             theme: 'The Dark Night Masquerade',
             intro: 'A black-tie masquerade for Kerala’s finest. Candlelight, deep velvet and gold in the Grand Ballroom, and a night that stays elegant all the way to midnight.',
