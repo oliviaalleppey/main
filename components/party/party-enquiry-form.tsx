@@ -8,9 +8,21 @@ type FormState = { name: string; phone: string; email: string; honeypot: string 
 const INITIAL: FormState = { name: '', phone: '', email: '', honeypot: '' };
 
 const FIELD =
-    'h-12 w-full border border-[#d4b06a]/40 bg-[#1a0709] px-3.5 text-sm text-[#f6efe0] placeholder:text-[#c9b89a]/60 outline-none focus:border-[#d4b06a]';
+    'h-14 w-full border border-[#d4b06a]/55 bg-[#1a0709] px-4 text-[17px] text-[#fbf4e6] placeholder:text-[#c9b89a]/70 outline-none focus:border-[#f1dba0] focus:ring-2 focus:ring-[#d4b06a]/40';
+const LABEL = 'block text-[15px] font-medium text-[#f1dba0] mb-1.5';
 
-export default function PartyEnquiryForm({ couples, onSent }: { couples: number; onSent?: () => void }) {
+export default function PartyEnquiryForm({
+    eventType,
+    guestCount,
+    message,
+    onSent,
+}: {
+    eventType: string;
+    guestCount: string;
+    /** The guest's plan, line by line, for the reservations team. */
+    message: string;
+    onSent?: () => void;
+}) {
     const [form, setForm] = useState<FormState>(INITIAL);
     const [sending, setSending] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -35,9 +47,10 @@ export default function PartyEnquiryForm({ couples, onSent }: { couples: number;
                     name: form.name,
                     phone: form.phone,
                     email: form.email,
-                    eventType: '31st Night celebrity masquerade',
+                    eventType,
                     preferredDate: '31 December 2026',
-                    guestCount: `${couples} couple(s)`,
+                    guestCount,
+                    message,
                 }),
             });
             const payload = await response.json().catch(() => ({}));
@@ -54,33 +67,39 @@ export default function PartyEnquiryForm({ couples, onSent }: { couples: number;
 
     if (sent) {
         return (
-            <div className="flex items-start gap-3 border border-[#d4b06a]/40 p-6 text-left">
-                <CheckCircle2 className="mt-0.5 h-7 w-7 shrink-0 text-[#d4b06a]" />
+            <div className="flex items-start gap-3 border border-[#d4b06a]/50 bg-[#1a0709]/70 p-6 text-left" role="status">
+                <CheckCircle2 className="mt-1 h-8 w-8 shrink-0 text-[#f1dba0]" />
                 <div>
-                    <p className="font-serif text-2xl text-[#f6efe0]">Enquiry received</p>
-                    <p className="mt-1 text-sm text-[#c9b89a]">Our team will call you shortly about your passes.</p>
+                    <p className="font-serif text-3xl text-[#fbf4e6]">Thank you, we have your plan</p>
+                    <p className="mt-2 text-[17px] leading-relaxed text-[#eadcc2]">Our team will call you shortly to confirm your passes.</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <form onSubmit={onSubmit} className="grid grid-cols-1 gap-3 text-left sm:grid-cols-2">
-            <label className="sr-only" htmlFor="pe-name">Name</label>
-            <input id="pe-name" required value={form.name} onChange={set('name')} placeholder="Name" className={FIELD} autoComplete="name" />
-            <label className="sr-only" htmlFor="pe-phone">Phone</label>
-            <input id="pe-phone" required type="tel" value={form.phone} onChange={set('phone')} placeholder="Phone" className={FIELD} autoComplete="tel" />
-            <label className="sr-only" htmlFor="pe-email">Email</label>
-            <input id="pe-email" type="email" value={form.email} onChange={set('email')} placeholder="Email (optional)" className={`${FIELD} sm:col-span-2`} autoComplete="email" />
+        <form onSubmit={onSubmit} className="grid grid-cols-1 gap-4 text-left sm:grid-cols-2">
+            <div>
+                <label className={LABEL} htmlFor="pe-name">Your name</label>
+                <input id="pe-name" required value={form.name} onChange={set('name')} className={FIELD} autoComplete="name" />
+            </div>
+            <div>
+                <label className={LABEL} htmlFor="pe-phone">Phone number</label>
+                <input id="pe-phone" required type="tel" value={form.phone} onChange={set('phone')} className={FIELD} autoComplete="tel" inputMode="tel" />
+            </div>
+            <div className="sm:col-span-2">
+                <label className={LABEL} htmlFor="pe-email">Email <span className="font-normal text-[#c9b89a]">(optional)</span></label>
+                <input id="pe-email" type="email" value={form.email} onChange={set('email')} className={FIELD} autoComplete="email" />
+            </div>
             <input type="text" name="website" value={form.honeypot} onChange={set('honeypot')} className="absolute left-[-9999px] opacity-0" tabIndex={-1} autoComplete="off" aria-hidden="true" />
-            {error && <p className="border border-red-400/40 bg-red-950/40 px-3 py-2 text-sm text-red-200 sm:col-span-2">{error}</p>}
+            {error && <p className="border border-red-400/50 bg-red-950/60 px-4 py-3 text-[16px] text-red-100 sm:col-span-2" role="alert">{error}</p>}
             <button
                 type="submit"
                 disabled={sending}
-                className="inline-flex h-12 items-center justify-center gap-2 border border-[#d4b06a] bg-[#d4b06a] text-[12px] uppercase tracking-[0.26em] text-[#1a0709] transition-colors hover:bg-[#f1dba0] disabled:opacity-70 sm:col-span-2"
+                className="mt-1 inline-flex h-14 items-center justify-center gap-2 border border-[#d4b06a] bg-[#d4b06a] text-[15px] font-semibold uppercase tracking-[0.14em] text-[#1a0709] transition-colors hover:bg-[#f1dba0] disabled:opacity-70 sm:col-span-2"
                 style={{ fontFamily: 'var(--font-cinzel), Georgia, serif' }}
             >
-                {sending ? (<><Loader2 className="h-4 w-4 animate-spin" />Sending</>) : 'Send enquiry'}
+                {sending ? (<><Loader2 className="h-5 w-5 animate-spin" />Sending</>) : 'Send my plan'}
             </button>
         </form>
     );

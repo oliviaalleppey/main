@@ -1,10 +1,27 @@
 // Non-server file: safe to import from client components.
 
+/** R stays the night at Olivia (residential); NR comes for the party only (non-residential). */
+export type PartyStay = 'R' | 'NR' | 'both';
+
+/** One line of the guest price list, e.g. a kid aged 6 to 11 for residential guests. */
+export type PartyGuestPrice = {
+    label: string;
+    /** Ages or what the price covers. */
+    note: string;
+    /** Per person, in rupees. */
+    price: number;
+    stay: PartyStay;
+};
+
 /** The 31st Night party pop-up and its page, stored in site_settings under PARTY_POPUP_KEY. */
 export type PartyPopupSettings = {
     enabled: boolean;
-    /** Per couple, in rupees. */
+    /** Per couple with a room (residential), in rupees. */
     pricePerCouple: number;
+    /** Per couple without a room (non-residential). 0 means the page says "price on request". */
+    pricePerCoupleNonResidential: number;
+    /** Extra guests, kids and nannies. */
+    guestPrices: PartyGuestPrice[];
     /** Seconds after the homepage opens before the pop-up appears. */
     delaySeconds: number;
 
@@ -45,6 +62,14 @@ export const DEFAULT_PARTY_PAGE_IMAGE = '/party/31st-night-party.webp';
 export const DEFAULT_PARTY_POPUP: PartyPopupSettings = {
     enabled: false,
     pricePerCouple: 49999,
+    pricePerCoupleNonResidential: 0,
+    guestPrices: [
+        { label: 'Extra adult', note: 'Above 11 years', price: 9999, stay: 'R' },
+        { label: 'Kid', note: '6 to 11 years', price: 4999, stay: 'R' },
+        { label: 'Child or infant', note: 'Below 5 years', price: 2999, stay: 'both' },
+        { label: 'Nanny', note: 'Kids area and dinner', price: 2999, stay: 'NR' },
+        { label: 'Nanny with extra bed', note: 'Extra bed, kids area and dinner', price: 5999, stay: 'R' },
+    ],
     delaySeconds: 5,
 
     backgroundImage: '',
@@ -56,8 +81,8 @@ export const DEFAULT_PARTY_POPUP: PartyPopupSettings = {
     eyebrow: "The grand New Year's Eve",
     titleMain: '31st',
     titleAccent: 'Night',
-    theme: 'A celebrity masquerade',
-    intro: 'Ring in the new year in the Grand Ballroom. Dress as a celebrity, keep the mask on, and dance until midnight.',
+    theme: 'The Grand Masquerade',
+    intro: 'Ring in the new year in the Grand Ballroom. Dress in your finest, wear a mask, and dance until midnight.',
     highlights: ['Live DJ', 'Open bar', 'Gala dinner', "Kids' care", 'Stay included'],
     dateValue: '31 December',
     timeValue: '8 pm to 11:30',
@@ -79,6 +104,7 @@ export const PARTY_END = '2027-01-01T00:00:00+05:30';
 export const PARTY_PATH = '/31st-night';
 
 const MAX_HIGHLIGHTS = 6;
+export const MAX_GUEST_PRICES = 8;
 
 function text(value: unknown, fallback: string, max: number): string {
     if (typeof value !== 'string') return fallback;
@@ -103,6 +129,26 @@ function link(value: unknown, fallback: string): string {
     return fallback;
 }
 
+function rupees(value: unknown): number {
+    const amount = Number(value);
+    return Number.isFinite(amount) && amount > 0 ? Math.min(10_000_000, Math.round(amount)) : 0;
+}
+
+/** Drops rows without a name or a price. A missing list means the built-in one. */
+function guestPrices(value: unknown): PartyGuestPrice[] {
+    if (!Array.isArray(value)) return DEFAULT_PARTY_POPUP.guestPrices;
+    return value
+        .filter((row): row is Record<string, unknown> => !!row && typeof row === 'object')
+        .map((row) => ({
+            label: text(row.label, '', 40),
+            note: text(row.note, '', 60),
+            price: rupees(row.price),
+            stay: (row.stay === 'R' || row.stay === 'NR' ? row.stay : 'both') as PartyStay,
+        }))
+        .filter((row) => row.label && row.price)
+        .slice(0, MAX_GUEST_PRICES);
+}
+
 export function normalisePartyPopup(raw: unknown): PartyPopupSettings {
     const value = (raw && typeof raw === 'object' ? raw : {}) as Partial<Record<keyof PartyPopupSettings, unknown>>;
     const d = DEFAULT_PARTY_POPUP;
@@ -120,6 +166,8 @@ export function normalisePartyPopup(raw: unknown): PartyPopupSettings {
     return {
         enabled: value.enabled === true,
         pricePerCouple: Number.isFinite(price) && price > 0 ? Math.round(price) : d.pricePerCouple,
+        pricePerCoupleNonResidential: rupees(value.pricePerCoupleNonResidential),
+        guestPrices: guestPrices(value.guestPrices),
         delaySeconds: Number.isFinite(delay) && delay >= 0 ? Math.min(60, Math.round(delay)) : d.delaySeconds,
 
         backgroundImage: image(value.backgroundImage),

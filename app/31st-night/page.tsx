@@ -9,7 +9,7 @@ import { eventSchema } from '@/lib/structured-data';
 export const revalidate = 60;
 
 const DESCRIPTION =
-    'Ring in the new year at Olivia Alleppey with a celebrity masquerade: live DJ, open bar, gala dinner and kids\' care, stay included. 31 December, 8 pm.';
+    'The Grand Masquerade at Olivia Alleppey: live DJ, open bar, gala dinner, kids\' area and nanny passes, stay included. New Year\'s Eve, 31 December, 8 pm.';
 
 export async function generateMetadata(): Promise<Metadata> {
     const content = await getPartyPopup();

@@ -3,14 +3,17 @@
 import { useEffect, useRef, useState } from 'react';
 import { upload } from '@vercel/blob/client';
 import { toast } from 'sonner';
-import { PartyPopper, Loader2, Save, ImagePlus, RotateCcw, Music } from 'lucide-react';
+import { PartyPopper, Loader2, Save, ImagePlus, RotateCcw, Music, Plus, Trash2 } from 'lucide-react';
 import { getPartyPopup, updatePartyPopup } from '@/lib/db/actions/settings-actions';
 import {
     DEFAULT_PARTY_BACKGROUND,
     DEFAULT_PARTY_MASK,
     DEFAULT_PARTY_PAGE_IMAGE,
     DEFAULT_PARTY_POPUP,
+    MAX_GUEST_PRICES,
+    type PartyGuestPrice,
     type PartyPopupSettings,
+    type PartyStay,
 } from '@/lib/config/party-popup';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
@@ -162,6 +165,64 @@ function TextField({
     );
 }
 
+const STAY_OPTIONS: { value: PartyStay; label: string }[] = [
+    { value: 'R', label: 'R · staying guests' },
+    { value: 'NR', label: 'NR · party only' },
+    { value: 'both', label: 'Both' },
+];
+
+function GuestPricesField({ value, onChange }: { value: PartyGuestPrice[]; onChange: (rows: PartyGuestPrice[]) => void }) {
+    const update = (i: number, patch: Partial<PartyGuestPrice>) =>
+        onChange(value.map((row, j) => (j === i ? { ...row, ...patch } : row)));
+
+    return (
+        <div className="space-y-3">
+            <div>
+                <Label>Extra guest prices</Label>
+                <p className="mt-1 text-xs text-muted-foreground">
+                    Shown on the /31st-night page, where guests add them to their plan. R is for guests staying at Olivia, NR for guests who come for the party only. Rows without a name or price are left out.
+                </p>
+            </div>
+            {value.map((row, i) => (
+                <div key={i} className="grid gap-2 rounded-md border p-3 sm:grid-cols-[1.2fr_1.4fr_0.8fr_1fr_auto] sm:items-end">
+                    <div className="space-y-1">
+                        <Label htmlFor={`pp-g${i}-label`} className="text-xs">Guest</Label>
+                        <Input id={`pp-g${i}-label`} value={row.label} maxLength={40} placeholder="Kid" onChange={(e) => update(i, { label: e.target.value })} />
+                    </div>
+                    <div className="space-y-1">
+                        <Label htmlFor={`pp-g${i}-note`} className="text-xs">Ages or what is included</Label>
+                        <Input id={`pp-g${i}-note`} value={row.note} maxLength={60} placeholder="6 to 11 years" onChange={(e) => update(i, { note: e.target.value })} />
+                    </div>
+                    <div className="space-y-1">
+                        <Label htmlFor={`pp-g${i}-price`} className="text-xs">Price (₹)</Label>
+                        <Input id={`pp-g${i}-price`} type="number" min={1} value={row.price || ''} onChange={(e) => update(i, { price: Number(e.target.value) })} />
+                    </div>
+                    <div className="space-y-1">
+                        <Label htmlFor={`pp-g${i}-stay`} className="text-xs">For</Label>
+                        <select
+                            id={`pp-g${i}-stay`}
+                            value={row.stay}
+                            onChange={(e) => update(i, { stay: e.target.value as PartyStay })}
+                            className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs"
+                        >
+                            {STAY_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                        </select>
+                    </div>
+                    <Button type="button" variant="ghost" size="icon" aria-label={`Remove ${row.label || 'this row'}`} onClick={() => onChange(value.filter((_, j) => j !== i))}>
+                        <Trash2 className="h-4 w-4" />
+                    </Button>
+                </div>
+            ))}
+            {value.length < MAX_GUEST_PRICES && (
+                <Button type="button" variant="outline" size="sm" onClick={() => onChange([...value, { label: '', note: '', price: 0, stay: 'both' }])}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add a price
+                </Button>
+            )}
+        </div>
+    );
+}
+
 export default function PartyPopupCard() {
     const [saved, setSaved] = useState<PartyPopupSettings>(DEFAULT_PARTY_POPUP);
     const [draft, setDraft] = useState<PartyPopupSettings>(DEFAULT_PARTY_POPUP);
@@ -302,13 +363,24 @@ export default function PartyPopupCard() {
                     <TextField id="pp-time" label="Time" value={draft.timeValue} onChange={set('timeValue')} maxLength={30} />
                     <TextField id="pp-dress" label="Dress" value={draft.dressValue} onChange={set('dressValue')} maxLength={40} />
                     <div className="space-y-1.5">
-                        <Label htmlFor="pp-price">Price per couple (₹)</Label>
+                        <Label htmlFor="pp-price">Couple pass, staying · R (₹)</Label>
                         <Input
                             id="pp-price"
                             type="number"
                             min={1}
                             value={draft.pricePerCouple}
                             onChange={(e) => set('pricePerCouple')(Number(e.target.value))}
+                        />
+                    </div>
+                    <div className="space-y-1.5">
+                        <Label htmlFor="pp-price-nr">Couple pass, party only · NR (₹)</Label>
+                        <Input
+                            id="pp-price-nr"
+                            type="number"
+                            min={0}
+                            placeholder="Empty shows “On request”"
+                            value={draft.pricePerCoupleNonResidential || ''}
+                            onChange={(e) => set('pricePerCoupleNonResidential')(Number(e.target.value))}
                         />
                     </div>
                     <TextField id="pp-price-label" label="Text above the price" value={draft.priceLabel} onChange={set('priceLabel')} maxLength={60} />
@@ -327,6 +399,8 @@ export default function PartyPopupCard() {
                         <TextField id="pp-fine" label="Small print under the buttons" value={draft.finePrint} onChange={set('finePrint')} maxLength={120} />
                     </div>
                 </section>
+
+                <GuestPricesField value={draft.guestPrices} onChange={set('guestPrices')} />
 
                 <section className="grid gap-4 sm:grid-cols-2">
                     <TextField id="pp-res-label" label="Main button text" value={draft.reserveLabel} onChange={set('reserveLabel')} maxLength={30} />
