@@ -54,6 +54,8 @@ export type PartyPopupSettings = {
     dressValue: string;
     priceLabel: string;
     finePrint: string;
+    /** The early bird offer line. Empty hides it. */
+    offerText: string;
 
     reserveLabel: string;
     reserveLink: string;
@@ -115,7 +117,7 @@ export const DEFAULT_PARTY_POPUP: PartyPopupSettings = {
     pricePerCouple: 49999,
     pricePerCoupleNonResidential: 0,
     guestPrices: [
-        { label: 'Extra adult', note: 'Above 11 years', price: 9999, stay: 'R' },
+        { label: 'Extra adult', note: 'Above 11 years', price: 11999, stay: 'R' },
         { label: 'Kid', note: '6 to 11 years', price: 4999, stay: 'R' },
         { label: 'Child or infant', note: 'Below 5 years', price: 2999, stay: 'both' },
         { label: 'Nanny', note: 'Kids area and dinner', price: 2999, stay: 'NR' },
@@ -140,6 +142,7 @@ export const DEFAULT_PARTY_POPUP: PartyPopupSettings = {
     timeValue: '8 pm to 11:30',
     priceLabel: 'Per couple · Room included',
     finePrint: 'Only 300 passes · Spirits for guests 23 and above',
+    offerText: 'Early bird offer: be the first to block the suite rooms at the same price.',
 
     reserveLabel: 'Reserve your pass',
     reserveLink: '/31st-night#reserve',
@@ -260,6 +263,8 @@ export function normalisePartyPopup(raw: unknown): PartyPopupSettings {
         dressValue: text(value.dressValue, d.dressValue, 40),
         priceLabel: text(value.priceLabel, d.priceLabel, 60),
         finePrint: text(value.finePrint, d.finePrint, 120),
+        // Unlike the other lines, an emptied offer stays empty, which hides it.
+        offerText: typeof value.offerText === 'string' ? value.offerText.trim().slice(0, 140) : d.offerText,
 
         reserveLabel: text(value.reserveLabel, d.reserveLabel, 30),
         reserveLink: link(value.reserveLink, d.reserveLink),

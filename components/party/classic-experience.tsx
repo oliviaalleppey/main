@@ -31,6 +31,21 @@ const DETAILS: Record<string, string> = {
 };
 
 const MAX_COUPLES = 10;
+const capitalise = (line: string) => line.charAt(0).toUpperCase() + line.slice(1);
+
+/** The early bird line, with its gold tag. */
+function Offer({ text }: { text: string }) {
+    if (!text) return null;
+    const [tag, ...rest] = text.split(':');
+    const hasTag = rest.length > 0 && tag.length <= 24;
+    return (
+        <p className="pc-offer">
+            <b>{hasTag ? tag.trim() : 'Early bird'}</b>
+            <span>{hasTag ? capitalise(rest.join(':').trim()) : text}</span>
+        </p>
+    );
+}
+
 const CONFETTI = ['#f1dba0', '#d4b06a', '#8d6b2e', '#b3202f', '#f6efe0'];
 
 type Dust = { x: number; y: number; r: number; vx: number; vy: number; a: number; t: number };
@@ -373,6 +388,8 @@ export default function ClassicExperience({
                         <img src={mask} alt="" width={709} height={502} />
                         <p className="small pc-cinzel">{content.presenter}</p>
                         <h2 id="pc-gate-title" className="pc-serif">{content.titleMain} <em>{content.titleAccent}</em></h2>
+                        <Offer text={content.offerText} />
+                        <br />
                         <button type="button" className="pc-enter pc-cinzel" onClick={() => enter(true)} autoFocus>
                             Enter the masquerade
                         </button>
@@ -406,6 +423,7 @@ export default function ClassicExperience({
                         <div><small className="pc-cinzel">DRESS</small><p className="pc-serif">{content.dressValue}</p></div>
                     </div>
                     {!over && <Countdown />}
+                    {!over && <Offer text={content.offerText} />}
                     {!over && (
                         <div className="pc-ctas">
                             <a href="#reserve" className="pc-btn pc-btn-gold pc-cinzel" onClick={(e) => burstFrom(e)}>
@@ -454,6 +472,7 @@ export default function ClassicExperience({
                             <div className="pc-pass-b">
                                 <small className="pc-cinzel">{content.priceLabel}</small>
                                 <div className="pc-price pc-serif">{formatRupees(content.pricePerCouple)}</div>
+                                {!over && <Offer text={content.offerText} />}
                                 {!over && (
                                     <>
                                         <div className="pc-step">

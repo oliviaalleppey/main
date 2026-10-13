@@ -133,6 +133,7 @@ export default function NewYearPopup({ content }: { content: PartyPopupSettings 
                             <div><small>DRESS</small><p>{content.dressValue}</p></div>
                         </div>
                         <Countdown />
+                        {content.offerText && <p className="ny-offer">{content.offerText}</p>}
                         <div className="ny-price">{content.priceLabel}<b>{formatRupees(content.pricePerCouple)}</b></div>
                         <div className="ny-cta">
                             <Link href={content.reserveLink} className="ny-btn ny-main" onClick={remember}>{content.reserveLabel}</Link>

@@ -649,6 +649,7 @@ export default function PartyExperience({
                             <div><small>Dress</small><p>{content.dressValue}</p></div>
                         </div>
                         {!over && <Countdown />}
+                        {!over && content.offerText && <p className="pt-offer">{content.offerText}</p>}
                         {!over && (
                             <div className="pt-ctas">
                                 <a href="#reserve" className="pt-btn pt-btn-gold" onClick={(e) => burstFrom(e)}>

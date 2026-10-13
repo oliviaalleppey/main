@@ -40,7 +40,7 @@ test('page photos only come from our folder or the public blob store', () => {
 test('the built-in list matches the prices we were given', () => {
     const byName = Object.fromEntries(DEFAULT_PARTY_POPUP.guestPrices.map((g) => [`${g.label}|${g.stay}`, g.price]));
     assert.deepEqual(byName, {
-        'Extra adult|R': 9999,
+        'Extra adult|R': 11999,
         'Kid|R': 4999,
         'Child or infant|both': 2999,
         'Nanny|NR': 2999,
@@ -114,4 +114,10 @@ test('the Dark Night theme can be chosen and brings its own words and picture', 
     assert.equal(noir.theme, 'The Dark Night Masquerade');
     assert.equal(noir.dressValue, PARTY_THEMES.noir.copy.dressValue);
     assert.equal(partyShareImage(noir), NOIR_SHARE_IMAGE);
+});
+
+test('the early bird line shows by default and can be hidden', () => {
+    assert.match(normalisePartyPopup(undefined).offerText, /early bird/i);
+    assert.equal(normalisePartyPopup({ offerText: '   ' }).offerText, '');
+    assert.equal(normalisePartyPopup({ offerText: ' Suites at the same price ' }).offerText, 'Suites at the same price');
 });

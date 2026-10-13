@@ -501,6 +501,9 @@ export default function PartyPopupCard() {
                     <div className="sm:col-span-3">
                         <TextField id="pp-fine" label="Small print under the buttons" value={draft.finePrint} onChange={set('finePrint')} maxLength={120} />
                     </div>
+                    <div className="sm:col-span-3">
+                        <TextField id="pp-offer" label="Early bird offer line (leave empty to hide it)" value={draft.offerText} onChange={set('offerText')} maxLength={140} />
+                    </div>
                 </section>
 
                 <GuestPricesField value={draft.guestPrices} onChange={set('guestPrices')} />
