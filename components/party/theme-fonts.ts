@@ -10,5 +10,5 @@ const bodoni = Bodoni_Moda({ subsets: ['latin'], style: ['normal', 'italic'], va
 export const THEME_FONTS = {
     masquerade: '',
     gatsby: `${poiret.variable} ${josefin.variable}`,
-    gotham: bodoni.variable,
+    noir: bodoni.variable,
 } as const;

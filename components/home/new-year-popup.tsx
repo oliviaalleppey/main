@@ -5,6 +5,7 @@ import Link from 'next/link';
 import {
     DEFAULT_PARTY_BACKGROUND,
     DEFAULT_PARTY_MASK,
+    NOIR_BACKDROP,
     PARTY_END,
     PARTY_START,
     formatRupees,
@@ -106,9 +107,11 @@ export default function NewYearPopup({ content }: { content: PartyPopupSettings 
                     <i className="ny-corner ny-c3" /><i className="ny-corner ny-c4" />
                     <button type="button" className="ny-x" onClick={close} aria-label="Close">&#10005;</button>
 
-                    {theme !== 'masquerade' ? (
-                        // Gatsby and Gotham draw their own sky: a Deco sun over the water, or Manhattan at night.
+                    {theme === 'gatsby' ? (
+                        // The Gatsby look draws its own sky: a Deco sun rising over the water.
                         <div className="ny-photo ny-deco"><span className="ny-tag">{content.presenter}</span></div>
+                    ) : theme === 'noir' ? (
+                        <div className="ny-photo ny-noir-photo" style={{ backgroundImage: `url("${NOIR_BACKDROP}")` }}><span className="ny-tag">{content.presenter}</span></div>
                     ) : (
                         <div className={`ny-photo${content.backgroundImage ? '' : ' ny-photo-default'}`} style={{ backgroundImage: `url("${content.backgroundImage || DEFAULT_PARTY_BACKGROUND}")` }}><span className="ny-tag">{content.presenter}</span></div>
                     )}

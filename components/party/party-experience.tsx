@@ -8,7 +8,7 @@ import {
 import PartyEnquiryForm from './party-enquiry-form';
 import { PartyMusic } from './party-music';
 import { FeatherGlyph, GatsbyArches, GatsbyClock, GatsbyOrnament, GatsbySky, HatGlyph } from './gatsby';
-import { GothamCity, GothamElevator, GothamInvite, GothamMoodBoard, GothamSky } from './gotham';
+import { NoirBackdrop, NoirFrame, NoirHero, NoirInvite, NoirMoodBoard, NoirSpot } from './noir';
 import { THEME_FONTS } from './theme-fonts';
 import {
     DEFAULT_PARTY_CROWD_IMAGE,
@@ -22,7 +22,7 @@ import {
 } from '@/lib/config/party-popup';
 import './party.css';
 import './gatsby.css';
-import './gotham.css';
+import './noir.css';
 
 /** Short notes for the highlights we know; anything the admin adds shows as a title only. */
 const DETAILS: Record<string, { note: string; icon: LucideIcon }> = {
@@ -37,7 +37,7 @@ const DETAILS: Record<string, { note: string; icon: LucideIcon }> = {
 const STATEMENT = {
     masquerade: ['Masks', 'on.', 'Lights', 'down.', 'Hands', 'up', 'for', 'midnight.'],
     gatsby: ['Masks', 'on.', 'Dance', 'late.', 'Welcome', 'to', 'the', 'Roaring', 'Twenty-Seven.'],
-    gotham: ['Black', 'tie.', 'Masks', 'on.', 'Kerala’s', 'finest,', 'after', 'dark.'],
+    noir: ['Black', 'tie.', 'Masks', 'on.', 'Kerala’s', 'finest,', 'after', 'dark.'],
 };
 
 const MAX_COUNT = 10;
@@ -195,7 +195,7 @@ export default function PartyExperience({
     bookHref: string;
 }) {
     const gatsby = content.pageTheme === 'gatsby';
-    const gotham = content.pageTheme === 'gotham';
+    const noir = content.pageTheme === 'noir';
     const statement = STATEMENT[content.pageTheme];
 
     const rootRef = useRef<HTMLDivElement>(null);
@@ -240,7 +240,7 @@ export default function PartyExperience({
     const themeLead = themeSplit > 0 ? content.theme.slice(0, themeSplit) : '';
     const themeLast = content.theme.slice(themeSplit + 1);
     const Glyph = (i: number) =>
-        gatsby ? [<HatGlyph key="h" />, <MaskGlyph key="m" />, <FeatherGlyph key="f" />][i % 3] : gotham && i % 2 ? <HatGlyph /> : <MaskGlyph />;
+        gatsby ? [<HatGlyph key="h" />, <MaskGlyph key="m" />, <FeatherGlyph key="f" />][i % 3] : noir && i % 2 ? <HatGlyph /> : <MaskGlyph />;
 
     // ── Price list and the guest's plan ────────────────────
     const rows = useMemo<Row[]>(() => [
@@ -601,7 +601,8 @@ export default function PartyExperience({
             onClick={onLinkClick}
         >
             {gatsby && <div className="gt-wall" aria-hidden="true"><i /><i /></div>}
-            {gotham && <div className="gm-wall" aria-hidden="true"><i className="gold" /><i className="purple" /><i className="crimson" /></div>}
+            {noir && <NoirBackdrop reduced={reduced} />}
+            {noir && <div className="nr-mood" aria-hidden="true"><i className="gold" /><i className="purple" /><i className="crimson" /></div>}
             <canvas ref={canvasRef} className="pt-canvas" aria-hidden="true" />
 
             <nav className="pt-top pt-cinzel" aria-label="Olivia Alleppey">
@@ -623,8 +624,8 @@ export default function PartyExperience({
                 <section className="pt-hero">
                     {gatsby ? (
                         <GatsbySky backRef={heroBackRef} glowRef={glowRef} beatRef={beatRef} reduced={reduced} />
-                    ) : gotham ? (
-                        <GothamSky backRef={heroBackRef} glowRef={glowRef} reduced={reduced} />
+                    ) : noir ? (
+                        <NoirHero backRef={heroBackRef} glowRef={glowRef} />
                     ) : (
                         <>
                             <div ref={heroBackRef} className="pt-hero-photo" aria-hidden="true">
@@ -677,7 +678,7 @@ export default function PartyExperience({
                     </div>
                 </div>
 
-                {gotham && <GothamInvite content={content} over={over} />}
+                {noir && <NoirInvite content={content} over={over} />}
 
                 <section className="pt-night">
                     <div className="pt-night-media" aria-hidden="true">
@@ -685,10 +686,8 @@ export default function PartyExperience({
                             <div className="pt-night-frame gt-clock-frame">
                                 <GatsbyClock bind={bindNight} act={act} />
                             </div>
-                        ) : gotham ? (
-                            <div className="pt-night-frame gm-lift-frame">
-                                <GothamElevator bind={bindNight} act={act} count={content.highlights.length} />
-                            </div>
+                        ) : noir ? (
+                            <NoirFrame act={act} />
                         ) : (
                             <div className="pt-night-frame">
                                 {nightPhotos.map((src, i) => (
@@ -725,14 +724,14 @@ export default function PartyExperience({
                     </div>
                 </section>
 
-                {gotham && <GothamMoodBoard />}
+                {noir && <NoirMoodBoard />}
 
                 <section ref={statementRef} className="pt-statement" aria-label={statement.join(' ')}>
                     <div className="pt-statement-pin">
                         {gatsby ? (
                             <GatsbyArches bind={bindStatement} />
-                        ) : gotham ? (
-                            <GothamCity bind={bindStatement} />
+                        ) : noir ? (
+                            <NoirSpot bind={bindStatement} />
                         ) : (
                             <div ref={statementPhotoRef} className="pt-statement-photo" style={{ backgroundImage: `url("${lightsPhoto}")` }} aria-hidden="true" />
                         )}

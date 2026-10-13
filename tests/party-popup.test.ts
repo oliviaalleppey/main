@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import {
     DEFAULT_PARTY_POPUP,
     GATSBY_SHARE_IMAGE,
-    GOTHAM_SHARE_IMAGE,
+    NOIR_SHARE_IMAGE,
     MAX_GUEST_PRICES,
     PARTY_THEMES,
     normalisePartyPopup,
@@ -108,10 +108,10 @@ test('the Gatsby page shares its own picture, not the masquerade photos', () => 
     assert.equal(partyShareImage(normalisePartyPopup({ pageImage: '/party/x.webp' })), '/party/x.webp');
 });
 
-test('the Gotham theme can be chosen and brings its own words and picture', () => {
-    const gotham = switchPartyTheme(normalisePartyPopup({ pageTheme: 'gatsby', ...PARTY_THEMES.gatsby.copy }), 'gotham');
-    assert.equal(normalisePartyPopup(gotham).pageTheme, 'gotham');
-    assert.equal(gotham.theme, 'The Gotham Masquerade');
-    assert.equal(gotham.dressValue, PARTY_THEMES.gotham.copy.dressValue);
-    assert.equal(partyShareImage(gotham), GOTHAM_SHARE_IMAGE);
+test('the Dark Night theme can be chosen and brings its own words and picture', () => {
+    const noir = switchPartyTheme(normalisePartyPopup({ pageTheme: 'gatsby', ...PARTY_THEMES.gatsby.copy }), 'noir');
+    assert.equal(normalisePartyPopup(noir).pageTheme, 'noir');
+    assert.equal(noir.theme, 'The Dark Night Masquerade');
+    assert.equal(noir.dressValue, PARTY_THEMES.noir.copy.dressValue);
+    assert.equal(partyShareImage(noir), NOIR_SHARE_IMAGE);
 });
