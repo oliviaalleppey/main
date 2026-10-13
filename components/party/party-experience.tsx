@@ -2,9 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { Baby, BedDouble, Car, Minus, Music, Plus, Sparkles, UtensilsCrossed, Wine, type LucideIcon } from 'lucide-react';
+import {
+    Baby, BedDouble, Car, CloudFog, Lightbulb, Minus, Music, Plus, Sparkles, UtensilsCrossed, Wine, type LucideIcon,
+} from 'lucide-react';
 import PartyEnquiryForm from './party-enquiry-form';
-import { PartyMusic } from './party-music';
+import { DRINKS, Glass, type DrinkKind } from './party-glass';
+import { INTRO_SECONDS, PartyMusic, type PartyFx } from './party-music';
 import {
     DEFAULT_PARTY_MASK,
     DEFAULT_PARTY_PAGE_IMAGE,
@@ -27,9 +30,30 @@ const DETAILS: Record<string, { note: string; icon: LucideIcon }> = {
 const MAX_COUNT = 10;
 const CONFETTI = ['#f1dba0', '#d4b06a', '#8d6b2e', '#b3202f', '#f6efe0'];
 const FIREWORK = ['#f1dba0', '#ffd27a', '#ffe9c2', '#e8a64a', '#ff8a7a', '#f6efe0'];
+const DISCO = ['#ffffff', '#ff7ad9', '#7ae7ff', '#ffe28a', '#b28cff'];
 /** One colour per price line, shared by its guest tokens and its dot in the summary. */
 const TOKEN = ['#e9c77b', '#f6efe0', '#e8a0a8', '#9fd3c7', '#c7b4f0', '#f0b37e', '#a8c8f0', '#d9e6a3'];
 const MAX_TOKENS = 24;
+
+/** Mask colours a guest can choose at the door. */
+const TONES = [
+    { name: 'Gold', swatch: 'linear-gradient(135deg,#fff0b8,#d4a440 55%,#8d6b2e)', filter: 'saturate(1)' },
+    { name: 'Silver', swatch: 'linear-gradient(135deg,#ffffff,#bfc4c9 55%,#6d7278)', filter: 'grayscale(1) brightness(1.2) contrast(1.05)' },
+    { name: 'Rose gold', swatch: 'linear-gradient(135deg,#ffe0dc,#e39a92 55%,#9c5a55)', filter: 'hue-rotate(-24deg) saturate(1.3) brightness(1.04)' },
+    { name: 'Emerald', swatch: 'linear-gradient(135deg,#d6ffe9,#3fbf86 55%,#17603f)', filter: 'hue-rotate(100deg) saturate(1.25)' },
+];
+
+/** Festoon bulbs in two drapes across the top of the hero, on the curve M0 2 Q25 30 50 2 Q75 30 100 2. */
+const BULBS = Array.from({ length: 22 }, (_, i) => {
+    const per = 11;
+    const u = ((i % per) + 0.5) / per;
+    return {
+        x: Math.floor(i / per) * 50 + u * 50,
+        y: ((2 + 56 * u * (1 - u)) / 30) * 100,
+        color: ['#fff1c9', '#ffd27a', '#ffb3a7', '#fff8e6'][i % 4],
+        delay: ((i * 0.37) % 2.4).toFixed(2),
+    };
+});
 
 const STAY_TEXT: Record<'R' | 'NR', { code: string; name: string; title: string; text: string }> = {
     R: { code: 'R', name: 'Residential', title: 'Staying with us', text: 'Your couple pass includes a room at Olivia for the night.' },
@@ -40,6 +64,7 @@ type Dust = { x: number; y: number; r: number; vx: number; vy: number; a: number
 type Bit = { x: number; y: number; vx: number; vy: number; rot: number; vr: number; w: number; h: number; c: string; life: number };
 type Spark = { x: number; y: number; px: number; py: number; vx: number; vy: number; life: number; max: number; c: string };
 type Rocket = { x: number; y: number; vx: number; vy: number; left: number; c: string };
+type Spot = { x: number; y: number; s: number; r: number; c: number; t: number };
 
 type Row = {
     key: string;
@@ -143,6 +168,26 @@ function Ornament() {
     );
 }
 
+/** Two glasses side by side; they clink each time `round` goes up. */
+function GlassPair({ kind, round, full = false }: { kind: DrinkKind; round: number; full?: boolean }) {
+    const ref = useRef<HTMLDivElement>(null);
+    // Restart the clink without remounting the glasses, so they don't pour again.
+    useEffect(() => {
+        const el = ref.current;
+        if (!el || !round) return;
+        el.classList.remove('clink');
+        void el.offsetWidth;
+        el.classList.add('clink');
+    }, [round]);
+    return (
+        <div ref={ref} className="pt-pair">
+            <span className="l"><Glass key={kind} kind={kind} full={full} /></span>
+            <span className="pt-clinkfx" aria-hidden="true">{Array.from({ length: 10 }, (_, i) => <i key={i} style={{ ['--a' as string]: `${i * 36}deg` }} />)}</span>
+            <span className="r"><Glass key={kind} kind={kind} full={full} /></span>
+        </div>
+    );
+}
+
 /** Tilts toward the pointer and moves a highlight with it. */
 function tiltHandlers(strength = 8) {
     return {
@@ -165,6 +210,48 @@ function tiltHandlers(strength = 8) {
     };
 }
 
+/** A soft round glow, drawn once and stamped many times on the canvas. */
+function glowSprite(color: string, size = 64) {
+    const sprite = document.createElement('canvas');
+    sprite.width = sprite.height = size;
+    const s = sprite.getContext('2d')!;
+    const half = size / 2;
+    const glow = s.createRadialGradient(half, half, 0, half, half, half);
+    glow.addColorStop(0, '#ffffff');
+    glow.addColorStop(0.22, color);
+    glow.addColorStop(1, 'rgba(0,0,0,0)');
+    s.fillStyle = glow;
+    s.fillRect(0, 0, size, size);
+    return sprite;
+}
+
+/** Tileable smoke, drawn once into a picture the fog layers slide across. */
+function fogTexture(done: (url: string) => void) {
+    const w = 1024;
+    const h = 256;
+    const c = document.createElement('canvas');
+    c.width = w;
+    c.height = h;
+    const g = c.getContext('2d');
+    if (!g) return;
+    for (let i = 0; i < 150; i++) {
+        const r = 40 + Math.random() * 110;
+        const x = Math.random() * w;
+        const y = h * 0.3 + Math.random() * h * 0.8;
+        const a = 0.03 + Math.random() * 0.06;
+        for (const dx of [-w, 0, w]) {
+            const grad = g.createRadialGradient(x + dx, y, 0, x + dx, y, r);
+            grad.addColorStop(0, `rgba(236,222,216,${a})`);
+            grad.addColorStop(1, 'rgba(236,222,216,0)');
+            g.fillStyle = grad;
+            g.beginPath();
+            g.arc(x + dx, y, r, 0, Math.PI * 2);
+            g.fill();
+        }
+    }
+    c.toBlob((blob) => { if (blob) done(URL.createObjectURL(blob)); });
+}
+
 const forStay = (row: Row, stay: 'R' | 'NR') => row.stay === 'both' || row.stay === stay;
 
 export default function PartyExperience({
@@ -178,15 +265,37 @@ export default function PartyExperience({
 }) {
     const rootRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const bgRef = useRef<HTMLDivElement>(null);
+    const veilRef = useRef<HTMLDivElement>(null);
+    const spotRef = useRef<HTMLDivElement>(null);
+    const pulseRef = useRef<HTMLDivElement>(null);
+    const uplightRef = useRef<HTMLDivElement>(null);
+    const beamsRef = useRef<HTMLDivElement>(null);
+    const maskRef = useRef<HTMLDivElement>(null);
+    const maskGlowRef = useRef<HTMLSpanElement>(null);
+    const fogRef = useRef<HTMLDivElement>(null);
+    const fogFrontRef = useRef<HTMLDivElement>(null);
+    const flashRef = useRef<HTMLDivElement>(null);
+    const pairRef = useRef<HTMLDivElement>(null);
+
     const musicRef = useRef<PartyMusic | null>(null);
+    const playingRef = useRef(false);
+    const lightsRef = useRef(false);
+    const showRef = useRef(false);
+    const enteringRef = useRef(false);
     const bitsRef = useRef<Bit[]>([]);
     const sparksRef = useRef<Spark[]>([]);
     const rocketsRef = useRef<Rocket[]>([]);
-    const showRef = useRef(false);
     const reduced = useReducedMotion();
 
     const [gate, setGate] = useState<'open' | 'leaving' | 'gone'>('open');
     const [playing, setPlaying] = useState(false);
+    const [lights, setLights] = useState(false);
+    const [puffing, setPuffing] = useState(false);
+    const [tone, setTone] = useState(0);
+    const [drink, setDrink] = useState<DrinkKind>('bubbly');
+    const [toastRound, setToastRound] = useState(0);
+    const [popRound, setPopRound] = useState(0);
     const [stay, setStay] = useState<'R' | 'NR'>('R');
     const [counts, setCounts] = useState<Record<string, number>>({ coupleR: 1, coupleNR: 1 });
     // Reveal-on-scroll styles apply only once the script is running.
@@ -233,6 +342,10 @@ export default function PartyExperience({
         `Estimated total: ${formatRupees(total)}${onRequest ? ' + couple pass (price on request)' : ''}`,
     ].join('\n');
 
+    const fx = useCallback((kind: PartyFx, seconds?: number) => {
+        if (playingRef.current) musicRef.current?.fx(kind, seconds);
+    }, []);
+
     // ── Confetti ───────────────────────────────────────────
     const burst = useCallback((x: number, y: number, count = 90) => {
         if (reduced) return;
@@ -273,34 +386,126 @@ export default function PartyExperience({
             left: frames,
             c: FIREWORK[Math.floor(Math.random() * FIREWORK.length)],
         });
+        fx('launch', frames / 60);
+    }, [reduced, fx]);
+
+    const volley = useCallback((count = 5) => {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        for (let i = 0; i < count; i++) {
+            window.setTimeout(() => launch(w * (0.14 + (0.72 * (i + Math.random() * 0.6)) / count), h * (0.1 + Math.random() * 0.26)), i * 230);
+        }
+    }, [launch]);
+
+    // ── Light, smoke and a toast ───────────────────────────
+    const flash = useCallback((strength = 0.4) => {
+        if (reduced) return;
+        flashRef.current?.animate([{ opacity: strength }, { opacity: 0 }], { duration: 700, easing: 'ease-out' });
     }, [reduced]);
+
+    const puff = useCallback((quiet = false) => {
+        setPuffing(true);
+        if (!quiet) fx('smoke');
+        if (!reduced) {
+            fogFrontRef.current?.animate(
+                [
+                    { opacity: 0, transform: 'translate3d(0,35%,0)' },
+                    { opacity: 0.85, transform: 'translate3d(0,4%,0)', offset: 0.3 },
+                    { opacity: 0, transform: 'translate3d(0,-22%,0)' },
+                ],
+                { duration: 4400, easing: 'ease-out' },
+            );
+        }
+        window.setTimeout(() => setPuffing(false), 4400);
+    }, [fx, reduced]);
+
+    function toggleLights() {
+        const next = !lightsRef.current;
+        lightsRef.current = next;
+        setLights(next);
+        fx('switch');
+        flash(next ? 0.35 : 0.15);
+    }
+
+    function cheers(where: 'pop' | 'section') {
+        let x = window.innerWidth / 2;
+        let y = window.innerHeight * 0.42;
+        if (where === 'section') {
+            setToastRound((n) => n + 1);
+            const box = pairRef.current?.getBoundingClientRect();
+            if (box) {
+                x = box.left + box.width / 2;
+                y = box.top + box.height * 0.2;
+            }
+        } else {
+            setPopRound((n) => n + 1);
+        }
+        window.setTimeout(() => {
+            fx('clink');
+            burst(x, y, 60);
+        }, reduced ? 0 : 430);
+    }
 
     function onStageClick(e: React.MouseEvent<HTMLDivElement>) {
         const target = e.target as HTMLElement;
+
+        // In-page links glide instead of jumping.
+        const anchor = target.closest('a[href^="#"]');
+        if (anchor) {
+            const section = document.querySelector(anchor.getAttribute('href')!);
+            if (section) {
+                e.preventDefault();
+                section.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth' });
+            }
+            return;
+        }
+
+        const bulb = target.closest<HTMLElement>('[data-bulb]');
+        if (bulb) {
+            bulb.classList.remove('pop');
+            void bulb.offsetWidth;
+            bulb.classList.add('pop');
+            fx('ping');
+            const box = bulb.getBoundingClientRect();
+            burst(box.left + box.width / 2, box.top + box.height / 2, 14);
+            return;
+        }
+
         if (gate !== 'gone' || target.closest('a,button,input,label,textarea,select,form,output,[data-calm]')) return;
         launch(e.clientX, e.clientY);
     }
 
     // ── Music ──────────────────────────────────────────────
-    async function startMusic() {
+    async function startMusic(intro: boolean): Promise<number | null> {
         try {
             const music = new PartyMusic(content.musicUrl);
-            await music.start();
+            // On the synthesised loop, a firework goes up every other bar while the top of the page is in view.
+            music.onBar = (bar) => {
+                if (bar % 2 === 0 && showRef.current && !document.hidden && window.scrollY < window.innerHeight * 0.5) {
+                    launch(window.innerWidth * (0.12 + Math.random() * 0.76), window.innerHeight * (0.1 + Math.random() * 0.24));
+                }
+            };
+            const delay = await music.start(intro);
             musicRef.current = music;
+            playingRef.current = true;
             setPlaying(true);
+            return delay;
         } catch {
+            playingRef.current = false;
             setPlaying(false);
+            return null;
         }
     }
 
     function toggleMusic() {
         const music = musicRef.current;
         if (!music) {
-            void startMusic();
+            void startMusic(false);
             return;
         }
         if (playing) music.pause();
         else music.resume();
+        playingRef.current = !playing;
         setPlaying(!playing);
     }
 
@@ -316,19 +521,22 @@ export default function PartyExperience({
 
     useEffect(() => () => musicRef.current?.stop(), []);
 
-    // ── Gate: the curtains part ────────────────────────────
-    function enter(withSound: boolean) {
-        if (withSound) void startMusic();
+    // ── Gate: the curtains part in one bar, and the night drops with the beat ──
+    async function enter(withSound: boolean) {
+        if (enteringRef.current) return;
+        enteringRef.current = true;
+        let delay = INTRO_SECONDS;
+        if (withSound) delay = (await startMusic(true)) ?? INTRO_SECONDS;
         setGate('leaving');
-        burst(window.innerWidth / 2, window.innerHeight * 0.6, 140);
-        const w = window.innerWidth;
-        const h = window.innerHeight;
-        [[0.3, 0.28, 650], [0.7, 0.22, 1000], [0.5, 0.16, 1350]].forEach(([x, y, delay]) =>
-            window.setTimeout(() => launch(w * x, h * y), delay));
+        rootRef.current?.style.setProperty('--intro', `${delay.toFixed(3)}s`);
         window.setTimeout(() => {
-            setGate('gone');
+            flash(0.55);
+            burst(window.innerWidth / 2, window.innerHeight * 0.55, 150);
+            volley(4);
+            puff(true);
             showRef.current = true;
-        }, 1700);
+        }, delay * 1000);
+        window.setTimeout(() => setGate('gone'), delay * 1000 + 250);
     }
 
     useEffect(() => {
@@ -338,29 +546,50 @@ export default function PartyExperience({
         return () => { document.body.style.overflow = previous; };
     }, [gate]);
 
-    // ── Pointer spotlight, mask parallax, scroll parallax, reveals ─────
+    // ── Scroll and pointer: written straight onto a few layers, never the whole page ──
     useEffect(() => {
         const root = rootRef.current;
         if (!root) return;
         setScripted(true);
 
+        const fine = window.matchMedia('(pointer: fine)').matches;
+        let px = 0;
+        let py = 0;
+        let pointerQueued = false;
         const onMove = (e: PointerEvent) => {
-            root.style.setProperty('--mx', `${e.clientX}px`);
-            root.style.setProperty('--my', `${e.clientY}px`);
-            root.style.setProperty('--px', ((e.clientX / window.innerWidth) - 0.5).toFixed(3));
-            root.style.setProperty('--py', ((e.clientY / window.innerHeight) - 0.5).toFixed(3));
-        };
-        let ticking = false;
-        const onScroll = () => {
-            if (ticking) return;
-            ticking = true;
+            if (!fine || e.pointerType !== 'mouse') return;
+            px = e.clientX;
+            py = e.clientY;
+            if (pointerQueued) return;
+            pointerQueued = true;
             requestAnimationFrame(() => {
-                root.style.setProperty('--sy', String(Math.round(window.scrollY)));
-                ticking = false;
+                pointerQueued = false;
+                if (spotRef.current) spotRef.current.style.transform = `translate3d(${px}px,${py}px,0)`;
+                const nx = px / window.innerWidth - 0.5;
+                const ny = py / window.innerHeight - 0.5;
+                if (maskRef.current) maskRef.current.style.transform = `translate3d(${nx * 22}px,${ny * 14}px,0) rotate(${nx * 4}deg)`;
+            });
+        };
+
+        let scrollQueued = false;
+        let lastVeil = -1;
+        const onScroll = () => {
+            if (scrollQueued) return;
+            scrollQueued = true;
+            requestAnimationFrame(() => {
+                scrollQueued = false;
+                const y = window.scrollY;
+                if (bgRef.current) bgRef.current.style.transform = `translate3d(0,${(-y * 0.06).toFixed(1)}px,0)`;
+                const veil = Math.round(Math.min(0.55, y / 900) * 100) / 100;
+                if (veil !== lastVeil && veilRef.current) {
+                    lastVeil = veil;
+                    veilRef.current.style.opacity = String(veil);
+                }
             });
         };
         window.addEventListener('pointermove', onMove, { passive: true });
         window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
 
         const observer = new IntersectionObserver(
             (entries) => entries.forEach((entry) => {
@@ -373,47 +602,46 @@ export default function PartyExperience({
         );
         root.querySelectorAll('[data-reveal]').forEach((el) => observer.observe(el));
 
+        let fogUrl = '';
+        fogTexture((url) => {
+            fogUrl = url;
+            fogRef.current?.style.setProperty('--fog', `url("${url}")`);
+            fogFrontRef.current?.style.setProperty('--fog', `url("${url}")`);
+        });
+
         return () => {
             window.removeEventListener('pointermove', onMove);
             window.removeEventListener('scroll', onScroll);
             observer.disconnect();
+            if (fogUrl) URL.revokeObjectURL(fogUrl);
         };
     }, []);
 
-    // ── Canvas: gold dust that swells with the beat, fireworks and confetti ──
+    // ── Canvas: gold dust, fireworks, confetti and mirror-ball reflections ──
     useEffect(() => {
         const canvas = canvasRef.current;
-        const root = rootRef.current;
-        if (!canvas || !root) return;
+        if (!canvas) return;
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
         let width = 0;
         let height = 0;
         const resize = () => {
             width = window.innerWidth;
             height = window.innerHeight;
-            canvas.width = width * dpr;
-            canvas.height = height * dpr;
+            const dpr = Math.min(window.devicePixelRatio || 1, width < 700 ? 1.5 : 2);
+            canvas.width = Math.round(width * dpr);
+            canvas.height = Math.round(height * dpr);
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         };
         resize();
         window.addEventListener('resize', resize);
 
-        // One soft glow, drawn once and stamped for every mote.
-        const sprite = document.createElement('canvas');
-        sprite.width = sprite.height = 64;
-        const s = sprite.getContext('2d')!;
-        const glow = s.createRadialGradient(32, 32, 0, 32, 32, 32);
-        glow.addColorStop(0, 'rgba(255,240,205,1)');
-        glow.addColorStop(0.25, 'rgba(241,219,160,.55)');
-        glow.addColorStop(1, 'rgba(212,176,106,0)');
-        s.fillStyle = glow;
-        s.fillRect(0, 0, 64, 64);
+        const sprite = glowSprite('rgba(241,219,160,.55)');
+        const discoSprites = DISCO.map((c) => glowSprite(c, 32));
+        const small = width < 700;
 
-        const count = reduced ? 0 : width < 700 ? 34 : 70;
-        const dust: Dust[] = Array.from({ length: count }, () => ({
+        const dust: Dust[] = Array.from({ length: reduced ? 0 : small ? 26 : 56 }, () => ({
             x: Math.random() * width,
             y: Math.random() * height,
             r: 2 + Math.random() * 7,
@@ -422,6 +650,24 @@ export default function PartyExperience({
             a: 0.2 + Math.random() * 0.6,
             t: Math.random() * Math.PI * 2,
         }));
+        const spots: Spot[] = Array.from({ length: small ? 22 : 44 }, () => ({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            s: 0.5 + Math.random() * 1.3,
+            r: 3 + Math.random() * 6,
+            c: Math.floor(Math.random() * DISCO.length),
+            t: Math.random() * Math.PI * 2,
+        }));
+
+        // Only touch a layer when its value has really changed.
+        const last = new Map<HTMLElement, number>();
+        const setOpacity = (el: HTMLElement | null, value: number) => {
+            if (!el) return;
+            const v = Math.round(value * 50) / 50;
+            if (last.get(el) === v) return;
+            last.set(el, v);
+            el.style.opacity = String(v);
+        };
 
         const explode = (x: number, y: number, c: string) => {
             const n = 70 + Math.floor(Math.random() * 40);
@@ -438,18 +684,27 @@ export default function PartyExperience({
                     c: Math.random() < 0.18 ? '#fff6dc' : c,
                 });
             }
+            if (playingRef.current) musicRef.current?.fx('boom');
         };
 
-        // While the hero is in view, the sky lights up on its own now and then.
+        // Without the synthesised loop to keep time, the sky lights up now and then on its own.
         let nextShow = performance.now() + 2600;
         let beat = 0;
+        let disco = 0;
         let frame = 0;
         const loop = (now: number) => {
-            const level = musicRef.current?.level() ?? 0;
-            beat = beat * 0.82 + level * 0.18;
-            root.style.setProperty('--beat', beat.toFixed(3));
+            const music = musicRef.current;
+            const level = playingRef.current ? music?.level() ?? 0 : 0;
+            beat = beat * 0.8 + level * 0.2;
+            disco += ((lightsRef.current ? 1 : 0) - disco) * 0.05;
 
-            if (!reduced && showRef.current && now > nextShow) {
+            setOpacity(pulseRef.current, beat * 0.9);
+            setOpacity(maskGlowRef.current, 0.35 + beat * 0.65);
+            setOpacity(beamsRef.current, 0.6 + beat * 0.5 + disco * 0.2);
+            setOpacity(uplightRef.current, disco * (playingRef.current ? 0.45 + beat * 0.55 : 0.8));
+
+            const synced = playingRef.current && music?.synced;
+            if (!reduced && !synced && showRef.current && now > nextShow) {
                 nextShow = now + 3200 + Math.random() * 2800;
                 if (!document.hidden && window.scrollY < height * 0.5) {
                     launch(width * (0.12 + Math.random() * 0.76), height * (0.1 + Math.random() * 0.24));
@@ -468,6 +723,18 @@ export default function PartyExperience({
                 const size = d.r * (2.2 + beat * 2);
                 ctx.globalAlpha = Math.min(1, d.a * (0.55 + 0.45 * Math.sin(d.t * 1.7)) + beat * 0.3);
                 ctx.drawImage(sprite, d.x - size, d.y - size, size * 2, size * 2);
+            }
+
+            // Mirror-ball reflections sweep across the room while the lights are on.
+            if (disco > 0.02 && !reduced) {
+                for (const p of spots) {
+                    p.t += 0.05;
+                    p.x += p.s * (1 + beat * 1.5);
+                    if (p.x > width + 20) { p.x = -20; p.y = Math.random() * height; }
+                    const size = p.r * (1.6 + beat);
+                    ctx.globalAlpha = disco * (0.45 + 0.4 * Math.sin(p.t));
+                    ctx.drawImage(discoSprites[p.c], p.x - size, p.y - size, size * 2, size * 2);
+                }
             }
 
             const rockets = rocketsRef.current;
@@ -554,20 +821,31 @@ export default function PartyExperience({
     };
 
     const ticker = [...content.highlights, content.theme];
+    const priceText = `${formatRupees(total)}${onRequest ? '+' : ''}`;
 
     return (
         <div
             ref={rootRef}
-            className={`pt${scripted ? ' pt-js' : ''}${gate === 'open' ? ' pt-gated' : ''}`}
-            style={{ ['--mask-url' as string]: `url("${mask}")` }}
+            className={`pt${scripted ? ' pt-js' : ''}${gate === 'open' ? ' pt-gated' : ''}${lights ? ' pt-disco' : ''}`}
+            style={{
+                ['--mask-url' as string]: `url("${mask}")`,
+                ['--tone' as string]: TONES[tone].filter,
+                ['--intro' as string]: `${INTRO_SECONDS.toFixed(3)}s`,
+            }}
             onClick={onStageClick}
         >
-            <div className="pt-bg" style={{ backgroundImage: `url("${photo}")` }} aria-hidden="true" />
-            <div className="pt-grade" aria-hidden="true" />
-            <div className="pt-beams" aria-hidden="true"><i /><i /><i /></div>
-            <div className="pt-veil" aria-hidden="true" />
-            <div className="pt-grain" aria-hidden="true" />
+            <div ref={bgRef} className="pt-bgwrap" aria-hidden="true">
+                <div className="pt-bg" style={{ backgroundImage: `url("${photo}")` }} />
+            </div>
+            <div className="pt-shade" aria-hidden="true" />
+            <div ref={beamsRef} className="pt-beams" aria-hidden="true"><i /><i /><i /></div>
+            <div ref={spotRef} className="pt-spot" aria-hidden="true" />
+            <div ref={veilRef} className="pt-veil" aria-hidden="true" />
+            <div ref={pulseRef} className="pt-pulse" aria-hidden="true" />
+            <div ref={uplightRef} className="pt-uplight" aria-hidden="true" />
+            <div className="pt-ball" aria-hidden="true"><i /></div>
             <canvas ref={canvasRef} className="pt-canvas" aria-hidden="true" />
+            <div ref={fogRef} className={`pt-fog${puffing ? ' puff' : ''}`} aria-hidden="true"><i /><i /></div>
 
             {gate !== 'gone' && (
                 <div className={`pt-gate${gate === 'leaving' ? ' out' : ''}`} role="dialog" aria-modal="true" aria-labelledby="pt-gate-title">
@@ -580,10 +858,28 @@ export default function PartyExperience({
                         <p className="pt-gate-pre pt-cinzel">{content.presenter}</p>
                         <h2 id="pt-gate-title" className="pt-serif">{content.titleMain} <em>{content.titleAccent}</em></h2>
                         <p className="pt-gate-theme pt-serif">{content.theme}</p>
-                        <button type="button" className="pt-enter pt-cinzel" onClick={() => enter(true)} autoFocus>
+                        <div className="pt-tones" role="radiogroup" aria-label="Choose your mask">
+                            <span className="pt-tones-label">Choose your mask</span>
+                            <div>
+                                {TONES.map((t, i) => (
+                                    <button
+                                        key={t.name}
+                                        type="button"
+                                        role="radio"
+                                        aria-checked={tone === i}
+                                        className={`pt-tone${tone === i ? ' on' : ''}`}
+                                        onClick={() => setTone(i)}
+                                    >
+                                        <i style={{ background: t.swatch }} aria-hidden="true" />
+                                        {t.name}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                        <button type="button" className="pt-enter pt-cinzel" onClick={() => void enter(true)} autoFocus>
                             Enter the masquerade
                         </button>
-                        <button type="button" className="pt-quiet" onClick={() => enter(false)}>
+                        <button type="button" className="pt-quiet" onClick={() => void enter(false)}>
                             Enter without sound
                         </button>
                     </div>
@@ -593,16 +889,33 @@ export default function PartyExperience({
             <nav className="pt-top pt-cinzel" aria-label="Olivia Alleppey">
                 <Link href="/">Olivia Alleppey</Link>
                 <div>
-                    <Link href="/rooms">Rooms</Link>
-                    {!over && <a href="#reserve">Prices</a>}
+                    <Link href="/rooms" className="pt-top-rooms">Rooms</Link>
+                    {!over && (
+                        <a href="#reserve" className="pt-top-price">
+                            {priceText}<span> · {people} {people === 1 ? 'guest' : 'guests'}</span>
+                        </a>
+                    )}
                 </div>
             </nav>
 
             <main className="pt-main">
                 <section className="pt-hero">
-                    <div className="pt-mask">
+                    <div className="pt-garland" aria-hidden="true" data-calm>
+                        <svg viewBox="0 0 100 30" preserveAspectRatio="none"><path d="M0 2Q25 30 50 2Q75 30 100 2" /></svg>
+                        {BULBS.map((b, i) => (
+                            <span
+                                key={i}
+                                data-bulb
+                                className="pt-bulb"
+                                style={{ left: `${b.x}%`, top: `${b.y}%`, ['--c' as string]: b.color, animationDelay: `${b.delay}s` }}
+                            />
+                        ))}
+                    </div>
+                    <div ref={maskRef} className="pt-mask">
+                        <span ref={maskGlowRef} className="pt-mask-glow" aria-hidden="true" />
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={mask} alt="Gold masquerade mask" width={709} height={502} />
+                        <img src={mask} alt="Masquerade mask" width={709} height={502} />
+                        <span className="pt-glint" aria-hidden="true"><i /></span>
                     </div>
                     <p className="pt-pre pt-cinzel">{content.eyebrow}</p>
                     <h1 className="pt-title pt-serif">
@@ -623,7 +936,11 @@ export default function PartyExperience({
                             <a href="#enquire" className="pt-btn pt-btn-ghost">{content.enquireLabel}</a>
                         </div>
                     )}
-                    {!reduced && <p className="pt-hint"><Sparkles aria-hidden="true" /> Tap anywhere to light a firework</p>}
+                    {!reduced && (
+                        <p className="pt-hint">
+                            <Sparkles aria-hidden="true" /> Tap anywhere for fireworks. Try the party buttons below.
+                        </p>
+                    )}
                     <div className="pt-scroll" aria-hidden="true"><i /></div>
                 </section>
 
@@ -650,6 +967,40 @@ export default function PartyExperience({
                                 </article>
                             );
                         })}
+                    </div>
+                </section>
+
+                <section className="pt-section pt-toast" aria-labelledby="pt-toast-title">
+                    <Ornament />
+                    <p className="pt-kicker pt-cinzel" data-reveal>Cheers to the new year</p>
+                    <h2 id="pt-toast-title" className="pt-h2 pt-serif" data-reveal>Raise a <em>glass</em></h2>
+                    <p className="pt-lede" data-reveal>Pick your drink, then tap Cheers.</p>
+                    <div className="pt-toast-box" data-reveal data-calm>
+                        <div className="pt-drinks" role="radiogroup" aria-label="Pick your drink">
+                            {(Object.keys(DRINKS) as DrinkKind[]).map((kind) => (
+                                <button
+                                    key={kind}
+                                    type="button"
+                                    role="radio"
+                                    aria-checked={drink === kind}
+                                    className={`pt-drink${drink === kind ? ' on' : ''}`}
+                                    onClick={() => setDrink(kind)}
+                                >
+                                    <Glass kind={kind} className="mini" />
+                                    {DRINKS[kind].name}
+                                </button>
+                            ))}
+                        </div>
+                        <div ref={pairRef} className="pt-toast-stage">
+                            <GlassPair kind={drink} round={toastRound} />
+                            <p key={toastRound} className={`pt-toast-msg pt-serif${toastRound ? ' on' : ''}`} aria-live="polite">
+                                {toastRound ? 'Here’s to the new year!' : ' '}
+                            </p>
+                        </div>
+                        <button type="button" className="pt-btn pt-btn-gold pt-cheers" onClick={() => cheers('section')}>
+                            <Wine aria-hidden="true" /> Cheers!
+                        </button>
+                        <p className="pt-toast-note">The open bar is for guests 23 and above.</p>
                     </div>
                 </section>
 
@@ -813,8 +1164,7 @@ export default function PartyExperience({
                                 message={planMessage}
                                 onSent={() => {
                                     burst(window.innerWidth / 2, window.innerHeight / 2, 160);
-                                    launch(window.innerWidth * 0.3, window.innerHeight * 0.25);
-                                    launch(window.innerWidth * 0.7, window.innerHeight * 0.2);
+                                    volley(3);
                                 }}
                             />
                         </div>
@@ -824,16 +1174,40 @@ export default function PartyExperience({
                 <p className="pt-end"><Link href="/">Olivia Alleppey</Link> · Alappuzha, Kerala</p>
             </main>
 
-            <button type="button" className={`pt-music${playing ? ' on' : ''}`} onClick={toggleMusic} aria-pressed={playing}>
-                <span className="pt-eq" aria-hidden="true"><i /><i /><i /><i /></span>
-                {playing ? 'Music on' : 'Play music'}
-            </button>
+            <div ref={fogFrontRef} className="pt-fog-front" aria-hidden="true"><i /></div>
+            <div ref={flashRef} className="pt-flash" aria-hidden="true" />
 
-            {!over && gate === 'gone' && (
-                <div className="pt-bar">
-                    <a href="#reserve" className="pt-btn pt-btn-gold">
-                        {formatRupees(total)}{onRequest ? '+' : ''} · {people} {people === 1 ? 'guest' : 'guests'}
-                    </a>
+            {popRound > 0 && (
+                <div key={popRound} className="pt-toast-pop" aria-hidden="true">
+                    <GlassPair kind={drink} round={popRound} full />
+                    <p className="pt-serif">Cheers!</p>
+                </div>
+            )}
+
+            {gate === 'gone' && (
+                <div className="pt-dock" role="toolbar" aria-label="Party controls">
+                    <button type="button" className={`pt-dock-btn${playing ? ' on' : ''}`} aria-pressed={playing} onClick={toggleMusic}>
+                        {playing
+                            ? <span className="pt-eq" aria-hidden="true"><i /><i /><i /><i /></span>
+                            : <Music aria-hidden="true" />}
+                        <span>Music</span>
+                    </button>
+                    <button type="button" className={`pt-dock-btn${lights ? ' on' : ''}`} aria-pressed={lights} onClick={toggleLights}>
+                        <Lightbulb aria-hidden="true" />
+                        <span>Lights</span>
+                    </button>
+                    <button type="button" className={`pt-dock-btn${puffing ? ' on' : ''}`} disabled={puffing} onClick={() => puff()}>
+                        <CloudFog aria-hidden="true" />
+                        <span>Smoke</span>
+                    </button>
+                    <button type="button" className="pt-dock-btn" onClick={() => volley(5)}>
+                        <Sparkles aria-hidden="true" />
+                        <span>Fireworks</span>
+                    </button>
+                    <button type="button" className="pt-dock-btn" onClick={() => cheers('pop')}>
+                        <Wine aria-hidden="true" />
+                        <span>Cheers</span>
+                    </button>
                 </div>
             )}
         </div>
