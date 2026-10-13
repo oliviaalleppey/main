@@ -166,13 +166,15 @@ export default function HeroSection({
 
                 {/* ② Typography — grows to fill space between logo and booking bar */}
                 <div className="flex-1 flex flex-col items-center justify-center text-center px-4 min-h-0">
-                    {/* h1: the hero line is the page's primary heading. */}
-                    <h1 className="text-white text-[2.4rem] xs:text-5xl sm:text-5xl md:text-7xl lg:text-8xl font-serif mb-3 md:mb-6 tracking-wide animate-fade-in-up delay-100 drop-shadow-lg leading-tight">
+                    {/* The big line is the brand tagline; the h1 is the line under it,
+                        because the page's main heading should say what and where the
+                        hotel is — that is what search engines weigh most after the title. */}
+                    <p className="text-white text-[2.4rem] xs:text-5xl sm:text-5xl md:text-7xl lg:text-8xl font-serif mb-3 md:mb-6 tracking-wide animate-fade-in-up delay-100 drop-shadow-lg leading-tight">
                         Experience The Unexperienced
-                    </h1>
-                    <p className="text-white text-sm md:text-lg font-light tracking-wider opacity-90 max-w-2xl animate-fade-in-up delay-200 drop-shadow-md">
-                        Where Luxury Meets the Backwaters.
                     </p>
+                    <h1 className="text-white text-sm md:text-lg font-light tracking-wider opacity-90 max-w-2xl animate-fade-in-up delay-200 drop-shadow-md">
+                        Luxury 5-Star Hotel on the Alleppey Backwaters
+                    </h1>
 
                     {/* Carousel dots — inside text area, below subtitle */}
                     {!showVideo && slides.length > 1 && (

@@ -8,7 +8,7 @@ import JsonLd from '@/components/seo/json-ld';
 import { breadcrumbSchema, restaurantSchema } from '@/lib/structured-data';
 
 export const metadata: Metadata = pageMetadata({
-    title: 'Brew Bar — Dining',
+    title: 'Brew Bar, 24-Hour Café in Alappuzha',
     description:
         'Brew Bar at Olivia Alleppey — craft coffee, teas and light bites in a relaxed setting at our 5-star hotel in Alappuzha, Kerala.',
     path: '/dining/brew-bar',
@@ -239,15 +239,16 @@ export default function BrewBiteMenuPage() {
                         {/* Logo wordmark */}
                         <div className="mb-3">
                             <p className="text-[#C8935A] text-[0.68rem] tracking-[0.4em] uppercase mb-4">Olivia International, Alleppey</p>
-                            <div className="inline-flex flex-col items-center gap-0">
+                            {/* The page's main heading; spans only, as a heading cannot hold a div. */}
+                            <h1 className="inline-flex flex-col items-center gap-0">
                                 <span className="font-serif text-5xl md:text-6xl font-bold text-white tracking-tight leading-none">Brew</span>
-                                <div className="flex items-center gap-2 my-0.5">
+                                <span className="flex items-center gap-2 my-0.5">
                                     <span className="w-8 h-[1px] bg-[#C8935A]" />
                                     <span className="text-[#C8935A] text-sm font-light italic">&amp;</span>
                                     <span className="w-8 h-[1px] bg-[#C8935A]" />
-                                </div>
+                                </span>
                                 <span className="font-serif text-5xl md:text-6xl font-bold text-white tracking-tight leading-none">Bite</span>
-                            </div>
+                            </h1>
                             <p className="text-[#C8935A]/80 text-[0.65rem] tracking-[0.55em] uppercase mt-4">Coffee Shop</p>
                         </div>
 

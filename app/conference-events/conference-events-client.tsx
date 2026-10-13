@@ -10,7 +10,7 @@ import { useState, useEffect, useRef } from 'react';
 const mainVenues = [
     {
         key: 'grand-ballroom',
-        name: 'Grand BallRoom',
+        name: 'Grand Ballroom',
         capacity: 'Up to 550',
         area: '5,035 sq ft',
         tag: 'Grand Scale',
@@ -18,9 +18,9 @@ const mainVenues = [
         description:
             'A flagship venue meticulously designed for high-impact corporate events and large-scale conferences. Featuring refined interiors, adaptable layouts, and seamless service support, it provides an ideal setting for conventions, product launches, corporate gatherings, and business summits where scale, precision, and sophistication come together effortlessly.',
         subVenues: [
-            { name: 'Grand BallRoom 1', theatre: '550', cluster: '196', classroom: '180', area: '1,749 sq ft' },
-            { name: 'Grand BallRoom 2', theatre: '550', cluster: '196', classroom: '180', area: '1,855 sq ft' },
-            { name: 'Grand BallRoom 3', theatre: '170', cluster: '66', classroom: '42', area: '1,431 sq ft' },
+            { name: 'Grand Ballroom 1', theatre: '550', cluster: '196', classroom: '180', area: '1,749 sq ft' },
+            { name: 'Grand Ballroom 2', theatre: '550', cluster: '196', classroom: '180', area: '1,855 sq ft' },
+            { name: 'Grand Ballroom 3', theatre: '170', cluster: '66', classroom: '42', area: '1,431 sq ft' },
         ],
     },
     {
@@ -63,7 +63,7 @@ const mainVenues = [
 
 const venueNavNames = mainVenues.map((v) => v.name);
 
-/** "Grand BallRoom 1" -> "grand-ballroom-1", matching the venue slugs in the DB. */
+/** "Grand Ballroom 1" -> "grand-ballroom-1", matching the venue slugs in the DB. */
 function slugify(name: string) {
     return name
         .toLowerCase()

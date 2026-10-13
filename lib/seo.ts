@@ -8,7 +8,7 @@
 /**
  * Canonical origin, including the `www` subdomain.
  *
- * The apex domain 301s to `www`, so this MUST keep the `www` prefix: a canonical
+ * The apex domain redirects to `www`, so this MUST keep the `www` prefix: a canonical
  * tag or sitemap entry pointing at the apex points at a redirect, which Google
  * treats as a soft error ("Page with redirect") and will not index cleanly.
  * It also matches the GA4 stream URL.
@@ -31,12 +31,24 @@ export const CONTACT = {
 } as const;
 
 export const ADDRESS = {
-    street: "Finishing Point",
+    street: "Finishing Point, Punnamada",
     locality: "Alappuzha",
     region: "Kerala",
     postalCode: "688013",
     country: "IN",
 } as const;
+
+/** The pin on the hotel's Google Maps listing. */
+export const GEO = { latitude: 9.5004383, longitude: 76.3506566 } as const;
+
+/** Short link to the Google Maps listing, as used on the contact page. */
+export const MAP_URL = "https://maps.app.goo.gl/yZ4xyGBqp8i8uo1Z9";
+
+/**
+ * The hotel's own profiles elsewhere. Listed as `sameAs` so Google can tie the
+ * site to the same business. Add Facebook here once the footer link is real.
+ */
+export const SAME_AS = ["https://www.instagram.com/oliviaalleppey"] as const;
 
 /** The generated social card served by app/opengraph-image.tsx. */
 export const OG_IMAGE_URL = `${SITE_URL}/opengraph-image`;
@@ -48,6 +60,18 @@ export function absoluteUrl(path = "/"): string {
     return `${SITE_URL}${clean.replace(/\/$/, "")}`;
 }
 
+/**
+ * Trims copy to a search-snippet length, cutting at a word boundary.
+ * Google shows roughly 155-160 characters before truncating.
+ */
+export function clipDescription(text: string, max = 158): string {
+    const clean = text.replace(/\s+/g, " ").trim();
+    if (clean.length <= max) return clean;
+    const cut = clean.slice(0, max - 1);
+    const lastSpace = cut.lastIndexOf(" ");
+    return `${(lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).replace(/[\s,;:.\u2014-]+$/, "")}\u2026`;
+}
+
 type PageMetaInput = {
     title: string;
     description: string;
@@ -57,6 +81,11 @@ type PageMetaInput = {
     image?: string;
     /** Set for funnel/account pages that should stay out of the index. */
     noIndex?: boolean;
+    /**
+     * With `noIndex`, still let crawlers follow the page's links. Use it for
+     * pages kept out of the index for being thin, not for being private.
+     */
+    followLinks?: boolean;
 };
 
 /**
@@ -71,6 +100,7 @@ export function pageMetadata({
     path,
     image,
     noIndex = false,
+    followLinks = false,
 }: PageMetaInput) {
     const url = absoluteUrl(path);
     const isHome = path === "/";
@@ -103,7 +133,7 @@ export function pageMetadata({
             images: [resolvedImage],
         },
         ...(noIndex
-            ? { robots: { index: false, follow: false, nocache: true } }
+            ? { robots: { index: false, follow: followLinks, nocache: !followLinks } }
             : {}),
     };
 }

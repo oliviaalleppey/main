@@ -9,7 +9,7 @@ import { upload } from '@vercel/blob/client';
 import { toWebPClient } from './webp-utils';
 
 const VENUES = [
-    { key: 'grand-ballroom', label: 'Grand BallRoom' },
+    { key: 'grand-ballroom', label: 'Grand Ballroom' },
     { key: 'forum', label: 'Forum' },
     { key: 'poolside', label: 'Poolside' },
 ];

@@ -9,7 +9,8 @@ import SeatingDiagram from '@/components/venues/seating-diagram';
 import { MapPin, Maximize2, Users, Wifi, Video, Coffee, Check, Download, Phone, Mail } from 'lucide-react';
 import JsonLd from '@/components/seo/json-ld';
 import { breadcrumbSchema, venueSchema } from '@/lib/structured-data';
-import { pageMetadata } from '@/lib/seo';
+import { clipDescription, pageMetadata } from '@/lib/seo';
+import { findParentVenue, venueTypeLabel } from '@/lib/venue-sections';
 
 // Next 16: `params` is a Promise and must be awaited. Reading `params.slug`
 // synchronously yields undefined, which made every venue here 404.
@@ -35,16 +36,35 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         return { title: 'Venue Not Found', robots: { index: false, follow: false } };
     }
 
-    const description =
-        venue.shortDescription ||
-        venue.description ||
-        `${venue.name} at Olivia Alleppey — conference and event venue in Alappuzha, Kerala.`;
+    const allVenues = await db
+        .select({ slug: venues.slug, isDivisible: venues.isDivisible })
+        .from(venues);
+    const parent = findParentVenue(slug, allVenues);
+
+    // Lead with the numbers planners search and compare on, then the prose.
+    const capacities = [
+        venue.capacityTheatre && `${venue.capacityTheatre} theatre`,
+        venue.capacityBanquet && `${venue.capacityBanquet} banquet`,
+        venue.capacityCocktail && `${venue.capacityCocktail} cocktail`,
+    ].filter(Boolean);
+    const facts = [
+        venue.area && `${venue.area.toLocaleString('en-IN')} sq ft`,
+        capacities.length > 0 && `seats up to ${capacities.join(', ')}`,
+    ].filter(Boolean);
+    const prose = venue.description || venue.shortDescription || '';
+    const description = clipDescription(
+        `${venue.name} at Olivia Alleppey, Alappuzha${facts.length ? `: ${facts.join(', ')}` : ''}. ${prose}`
+    );
 
     return pageMetadata({
-        title: `${venue.name} — Conference & Events`,
+        title: `${venue.name}, ${venueTypeLabel(venue.venueType)} in Alappuzha`,
         description,
         path: `/conference-events/${slug}`,
         image: venue.featuredImage || undefined,
+        // A section of a divisible room: reachable, but the parent page is the
+        // one that should rank.
+        noIndex: !!parent,
+        followLinks: true,
     });
 }
 

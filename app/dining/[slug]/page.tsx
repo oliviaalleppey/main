@@ -8,7 +8,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import JsonLd from '@/components/seo/json-ld';
 import { breadcrumbSchema, restaurantSchema } from '@/lib/structured-data';
-import { pageMetadata } from '@/lib/seo';
+import { clipDescription, pageMetadata } from '@/lib/seo';
+import { getDiningImages } from '@/app/admin/media/actions';
 
 // Next 16: `params` is a Promise and must be awaited. Reading `params.slug`
 // synchronously yields undefined, which made every outlet here 404.
@@ -24,18 +25,34 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         return { title: 'Dining Outlet Not Found', robots: { index: false, follow: false } };
     }
 
-    const description =
-        outlet.shortDescription ||
-        outlet.description ||
-        `${outlet.name} at Olivia Alleppey — dining at our 5-star hotel in Alappuzha, Kerala.`;
+    const prose = outlet.description || outlet.shortDescription || '';
+    const description = clipDescription(
+        `${outlet.name} at Olivia Alleppey, Alappuzha. ${prose}`
+    );
+    const label = OUTLET_LABELS[outlet.outletType ?? ''] ?? 'Restaurant';
+    const name = outlet.name.toLowerCase().includes(label.toLowerCase())
+        ? outlet.name
+        : `${outlet.name} ${label}`;
 
     return pageMetadata({
-        title: `${outlet.name} — Dining`,
+        title: `${name} in Alappuzha`,
         description,
         path: `/dining/${slug}`,
-        image: outlet.featuredImage || undefined,
+        image: (await getHeroImage(outlet)) || undefined,
+        // An outlet that has not opened is a placeholder; it joins the index on
+        // its own once its status is switched to operational.
+        noIndex: outlet.status === 'upcoming',
+        followLinks: true,
     });
 }
+
+const OUTLET_LABELS: Record<string, string> = {
+    restaurant: 'Restaurant',
+    cafe: 'Café',
+    bar: 'Bar',
+    lounge: 'Lounge',
+    room_service: 'In-Room Dining',
+};
 
 async function getOutlet(slug: string) {
     const outlet = await db
@@ -47,6 +64,19 @@ async function getOutlet(slug: string) {
     return outlet[0];
 }
 
+/**
+ * The outlet's photo. An uploaded featured image wins; otherwise the photo set
+ * in Media for the /dining page. The seeded featured images are local paths
+ * (/images/dining/*.png) that were never committed, so they 404 — they are
+ * only used if nothing else exists.
+ */
+async function getHeroImage(outlet: { slug: string; featuredImage: string | null }) {
+    const uploaded = outlet.featuredImage?.startsWith('https://') ? outlet.featuredImage : null;
+    if (uploaded) return uploaded;
+    const mediaImages = await getDiningImages().catch(() => ({} as Record<string, string>));
+    return mediaImages[outlet.slug] || outlet.featuredImage || null;
+}
+
 export default async function OutletPage({ params }: Props) {
     const { slug } = await params;
     const outlet = await getOutlet(slug);
@@ -56,6 +86,7 @@ export default async function OutletPage({ params }: Props) {
     }
 
     const features = outlet.specialFeatures as string[] || [];
+    const heroImage = await getHeroImage(outlet);
 
     return (
         <div className="min-h-screen bg-white">
@@ -64,8 +95,8 @@ export default async function OutletPage({ params }: Props) {
                     restaurantSchema({
                         name: outlet.name,
                         slug,
-                        description: outlet.shortDescription || outlet.description,
-                        image: outlet.featuredImage,
+                        description: outlet.description || outlet.shortDescription,
+                        image: heroImage,
                         cuisine: outlet.cuisineType,
                         hours: outlet.operatingHours,
                     }),
@@ -79,9 +110,9 @@ export default async function OutletPage({ params }: Props) {
             <section className="relative h-[70vh] flex items-end overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent z-10" />
                 <div className="absolute inset-0 bg-cream-100">
-                    {outlet.featuredImage ? (
+                    {heroImage ? (
                         <Image
-                            src={outlet.featuredImage}
+                            src={heroImage}
                             alt={outlet.name}
                             fill
                             className="object-cover"

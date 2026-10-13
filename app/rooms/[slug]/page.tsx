@@ -16,7 +16,7 @@ import { roomTypes } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { ensureRoomTypeMinOccupancyColumn } from '@/lib/db/schema-guard';
 import { formatRoomName } from '@/lib/utils';
-import { pageMetadata } from '@/lib/seo';
+import { pageMetadata, clipDescription } from '@/lib/seo';
 import JsonLd from '@/components/seo/json-ld';
 import { breadcrumbSchema, hotelRoomSchema } from '@/lib/structured-data';
 
@@ -37,12 +37,20 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     // Falls back to the generated /opengraph-image when the room has no artwork.
     const ogImage = room.featuredImage || images[0] || undefined;
 
+    // shortDescription holds the inclusions line ("Complimentary breakfast…"),
+    // not a description, so the snippet leads with the room's facts and prose.
+    const facts = [
+        room.size && `${room.size} ${room.sizeUnit === 'sqm' ? 'sq m' : 'sq ft'}`,
+        room.bedType && room.bedType.toLowerCase(),
+        room.maxGuests && `sleeps up to ${room.maxGuests}`,
+    ].filter(Boolean);
+    const prose = room.description || `Experience luxury in our ${roomName}.`;
+
     return pageMetadata({
         title: roomName,
-        description:
-            room.shortDescription ||
-            room.description ||
-            `Experience luxury in our ${roomName} at Olivia Alleppey, Alappuzha, Kerala.`,
+        description: clipDescription(
+            `${roomName} at Olivia Alleppey, Alappuzha${facts.length ? `: ${facts.join(', ')}` : ''}. ${prose}`
+        ),
         path: `/rooms/${slug}`,
         image: ogImage,
     });
@@ -97,7 +105,7 @@ export default async function RoomDetailPage({ params }: { params: Promise<{ slu
                     hotelRoomSchema({
                         name: roomName,
                         slug,
-                        description: room.shortDescription || room.description,
+                        description: room.description || room.shortDescription,
                         image: room.featuredImage || room.images?.[0],
                         // basePrice is stored in paise.
                         price: room.basePrice ? Math.round(room.basePrice / 100) : null,

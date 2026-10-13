@@ -5,7 +5,7 @@
  * <script type="application/ld+json"> tag.
  */
 
-import { ADDRESS, BRAND, CONTACT, LEGAL_NAME, SITE_URL, absoluteUrl } from "./seo";
+import { ADDRESS, BRAND, CONTACT, GEO, LEGAL_NAME, MAP_URL, SAME_AS, SITE_URL, absoluteUrl } from "./seo";
 
 /** Stable @id for the hotel node, so other nodes can reference it. */
 export const HOTEL_ID = `${SITE_URL}/#hotel`;
@@ -22,8 +22,11 @@ const postalAddress = {
 /**
  * The primary Hotel node. Rendered once, in the root layout, so every page
  * carries the business identity.
+ *
+ * `photos` are real pictures of the property (absolute URLs). Google wants
+ * photos here; the generated social card is kept last only as a fallback.
  */
-export function hotelSchema() {
+export function hotelSchema(photos: string[] = []) {
     return {
         "@context": "https://schema.org",
         "@type": "Hotel",
@@ -33,11 +36,18 @@ export function hotelSchema() {
         url: SITE_URL,
         description:
             "A luxury 5-star hotel at Finishing Point, Alappuzha, overlooking the Kerala backwaters. 88 rooms and suites, multiple dining venues, spa, banquet and conference facilities.",
-        image: `${SITE_URL}/opengraph-image`,
+        image: [...photos.filter((url) => /^https:\/\//.test(url)), `${SITE_URL}/opengraph-image`],
         logo: `${SITE_URL}/images/olivia-logo.svg`,
         telephone: CONTACT.phone,
         email: CONTACT.reservationsEmail,
         address: postalAddress,
+        geo: {
+            "@type": "GeoCoordinates",
+            latitude: GEO.latitude,
+            longitude: GEO.longitude,
+        },
+        hasMap: MAP_URL,
+        sameAs: [...SAME_AS],
         starRating: { "@type": "Rating", ratingValue: "5" },
         priceRange: "₹₹₹",
         currenciesAccepted: "INR",
@@ -81,7 +91,7 @@ export function hotelSchema() {
     };
 }
 
-/** Sitewide WebSite node enabling the search box rich result. */
+/** Sitewide WebSite node: names the site and ties it to the hotel. */
 export function websiteSchema() {
     return {
         "@context": "https://schema.org",
@@ -205,6 +215,57 @@ export function venueSchema(venue: VenueInput) {
                       "@type": "QuantitativeValue",
                       value: venue.areaSqft,
                       unitCode: "FTK",
+                  },
+              }
+            : {}),
+    };
+}
+
+type EventInput = {
+    name: string;
+    description: string;
+    /** Site-relative path of the event page. */
+    path: string;
+    /** ISO 8601 with offset, e.g. "2026-12-31T20:00:00+05:30". */
+    startDate: string;
+    endDate: string;
+    image?: string | null;
+    /** Ticket price in INR. */
+    price?: number | null;
+    /** What one ticket buys, e.g. "Per couple". */
+    priceNote?: string | null;
+};
+
+/** Event node for a ticketed event held at the hotel. */
+export function eventSchema(event: EventInput) {
+    const url = absoluteUrl(event.path);
+
+    return {
+        "@context": "https://schema.org",
+        "@type": "Event",
+        name: event.name,
+        description: event.description,
+        url,
+        startDate: event.startDate,
+        endDate: event.endDate,
+        eventStatus: "https://schema.org/EventScheduled",
+        eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+        ...(event.image ? { image: [event.image] } : {}),
+        location: {
+            "@type": "Place",
+            name: BRAND,
+            address: postalAddress,
+        },
+        organizer: { "@type": "Organization", name: BRAND, url: SITE_URL },
+        ...(event.price
+            ? {
+                  offers: {
+                      "@type": "Offer",
+                      price: event.price,
+                      priceCurrency: "INR",
+                      availability: "https://schema.org/InStock",
+                      url,
+                      ...(event.priceNote ? { description: event.priceNote } : {}),
                   },
               }
             : {}),

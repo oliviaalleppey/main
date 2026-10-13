@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Outfit, Cormorant_Garamond, Cinzel } from "next/font/google";
 import "./globals.css";
-import { auth } from "@/auth";
 import { SessionProvider } from "@/components/auth/session-provider";
 import FrontendLayout from "@/components/layout/frontend-layout";
 import { getColorPalette } from "@/lib/db/actions/settings-actions";
@@ -11,11 +10,17 @@ import GoogleAnalytics from "@/components/analytics/google-analytics";
 import MetaPixel from "@/components/analytics/meta-pixel";
 import { hotelSchema, websiteSchema } from "@/lib/structured-data";
 import { BRAND, SITE_URL } from "@/lib/seo";
+import { getHeroMedia, getHomeHeroImages } from "@/app/admin/media/actions";
 
-// No `force-dynamic` here: it opted every route out of static rendering.
-// Note the root layout still calls auth(), which reads cookies and therefore
-// keeps routes dynamic on its own — see the SEO notes for the follow-up needed
-// to make marketing pages genuinely static.
+// Public pages are cached and rebuilt at most once a minute, so admin edits
+// still show up within about a minute. A page can ask for less caching with
+// its own `revalidate` (the lowest value in a route wins); the booking funnel,
+// account pages and admin read cookies and so always render per request.
+//
+// Nothing in this layout may read cookies or headers (auth() included): doing
+// so makes every page on the site render per request, which is what slowed
+// first-byte times to 0.4-1s. The header loads the session in the browser.
+export const revalidate = 60;
 
 const sans = Outfit({
   subsets: ["latin"],
@@ -78,27 +83,17 @@ export const metadata: Metadata = {
   // their own canonical via pageMetadata().
 };
 
-async function getSafeSession() {
-  try {
-    return await auth();
-  } catch (error: any) {
-    // auth() reads cookies, so during static generation Next throws a
-    // DynamicServerError to signal "this route must be dynamic". That is
-    // control flow, not a failure — swallowing it logs ~80 spurious build
-    // errors and hides a signal the framework relies on.
-    if (
-      error?.digest === 'DYNAMIC_SERVER_USAGE' ||
-      error?.name === 'DynamicServerError'
-    ) {
-      throw error;
-    }
-
-    if (error?.name === 'JWTSessionError' || error?.message?.includes('JWTSessionError')) {
-      return null;
-    }
-    console.error("[auth] Session retrieval failed:", error);
-    return null;
-  }
+/** Real photos of the property for the Hotel structured data. */
+async function getPropertyPhotos(): Promise<string[]> {
+  const [heroMedia, homeImages] = await Promise.all([
+    getHeroMedia().catch(() => null),
+    getHomeHeroImages().catch(() => []),
+  ]);
+  const photos = [
+    heroMedia?.type === "image" ? heroMedia.url : null,
+    ...homeImages.map((image) => image.imageUrl),
+  ].filter((url): url is string => !!url);
+  return [...new Set(photos)].slice(0, 5);
 }
 
 export default async function RootLayout({
@@ -106,9 +101,9 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [session, palette] = await Promise.all([
-    getSafeSession(),
+  const [palette, photos] = await Promise.all([
     getColorPalette(),
+    getPropertyPhotos(),
   ]);
 
   const paletteVars = {
@@ -133,10 +128,10 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <body className="font-sans subpixel-antialiased" suppressHydrationWarning>
-        <JsonLd data={[hotelSchema(), websiteSchema()]} />
+        <JsonLd data={[hotelSchema(photos), websiteSchema()]} />
         <GoogleAnalytics />
         <MetaPixel />
-        <SessionProvider session={session}>
+        <SessionProvider>
           <FrontendLayout>
             {children}
           </FrontendLayout>

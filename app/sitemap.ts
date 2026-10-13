@@ -1,8 +1,10 @@
 import type { MetadataRoute } from "next";
 import { db } from "@/lib/db";
 import { diningOutlets, roomTypes, venues } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import { absoluteUrl } from "@/lib/seo";
+import { findParentVenue } from "@/lib/venue-sections";
+import { PARTY_PATH } from "@/lib/config/party-popup";
 
 // Regenerate at most once a day; room and outlet slugs change rarely.
 export const revalidate = 86400;
@@ -19,6 +21,7 @@ const staticRoutes: { path: string; priority: number; changeFrequency: Entry["ch
     { path: "/discover", priority: 0.7, changeFrequency: "monthly" },
     { path: "/gallery", priority: 0.6, changeFrequency: "monthly" },
     { path: "/membership", priority: 0.6, changeFrequency: "monthly" },
+    { path: PARTY_PATH, priority: 0.8, changeFrequency: "weekly" },
     { path: "/contact", priority: 0.6, changeFrequency: "yearly" },
     { path: "/terms", priority: 0.2, changeFrequency: "yearly" },
     { path: "/privacy", priority: 0.2, changeFrequency: "yearly" },
@@ -55,12 +58,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             db
                 .select({ slug: diningOutlets.slug })
                 .from(diningOutlets)
-                .where(eq(diningOutlets.isActive, true)),
+                // Outlets still "upcoming" are noindex placeholders until they open.
+                .where(and(eq(diningOutlets.isActive, true), ne(diningOutlets.status, "upcoming"))),
             "dining outlets"
         ),
         safe(
             db
-                .select({ slug: venues.slug })
+                .select({ slug: venues.slug, isDivisible: venues.isDivisible })
                 .from(venues)
                 .where(eq(venues.isActive, true)),
             "venues"
@@ -88,12 +92,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.7,
     }));
 
-    const venueEntries: MetadataRoute.Sitemap = allVenues.map((venue) => ({
-        url: absoluteUrl(`/conference-events/${venue.slug}`),
-        lastModified: now,
-        changeFrequency: "monthly",
-        priority: 0.7,
-    }));
+    // Sections of a divisible room (Grand Ballroom 1, 2, 3) are noindex.
+    const venueEntries: MetadataRoute.Sitemap = allVenues
+        .filter((venue) => !findParentVenue(venue.slug, allVenues))
+        .map((venue) => ({
+            url: absoluteUrl(`/conference-events/${venue.slug}`),
+            lastModified: now,
+            changeFrequency: "monthly",
+            priority: 0.7,
+        }));
 
     return [...staticEntries, ...roomEntries, ...diningEntries, ...venueEntries];
 }

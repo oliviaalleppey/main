@@ -75,7 +75,7 @@ export default function DiningClient({ outlets }: Props) {
                         <div className="text-center mb-10 md:mb-12">
                             <span className="inline-block w-12 h-[1px] bg-[#C6AF84] mb-5" />
                             {/* h1: this page has no hero, so the collection heading is the primary one. */}
-                            <h1 className="text-4xl md:text-5xl font-serif text-[#2C3632] tracking-tight">A Culinary Journey at Olivia</h1>
+                            <h1 className="text-4xl md:text-5xl font-serif text-[#2C3632] tracking-tight">Restaurants &amp; Bars at Olivia Alleppey</h1>
                         </div>
                         <div className="space-y-8 md:space-y-10">
                             {outlets.map((outlet, index) => (

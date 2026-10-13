@@ -108,7 +108,7 @@ export default function WeddingPage() {
                         <div className="text-center mb-10 md:mb-12">
                             <span className="inline-block w-12 h-[1px] bg-[#C6AF84] mb-5" />
                             {/* h1: primary heading for the weddings page. */}
-                            <h1 className="text-4xl md:text-5xl font-serif text-[#2C3632] tracking-tight">Spaces Designed for Wedding Flow</h1>
+                            <h1 className="text-4xl md:text-5xl font-serif text-[#2C3632] tracking-tight">Wedding Venues at Olivia Alleppey</h1>
                         </div>
                         <div className="space-y-8 md:space-y-10">
                             {venues.map((venue, index) => (
