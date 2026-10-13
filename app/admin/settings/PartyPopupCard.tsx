@@ -176,6 +176,7 @@ function TextField({
 const THEME_SWATCH: Record<PartyPageTheme, string> = {
     masquerade: 'radial-gradient(ellipse at 50% 30%, #c42638 0, #3a0a14 45%, #0b0306 80%)',
     gatsby: 'repeating-conic-gradient(from -90deg at 50% 78%, rgba(243,214,150,.55) 0deg 1.5deg, transparent 1.5deg 9deg), linear-gradient(#05060b, #17121f 76%, #d9b56c 78%, #09090c 80%)',
+    gotham: 'linear-gradient(90deg, transparent 0 8%, #050406 8% 14%, transparent 14% 22%, #050406 22% 26%, transparent 26% 40%, #050406 40% 48%, transparent 48% 60%, #050406 60% 66%, transparent 66% 80%, #050406 80% 90%, transparent 90%) bottom / 100% 55% no-repeat, radial-gradient(ellipse at 50% 100%, #c4182f, #4a1260 45%, #050406 80%)',
 };
 
 function ThemeSwitch({
@@ -195,7 +196,7 @@ function ThemeSwitch({
                     Changes the look of the /31st-night page and the homepage pop-up straight away. Prices and details stay as they are. Use Preview to look at a theme before switching.
                 </p>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-3 sm:grid-cols-3">
                 {PARTY_PAGE_THEMES.map((theme) => {
                     const active = value === theme;
                     return (
@@ -385,9 +386,9 @@ export default function PartyPopupCard() {
             <CardContent className="space-y-8">
                 <ThemeSwitch value={saved.pageTheme} disabled={loading || saving} onPick={pickTheme} />
 
-                {saved.pageTheme === 'gatsby' && (
+                {saved.pageTheme !== 'masquerade' && (
                     <p className="rounded-md border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
-                        The Gatsby theme draws its own backgrounds and uses only the mask below; the photos are for The Grand Masquerade.
+                        The Gatsby and Gotham themes draw their own backgrounds and use only the mask below; the photos are for The Grand Masquerade.
                     </p>
                 )}
                 <section className="grid gap-6 sm:grid-cols-2">

@@ -4,7 +4,7 @@
 export type PartyStay = 'R' | 'NR' | 'both';
 
 /** The look of the /31st-night page and the homepage pop-up, picked in Site Appearance. */
-export const PARTY_PAGE_THEMES = ['masquerade', 'gatsby'] as const;
+export const PARTY_PAGE_THEMES = ['masquerade', 'gatsby', 'gotham'] as const;
 export type PartyPageTheme = (typeof PARTY_PAGE_THEMES)[number];
 
 /** One line of the guest price list, e.g. a kid aged 6 to 11 for residential guests. */
@@ -70,8 +70,9 @@ export const DEFAULT_PARTY_CROWD_IMAGE = '/party/31st-night-crowd.webp';
 export const DEFAULT_PARTY_LIGHTS_IMAGE = '/party/31st-night-lights.webp';
 /** Shown when the page is shared on WhatsApp and in search results. */
 export const DEFAULT_PARTY_SHARE_IMAGE = '/party/31st-night-party.webp';
-/** The Gatsby page draws its own backgrounds; this is a still of its opening, for sharing. */
+/** The Gatsby and Gotham pages draw their own backgrounds; these are stills of their openings, for sharing. */
 export const GATSBY_SHARE_IMAGE = '/party/31st-night-gatsby.webp';
+export const GOTHAM_SHARE_IMAGE = '/party/31st-night-gotham.webp';
 
 /** The words that belong to a theme. Switching themes swaps them, unless someone has rewritten them. */
 type PartyThemeCopy = Pick<PartyPopupSettings, 'theme' | 'intro' | 'dressValue'>;
@@ -93,6 +94,15 @@ export const PARTY_THEMES: Record<PartyPageTheme, { name: string; about: string;
             theme: 'The Gatsby Masquerade',
             intro: 'Ring in the new year the Gatsby way in the Grand Ballroom. Masks, sequins, pearls and sharp suits, gold everywhere, and dancing until midnight.',
             dressValue: 'Masks and ’20s glamour',
+        },
+    },
+    gotham: {
+        name: 'The Gotham Masquerade',
+        about: 'New York after dark for Kerala’s high society: black, gold, a touch of purple and red. Draws its own skyline; only the mask below is used.',
+        copy: {
+            theme: 'The Gotham Masquerade',
+            intro: 'A black-tie masquerade for Kerala’s finest. The Grand Ballroom becomes a Manhattan penthouse after dark: low gold light, deep velvet, and the whole city at your feet until midnight.',
+            dressValue: 'Black tie and masks',
         },
     },
 };
@@ -157,6 +167,7 @@ export function switchPartyTheme(settings: PartyPopupSettings, next: PartyPageTh
 /** The picture used when the page is shared. */
 export function partyShareImage(settings: PartyPopupSettings): string {
     if (settings.pageTheme === 'gatsby') return GATSBY_SHARE_IMAGE;
+    if (settings.pageTheme === 'gotham') return GOTHAM_SHARE_IMAGE;
     return settings.pageImage || DEFAULT_PARTY_SHARE_IMAGE;
 }
 

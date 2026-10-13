@@ -77,3 +77,20 @@
 .ny-gatsby .ny-when p,.ny-gatsby .ny-count b,.ny-gatsby .ny-price b{font-family:var(--font-josefin),sans-serif;font-weight:600}
 .ny-gatsby .ny-main{color:#0c0b08}
 @media(max-width:620px){.ny-gatsby .ny-theme{font-size:13px;letter-spacing:.2em}}
+
+/* The Gotham masquerade: Manhattan at night, lit from below in crimson and purple. */
+.ny-gotham .ny-modal{background:#070509}
+.ny-gotham .ny-x{background:rgba(7,5,9,.7)}
+.ny-gotham .ny-x:hover{background:#5c0714}
+.ny-gotham .ny-deco{background:
+  url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 120' preserveAspectRatio='xMidYMax slice'><path fill='%23050407' d='M0 120V78h14V62h12v16h10V50h16v70h6V70h14V40h4V20h2V8h2v12h2v20h4v80h8V66h18V54h10v66h6V58l8-6V30l6-14 6 14v22l8 6v62h10V72h20V46h8V34h2V14h2v20h2v12h8v74h10V64h16v56h8V80h14V60h12v60z'/><g fill='%23f0cf86'><rect x='40' y='58' width='3' height='4'/><rect x='84' y='50' width='3' height='4'/><rect x='152' y='66' width='3' height='4'/><rect x='222' y='56' width='3' height='4'/><rect x='270' y='74' width='3' height='4'/></g><g fill='%23e61e32'><circle cx='89' cy='8' r='2'/><circle cx='243' cy='14' r='2'/></g></svg>") center bottom/100% 70% no-repeat,
+  radial-gradient(ellipse 70% 50% at 50% 100%,rgba(196,24,47,.5),rgba(122,63,160,.2) 50%,rgba(0,0,0,0) 75%),
+  radial-gradient(circle at 84% 22%,#efe6d4 0 22px,rgba(240,230,210,.18) 23px,rgba(240,230,210,0) 60px),
+  linear-gradient(#020103,#0a0711 55%,#170a19)}
+.ny-gotham .ny-deco::before{display:none}
+.ny-gotham .ny-deco::after{background:linear-gradient(to bottom,rgba(7,5,9,0) 0%,rgba(7,5,9,0) 55%,#070509 100%)}
+.ny-gotham .ny-h1{font-family:var(--font-bodoni),var(--font-serif),serif;font-weight:500}
+.ny-gotham .ny-theme{font-family:var(--font-sans),sans-serif;font-style:normal;font-weight:500;font-size:15px;letter-spacing:.32em;text-transform:uppercase;color:#ecd49a}
+.ny-gotham .ny-main{color:#0a0809}
+.ny-gotham .ny-hl li+li::before{background:#c4182f}
+@media(max-width:620px){.ny-gotham .ny-theme{font-size:12.5px;letter-spacing:.18em}}
