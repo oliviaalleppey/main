@@ -133,7 +133,7 @@ export default function ConferenceEventsClient({
                         <div className="text-center mb-10 md:mb-12">
                             <span className="inline-block w-12 h-[1px] bg-[#C6AF84] mb-5" />
                             {/* h1: primary heading for the conference & events hub. */}
-                            <h1 className="text-4xl md:text-5xl font-serif text-[#2C3632] tracking-tight">Spaces Designed for Business Flow</h1>
+                            <h1 className="text-4xl md:text-5xl font-serif text-[#2C3632] tracking-tight">Conference &amp; Event Venues at Olivia Alleppey</h1>
                         </div>
                         <div className="space-y-8 md:space-y-10">
                             {mainVenues.map((venue, index) => (

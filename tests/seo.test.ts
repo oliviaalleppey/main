@@ -3,7 +3,7 @@
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { clipDescription, pageMetadata } from '@/lib/seo';
+import { altText, clipDescription, pageMetadata } from '@/lib/seo';
 import { findParentVenue } from '@/lib/venue-sections';
 
 test('short copy is left alone, apart from collapsed whitespace', () => {
@@ -50,4 +50,15 @@ test('thin pages can stay out of the index while their links are still followed'
 test('private pages stay fully closed by default', () => {
     const meta = pageMetadata({ title: 'T', description: 'D', path: '/x', noIndex: true });
     assert.deepEqual(meta.robots, { index: false, follow: false, nocache: true });
+});
+
+test('alt text keeps a real caption', () => {
+    assert.equal(altText('Lake view suite at sunset', 'fallback'), 'Lake view suite at sunset');
+    assert.equal(altText('Lobby', 'fallback'), 'Lobby');
+});
+
+test('alt text replaces file names and blanks with the fallback', () => {
+    for (const raw of ['Hero_2.jpg', 'IMG_4021', 'canal_view_king.webp', 'Hero_2', '', '   ', null, undefined]) {
+        assert.equal(altText(raw, 'fallback'), 'fallback', `kept ${String(raw)}`);
+    }
 });

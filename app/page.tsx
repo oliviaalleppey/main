@@ -11,7 +11,7 @@ import { getHeroMedia, getHomeHeroImages } from '@/app/admin/media/actions';
 import NewYearPopup from '@/components/home/new-year-popup';
 import { getPartyPopup } from '@/lib/db/actions/settings-actions';
 import { PARTY_END } from '@/lib/config/party-popup';
-import { pageMetadata } from '@/lib/seo';
+import { altText, pageMetadata } from '@/lib/seo';
 
 export const revalidate = 60;
 
@@ -29,7 +29,7 @@ export default async function Home() {
     getPartyPopup(),
   ]);
   const showPartyPopup = partyPopup.enabled && Date.now() < new Date(PARTY_END).getTime();
-  const heroSlides = homeHeroImages.map(img => ({ url: img.imageUrl, alt: img.title || 'Olivia International Hotel' }));
+  const heroSlides = homeHeroImages.map(img => ({ url: img.imageUrl, alt: altText(img.title, 'Olivia Alleppey, luxury 5-star hotel on the Alappuzha backwaters') }));
 
   return (
     <main className="min-h-screen bg-[var(--surface-cream)] font-sans">

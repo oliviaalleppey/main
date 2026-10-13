@@ -72,6 +72,19 @@ export function clipDescription(text: string, max = 158): string {
     return `${(lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).replace(/[\s,;:.\u2014-]+$/, "")}\u2026`;
 }
 
+/**
+ * Alt text for an image whose caption comes from an upload. Admin uploads often
+ * keep the file name as the title ("Hero_2.jpg"), which is useless to screen
+ * readers and image search, so a file-name-like caption is replaced by the fallback.
+ */
+export function altText(raw: string | null | undefined, fallback: string): string {
+    const text = (raw ?? "").trim();
+    if (!text) return fallback;
+    const looksLikeFile =
+        /\.(jpe?g|png|webp|avif|gif|svg)$/i.test(text) || (!/\s/.test(text) && /[_\d]/.test(text));
+    return looksLikeFile ? fallback : text;
+}
+
 type PageMetaInput = {
     title: string;
     description: string;

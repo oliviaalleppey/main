@@ -257,6 +257,7 @@ export default function DiscoverClient({ headerImage, rooms = [], experienceImag
                     </motion.p>
                     <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, delay: 0.4 }} className="font-serif text-[3.5rem] sm:text-[5rem] md:text-[7rem] lg:text-[8.5rem] leading-[0.85] text-white tracking-[-0.03em] max-w-4xl">
                         Discover
+                        <span className="block mt-4 font-sans text-[0.6rem] sm:text-xs md:text-sm leading-normal tracking-[0.22em] sm:tracking-[0.45em] uppercase text-white/80">Alappuzha &amp; the Kerala Backwaters</span>
                     </motion.h1>
                     <motion.p initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.8 }} className="mt-6 text-white/70 text-base md:text-lg max-w-lg leading-relaxed">
                         Every facet of Olivia — where refined hospitality meets the timeless beauty of Kerala.
@@ -380,18 +381,6 @@ export default function DiscoverClient({ headerImage, rooms = [], experienceImag
                             );
                         })}
                     </HorizontalScroller>
-
-                    <motion.div
-                        initial={{ opacity: 0, y: 8 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.6, delay: 0.2 }}
-                        className="mt-10 text-center"
-                    >
-                        <Link href="/experiences" className="inline-flex items-center gap-2 text-[10px] tracking-[0.25em] uppercase font-semibold text-[var(--text-dark)] hover:text-[var(--gold-accent-dark)] transition-colors">
-                            View All Experiences <ArrowRight className="w-4 h-4" />
-                        </Link>
-                    </motion.div>
                 </div>
             </section>
 
