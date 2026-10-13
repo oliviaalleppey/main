@@ -7,6 +7,8 @@ import { PartyPopper, Loader2, Save, ImagePlus, RotateCcw, Music, Plus, Trash2 }
 import { getPartyPopup, updatePartyPopup } from '@/lib/db/actions/settings-actions';
 import {
     DEFAULT_PARTY_BACKGROUND,
+    DEFAULT_PARTY_CROWD_IMAGE,
+    DEFAULT_PARTY_LIGHTS_IMAGE,
     DEFAULT_PARTY_MASK,
     DEFAULT_PARTY_PAGE_IMAGE,
     DEFAULT_PARTY_POPUP,
@@ -125,7 +127,7 @@ function MusicField({ value, onChange }: { value: string; onChange: (url: string
                 </p>
             )}
             <p className="text-xs text-muted-foreground">
-                Plays after a guest taps &quot;Enter the masquerade&quot;. Only upload music you have the rights to play publicly.
+                Plays when a guest taps the sound button. Only upload music you have the rights to play publicly.
             </p>
             <div className="flex gap-2">
                 <input ref={input} type="file" accept="audio/mpeg,audio/mp4,audio/x-m4a,audio/wav,audio/ogg" className="hidden" onChange={pick} />
@@ -320,11 +322,25 @@ export default function PartyPopupCard() {
                         checker
                     />
                     <ImageField
-                        label="Event page background"
-                        hint="The full-screen photo behind the /31st-night page. A tall photo works on phones and computers."
+                        label="Event page, top photo"
+                        hint="The full-screen photo at the top of /31st-night, behind the mask. A tall photo works on phones and computers."
                         value={draft.pageImage}
                         fallback={DEFAULT_PARTY_PAGE_IMAGE}
                         onChange={set('pageImage')}
+                    />
+                    <ImageField
+                        label="Event page, crowd photo"
+                        hint="Shown beside the list of what the night includes. A tall photo works best."
+                        value={draft.crowdImage}
+                        fallback={DEFAULT_PARTY_CROWD_IMAGE}
+                        onChange={set('crowdImage')}
+                    />
+                    <ImageField
+                        label="Event page, lights photo"
+                        hint="Behind the big “Masks on” line further down the page."
+                        value={draft.lightsImage}
+                        fallback={DEFAULT_PARTY_LIGHTS_IMAGE}
+                        onChange={set('lightsImage')}
                     />
                     <MusicField value={draft.musicUrl} onChange={set('musicUrl')} />
                 </section>

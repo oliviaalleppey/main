@@ -28,8 +28,11 @@ export type PartyPopupSettings = {
     /** Empty means the built-in image. */
     backgroundImage: string;
     maskImage: string;
-    /** Full-screen photo behind the /31st-night page. */
+    /** The photo at the top of the /31st-night page. */
     pageImage: string;
+    /** Photos further down the page: the crowd in the haze, and the ballroom lights. */
+    crowdImage: string;
+    lightsImage: string;
     /** Uploaded track for the event page. Empty means the built-in synthesised loop. */
     musicUrl: string;
 
@@ -57,7 +60,11 @@ export const PARTY_POPUP_KEY = 'party_popup_31st';
 
 export const DEFAULT_PARTY_BACKGROUND = '/party/31st-night-ballroom.webp';
 export const DEFAULT_PARTY_MASK = '/party/31st-night-mask.webp';
-export const DEFAULT_PARTY_PAGE_IMAGE = '/party/31st-night-party.webp';
+export const DEFAULT_PARTY_PAGE_IMAGE = '/party/31st-night-hands.webp';
+export const DEFAULT_PARTY_CROWD_IMAGE = '/party/31st-night-crowd.webp';
+export const DEFAULT_PARTY_LIGHTS_IMAGE = '/party/31st-night-lights.webp';
+/** Shown when the page is shared on WhatsApp and in search results. */
+export const DEFAULT_PARTY_SHARE_IMAGE = '/party/31st-night-party.webp';
 
 export const DEFAULT_PARTY_POPUP: PartyPopupSettings = {
     enabled: false,
@@ -75,6 +82,8 @@ export const DEFAULT_PARTY_POPUP: PartyPopupSettings = {
     backgroundImage: '',
     maskImage: '',
     pageImage: '',
+    crowdImage: '',
+    lightsImage: '',
     musicUrl: '',
 
     presenter: 'Olivia Alleppey presents',
@@ -83,12 +92,12 @@ export const DEFAULT_PARTY_POPUP: PartyPopupSettings = {
     titleAccent: 'Night',
     theme: 'The Grand Masquerade',
     intro: 'Ring in the new year in the Grand Ballroom. Dress in your finest, wear a mask, and dance until midnight.',
-    highlights: ['Live DJ', 'Open bar', 'Gala dinner', "Kids' care", 'Stay included'],
+    highlights: ['Live DJ', 'Spirits', 'Gala dinner', "Kids' care", 'Stay included'],
     dateValue: '31 December',
     timeValue: '8 pm to 11:30',
     dressValue: 'Mask on, glamour up',
     priceLabel: 'Per couple · Room included',
-    finePrint: 'Only 300 passes · 23 and above for the bar',
+    finePrint: 'Only 300 passes · Spirits for guests 23 and above',
 
     reserveLabel: 'Reserve your pass',
     reserveLink: '/31st-night#reserve',
@@ -173,6 +182,8 @@ export function normalisePartyPopup(raw: unknown): PartyPopupSettings {
         backgroundImage: image(value.backgroundImage),
         maskImage: image(value.maskImage),
         pageImage: image(value.pageImage),
+        crowdImage: image(value.crowdImage),
+        lightsImage: image(value.lightsImage),
         musicUrl: image(value.musicUrl),
 
         presenter: text(value.presenter, d.presenter, 60),

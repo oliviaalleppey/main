@@ -12,6 +12,22 @@ test('nothing saved yet gives the built-in price list', () => {
     assert.equal(settings.theme, 'The Grand Masquerade');
 });
 
+test('the bar is called Spirits, not open bar', () => {
+    const settings = normalisePartyPopup(undefined);
+    assert.ok(settings.highlights.includes('Spirits'));
+    assert.ok(!settings.highlights.some((h) => /open bar/i.test(h)));
+    assert.doesNotMatch(settings.finePrint, /\bbar\b/i);
+});
+
+test('page photos only come from our folder or the public blob store', () => {
+    const settings = normalisePartyPopup({
+        crowdImage: '/party/crowd.webp',
+        lightsImage: 'https://evil.example.com/x.jpg',
+    });
+    assert.equal(settings.crowdImage, '/party/crowd.webp');
+    assert.equal(settings.lightsImage, '');
+});
+
 test('the built-in list matches the prices we were given', () => {
     const byName = Object.fromEntries(DEFAULT_PARTY_POPUP.guestPrices.map((g) => [`${g.label}|${g.stay}`, g.price]));
     assert.deepEqual(byName, {
