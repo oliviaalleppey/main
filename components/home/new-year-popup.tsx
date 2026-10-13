@@ -10,6 +10,7 @@ import {
     formatRupees,
     type PartyPopupSettings,
 } from '@/lib/config/party-popup';
+import { gatsbyFonts } from '@/components/party/gatsby-fonts';
 import './new-year-popup.css';
 
 const DISMISSED_KEY = 'olivia_31st_night_dismissed';
@@ -92,10 +93,11 @@ export default function NewYearPopup({ content }: { content: PartyPopupSettings 
     }, [open, close]);
 
     if (!open) return null;
+    const gatsby = content.pageTheme === 'gatsby';
 
     return (
         <div
-            className={`ny-veil${leaving ? ' ny-out' : ''}`}
+            className={`ny-veil${leaving ? ' ny-out' : ''}${gatsby ? ` ny-gatsby ${gatsbyFonts}` : ''}`}
             onClick={(e) => { if (e.target === e.currentTarget) close(); }}
         >
             <div className="ny-modal" role="dialog" aria-modal="true" aria-labelledby="ny-title">
@@ -104,7 +106,12 @@ export default function NewYearPopup({ content }: { content: PartyPopupSettings 
                     <i className="ny-corner ny-c3" /><i className="ny-corner ny-c4" />
                     <button type="button" className="ny-x" onClick={close} aria-label="Close">&#10005;</button>
 
-                    <div className={`ny-photo${content.backgroundImage ? '' : ' ny-photo-default'}`} style={{ backgroundImage: `url("${content.backgroundImage || DEFAULT_PARTY_BACKGROUND}")` }}><span className="ny-tag">{content.presenter}</span></div>
+                    {gatsby ? (
+                        // The Gatsby look draws its own sky: a Deco sun rising over the water.
+                        <div className="ny-photo ny-deco"><span className="ny-tag">{content.presenter}</span></div>
+                    ) : (
+                        <div className={`ny-photo${content.backgroundImage ? '' : ' ny-photo-default'}`} style={{ backgroundImage: `url("${content.backgroundImage || DEFAULT_PARTY_BACKGROUND}")` }}><span className="ny-tag">{content.presenter}</span></div>
+                    )}
 
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img className="ny-mask" src={content.maskImage || DEFAULT_PARTY_MASK} alt="Masquerade mask" width={709} height={502} />

@@ -3,6 +3,10 @@
 /** R stays the night at Olivia (residential); NR comes for the party only (non-residential). */
 export type PartyStay = 'R' | 'NR' | 'both';
 
+/** The look of the /31st-night page and the homepage pop-up, picked in Site Appearance. */
+export const PARTY_PAGE_THEMES = ['masquerade', 'gatsby'] as const;
+export type PartyPageTheme = (typeof PARTY_PAGE_THEMES)[number];
+
 /** One line of the guest price list, e.g. a kid aged 6 to 11 for residential guests. */
 export type PartyGuestPrice = {
     label: string;
@@ -16,6 +20,7 @@ export type PartyGuestPrice = {
 /** The 31st Night party pop-up and its page, stored in site_settings under PARTY_POPUP_KEY. */
 export type PartyPopupSettings = {
     enabled: boolean;
+    pageTheme: PartyPageTheme;
     /** Per couple with a room (residential), in rupees. */
     pricePerCouple: number;
     /** Per couple without a room (non-residential). 0 means the page says "price on request". */
@@ -65,9 +70,36 @@ export const DEFAULT_PARTY_CROWD_IMAGE = '/party/31st-night-crowd.webp';
 export const DEFAULT_PARTY_LIGHTS_IMAGE = '/party/31st-night-lights.webp';
 /** Shown when the page is shared on WhatsApp and in search results. */
 export const DEFAULT_PARTY_SHARE_IMAGE = '/party/31st-night-party.webp';
+/** The Gatsby page draws its own backgrounds; this is a still of its opening, for sharing. */
+export const GATSBY_SHARE_IMAGE = '/party/31st-night-gatsby.webp';
+
+/** The words that belong to a theme. Switching themes swaps them, unless someone has rewritten them. */
+type PartyThemeCopy = Pick<PartyPopupSettings, 'theme' | 'intro' | 'dressValue'>;
+
+export const PARTY_THEMES: Record<PartyPageTheme, { name: string; about: string; copy: PartyThemeCopy }> = {
+    masquerade: {
+        name: 'The Grand Masquerade',
+        about: 'Masks and club lights, over the photos below.',
+        copy: {
+            theme: 'The Grand Masquerade',
+            intro: 'Ring in the new year in the Grand Ballroom. Dress in your finest, wear a mask, and dance until midnight.',
+            dressValue: 'Mask on, glamour up',
+        },
+    },
+    gatsby: {
+        name: 'The Gatsby Masquerade',
+        about: 'The mask over a 1920s black and gold Art Deco night, with fireworks over the water. Draws its own backgrounds; only the mask below is used.',
+        copy: {
+            theme: 'The Gatsby Masquerade',
+            intro: 'Ring in the new year the Gatsby way in the Grand Ballroom. Masks, sequins, pearls and sharp suits, gold everywhere, and dancing until midnight.',
+            dressValue: 'Masks and ’20s glamour',
+        },
+    },
+};
 
 export const DEFAULT_PARTY_POPUP: PartyPopupSettings = {
     enabled: false,
+    pageTheme: 'masquerade',
     pricePerCouple: 49999,
     pricePerCoupleNonResidential: 0,
     guestPrices: [
@@ -90,12 +122,10 @@ export const DEFAULT_PARTY_POPUP: PartyPopupSettings = {
     eyebrow: "The grand New Year's Eve",
     titleMain: '31st',
     titleAccent: 'Night',
-    theme: 'The Grand Masquerade',
-    intro: 'Ring in the new year in the Grand Ballroom. Dress in your finest, wear a mask, and dance until midnight.',
+    ...PARTY_THEMES.masquerade.copy,
     highlights: ['Live DJ', 'Spirits', 'Gala dinner', "Kids' care", 'Stay included'],
     dateValue: '31 December',
     timeValue: '8 pm to 11:30',
-    dressValue: 'Mask on, glamour up',
     priceLabel: 'Per couple · Room included',
     finePrint: 'Only 300 passes · Spirits for guests 23 and above',
 
@@ -111,6 +141,24 @@ export const PARTY_START = '2026-12-31T20:00:00+05:30';
 export const PARTY_END = '2027-01-01T00:00:00+05:30';
 
 export const PARTY_PATH = '/31st-night';
+/** Search for a room on the night of the party. */
+export const PARTY_BOOK_HREF = '/book/search?checkIn=2026-12-31&checkOut=2027-01-01&adults=2';
+
+/** Moves to another theme, bringing its words along wherever the old theme's words are still unchanged. */
+export function switchPartyTheme(settings: PartyPopupSettings, next: PartyPageTheme): PartyPopupSettings {
+    const result = { ...settings, pageTheme: next };
+    for (const key of Object.keys(PARTY_THEMES[next].copy) as (keyof PartyThemeCopy)[]) {
+        const untouched = PARTY_PAGE_THEMES.some((theme) => PARTY_THEMES[theme].copy[key] === settings[key]);
+        if (untouched) result[key] = PARTY_THEMES[next].copy[key];
+    }
+    return result;
+}
+
+/** The picture used when the page is shared. */
+export function partyShareImage(settings: PartyPopupSettings): string {
+    if (settings.pageTheme === 'gatsby') return GATSBY_SHARE_IMAGE;
+    return settings.pageImage || DEFAULT_PARTY_SHARE_IMAGE;
+}
 
 const MAX_HIGHLIGHTS = 6;
 export const MAX_GUEST_PRICES = 8;
@@ -174,6 +222,7 @@ export function normalisePartyPopup(raw: unknown): PartyPopupSettings {
 
     return {
         enabled: value.enabled === true,
+        pageTheme: PARTY_PAGE_THEMES.find((theme) => theme === value.pageTheme) ?? d.pageTheme,
         pricePerCouple: Number.isFinite(price) && price > 0 ? Math.round(price) : d.pricePerCouple,
         pricePerCoupleNonResidential: rupees(value.pricePerCoupleNonResidential),
         guestPrices: guestPrices(value.guestPrices),

@@ -3,7 +3,15 @@
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { DEFAULT_PARTY_POPUP, MAX_GUEST_PRICES, normalisePartyPopup } from '@/lib/config/party-popup';
+import {
+    DEFAULT_PARTY_POPUP,
+    GATSBY_SHARE_IMAGE,
+    MAX_GUEST_PRICES,
+    PARTY_THEMES,
+    normalisePartyPopup,
+    partyShareImage,
+    switchPartyTheme,
+} from '@/lib/config/party-popup';
 
 test('nothing saved yet gives the built-in price list', () => {
     const settings = normalisePartyPopup(undefined);
@@ -68,4 +76,33 @@ test('the party-only couple price keeps a real number and drops anything else', 
     assert.equal(normalisePartyPopup({ pricePerCoupleNonResidential: 34999 }).pricePerCoupleNonResidential, 34999);
     assert.equal(normalisePartyPopup({ pricePerCoupleNonResidential: -5 }).pricePerCoupleNonResidential, 0);
     assert.equal(normalisePartyPopup({ pricePerCoupleNonResidential: 'abc' }).pricePerCoupleNonResidential, 0);
+});
+
+test('the page stays on the masquerade until someone switches it', () => {
+    assert.equal(normalisePartyPopup(undefined).pageTheme, 'masquerade');
+    assert.equal(normalisePartyPopup({ pageTheme: 'gatsby' }).pageTheme, 'gatsby');
+    assert.equal(normalisePartyPopup({ pageTheme: 'disco' }).pageTheme, 'masquerade');
+});
+
+test('switching to Gatsby brings its words and keeps prices', () => {
+    const next = switchPartyTheme(normalisePartyPopup({ pricePerCoupleNonResidential: 34999 }), 'gatsby');
+    assert.equal(next.pageTheme, 'gatsby');
+    assert.equal(next.theme, PARTY_THEMES.gatsby.copy.theme);
+    assert.equal(next.dressValue, PARTY_THEMES.gatsby.copy.dressValue);
+    assert.equal(next.pricePerCoupleNonResidential, 34999);
+    assert.deepEqual(next.guestPrices, DEFAULT_PARTY_POPUP.guestPrices);
+});
+
+test('words someone rewrote survive a theme switch, and switching back restores the rest', () => {
+    const edited = { ...normalisePartyPopup(undefined), intro: 'Our own words.' };
+    const gatsby = switchPartyTheme(edited, 'gatsby');
+    assert.equal(gatsby.intro, 'Our own words.');
+    const back = switchPartyTheme(gatsby, 'masquerade');
+    assert.equal(back.theme, PARTY_THEMES.masquerade.copy.theme);
+    assert.equal(back.intro, 'Our own words.');
+});
+
+test('the Gatsby page shares its own picture, not the masquerade photos', () => {
+    assert.equal(partyShareImage(normalisePartyPopup({ pageTheme: 'gatsby', pageImage: '/party/x.webp' })), GATSBY_SHARE_IMAGE);
+    assert.equal(partyShareImage(normalisePartyPopup({ pageImage: '/party/x.webp' })), '/party/x.webp');
 });

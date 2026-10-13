@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { upload } from '@vercel/blob/client';
 import { toast } from 'sonner';
-import { PartyPopper, Loader2, Save, ImagePlus, RotateCcw, Music, Plus, Trash2 } from 'lucide-react';
+import { PartyPopper, Loader2, Save, ImagePlus, RotateCcw, Music, Plus, Trash2, Check, ExternalLink } from 'lucide-react';
 import { getPartyPopup, updatePartyPopup } from '@/lib/db/actions/settings-actions';
 import {
     DEFAULT_PARTY_BACKGROUND,
@@ -13,7 +13,12 @@ import {
     DEFAULT_PARTY_PAGE_IMAGE,
     DEFAULT_PARTY_POPUP,
     MAX_GUEST_PRICES,
+    PARTY_PAGE_THEMES,
+    PARTY_PATH,
+    PARTY_THEMES,
+    switchPartyTheme,
     type PartyGuestPrice,
+    type PartyPageTheme,
     type PartyPopupSettings,
     type PartyStay,
 } from '@/lib/config/party-popup';
@@ -167,6 +172,71 @@ function TextField({
     );
 }
 
+/** A small picture of each theme for the switch. */
+const THEME_SWATCH: Record<PartyPageTheme, string> = {
+    masquerade: 'radial-gradient(ellipse at 50% 30%, #c42638 0, #3a0a14 45%, #0b0306 80%)',
+    gatsby: 'repeating-conic-gradient(from -90deg at 50% 78%, rgba(243,214,150,.55) 0deg 1.5deg, transparent 1.5deg 9deg), linear-gradient(#05060b, #17121f 76%, #d9b56c 78%, #09090c 80%)',
+};
+
+function ThemeSwitch({
+    value,
+    disabled,
+    onPick,
+}: {
+    value: PartyPageTheme;
+    disabled: boolean;
+    onPick: (theme: PartyPageTheme) => void;
+}) {
+    return (
+        <section className="space-y-3">
+            <div>
+                <Label>Page theme</Label>
+                <p className="mt-1 text-xs text-muted-foreground">
+                    Changes the look of the /31st-night page and the homepage pop-up straight away. Prices and details stay as they are. Use Preview to look at a theme before switching.
+                </p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+                {PARTY_PAGE_THEMES.map((theme) => {
+                    const active = value === theme;
+                    return (
+                        <div key={theme} className={`overflow-hidden rounded-lg border-2 ${active ? 'border-primary' : 'border-border'}`}>
+                            <button
+                                type="button"
+                                disabled={disabled || active}
+                                onClick={() => onPick(theme)}
+                                aria-pressed={active}
+                                className="block w-full text-left disabled:cursor-default"
+                            >
+                                <div className="h-20" style={{ background: THEME_SWATCH[theme] }} />
+                                <div className="space-y-1 p-3">
+                                    <p className="flex items-center gap-2 font-medium">
+                                        {PARTY_THEMES[theme].name}
+                                        {active && (
+                                            <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
+                                                <Check className="h-3 w-3" /> Live
+                                            </span>
+                                        )}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">{PARTY_THEMES[theme].about}</p>
+                                    {!active && <p className="text-xs font-medium text-primary">Click to use this theme</p>}
+                                </div>
+                            </button>
+                            <a
+                                href={`${PARTY_PATH}/preview/${theme}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="flex items-center gap-1 border-t px-3 py-2 text-xs font-medium hover:bg-muted"
+                            >
+                                <ExternalLink className="h-3 w-3" /> Preview
+                            </a>
+                        </div>
+                    );
+                })}
+            </div>
+        </section>
+    );
+}
+
 const STAY_OPTIONS: { value: PartyStay; label: string }[] = [
     { value: 'R', label: 'R · staying guests' },
     { value: 'NR', label: 'NR · party only' },
@@ -264,6 +334,15 @@ export default function PartyPopupCard() {
         }
     }
 
+    // Like the on/off switch, the theme saves on its own; unsaved edits below stay as they are.
+    async function pickTheme(theme: PartyPageTheme) {
+        const result = await persist(switchPartyTheme(saved, theme));
+        if (result) {
+            setDraft((prev) => switchPartyTheme(prev, theme));
+            toast.success(`The 31st Night page now uses ${PARTY_THEMES[theme].name}`);
+        }
+    }
+
     async function saveAll() {
         const result = await persist(draft);
         if (result) {
@@ -304,6 +383,13 @@ export default function PartyPopupCard() {
                 </div>
             </CardHeader>
             <CardContent className="space-y-8">
+                <ThemeSwitch value={saved.pageTheme} disabled={loading || saving} onPick={pickTheme} />
+
+                {saved.pageTheme === 'gatsby' && (
+                    <p className="rounded-md border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+                        The Gatsby theme draws its own backgrounds and uses only the mask below; the photos are for The Grand Masquerade.
+                    </p>
+                )}
                 <section className="grid gap-6 sm:grid-cols-2">
                     <ImageField
                         label="Pop-up photo"
@@ -429,7 +515,7 @@ export default function PartyPopupCard() {
                 </section>
 
                 <div className="flex justify-end gap-2">
-                    <Button type="button" variant="ghost" disabled={loading || saving} onClick={() => setDraft({ ...DEFAULT_PARTY_POPUP, enabled: saved.enabled })}>
+                    <Button type="button" variant="ghost" disabled={loading || saving} onClick={() => setDraft(switchPartyTheme({ ...DEFAULT_PARTY_POPUP, enabled: saved.enabled }, saved.pageTheme))}>
                         <RotateCcw className="mr-2 h-4 w-4" />
                         Reset to defaults
                     </Button>

@@ -19,8 +19,8 @@ export default function FrontendLayout({ children }: FrontendLayoutProps) {
         return <>{children}</>;
     }
 
-    // The 31st Night page is a full-screen experience with its own top bar.
-    if (pathname === '/31st-night') {
+    // The 31st Night page (and its theme previews) is a full-screen experience with its own top bar.
+    if (pathname === '/31st-night' || pathname?.startsWith('/31st-night/')) {
         return (
             <>
                 {children}

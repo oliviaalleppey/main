@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import PartyEnquiryForm from './party-enquiry-form';
 import { PartyMusic } from './party-music';
+import { FeatherGlyph, GatsbyArches, GatsbyClock, GatsbyOrnament, GatsbySky, HatGlyph } from './gatsby';
+import { gatsbyFonts } from './gatsby-fonts';
 import {
     DEFAULT_PARTY_CROWD_IMAGE,
     DEFAULT_PARTY_LIGHTS_IMAGE,
@@ -18,6 +20,7 @@ import {
     type PartyStay,
 } from '@/lib/config/party-popup';
 import './party.css';
+import './gatsby.css';
 
 /** Short notes for the highlights we know; anything the admin adds shows as a title only. */
 const DETAILS: Record<string, { note: string; icon: LucideIcon }> = {
@@ -29,7 +32,10 @@ const DETAILS: Record<string, { note: string; icon: LucideIcon }> = {
 };
 
 /** Lights up gold, word by word, as the section scrolls past. */
-const STATEMENT = ['Masks', 'on.', 'Lights', 'down.', 'Hands', 'up', 'for', 'midnight.'];
+const STATEMENT = {
+    masquerade: ['Masks', 'on.', 'Lights', 'down.', 'Hands', 'up', 'for', 'midnight.'],
+    gatsby: ['Masks', 'on.', 'Dance', 'late.', 'Welcome', 'to', 'the', 'Roaring', 'Twenty-Seven.'],
+};
 
 const MAX_COUNT = 10;
 const CONFETTI = ['#f1dba0', '#d4b06a', '#8d6b2e', '#fff6dc', '#e8a64a'];
@@ -185,18 +191,30 @@ export default function PartyExperience({
     over: boolean;
     bookHref: string;
 }) {
+    const gatsby = content.pageTheme === 'gatsby';
+    const statement = STATEMENT[content.pageTheme];
+
     const rootRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const heroPhotoRef = useRef<HTMLDivElement>(null);
-    const flaresRef = useRef<HTMLDivElement>(null);
-    const maskRef = useRef<HTMLDivElement>(null);
-    const maskGlowRef = useRef<HTMLSpanElement>(null);
+    /** The scenery behind the opening; it scrolls slower than the page. */
+    const heroBackRef = useRef<HTMLDivElement>(null);
+    /** Glows with the beat: the stage flares, or the Gatsby sun. */
+    const glowRef = useRef<HTMLDivElement>(null);
+    /** The mask or the crest; it leans toward the pointer and fades as you scroll. */
+    const heroArtRef = useRef<HTMLDivElement>(null);
+    const artGlowRef = useRef<HTMLSpanElement>(null);
     const statementRef = useRef<HTMLElement>(null);
     const statementPhotoRef = useRef<HTMLDivElement>(null);
     const wordsRef = useRef<HTMLParagraphElement>(null);
+    // Scroll progress handed to the Gatsby clock and arches, 0 to 1.
+    const nightHook = useRef<((p: number) => void) | null>(null);
+    const statementHook = useRef<((p: number) => void) | null>(null);
+    const bindNight = useCallback((fn: ((p: number) => void) | null) => { nightHook.current = fn; }, []);
+    const bindStatement = useCallback((fn: ((p: number) => void) | null) => { statementHook.current = fn; }, []);
 
     const musicRef = useRef<PartyMusic | null>(null);
     const playingRef = useRef(false);
+    const beatRef = useRef(0);
     const bitsRef = useRef<Bit[]>([]);
     const reduced = useReducedMotion();
 
@@ -213,6 +231,11 @@ export default function PartyExperience({
     const lightsPhoto = content.lightsImage || DEFAULT_PARTY_LIGHTS_IMAGE;
     const nightPhotos = [crowdPhoto, lightsPhoto, heroPhoto];
     const name = `${content.titleMain} ${content.titleAccent}`;
+    // "The Grand Masquerade" heads the night as "The Grand" and a gold "Masquerade".
+    const themeSplit = content.theme.lastIndexOf(' ');
+    const themeLead = themeSplit > 0 ? content.theme.slice(0, themeSplit) : '';
+    const themeLast = content.theme.slice(themeSplit + 1);
+    const Glyph = (i: number) => (gatsby ? [<HatGlyph key="h" />, <MaskGlyph key="m" />, <FeatherGlyph key="f" />][i % 3] : <MaskGlyph />);
 
     // ── Price list and the guest's plan ────────────────────
     const rows = useMemo<Row[]>(() => [
@@ -292,7 +315,7 @@ export default function PartyExperience({
         const music = musicRef.current;
         if (!music) {
             try {
-                const next = new PartyMusic(content.musicUrl);
+                const next = new PartyMusic(content.musicUrl, gatsby ? 'swing' : 'house');
                 await next.start();
                 musicRef.current = next;
                 playingRef.current = true;
@@ -335,6 +358,7 @@ export default function PartyExperience({
             actMiddles = actRows.map((li) => li.getBoundingClientRect().top + window.scrollY + li.offsetHeight / 2);
         };
         let currentAct = -1;
+        let nightP = -1;
         let nx = 0;
         let ny = 0;
         let y = window.scrollY;
@@ -346,10 +370,11 @@ export default function PartyExperience({
             const vh = window.innerHeight;
 
             if (y < vh * 1.3) {
-                if (heroPhotoRef.current) heroPhotoRef.current.style.transform = `translate3d(0,${(y * 0.35).toFixed(1)}px,0)`;
-                if (maskRef.current) {
-                    maskRef.current.style.transform = `translate3d(${(nx * 22).toFixed(1)}px,${(ny * 14 - y * 0.18).toFixed(1)}px,0) rotate(${(nx * 4).toFixed(2)}deg)`;
-                    maskRef.current.style.opacity = Math.max(0, 1 - y / (vh * 0.9)).toFixed(2);
+                if (heroBackRef.current) heroBackRef.current.style.transform = `translate3d(0,${(y * 0.35).toFixed(1)}px,0)`;
+                const art = heroArtRef.current;
+                if (art) {
+                    art.style.transform = `translate3d(${(nx * 22).toFixed(1)}px,${(ny * 14 - y * 0.18).toFixed(1)}px,0) rotate(${(nx * 4).toFixed(2)}deg)`;
+                    art.style.opacity = Math.max(0, 1 - y / (vh * 0.9)).toFixed(2);
                 }
             }
 
@@ -362,6 +387,14 @@ export default function PartyExperience({
                     currentAct = nearest;
                     setAct(nearest);
                 }
+                // How far through the list, from the first highlight to the last.
+                const first = actMiddles[0];
+                const span = actMiddles[actMiddles.length - 1] - first || 1;
+                const p = Math.round(Math.min(1, Math.max(0, (line - first) / span)) * 400) / 400;
+                if (p !== nightP) {
+                    nightP = p;
+                    nightHook.current?.(p);
+                }
             }
 
             const band = statementRef.current;
@@ -369,8 +402,9 @@ export default function PartyExperience({
                 const top = band.offsetTop;
                 const travel = band.offsetHeight - vh;
                 const p = Math.min(1, Math.max(0, (y - top + vh * 0.35) / (travel + vh * 0.35)));
-                if (y > top - vh && y < top + band.offsetHeight && statementPhotoRef.current) {
-                    statementPhotoRef.current.style.transform = `scale(${(1.04 + p * 0.12).toFixed(3)})`;
+                if (y > top - vh && y < top + band.offsetHeight) {
+                    if (statementPhotoRef.current) statementPhotoRef.current.style.transform = `scale(${(1.04 + p * 0.12).toFixed(3)})`;
+                    statementHook.current?.(p);
                 }
                 const next = Math.round(p * words.length * 1.2);
                 if (next !== lit) {
@@ -480,8 +514,9 @@ export default function PartyExperience({
         const loop = () => {
             const level = playingRef.current ? musicRef.current?.level() ?? 0 : 0;
             beat = beat * 0.8 + level * 0.2;
-            setOpacity(flaresRef.current, 0.75 + beat * 0.5);
-            setOpacity(maskGlowRef.current, 0.35 + beat * 0.65);
+            beatRef.current = beat;
+            setOpacity(glowRef.current, 0.75 + beat * 0.5);
+            setOpacity(artGlowRef.current, 0.35 + beat * 0.65);
 
             // The dust belongs to the opening; it fades as you scroll on.
             const fade = Math.max(0, 1 - window.scrollY / height);
@@ -555,7 +590,12 @@ export default function PartyExperience({
     const priceText = `${formatRupees(total)}${onRequest ? '+' : ''}`;
 
     return (
-        <div ref={rootRef} className={`pt${scripted ? ' pt-js' : ''}${playing ? ' pt-playing' : ''}`} onClick={onLinkClick}>
+        <div
+            ref={rootRef}
+            className={`pt pt-${content.pageTheme}${gatsby ? ` ${gatsbyFonts}` : ''}${scripted ? ' pt-js' : ''}${playing ? ' pt-playing' : ''}`}
+            onClick={onLinkClick}
+        >
+            {gatsby && <div className="gt-wall" aria-hidden="true"><i /><i /></div>}
             <canvas ref={canvasRef} className="pt-canvas" aria-hidden="true" />
 
             <nav className="pt-top pt-cinzel" aria-label="Olivia Alleppey">
@@ -575,16 +615,22 @@ export default function PartyExperience({
 
             <main className="pt-main">
                 <section className="pt-hero">
-                    <div ref={heroPhotoRef} className="pt-hero-photo" aria-hidden="true">
-                        <i style={{ backgroundImage: `url("${heroPhoto}")` }} />
-                    </div>
-                    <div className="pt-hero-shade" aria-hidden="true" />
-                    <div ref={flaresRef} className="pt-flares" aria-hidden="true"><i className="a" /><i className="b" /></div>
+                    {gatsby ? (
+                        <GatsbySky backRef={heroBackRef} glowRef={glowRef} beatRef={beatRef} reduced={reduced} />
+                    ) : (
+                        <>
+                            <div ref={heroBackRef} className="pt-hero-photo" aria-hidden="true">
+                                <i style={{ backgroundImage: `url("${heroPhoto}")` }} />
+                            </div>
+                            <div className="pt-hero-shade" aria-hidden="true" />
+                            <div ref={glowRef} className="pt-flares" aria-hidden="true"><i className="a" /><i className="b" /></div>
+                        </>
+                    )}
 
                     <div className="pt-hero-in">
-                        <div ref={maskRef} className="pt-mask">
+                        <div ref={heroArtRef} className="pt-mask">
                             <div className="pt-mask-in">
-                                <span ref={maskGlowRef} className="pt-mask-glow" aria-hidden="true" />
+                                <span ref={artGlowRef} className="pt-mask-glow" aria-hidden="true" />
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img src={mask} alt="Masquerade mask" width={709} height={502} />
                                 <span className="pt-glint" style={{ ['--mask-url' as string]: `url("${mask}")` }} aria-hidden="true"><i /></span>
@@ -625,16 +671,22 @@ export default function PartyExperience({
 
                 <section className="pt-night">
                     <div className="pt-night-media" aria-hidden="true">
-                        <div className="pt-night-frame">
-                            {nightPhotos.map((src, i) => (
-                                <i key={i} className={i === act % nightPhotos.length ? 'on' : ''} style={{ backgroundImage: `url("${src}")` }} />
-                            ))}
-                            <span className="pt-night-num pt-serif" key={act}>{String(act + 1).padStart(2, '0')}</span>
-                        </div>
+                        {gatsby ? (
+                            <div className="pt-night-frame gt-clock-frame">
+                                <GatsbyClock bind={bindNight} act={act} />
+                            </div>
+                        ) : (
+                            <div className="pt-night-frame">
+                                {nightPhotos.map((src, i) => (
+                                    <i key={i} className={i === act % nightPhotos.length ? 'on' : ''} style={{ backgroundImage: `url("${src}")` }} />
+                                ))}
+                                <span className="pt-night-num pt-serif" key={act}>{String(act + 1).padStart(2, '0')}</span>
+                            </div>
+                        )}
                     </div>
                     <div className="pt-night-text">
                         <p className="pt-kicker pt-cinzel" data-reveal>The night</p>
-                        <h2 className="pt-h2 pt-serif" data-reveal>The Grand <em>Masquerade</em></h2>
+                        <h2 className="pt-h2 pt-serif" data-reveal>{themeLead} <em>{themeLast}</em></h2>
                         <p className="pt-lede" data-reveal>{content.intro}</p>
                         <ol className="pt-acts">
                             {content.highlights.map((title, i) => {
@@ -659,19 +711,23 @@ export default function PartyExperience({
                     </div>
                 </section>
 
-                <section ref={statementRef} className="pt-statement" aria-label="Masks on. Lights down. Hands up for midnight.">
+                <section ref={statementRef} className="pt-statement" aria-label={statement.join(' ')}>
                     <div className="pt-statement-pin">
-                        <div ref={statementPhotoRef} className="pt-statement-photo" style={{ backgroundImage: `url("${lightsPhoto}")` }} aria-hidden="true" />
+                        {gatsby ? (
+                            <GatsbyArches bind={bindStatement} />
+                        ) : (
+                            <div ref={statementPhotoRef} className="pt-statement-photo" style={{ backgroundImage: `url("${lightsPhoto}")` }} aria-hidden="true" />
+                        )}
                         <div className="pt-statement-shade" aria-hidden="true" />
                         <p ref={wordsRef} className="pt-words pt-serif" aria-hidden="true">
-                            {STATEMENT.map((word, i) => <span key={i}>{word} </span>)}
+                            {statement.map((word, i) => <span key={i}>{word} </span>)}
                         </p>
                         <p className="pt-statement-sub">{content.dateValue} · The Grand Ballroom · Olivia Alleppey</p>
                     </div>
                 </section>
 
                 <section id="reserve" className="pt-section" style={{ scrollMarginTop: 60 }}>
-                    <Ornament />
+                    {gatsby ? <GatsbyOrnament /> : <Ornament />}
                     <p className="pt-kicker pt-cinzel" data-reveal>Passes and prices</p>
                     <h2 className="pt-h2 pt-serif" data-reveal>Plan your <em>night</em></h2>
                     <p className="pt-lede" data-reveal>
@@ -768,8 +824,8 @@ export default function PartyExperience({
                             </div>
                             <div className="pt-ticket-body">
                                 <div className="pt-tokens" aria-hidden="true">
-                                    {tokens.slice(0, MAX_TOKENS).map((t) => (
-                                        <span key={t.id} className={`pt-token${t.small ? ' sm' : ''}`} style={{ color: t.color }}><MaskGlyph /></span>
+                                    {tokens.slice(0, MAX_TOKENS).map((t, i) => (
+                                        <span key={t.id} className={`pt-token${t.small ? ' sm' : ''}`} style={{ color: t.color }}>{Glyph(i)}</span>
                                     ))}
                                     {tokens.length > MAX_TOKENS && <span className="pt-token-more">+{tokens.length - MAX_TOKENS}</span>}
                                 </div>
@@ -806,7 +862,7 @@ export default function PartyExperience({
 
                 {!over && (
                     <section id="enquire" className="pt-section" style={{ paddingTop: 20, scrollMarginTop: 60 }}>
-                        <Ornament />
+                        {gatsby ? <GatsbyOrnament /> : <Ornament />}
                         <p className="pt-kicker pt-cinzel" data-reveal>Reserve your passes</p>
                         <h2 className="pt-h2 pt-serif" data-reveal>We&apos;ll <em>call you</em></h2>
                         <div className="pt-enquire" data-reveal>
