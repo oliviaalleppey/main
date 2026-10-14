@@ -147,10 +147,10 @@ export default function MasqueradeHero() {
                                     style={{
                                         left: `${x}%`,
                                         top: `${y}%`,
-                                        width: `max(${(size * 0.9) / 16.71}cqw, 7px)`,
-                                        height: `max(${(size * 0.9) / 16.71}cqw, 7px)`,
-                                        animationDuration: sweep ? '6s' : `${2.6 + ((i * 7) % 5) * 0.6}s`,
-                                        animationDelay: sweep ? `${(x / 100) * 3.2}s` : `${((i * 13) % 40) / 10}s`,
+                                        width: `max(${(size * 2) / 16.71}cqw, 13px)`,
+                                        height: `max(${(size * 2) / 16.71}cqw, 13px)`,
+                                        animationDuration: sweep ? '3.6s' : `${1.3 + ((i * 7) % 5) * 0.4}s`,
+                                        animationDelay: sweep ? `${(x / 100) * 2.4}s` : `${((i * 13) % 40) / 10}s`,
                                     }}
                                 />
                             );
@@ -254,16 +254,18 @@ export default function MasqueradeHero() {
                     pointer-events: none;
                     mix-blend-mode: screen;
                     background:
-                        radial-gradient(circle, #fff 0 8%, rgba(255,244,205,0.9) 12%, transparent 32%),
-                        linear-gradient(90deg, transparent 0, #fff8e0 50%, transparent 100%) center / 100% 7% no-repeat,
-                        linear-gradient(0deg, transparent 0, #fff8e0 50%, transparent 100%) center / 7% 100% no-repeat;
-                    filter: drop-shadow(0 0 6px rgba(255,236,170,0.95));
+                        radial-gradient(circle, #fff 0 14%, rgba(255,250,225,1) 20%, rgba(255,230,150,.55) 38%, transparent 60%),
+                        linear-gradient(90deg, transparent 0, #fff 50%, transparent 100%) center / 100% 9% no-repeat,
+                        linear-gradient(0deg, transparent 0, #fff 50%, transparent 100%) center / 9% 100% no-repeat;
+                    filter: brightness(1.5) drop-shadow(0 0 3px #fff) drop-shadow(0 0 10px rgba(255,225,140,1)) drop-shadow(0 0 22px rgba(255,200,90,.8));
                     animation: masq-twinkle ease-in-out infinite;
                 }
                 @keyframes masq-twinkle {
-                    0%, 78%, 100% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; }
-                    86% { transform: translate(-50%, -50%) scale(1) rotate(45deg); opacity: 1; }
-                    94% { transform: translate(-50%, -50%) scale(0.4) rotate(90deg); opacity: .7; }
+                    0%, 52%, 100% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; }
+                    62% { transform: translate(-50%, -50%) scale(1.35) rotate(45deg); opacity: 1; }
+                    72% { transform: translate(-50%, -50%) scale(.7) rotate(90deg); opacity: 1; }
+                    82% { transform: translate(-50%, -50%) scale(1.1) rotate(135deg); opacity: .9; }
+                    92% { transform: translate(-50%, -50%) scale(.25) rotate(180deg); opacity: .4; }
                 }
                 .masq-trail {
                     position: absolute;
