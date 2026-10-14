@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 
 
@@ -11,7 +11,6 @@ const GUARD = `try{if(matchMedia('(prefers-reduced-motion: reduce)').matches){do
 // from another page of the site (this module stays loaded during that navigation).
 let playedThisLoad = false;
 
-const AUTO_OPEN_MS = 5200;
 const OPEN_DURATION_MS = 1900;
 
 const GOLD_TEXT = 'bg-gradient-to-b from-[#fff6d8] via-[#f0cf7a] to-[#b8883f] bg-clip-text text-transparent';
@@ -21,11 +20,10 @@ type Phase = 'playing' | 'opening' | 'done';
 
 /**
  * Curtain-raiser for the Grand Masquerade opener. Plays on every page load: the title appears on closed velvet curtains,
- * then they part onto the page. "Enter" (or Skip) opens them straight away, and the tap lets the music start.
+ * then they part onto the page, but only when the visitor presses Enter. That tap also lets the music start.
  */
 export default function MasqueradeIntro() {
     const [phase, setPhase] = useState<Phase>(() => (playedThisLoad ? 'done' : 'playing'));
-    const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
     const open = useCallback(() => {
         setPhase((p) => (p === 'playing' ? 'opening' : p));
@@ -39,9 +37,7 @@ export default function MasqueradeIntro() {
         }
         if (playedThisLoad) return;
         playedThisLoad = true;
-        timers.current.push(setTimeout(open, AUTO_OPEN_MS));
-        return () => timers.current.forEach(clearTimeout);
-    }, [open]);
+    }, []);
 
     // Once the curtains start to part, remove the overlay when they're clear of the screen.
     useEffect(() => {
@@ -172,13 +168,6 @@ export default function MasqueradeIntro() {
                         </motion.button>
                     </motion.div>
 
-                    <button
-                        type="button"
-                        onClick={open}
-                        className="absolute right-5 top-5 z-20 text-[10px] uppercase tracking-[0.3em] text-[#d9b668]/70 hover:text-[#f3dc9c] transition-colors"
-                    >
-                        Skip
-                    </button>
                 </div>
             )}
         </>
