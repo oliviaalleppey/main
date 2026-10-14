@@ -6,6 +6,8 @@ import { calculateAddOnTax, groupAddOnTaxByRate, groupTaxByRate, splitStayIntoNi
 import { notFound } from 'next/navigation';
 import { PrintButton } from '@/components/invoice/print-button';
 import { amountInWords, formatRoomName } from '@/lib/utils';
+import { formatCheckIn, formatCheckOut } from '@/lib/stay-times';
+import { parseMasqueradeNotes } from '@/lib/masquerade-notes';
 
 // Hotel Details
 //
@@ -100,8 +102,11 @@ export default async function InvoicePage({ params }: { params: Promise<{ bookin
     );
 
     const invoiceDate = booking.confirmedAt ? new Date(booking.confirmedAt).toLocaleDateString('en-IN') : new Date().toLocaleDateString('en-IN');
-    const checkIn = new Date(booking.checkIn).toLocaleString('en-IN');
-    const checkOut = new Date(booking.checkOut).toLocaleString('en-IN');
+    // Dates with the hotel's own times: a plain stay day printed as a timestamp came out as 5:30:00 am.
+    const checkIn = formatCheckIn(booking.checkIn);
+    const checkOut = formatCheckOut(booking.checkOut);
+    // The 31st Night is sold on a half-board basis; every other booking is breakfast-inclusive (CP).
+    const mealPlan = parseMasqueradeNotes(booking.specialRequests).isMasquerade ? 'MAP' : 'CP';
     const invoiceNo = confirmation?.confirmationNumber || `INV-${booking.bookingNumber?.slice(0, 8)}`;
 
     return (
@@ -146,7 +151,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ bookin
                 {/* Invoice Meta */}
                 <div className="grid grid-cols-4 text-xs border-b border-gray-400 divide-x divide-gray-400">
                     <div className="p-1"><span className="text-blue-900 font-bold">Room No :</span> -</div>
-                    <div className="p-1"><span className="text-blue-900 font-bold">Plan :</span> CP</div>
+                    <div className="p-1"><span className="text-blue-900 font-bold">Plan :</span> {mealPlan}</div>
                     <div className="p-1"><span className="text-blue-900 font-bold">PAX :</span> {booking.adults}/{booking.children}</div>
                     <div className="p-1"><span className="text-blue-900 font-bold">Invoice No :</span> {invoiceNo}</div>
                 </div>

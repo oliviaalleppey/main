@@ -1,11 +1,13 @@
 import { db } from '@/lib/db';
-import { bookings, bookingConfirmations, roomTypes, bookingItems } from '@/lib/db/schema';
+import { bookings, bookingConfirmations, roomTypes, bookingItems, bookingAddOns, addOns } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { CheckCircle2, Copy } from 'lucide-react';
 import { ensureRoomTypeMinOccupancyColumn } from '@/lib/db/schema-guard';
 import { formatRoomName } from '@/lib/utils';
+import MasqueradeConfirmation, { type ConfirmationTone } from '@/components/masquerade/masquerade-confirmation';
+import { parseMasqueradeNotes } from '@/lib/masquerade-notes';
 
 // Format helper
 const formatCurrency = (amount: number) => {
@@ -92,6 +94,56 @@ export default async function ConfirmationPage({ params }: { params: Promise<{ b
         statusMsg = "Your payment is successful. We are finalizing reservation confirmation with the hotel system. You will receive confirmation shortly.";
         icon = <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />;
         iconBg = "bg-blue-50";
+    }
+
+    // The 31st Night has its own look. Every status keeps the same wording as below, just dressed for the evening.
+    const masqueradeNotes = parseMasqueradeNotes(booking.specialRequests);
+    if (masqueradeNotes.isMasquerade) {
+        const addOnLines = await db
+            .select({ name: addOns.name, quantity: bookingAddOns.quantity, subtotal: bookingAddOns.subtotal })
+            .from(bookingAddOns)
+            .innerJoin(addOns, eq(addOns.id, bookingAddOns.addOnId))
+            .where(eq(bookingAddOns.bookingId, booking.id));
+
+        const tone: ConfirmationTone =
+            booking.status === 'confirmed' ? 'confirmed'
+            : booking.status === 'failed' && booking.paymentStatus === 'success' ? 'received'
+            : booking.status === 'failed' ? 'failed'
+            : 'pending';
+
+        const title =
+            tone === 'confirmed' ? 'Your evening is reserved'
+            : tone === 'received' ? 'Payment received'
+            : tone === 'failed' ? 'Booking not completed'
+            : booking.status === 'payment_success' || booking.status === 'booking_requested' ? 'Payment received'
+            : 'Awaiting payment';
+        const message =
+            tone === 'confirmed' ? 'Thank you. Your room for The Grand Masquerade is confirmed. We look forward to welcoming you on the 31st.'
+            : tone === 'received' ? statusMsg
+            : tone === 'failed' ? 'There was an issue completing your reservation. If you were charged, please call us and we will put it right.'
+            : booking.status === 'payment_success' || booking.status === 'booking_requested' ? 'Your payment is successful and we are confirming your room with the hotel. You will receive your confirmation shortly.'
+            : 'We are waiting for your payment to be confirmed. This page will show your booking once it is.';
+
+        return (
+            <MasqueradeConfirmation
+                tone={tone}
+                title={title}
+                message={message}
+                guestName={booking.guestName}
+                bookingNumber={booking.bookingNumber}
+                confirmationNumber={booking.status === 'confirmed' ? (confirmation?.confirmationNumber || booking.bookingNumber) : null}
+                bookingId={booking.id}
+                checkIn={String(booking.checkIn)}
+                checkOut={String(booking.checkOut)}
+                notes={masqueradeNotes}
+                roomSummary={roomName}
+                addOns={addOnLines.map((l) => ({ name: l.name, quantity: l.quantity || 1, subtotalPaise: l.subtotal }))}
+                subtotalPaise={booking.subtotal}
+                gstPaise={booking.taxAmount || 0}
+                totalPaise={booking.totalAmount}
+                paid={booking.paymentStatus === 'success'}
+            />
+        );
     }
 
     return (
