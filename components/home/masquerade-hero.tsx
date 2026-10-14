@@ -1,17 +1,39 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 import { CONTACT } from '@/lib/seo';
 
-const WHATSAPP_MESSAGE = encodeURIComponent(
-    "Hello Olivia Alleppey, I would like to reserve for The Grand Masquerade on 31st December."
+const BOOK_MESSAGE = encodeURIComponent(
+    "Hello Olivia Alleppey, I would like to book The Grand Masquerade, 31st Night (₹49,999)."
 );
 
-// Fixed positions so server and client render the same markup.
+// Positions are percentages of the picture itself (the scene box below keeps the
+// picture's 16:9 shape), so every glint stays on its jewel at any screen size.
+const GLINTS: { x: number; y: number; s: number; d: number }[] = [
+    // THE + finial
+    { x: 50.0, y: 21.5, s: 22, d: 0.0 }, { x: 48.2, y: 27.5, s: 14, d: 1.1 }, { x: 52.0, y: 28.0, s: 16, d: 2.0 },
+    // GRAND
+    { x: 41.2, y: 33.0, s: 20, d: 0.6 }, { x: 45.0, y: 35.5, s: 14, d: 1.7 }, { x: 49.0, y: 32.5, s: 18, d: 2.6 },
+    { x: 53.5, y: 35.0, s: 14, d: 0.3 }, { x: 58.0, y: 32.0, s: 20, d: 1.4 }, { x: 61.0, y: 36.0, s: 14, d: 2.3 },
+    // flourishes
+    { x: 37.5, y: 37.5, s: 16, d: 0.9 }, { x: 63.8, y: 37.5, s: 16, d: 1.9 },
+    // MASQUERADE
+    { x: 29.5, y: 43.5, s: 18, d: 2.8 }, { x: 33.5, y: 45.5, s: 14, d: 0.2 }, { x: 37.5, y: 42.5, s: 18, d: 1.3 },
+    { x: 41.5, y: 46.0, s: 14, d: 2.2 }, { x: 45.5, y: 43.0, s: 20, d: 0.8 }, { x: 49.5, y: 46.5, s: 14, d: 1.8 },
+    { x: 53.5, y: 43.0, s: 18, d: 2.7 }, { x: 57.5, y: 45.5, s: 14, d: 0.5 }, { x: 61.5, y: 42.5, s: 18, d: 1.6 },
+    { x: 65.5, y: 45.5, s: 14, d: 2.5 }, { x: 69.5, y: 43.0, s: 20, d: 1.0 }, { x: 72.0, y: 47.0, s: 14, d: 2.0 },
+    // bottom ornament
+    { x: 50.0, y: 53.5, s: 18, d: 1.5 },
+    // mask: brooch, filigree and rim
+    { x: 47.2, y: 75.5, s: 26, d: 0.4 }, { x: 55.5, y: 67.5, s: 18, d: 1.2 }, { x: 52.0, y: 78.5, s: 14, d: 2.1 },
+    { x: 61.0, y: 72.0, s: 14, d: 2.9 }, { x: 57.0, y: 82.0, s: 12, d: 0.7 },
+    // chandelier
+    { x: 49.6, y: 9.0, s: 20, d: 1.0 }, { x: 46.5, y: 14.0, s: 12, d: 2.2 }, { x: 53.0, y: 13.5, s: 12, d: 0.1 },
+];
+
+// Fixed values so server and client render the same markup.
 const SPARKS = Array.from({ length: 22 }, (_, i) => ({
     left: `${(i * 37 + 11) % 100}%`,
     size: 2 + (i % 3),
@@ -19,80 +41,89 @@ const SPARKS = Array.from({ length: 22 }, (_, i) => ({
     duration: `${9 + (i % 6) * 2}s`,
 }));
 
-function StayForm({ className = '' }: { className?: string }) {
-    const router = useRouter();
-    const today = format(new Date(), 'yyyy-MM-dd');
-    const [checkIn, setCheckIn] = useState('');
-    const [checkOut, setCheckOut] = useState('');
-    const [adults, setAdults] = useState(2);
-    const [error, setError] = useState<string | null>(null);
+function scrollPastHero(section: HTMLElement | null) {
+    if (!section) return;
+    const header = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--site-header-height')) || 62;
+    const top = section.getBoundingClientRect().bottom + window.scrollY - header;
+    window.scrollTo({ top, behavior: 'smooth' });
+}
 
-    const submit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!checkIn || !checkOut || checkOut <= checkIn) {
-            setError('Choose check-in and a later check-out date');
-            return;
-        }
-        const params = new URLSearchParams({ checkIn, checkOut, adults: String(adults), children: '0' });
-        router.push(`/book/search?${params.toString()}`);
+function CoinButton({
+    children,
+    onFlipped,
+    className = '',
+}: {
+    children: React.ReactNode;
+    onFlipped: () => void;
+    className?: string;
+}) {
+    const [flipping, setFlipping] = useState(false);
+    const click = () => {
+        if (flipping) return;
+        setFlipping(true);
+        setTimeout(onFlipped, 750);
+        setTimeout(() => setFlipping(false), 1100);
     };
-
-    const field =
-        'w-full bg-black/40 border border-[#d9b668]/40 text-[#f3e3b5] text-sm px-3 py-2.5 [color-scheme:dark] focus:outline-none focus:border-[#d9b668]';
-    const label = 'block mb-1.5 text-[9px] uppercase tracking-[0.25em] text-[#d9b668]/70';
-
     return (
-        <form onSubmit={submit} className={className}>
-            <div>
-                <label className={label} htmlFor="masq-in">Check-in</label>
-                <input id="masq-in" type="date" min={today} value={checkIn} className={field}
-                    onChange={(e) => { setCheckIn(e.target.value); setError(null); if (checkOut && e.target.value >= checkOut) setCheckOut(''); }} />
-            </div>
-            <div>
-                <label className={label} htmlFor="masq-out">Check-out</label>
-                <input id="masq-out" type="date" min={checkIn || today} value={checkOut} className={field}
-                    onChange={(e) => { setCheckOut(e.target.value); setError(null); }} />
-            </div>
-            <div>
-                <label className={label} htmlFor="masq-guests">Guests</label>
-                <select id="masq-guests" value={adults} onChange={(e) => setAdults(Number(e.target.value))} className={field}>
-                    {[1, 2, 3, 4, 5, 6].map((n) => (
-                        <option key={n} value={n}>{n} {n === 1 ? 'adult' : 'adults'}</option>
-                    ))}
-                </select>
-            </div>
-            <button type="submit" className="masq-btn px-7 py-3.5 text-[11px] uppercase tracking-[0.3em] font-medium text-[#1a0d06]">
-                Check Availability
+        <span className="inline-block [perspective:700px]">
+            <button
+                type="button"
+                onClick={click}
+                className={`masq-btn masq-coin ${flipping ? 'masq-flip' : ''} ${className}`}
+            >
+                {children}
             </button>
-            {error && <p role="alert" className="text-xs text-[#f0a0a0] text-center">{error}</p>}
-        </form>
+        </span>
     );
 }
 
-function Actions({ className = '' }: { className?: string }) {
+function NightOffer() {
     return (
-        <div className={className}>
+        <>
+            <span className="masq-gold font-serif font-semibold uppercase tracking-[0.25em] text-base">31st Night</span>
+            <span className="masq-gold font-serif font-semibold text-4xl leading-none tabular-nums">&#8377;49,999</span>
             <a
-                href={`https://wa.me/${CONTACT.phone.replace(/[^0-9]/g, '')}?text=${WHATSAPP_MESSAGE}`}
+                href={`https://wa.me/${CONTACT.phone.replace(/[^0-9]/g, '')}?text=${BOOK_MESSAGE}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="masq-btn text-center px-7 py-3.5 text-[11px] uppercase tracking-[0.3em] font-medium text-[#1a0d06]"
+                className="masq-btn mt-2 w-full px-9 py-3.5 text-xs uppercase tracking-[0.3em] font-medium text-[#1a0d06]"
             >
-                Reserve Your Evening
+                Book Now
             </a>
-            <a
-                href={`tel:${CONTACT.phone}`}
-                className="text-center px-7 py-3.5 text-[11px] uppercase tracking-[0.3em] text-[#e8cf94] border border-[#d9b668]/50 hover:bg-[#d9b668]/10 transition-colors"
-            >
-                Call {CONTACT.phoneDisplay}
-            </a>
-        </div>
+        </>
     );
 }
 
 export default function MasqueradeHero() {
+    const sectionRef = useRef<HTMLElement>(null);
+    const sceneRef = useRef<HTMLDivElement>(null);
+    const [trail, setTrail] = useState<{ id: number; x: number; y: number }[]>([]);
+    const last = useRef(0);
+    const idRef = useRef(0);
+
+    const onMove = useCallback((e: React.PointerEvent<HTMLElement>) => {
+        const sec = sectionRef.current;
+        if (!sec || e.pointerType === 'touch') return;
+        const r = sec.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width - 0.5;
+        const py = (e.clientY - r.top) / r.height - 0.5;
+        // Parallax: the hall drifts gently against the pointer.
+        if (sceneRef.current) {
+            sceneRef.current.style.transform = `translate(calc(-50% + ${px * -18}px), calc(-50% + ${py * -12}px)) scale(1.04)`;
+        }
+        // Gold dust follows the cursor.
+        const now = performance.now();
+        if (now - last.current < 70) return;
+        last.current = now;
+        const id = ++idRef.current;
+        setTrail((t) => [...t.slice(-11), { id, x: e.clientX - r.left, y: e.clientY - r.top }]);
+        setTimeout(() => setTrail((t) => t.filter((p) => p.id !== id)), 800);
+    }, []);
+
     return (
         <section
+            ref={sectionRef}
+            onPointerMove={onMove}
             aria-label="The Grand Masquerade, New Year's Eve at Olivia Alleppey"
             className="masq relative w-full overflow-hidden bg-[#0b0507] flex flex-col lg:block min-h-[calc(100vh-var(--site-header-height))] supports-[height:100dvh]:min-h-[calc(100dvh-var(--site-header-height))] lg:h-[calc(100vh-var(--site-header-height))] lg:supports-[height:100dvh]:h-[calc(100dvh-var(--site-header-height))]"
         >
@@ -106,71 +137,85 @@ export default function MasqueradeHero() {
                 className="lg:hidden object-cover scale-125 blur-xl brightness-50"
             />
 
-            {/* The scene: full-bleed landscape on desktop, full width on phones */}
-            <motion.div
-                initial={{ opacity: 0, scale: 1.05 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 1.8, ease: 'easeOut' }}
-                className="relative z-10 w-full aspect-[16/9] lg:absolute lg:inset-0 lg:aspect-auto"
-            >
-                <Image
-                    src="/images/masquerade/hall.webp"
-                    alt="The Grand Masquerade at Olivia Alleppey: a candlelit ballroom, a gold feathered mask on red velvet."
-                    fill
-                    priority
-                    sizes="100vw"
-                    className="object-cover"
-                />
-                <div className="hidden lg:block absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_55%,rgba(5,2,3,0.65)_100%)]" />
-                <div className="masq-sheen pointer-events-none absolute inset-x-[22%] top-[14%] h-[34%]" />
-            </motion.div>
+            {/* Phone: the picture at its own shape. Desktop: it fills the screen. */}
+            <div className="relative z-10 w-full aspect-[16/9] lg:absolute lg:inset-0 lg:aspect-auto overflow-hidden">
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 1.8, ease: 'easeOut' }}
+                    className="absolute inset-0"
+                >
+                    {/* Scene box: always 16:9 and always covering, so glints sit on the jewels */}
+                    <div
+                        ref={sceneRef}
+                        className="masq-scene absolute left-1/2 top-1/2 aspect-[16/9] w-full lg:w-[max(100vw,calc((100vh-var(--site-header-height))*1.7778))]"
+                        style={{ transform: 'translate(-50%, -50%) scale(1.04)' }}
+                    >
+                        <Image
+                            src="/images/masquerade/hall.webp"
+                            alt="The Grand Masquerade at Olivia Alleppey: a candlelit ballroom and a gold feathered mask on red velvet."
+                            fill
+                            priority
+                            sizes="100vw"
+                            className="object-cover"
+                        />
+                        {/* Light sweeping across the diamond title */}
+                        <div className="masq-sheen pointer-events-none absolute left-[27%] top-[19%] w-[46%] h-[36%]" />
+                        {/* Every jewel twinkles */}
+                        {GLINTS.map((g, i) => (
+                            <span
+                                key={i}
+                                className="masq-glint"
+                                style={{
+                                    left: `${g.x}%`,
+                                    top: `${g.y}%`,
+                                    width: g.s,
+                                    height: g.s,
+                                    animationDelay: `${g.d}s`,
+                                    animationDuration: `${2.4 + (i % 4) * 0.5}s`,
+                                }}
+                            />
+                        ))}
+                    </div>
+                </motion.div>
+                <div className="hidden lg:block absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_55%,rgba(5,2,3,0.65)_100%)] pointer-events-none" />
+            </div>
 
-            {/* Date line, set in the same serif as the title */}
-            <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.9, duration: 1 }}
-                className="relative z-20 lg:hidden text-center px-4 pt-6"
-            >
-                <p className="masq-gold font-serif font-semibold uppercase tracking-[0.3em] text-sm md:text-lg">
-                    The Grand New Year&rsquo;s Eve
-                </p>
-                <p className="mt-1 font-serif font-semibold uppercase tracking-[0.25em] text-[#e8cf94] text-xs md:text-sm">
-                    Thursday &middot; 31 December &middot; Check-in 2:00 PM
-                </p>
-            </motion.div>
+            {/* Gold dust following the cursor */}
+            {trail.map((p) => (
+                <span key={p.id} className="masq-trail" style={{ left: p.x, top: p.y }} />
+            ))}
 
-            {/* Left: stay on other dates (desktop) */}
+            {/* Left (desktop): one button for every other date */}
             <motion.div
                 initial={{ opacity: 0, x: -24 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.8, duration: 1 }}
-                className="hidden lg:flex absolute z-20 left-8 xl:left-14 top-1/2 -translate-y-1/2 flex-col items-center gap-5 p-6 bg-black/55 backdrop-blur-md border border-[#d9b668]/30"
+                className="hidden lg:flex absolute z-20 left-8 xl:left-14 top-1/2 -translate-y-1/2"
             >
-                <span className="masq-gold font-serif font-semibold uppercase tracking-[0.25em] text-base">Other Dates</span>
-                <StayForm className="flex flex-col gap-4 w-60" />
+                <CoinButton onFlipped={() => scrollPastHero(sectionRef.current)} className="px-9 py-4 text-xs uppercase tracking-[0.3em] font-medium text-[#1a0d06]">
+                    Other Dates
+                </CoinButton>
             </motion.div>
 
-            {/* Right: reserve the evening (desktop) */}
+            {/* Right (desktop): the 31st Night */}
             <motion.div
                 initial={{ opacity: 0, x: 24 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.8, duration: 1 }}
-                className="hidden lg:flex absolute z-20 right-8 xl:right-14 top-1/2 -translate-y-1/2 flex-col items-center gap-5 p-6 bg-black/55 backdrop-blur-md border border-[#d9b668]/30"
+                className="hidden lg:flex absolute z-20 right-8 xl:right-14 top-1/2 -translate-y-1/2 flex-col items-center gap-3 px-8 py-6 bg-black/55 backdrop-blur-md border border-[#d9b668]/30"
             >
-                <span className="masq-gold font-serif font-semibold uppercase tracking-[0.25em] text-base">31 December</span>
-                <p className="-mt-3 text-center font-serif font-semibold uppercase tracking-[0.2em] text-[#e8cf94] text-xs leading-relaxed">
-                    Thursday<br />Check-in 2:00 PM
-                </p>
-                <Actions className="flex flex-col gap-3 w-60" />
+                <NightOffer />
             </motion.div>
 
             {/* Below the picture (mobile / tablet) */}
-            <div className="relative z-10 lg:hidden flex flex-col items-center gap-5 px-4 pb-8 pt-4 w-full">
-                <Actions className="flex flex-col gap-3 w-full max-w-xs" />
-                <span className="masq-gold mt-3 font-serif font-semibold uppercase tracking-[0.25em] text-base">Other Dates</span>
-                <StayForm className="flex flex-col gap-4 w-full max-w-xs" />
-                <p className="mt-2 text-[9px] uppercase tracking-[0.35em] text-[#d9b668]/60">Scroll to explore Olivia</p>
+            <div className="relative z-10 lg:hidden flex flex-col items-center gap-6 px-4 pb-8 pt-6 w-full">
+                <div className="flex flex-col items-center gap-3 px-8 py-6 bg-black/55 border border-[#d9b668]/30 w-full max-w-xs">
+                    <NightOffer />
+                </div>
+                <CoinButton onFlipped={() => scrollPastHero(sectionRef.current)} className="w-full max-w-xs py-4 text-xs uppercase tracking-[0.3em] font-medium text-[#1a0d06]">
+                    Other Dates
+                </CoinButton>
             </div>
 
             {/* Floating gold dust */}
@@ -193,10 +238,7 @@ export default function MasqueradeHero() {
             {/* Scroll cue */}
             <button
                 type="button"
-                onClick={(e) => {
-                    const el = e.currentTarget.closest('section');
-                    if (el) window.scrollTo({ top: el.getBoundingClientRect().bottom + window.scrollY, behavior: 'smooth' });
-                }}
+                onClick={() => scrollPastHero(sectionRef.current)}
                 className="hidden lg:flex absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex-col items-center gap-1 text-[9px] uppercase tracking-[0.35em] text-[#d9b668]/80 hover:text-[#d9b668] transition-colors"
             >
                 Discover Olivia
@@ -214,17 +256,73 @@ export default function MasqueradeHero() {
                     background: linear-gradient(135deg, #f3dc9c 0%, #d9b668 45%, #b68845 100%);
                     box-shadow: 0 0 28px rgba(217,182,104,0.35);
                     transition: box-shadow .3s, filter .3s;
+                    position: relative;
+                    overflow: hidden;
+                    text-align: center;
+                    display: inline-block;
                 }
-                .masq-btn:hover { filter: brightness(1.08); box-shadow: 0 0 40px rgba(217,182,104,0.6); }
+                .masq-btn::after {
+                    content: '';
+                    position: absolute;
+                    inset: 0;
+                    background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.65) 50%, transparent 65%);
+                    transform: translateX(-120%);
+                    animation: masq-btn-shine 3.6s ease-in-out infinite;
+                }
+                @keyframes masq-btn-shine { 0%, 55% { transform: translateX(-120%); } 100% { transform: translateX(120%); } }
+                .masq-btn:hover { filter: brightness(1.08); box-shadow: 0 0 44px rgba(217,182,104,0.65); }
+                .masq-coin { transform-style: preserve-3d; }
+                .masq-flip { animation: masq-coin 0.9s cubic-bezier(.3,.1,.3,1); }
+                @keyframes masq-coin {
+                    0% { transform: rotateY(0) scale(1); }
+                    50% { transform: rotateY(540deg) scale(1.12); }
+                    100% { transform: rotateY(720deg) scale(1); }
+                }
+                .masq-scene { transition: transform 0.35s ease-out; will-change: transform; }
                 .masq-sheen {
-                    background: linear-gradient(105deg, transparent 40%, rgba(255,246,214,0.35) 50%, transparent 60%);
-                    background-size: 250% 100%;
-                    mix-blend-mode: soft-light;
-                    animation: masq-sheen 6s ease-in-out infinite;
+                    background: linear-gradient(105deg, transparent 38%, rgba(255,247,220,0.55) 50%, transparent 62%);
+                    background-size: 260% 100%;
+                    mix-blend-mode: plus-lighter;
+                    animation: masq-sheen 5s ease-in-out infinite;
                 }
                 @keyframes masq-sheen {
-                    0%, 55% { background-position: 150% 0; }
-                    100% { background-position: -50% 0; }
+                    0%, 45% { background-position: 160% 0; }
+                    100% { background-position: -60% 0; }
+                }
+                .masq-glint {
+                    position: absolute;
+                    transform: translate(-50%, -50%) scale(0) rotate(0deg);
+                    pointer-events: none;
+                    mix-blend-mode: screen;
+                    background:
+                        radial-gradient(circle, #fff 0 8%, rgba(255,244,205,0.9) 12%, transparent 32%),
+                        linear-gradient(90deg, transparent 0, #fff8e0 50%, transparent 100%) center / 100% 7% no-repeat,
+                        linear-gradient(0deg, transparent 0, #fff8e0 50%, transparent 100%) center / 7% 100% no-repeat;
+                    filter: drop-shadow(0 0 6px rgba(255,236,170,0.95));
+                    animation: masq-twinkle ease-in-out infinite;
+                }
+                @keyframes masq-twinkle {
+                    0%, 55%, 100% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; }
+                    70% { transform: translate(-50%, -50%) scale(1) rotate(45deg); opacity: 1; }
+                    85% { transform: translate(-50%, -50%) scale(0.45) rotate(90deg); opacity: .8; }
+                }
+                .masq-trail {
+                    position: absolute;
+                    z-index: 30;
+                    width: 10px;
+                    height: 10px;
+                    pointer-events: none;
+                    transform: translate(-50%, -50%);
+                    background:
+                        radial-gradient(circle, #fff 0 15%, rgba(255,240,190,.9) 25%, transparent 60%),
+                        linear-gradient(90deg, transparent, #fff3c4, transparent) center / 100% 12% no-repeat,
+                        linear-gradient(0deg, transparent, #fff3c4, transparent) center / 12% 100% no-repeat;
+                    filter: drop-shadow(0 0 5px rgba(255,226,150,.9));
+                    animation: masq-trail .8s ease-out forwards;
+                }
+                @keyframes masq-trail {
+                    from { opacity: 1; transform: translate(-50%, -50%) scale(1.4) rotate(0); }
+                    to { opacity: 0; transform: translate(-50%, 18px) scale(.2) rotate(120deg); }
                 }
                 .masq-spark {
                     position: absolute;
@@ -244,8 +342,9 @@ export default function MasqueradeHero() {
                 .masq-chevron { animation: masq-bob 1.8s ease-in-out infinite; }
                 @keyframes masq-bob { 50% { transform: translateY(5px) rotate(45deg); } }
                 @media (prefers-reduced-motion: reduce) {
-                    .masq-sheen, .masq-spark, .masq-chevron { animation: none; }
-                    .masq-spark { display: none; }
+                    .masq-sheen, .masq-spark, .masq-chevron, .masq-btn::after, .masq-flip { animation: none; }
+                    .masq-spark, .masq-trail { display: none; }
+                    .masq-glint { animation: none; transform: translate(-50%, -50%) scale(.5); opacity: .7; }
                 }
             `}</style>
         </section>
