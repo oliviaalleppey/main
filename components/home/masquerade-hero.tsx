@@ -98,7 +98,7 @@ export default function MasqueradeHero() {
         >
             {/* Phones: blurred fill behind the picture and the panel below it */}
             <Image
-                src="/images/masquerade/landscape.webp"
+                src="/images/masquerade/hall.webp"
                 alt=""
                 fill
                 sizes="100vw"
@@ -114,7 +114,7 @@ export default function MasqueradeHero() {
                 className="relative z-10 w-full aspect-[16/9] lg:absolute lg:inset-0 lg:aspect-auto"
             >
                 <Image
-                    src="/images/masquerade/landscape.webp"
+                    src="/images/masquerade/hall.webp"
                     alt="The Grand Masquerade at Olivia Alleppey: a candlelit ballroom, a gold feathered mask on red velvet."
                     fill
                     priority
