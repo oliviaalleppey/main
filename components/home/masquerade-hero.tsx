@@ -147,10 +147,10 @@ export default function MasqueradeHero() {
                                     style={{
                                         left: `${x}%`,
                                         top: `${y}%`,
-                                        width: `max(${(size * 2) / 16.71}cqw, 13px)`,
-                                        height: `max(${(size * 2) / 16.71}cqw, 13px)`,
-                                        animationDuration: sweep ? '3.6s' : `${1.3 + ((i * 7) % 5) * 0.4}s`,
-                                        animationDelay: sweep ? `${(x / 100) * 2.4}s` : `${((i * 13) % 40) / 10}s`,
+                                        width: `max(${(size * 1.4) / 16.71}cqw, 10px)`,
+                                        height: `max(${(size * 1.4) / 16.71}cqw, 10px)`,
+                                        animationDuration: sweep ? '5.5s' : `${2.4 + ((i * 7) % 5) * 0.6}s`,
+                                        animationDelay: sweep ? `${(x / 100) * 3.2}s` : `${((i * 13) % 40) / 10}s`,
                                     }}
                                 />
                             );
@@ -257,15 +257,13 @@ export default function MasqueradeHero() {
                         radial-gradient(circle, #fff 0 14%, rgba(255,250,225,1) 20%, rgba(255,230,150,.55) 38%, transparent 60%),
                         linear-gradient(90deg, transparent 0, #fff 50%, transparent 100%) center / 100% 9% no-repeat,
                         linear-gradient(0deg, transparent 0, #fff 50%, transparent 100%) center / 9% 100% no-repeat;
-                    filter: brightness(1.5) drop-shadow(0 0 3px #fff) drop-shadow(0 0 10px rgba(255,225,140,1)) drop-shadow(0 0 22px rgba(255,200,90,.8));
+                    filter: brightness(1.2) drop-shadow(0 0 3px #fff) drop-shadow(0 0 9px rgba(255,225,140,.9));
                     animation: masq-twinkle ease-in-out infinite;
                 }
                 @keyframes masq-twinkle {
-                    0%, 52%, 100% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; }
-                    62% { transform: translate(-50%, -50%) scale(1.35) rotate(45deg); opacity: 1; }
-                    72% { transform: translate(-50%, -50%) scale(.7) rotate(90deg); opacity: 1; }
-                    82% { transform: translate(-50%, -50%) scale(1.1) rotate(135deg); opacity: .9; }
-                    92% { transform: translate(-50%, -50%) scale(.25) rotate(180deg); opacity: .4; }
+                    0%, 68%, 100% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; }
+                    80% { transform: translate(-50%, -50%) scale(1) rotate(45deg); opacity: 1; }
+                    92% { transform: translate(-50%, -50%) scale(.35) rotate(90deg); opacity: .6; }
                 }
                 .masq-trail {
                     position: absolute;
