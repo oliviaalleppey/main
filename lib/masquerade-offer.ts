@@ -74,6 +74,15 @@ export function roomProblem(room: RoomConfig): string | null {
     return null;
 }
 
+/** A room's guests in words, e.g. "2 adults, 1 junior guest, nanny". Used by the booking summary. */
+export function roomGuestsText(room: RoomConfig): string {
+    const parts = [room['extra-adult'] ? '3 adults' : '2 adults'];
+    if (room['junior-guest']) parts.push(`${room['junior-guest']} junior guest${room['junior-guest'] > 1 ? 's' : ''}`);
+    if (room['little-ones']) parts.push(`${room['little-ones']} little one${room['little-ones'] > 1 ? 's' : ''}`);
+    if (room.nanny) parts.push('nanny');
+    return parts.join(', ');
+}
+
 /** People in a room, for the booking record: adults, children (under 12), and the nanny counted with the children. */
 export function roomHeadcount(room: RoomConfig): { adults: number; children: number } {
     return { adults: 2 + room['extra-adult'], children: room['junior-guest'] + room['little-ones'] + room.nanny };

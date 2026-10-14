@@ -12,6 +12,7 @@ import {
     emptyRoom,
     formatINR,
     quoteMasquerade,
+    roomGuestsText,
     roomProblem,
     validateGuest,
     type ExtraId,
@@ -35,7 +36,6 @@ const OPEN_EASE = { duration: 1.5, ease: [0.7, 0, 0.2, 1] as [number, number, nu
 const FIELD =
     'w-full bg-black/55 border border-[#d9b668]/55 px-4 py-3.5 text-base text-[#fff8e6] placeholder:text-[#bfae82] outline-none transition-colors focus:border-[#f6dc9a] focus:bg-black/70';
 const LABEL = 'mb-2 block text-xs font-medium uppercase tracking-[0.14em] text-[#f0d58c]';
-const SALE_LINE = 'text-sm text-[#e0d0a6]';
 
 export default function MasqueradeBooking() {
     const [phase, setPhase] = useState<Phase>('closed');
@@ -49,7 +49,6 @@ export default function MasqueradeBooking() {
     const [errors, setErrors] = useState<Record<string, string>>({});
 
     const [rooms, setRooms] = useState<RoomConfig[]>([emptyRoom()]);
-    const [activeRoom, setActiveRoom] = useState(0);
     const [extras, setExtras] = useState<ExtrasSelection>({});
     const [notes, setNotes] = useState('');
     const [terms, setTerms] = useState(false);
@@ -137,8 +136,9 @@ export default function MasqueradeBooking() {
     const setPackages = (count: number) => {
         const n = Math.min(Math.max(count, 1), roomCap);
         setRooms((prev) => (n > prev.length ? [...prev, ...Array.from({ length: n - prev.length }, emptyRoom)] : prev.slice(0, n)));
-        setActiveRoom((a) => Math.min(a, n - 1));
     };
+
+    const removeRoom = (index: number) => setRooms((prev) => (prev.length > 1 ? prev.filter((_, i) => i !== index) : prev));
 
     const setRoomQty = (index: number, id: RoomAddonId, qty: number) =>
         setRooms((prev) => prev.map((room, i) => (i === index ? { ...room, [id]: qty } : room)));
@@ -209,7 +209,6 @@ export default function MasqueradeBooking() {
 
     const parting = phase === 'opening';
     const sway = { skewX: [0, -1.6, 1.1, -0.5, 0] };
-    const active = rooms[Math.min(activeRoom, rooms.length - 1)];
 
     return (
         <div className="fixed inset-0 z-[110] overflow-hidden" role="dialog" aria-modal="true" aria-label="Reserve The Grand Masquerade, 31st Night">
@@ -267,7 +266,7 @@ export default function MasqueradeBooking() {
                         <div className="flex min-h-full items-center justify-center px-4 py-14 md:py-10">
                             <div
                                 className={`relative w-full border border-[#d9b668]/40 bg-black/55 backdrop-blur-[3px] px-5 py-8 md:px-10 md:py-10 ${
-                                    step === 2 ? 'max-w-5xl' : 'max-w-md'
+                                    step === 2 ? 'max-w-7xl' : 'max-w-md'
                                 } transition-[max-width] duration-500`}
                             >
                                 <button
@@ -372,211 +371,245 @@ export default function MasqueradeBooking() {
                                             animate={{ opacity: 1, x: 0 }}
                                             exit={{ opacity: 0, x: 24 }}
                                             transition={{ duration: 0.3 }}
+                                            className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_350px] lg:items-start"
                                         >
-                                            {/* Packages: one package, one room */}
-                                            <div className="mb-6 flex flex-col items-center justify-between gap-3 border border-[#d9b668]/30 bg-black/30 px-4 py-3 sm:flex-row">
-                                                <div className="text-center sm:text-left">
-                                                    <p className="text-base font-semibold text-[#fff8e6]">The 31st Night package</p>
-                                                    <p className={SALE_LINE}>
-                                                        {formatINR(PACKAGE_PRICE_PAISE)} + GST per room, room included
-                                                    </p>
+                                            {/* Left: choosing */}
+                                            <div className="min-w-0">
+                                                {/* 1. The main choice: how many packages (one package, one room) */}
+                                                <div className="mb-8 flex flex-col items-center justify-between gap-4 border-2 border-[#f0d58c]/70 bg-gradient-to-r from-[#d9b668]/20 via-[#d9b668]/8 to-transparent px-5 py-5 shadow-[0_0_34px_rgba(240,205,120,.18)] sm:flex-row">
+                                                    <div className="flex items-center gap-4 text-center sm:text-left">
+                                                        <StepNumber n={1} />
+                                                        <div>
+                                                            <p className="text-xl font-semibold text-[#fff8e6]">The 31st Night package</p>
+                                                            <p className="mt-0.5 text-base text-[#f0e2b8]">{formatINR(PACKAGE_PRICE_PAISE)} + GST per room, room included</p>
+                                                        </div>
+                                                    </div>
+                                                    <Stepper value={rooms.length} min={1} max={roomCap} onChange={setPackages} label="packages" large />
                                                 </div>
-                                                <Stepper value={rooms.length} min={1} max={roomCap} onChange={setPackages} label="packages" />
-                                            </div>
 
-                                            {/* Row 1: this room's people */}
-                                            <section className="mb-6">
-                                                <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-                                                    <h3 className="font-sans text-sm font-semibold uppercase tracking-[0.14em] text-[#f0d58c]">
-                                                        {rooms.length > 1 ? `Room ${activeRoom + 1} guests` : 'Your room: guests'}
+                                                {/* 2. Who is staying: one card per room, each with its own choices */}
+                                                <section className="mb-8">
+                                                    <h3 className="mb-2 flex items-center gap-3 font-sans text-base font-semibold uppercase tracking-[0.12em] text-[#f6dc9a]">
+                                                        <StepNumber n={2} />
+                                                        {rooms.length > 1 ? 'Who is staying in each room?' : 'Who is staying in your room?'}
                                                     </h3>
-                                                    {rooms.length > 1 && (
-                                                        <div className="flex flex-wrap gap-2" role="tablist" aria-label="Rooms">
-                                                            {rooms.map((room, i) => (
-                                                                <button
-                                                                    key={i}
-                                                                    type="button"
-                                                                    role="tab"
-                                                                    aria-selected={i === activeRoom}
-                                                                    onClick={() => setActiveRoom(i)}
-                                                                    className={`px-3.5 py-1.5 text-sm font-medium border transition-colors ${
-                                                                        i === activeRoom
-                                                                            ? 'border-[#f3dc9c] bg-[#d9b668]/25 text-[#fff1c4]'
-                                                                            : 'border-[#d9b668]/40 text-[#e0d0a6] hover:border-[#d9b668]'
+                                                    <p className="mb-4 text-sm text-[#e8dab0]">
+                                                        Each room has a couple. Add one extra adult, or up to two more people (children and nanny). Need more adults? Add another package.
+                                                    </p>
+
+                                                    <div className="space-y-5">
+                                                        {rooms.map((room, roomIndex) => (
+                                                            <div
+                                                                key={roomIndex}
+                                                                className="border border-[#d9b668]/55 bg-gradient-to-b from-[#d9b668]/10 to-transparent px-4 py-5 md:px-5"
+                                                            >
+                                                                <div className="mb-4 flex items-center justify-between gap-3">
+                                                                    <div>
+                                                                        <p className="text-lg font-semibold text-[#fff8e6]">{rooms.length > 1 ? `Room ${roomIndex + 1}` : 'Your room'}</p>
+                                                                        <p className="text-sm text-[#e0d0a6]">{roomGuestsText(room)}</p>
+                                                                    </div>
+                                                                    {rooms.length > 1 && (
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => removeRoom(roomIndex)}
+                                                                            className="shrink-0 text-sm font-medium text-[#e0d0a6] underline underline-offset-4 hover:text-[#fff1c4]"
+                                                                        >
+                                                                            Remove room
+                                                                        </button>
+                                                                    )}
+                                                                </div>
+
+                                                                <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+                                                                    {ROOM_ADDONS.map((item) => {
+                                                                        const qty = room[item.id];
+                                                                        const on = qty > 0;
+                                                                        const canAdd = roomCanTake(room, item.id);
+                                                                        return (
+                                                                            <div
+                                                                                key={item.id}
+                                                                                onClick={() => !on && canAdd && setRoomQty(roomIndex, item.id, 1)}
+                                                                                className={`relative flex min-h-[10.5rem] flex-col justify-between gap-4 border-2 px-4 py-4 transition-all ${
+                                                                                    on
+                                                                                        ? 'cursor-default border-[#f6dc9a] bg-gradient-to-b from-[#d9b668]/35 to-[#d9b668]/12 shadow-[0_0_30px_rgba(240,205,120,.4)]'
+                                                                                        : canAdd
+                                                                                            ? 'cursor-pointer border-[#d9b668]/60 bg-black/50 hover:border-[#f0d58c] hover:bg-[#d9b668]/10'
+                                                                                            : 'cursor-not-allowed border-[#d9b668]/15 bg-black/25 opacity-45'
+                                                                                }`}
+                                                                            >
+                                                                                {on && (
+                                                                                    <span aria-hidden className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-[#f6dc9a] text-[#1a0d06]">
+                                                                                        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7" /></svg>
+                                                                                    </span>
+                                                                                )}
+                                                                                <div className="pr-6">
+                                                                                    <p className="text-lg font-semibold leading-snug text-[#fff8e6]">{item.name}</p>
+                                                                                    <p className="mt-1.5 text-sm leading-snug text-[#e8dab0]">{item.note}</p>
+                                                                                </div>
+                                                                                <div className="flex flex-wrap items-end justify-between gap-x-2 gap-y-2">
+                                                                                    <span className="text-2xl font-semibold tabular-nums text-[#f6dc9a]">{formatINR(item.pricePaise)}</span>
+                                                                                    {on ? (
+                                                                                        <Stepper
+                                                                                            value={qty}
+                                                                                            min={0}
+                                                                                            max={roomCanTake(room, item.id) ? item.max : qty}
+                                                                                            onChange={(q) => setRoomQty(roomIndex, item.id, q)}
+                                                                                            label={`${item.name}, ${rooms.length > 1 ? `room ${roomIndex + 1}` : 'your room'}`}
+                                                                                        />
+                                                                                    ) : (
+                                                                                        <span className="text-sm font-semibold uppercase tracking-[0.1em] text-[#f6dc9a]">{canAdd ? 'Add +' : 'Not available'}</span>
+                                                                                    )}
+                                                                                </div>
+                                                                            </div>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+
+                                                    {rooms.length < roomCap && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setPackages(rooms.length + 1)}
+                                                            className="mt-4 text-sm font-medium text-[#f6dc9a] underline underline-offset-4 hover:text-[#fff1c4]"
+                                                        >
+                                                            + Add another package (another room)
+                                                        </button>
+                                                    )}
+                                                </section>
+
+                                                {/* 3. Optional: people who join the evening from outside the hotel. Deliberately quiet. */}
+                                                <section className="mb-5">
+                                                    <h3 className="mb-1 flex items-center gap-2 font-sans text-xs font-semibold uppercase tracking-[0.14em] text-[#d9c585]">
+                                                        <span className="text-[#bfae82]">3 ·</span> Joining the evening from outside the hotel (optional)
+                                                    </h3>
+                                                    <p className="mb-2.5 text-xs text-[#bfae82]">Visiting guests and drivers. Not tied to a room.</p>
+                                                    <div className="grid grid-cols-2 gap-2 xl:grid-cols-4">
+                                                        {EXTRAS.map((item) => {
+                                                            const qty = extras[item.id] ?? 0;
+                                                            const on = qty > 0;
+                                                            return (
+                                                                <div
+                                                                    key={item.id}
+                                                                    onClick={() => !on && setExtraQty(item.id, 1)}
+                                                                    className={`flex cursor-pointer flex-col justify-between gap-2 border px-3 py-2.5 transition-colors ${
+                                                                        on
+                                                                            ? 'border-[#d9b668]/70 bg-[#d9b668]/10'
+                                                                            : 'border-[#d9b668]/20 bg-black/20 hover:border-[#d9b668]/45'
                                                                     }`}
                                                                 >
-                                                                    Room {i + 1}
-                                                                    {roomProblem(room) ? ' !' : ''}
-                                                                </button>
-                                                            ))}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <p className={`${SALE_LINE} mb-3`}>
-                                                    Each room has a couple. Add one extra adult, or up to two more people (children and nanny). Need more adults? Add another package.
-                                                </p>
-                                                <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-                                                    {ROOM_ADDONS.map((item) => {
-                                                        const qty = active[item.id];
-                                                        const on = qty > 0;
-                                                        const canAdd = roomCanTake(active, item.id);
-                                                        return (
-                                                            <div
-                                                                key={item.id}
-                                                                onClick={() => !on && canAdd && setRoomQty(activeRoom, item.id, 1)}
-                                                                className={`flex flex-col justify-between gap-3 border px-3 py-3 md:px-4 transition-all ${
-                                                                    on
-                                                                        ? 'cursor-default border-[#f3dc9c] bg-[#d9b668]/15 shadow-[0_0_22px_rgba(240,205,120,.25)]'
-                                                                        : canAdd
-                                                                            ? 'cursor-pointer border-[#d9b668]/30 bg-black/35 hover:border-[#d9b668]/70'
-                                                                            : 'cursor-not-allowed border-[#d9b668]/15 bg-black/25 opacity-50'
-                                                                }`}
-                                                            >
-                                                                <div>
-                                                                    <p className="text-[15px] font-semibold leading-snug text-[#fff8e6]">{item.name}</p>
-                                                                    <p className="mt-1 text-[13px] leading-snug text-[#dccda4]">{item.note}</p>
+                                                                    <div>
+                                                                        <p className="text-sm font-medium leading-snug text-[#efe3c0]">{item.name}</p>
+                                                                        <p className="mt-0.5 text-xs leading-snug text-[#bfae82]">{item.note}</p>
+                                                                    </div>
+                                                                    <div className="flex items-end justify-between gap-2">
+                                                                        <span className="text-base font-medium tabular-nums text-[#e6cf8e]">{formatINR(item.pricePaise)}</span>
+                                                                        {on ? (
+                                                                            <Stepper value={qty} min={0} max={MAX_EXTRA_QTY} onChange={(q) => setExtraQty(item.id, q)} label={item.name} compact />
+                                                                        ) : (
+                                                                            <span className="text-xs font-medium uppercase tracking-[0.1em] text-[#bfae82]">Add +</span>
+                                                                        )}
+                                                                    </div>
                                                                 </div>
-                                                                <div className="flex items-end justify-between gap-2">
-                                                                    <span className="text-lg font-semibold tabular-nums text-[#f6dc9a]">{formatINR(item.pricePaise)}</span>
-                                                                    {on ? (
-                                                                        <Stepper
-                                                                            value={qty}
-                                                                            min={0}
-                                                                            max={roomCanTake(active, item.id) ? item.max : qty}
-                                                                            onChange={(q) => setRoomQty(activeRoom, item.id, q)}
-                                                                            label={item.name}
-                                                                            compact
-                                                                        />
-                                                                    ) : (
-                                                                        <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[#f0d58c]">{canAdd ? 'Add +' : 'Not available'}</span>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
-                                                {rooms.length < roomCap && (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setPackages(rooms.length + 1);
-                                                            setActiveRoom(rooms.length);
-                                                        }}
-                                                        className="mt-3 text-sm font-medium text-[#f6dc9a] underline underline-offset-4 hover:text-[#fff1c4]"
-                                                    >
-                                                        + Add another package (another room)
-                                                    </button>
-                                                )}
-                                            </section>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </section>
 
-                                            {/* Row 2: for the whole booking */}
-                                            <section className="mb-6">
-                                                <h3 className="mb-1 font-sans text-sm font-semibold uppercase tracking-[0.14em] text-[#f0d58c]">Visiting guests & drivers</h3>
-                                                <p className={`${SALE_LINE} mb-3`}>For people who join the evening but stay outside the hotel. Not tied to a room.</p>
-                                                <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-                                                    {EXTRAS.map((item) => {
-                                                        const qty = extras[item.id] ?? 0;
-                                                        const on = qty > 0;
-                                                        return (
-                                                            <div
-                                                                key={item.id}
-                                                                onClick={() => !on && setExtraQty(item.id, 1)}
-                                                                className={`flex cursor-pointer flex-col justify-between gap-3 border px-3 py-3 md:px-4 transition-all ${
-                                                                    on
-                                                                        ? 'border-[#f3dc9c] bg-[#d9b668]/15 shadow-[0_0_22px_rgba(240,205,120,.25)]'
-                                                                        : 'border-[#d9b668]/30 bg-black/35 hover:border-[#d9b668]/70'
-                                                                }`}
-                                                            >
-                                                                <div>
-                                                                    <p className="text-[15px] font-semibold leading-snug text-[#fff8e6]">{item.name}</p>
-                                                                    <p className="mt-1 text-[13px] leading-snug text-[#dccda4]">{item.note}</p>
-                                                                </div>
-                                                                <div className="flex items-end justify-between gap-2">
-                                                                    <span className="text-lg font-semibold tabular-nums text-[#f6dc9a]">{formatINR(item.pricePaise)}</span>
-                                                                    {on ? (
-                                                                        <Stepper value={qty} min={0} max={MAX_EXTRA_QTY} onChange={(q) => setExtraQty(item.id, q)} label={item.name} compact />
-                                                                    ) : (
-                                                                        <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[#f0d58c]">Add +</span>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                        );
-                                                    })}
+                                                <div>
+                                                    <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.12em] text-[#bfae82]" htmlFor="bk-notes">Special requests (optional)</label>
+                                                    <textarea
+                                                        id="bk-notes"
+                                                        rows={2}
+                                                        maxLength={1000}
+                                                        className="w-full bg-black/25 border border-[#d9b668]/25 px-3 py-2.5 text-sm text-[#efe3c0] placeholder:text-[#a69870] outline-none transition-colors focus:border-[#d9b668]/70"
+                                                        value={notes}
+                                                        onChange={(e) => setNotes(e.target.value)}
+                                                        placeholder="Dietary needs, celebrations, anything we should know"
+                                                    />
                                                 </div>
-                                            </section>
-
-                                            <div className="mb-6">
-                                                <label className={LABEL} htmlFor="bk-notes">Special requests (optional)</label>
-                                                <textarea
-                                                    id="bk-notes"
-                                                    rows={2}
-                                                    maxLength={1000}
-                                                    className={FIELD}
-                                                    value={notes}
-                                                    onChange={(e) => setNotes(e.target.value)}
-                                                    placeholder="Dietary needs, celebrations, anything we should know"
-                                                />
                                             </div>
 
-                                            <label className="mb-6 flex cursor-pointer items-start gap-3 text-sm text-[#e8dab0]">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={terms}
-                                                    onChange={(e) => setTerms(e.target.checked)}
-                                                    className="mt-0.5 h-5 w-5 shrink-0 accent-[#d9b668]"
-                                                />
-                                                <span>I agree to the terms and cancellation policy for The Grand Masquerade, 31st Night.</span>
-                                            </label>
+                                            {/* Right: checking */}
+                                            <aside aria-label="Booking summary" className="border border-[#d9b668]/50 bg-black/60 px-5 py-6 lg:sticky lg:top-4">
+                                                <h3 className="font-sans text-sm font-semibold uppercase tracking-[0.14em] text-[#f0d58c]">Booking summary</h3>
 
-                                            {(serverError || quote.problem) && (
-                                                <p role="alert" className="mb-4 border border-[#f5a3a3]/50 bg-[#4a0f14]/60 px-4 py-3 text-sm text-[#f5c4c4]">
-                                                    {serverError || quote.problem}
-                                                </p>
-                                            )}
+                                                <ul className="mt-4 space-y-3 border-b border-[#d9b668]/30 pb-4">
+                                                    {rooms.map((room, i) => (
+                                                        <li key={i} className="text-sm">
+                                                            <p className="font-semibold text-[#fff8e6]">{rooms.length > 1 ? `Room ${i + 1}` : 'Your room'}</p>
+                                                            <p className="text-[#e0d0a6]">{roomGuestsText(room)}</p>
+                                                            {roomProblem(room) && <p className="mt-1 text-[#ffb3b3]">{roomProblem(room)}</p>}
+                                                        </li>
+                                                    ))}
+                                                </ul>
 
-                                            <div className="border-t border-[#d9b668]/30 pt-5">
-                                                <dl className="mb-4 space-y-1 text-sm text-[#e8dab0]">
-                                                    <div className="flex justify-between">
-                                                        <dt>{rooms.length > 1 ? `${rooms.length} packages (room included)` : 'Package (room included)'}</dt>
+                                                <dl className="mt-4 space-y-2 text-sm text-[#f3e7c6]">
+                                                    <div className="flex justify-between gap-3">
+                                                        <dt>
+                                                            {rooms.length > 1 ? `${rooms.length} packages` : 'Package'}
+                                                            <span className="block text-xs text-[#d9c9a0]">room included</span>
+                                                        </dt>
                                                         <dd className="tabular-nums">{formatINR(quote.roomSubtotalPaise)}</dd>
                                                     </div>
-                                                    {quote.addOnSubtotalPaise > 0 && (
-                                                        <div className="flex justify-between">
-                                                            <dt>Add-ons</dt>
-                                                            <dd className="tabular-nums">{formatINR(quote.addOnSubtotalPaise)}</dd>
+                                                    {quote.addOnTotals.map((t) => (
+                                                        <div key={t.id} className="flex justify-between gap-3 text-[#e8dab0]">
+                                                            <dt>
+                                                                {t.name}
+                                                                {t.qty > 1 ? ` × ${t.qty}` : ''}
+                                                            </dt>
+                                                            <dd className="tabular-nums">{formatINR(t.subtotalPaise)}</dd>
                                                         </div>
-                                                    )}
-                                                    <div className="flex justify-between">
+                                                    ))}
+                                                    <div className="flex justify-between gap-3 border-t border-[#d9b668]/25 pt-2">
+                                                        <dt>Subtotal</dt>
+                                                        <dd className="tabular-nums">{formatINR(quote.subtotalPaise)}</dd>
+                                                    </div>
+                                                    <div className="flex justify-between gap-3">
                                                         <dt>GST ({GST_RATE}%)</dt>
                                                         <dd className="tabular-nums">{formatINR(quote.gstPaise)}</dd>
                                                     </div>
                                                 </dl>
-                                                <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between">
-                                                    <div className="text-center sm:text-left">
-                                                        <p className="text-xs font-medium uppercase tracking-[0.14em] text-[#f0d58c]">Total payable</p>
-                                                        <p className="text-3xl font-semibold tabular-nums text-[#f6dc9a]">{formatINR(quote.totalPaise)}</p>
-                                                    </div>
-                                                    <div className="flex flex-col gap-3 sm:flex-row">
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => setStep(1)}
-                                                            disabled={sending}
-                                                            className="border border-[#d9b668]/60 px-8 py-3.5 text-sm font-semibold uppercase tracking-[0.16em] text-[#f6dc9a] transition-colors hover:bg-[#d9b668]/15 disabled:opacity-40"
-                                                        >
-                                                            Back
-                                                        </button>
-                                                        <button
-                                                            type="button"
-                                                            onClick={submit}
-                                                            disabled={sending || !!quote.problem || soldOut}
-                                                            className="masq-btn px-8 py-3.5 text-sm uppercase tracking-[0.16em] font-semibold text-[#1a0d06] disabled:opacity-60"
-                                                        >
-                                                            {sending ? (payOnline ? 'Opening payment…' : 'Sending…') : payOnline ? 'Book Now' : 'Send Booking Request'}
-                                                        </button>
-                                                    </div>
+
+                                                <div className="mt-4 border-t border-[#d9b668]/40 pt-4">
+                                                    <p className="text-xs font-medium uppercase tracking-[0.14em] text-[#f0d58c]">Total payable</p>
+                                                    <p className="text-3xl font-semibold tabular-nums text-[#f6dc9a]">{formatINR(quote.totalPaise)}</p>
                                                 </div>
-                                                {payOnline && <p className="mt-3 text-center text-xs text-[#d9c9a0] sm:text-right">You will be taken to our secure payment page. Your room is held for 10 minutes.</p>}
-                                            </div>
+
+                                                <label className="mt-5 flex cursor-pointer items-start gap-3 text-sm text-[#e8dab0]">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={terms}
+                                                        onChange={(e) => setTerms(e.target.checked)}
+                                                        className="mt-0.5 h-5 w-5 shrink-0 accent-[#d9b668]"
+                                                    />
+                                                    <span>I agree to the terms and cancellation policy for The Grand Masquerade, 31st Night.</span>
+                                                </label>
+
+                                                {(serverError || quote.problem) && (
+                                                    <p role="alert" className="mt-4 border border-[#f5a3a3]/50 bg-[#4a0f14]/60 px-4 py-3 text-sm text-[#f5c4c4]">
+                                                        {serverError || quote.problem}
+                                                    </p>
+                                                )}
+
+                                                <button
+                                                    type="button"
+                                                    onClick={submit}
+                                                    disabled={sending || !!quote.problem || soldOut}
+                                                    className="masq-btn mt-5 w-full px-6 py-4 text-sm uppercase tracking-[0.16em] font-semibold text-[#1a0d06] disabled:opacity-60"
+                                                >
+                                                    {sending ? (payOnline ? 'Opening payment…' : 'Sending…') : payOnline ? 'Book Now' : 'Send Booking Request'}
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setStep(1)}
+                                                    disabled={sending}
+                                                    className="mt-3 w-full border border-[#d9b668]/60 px-6 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-[#f6dc9a] transition-colors hover:bg-[#d9b668]/15 disabled:opacity-40"
+                                                >
+                                                    Back
+                                                </button>
+                                                {payOnline && <p className="mt-3 text-center text-xs text-[#d9c9a0]">You will be taken to our secure payment page. Your room is held for 10 minutes.</p>}
+                                            </aside>
                                         </motion.div>
                                     )}
 
@@ -615,6 +648,7 @@ function Stepper({
     onChange,
     label,
     compact = false,
+    large = false,
 }: {
     value: number;
     min: number;
@@ -622,20 +656,29 @@ function Stepper({
     onChange: (v: number) => void;
     label: string;
     compact?: boolean;
+    large?: boolean;
 }) {
-    const size = compact ? 'h-7 w-7' : 'h-9 w-9';
+    const size = compact ? 'h-7 w-7' : large ? 'h-11 w-11 text-lg' : 'h-9 w-9';
     const btn = `${size} flex items-center justify-center border border-[#d9b668]/60 text-[#f3dc9c] transition-colors hover:bg-[#d9b668]/25 disabled:opacity-30 disabled:hover:bg-transparent`;
     return (
         <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
             <button type="button" className={btn} onClick={() => onChange(value - 1)} disabled={value <= min} aria-label={`Decrease ${label}`}>
                 &minus;
             </button>
-            <span className={`${compact ? 'w-5 text-sm' : 'w-7 text-base'} text-center tabular-nums text-[#f6e9c4]`} aria-live="polite">
+            <span className={`${compact ? 'w-5 text-sm' : large ? 'w-9 text-xl font-semibold' : 'w-7 text-base'} text-center tabular-nums text-[#f6e9c4]`} aria-live="polite">
                 {value}
             </span>
             <button type="button" className={btn} onClick={() => onChange(value + 1)} disabled={value >= max} aria-label={`Increase ${label}`}>
                 +
             </button>
         </div>
+    );
+}
+
+function StepNumber({ n }: { n: number }) {
+    return (
+        <span aria-hidden className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-[#f0d58c] bg-[#d9b668]/20 text-base font-semibold text-[#fff1c4]">
+            {n}
+        </span>
     );
 }
