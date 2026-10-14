@@ -94,13 +94,14 @@ function useMasqueradeMusic(sectionRef: React.RefObject<HTMLElement | null>) {
                 setPlaying(true);
             }).catch(() => {});
         };
-        window.addEventListener('pointerdown', start);
-        window.addEventListener('keydown', start);
+        // Touch screens only grant permission to play sound when the finger lifts, so listen for every kind of
+        // press and release; `start` does nothing once the music is already playing.
+        const gestures = ['pointerdown', 'pointerup', 'touchend', 'click', 'keydown'] as const;
+        gestures.forEach((g) => window.addEventListener(g, start, { passive: true }));
 
         return () => {
             cancelAnimationFrame(raf);
-            window.removeEventListener('pointerdown', start);
-            window.removeEventListener('keydown', start);
+            gestures.forEach((g) => window.removeEventListener(g, start));
             audio.pause();
             audio.src = '';
         };
