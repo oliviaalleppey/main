@@ -4,7 +4,6 @@ import { diningOutlets, roomTypes, venues } from "@/lib/db/schema";
 import { and, eq, ne } from "drizzle-orm";
 import { absoluteUrl } from "@/lib/seo";
 import { findParentVenue } from "@/lib/venue-sections";
-import { PARTY_PATH } from "@/lib/config/party-popup";
 
 // Regenerate at most once a day; room and outlet slugs change rarely.
 export const revalidate = 86400;
@@ -21,7 +20,6 @@ const staticRoutes: { path: string; priority: number; changeFrequency: Entry["ch
     { path: "/discover", priority: 0.7, changeFrequency: "monthly" },
     { path: "/gallery", priority: 0.6, changeFrequency: "monthly" },
     { path: "/membership", priority: 0.6, changeFrequency: "monthly" },
-    { path: PARTY_PATH, priority: 0.8, changeFrequency: "weekly" },
     { path: "/contact", priority: 0.6, changeFrequency: "yearly" },
     { path: "/terms", priority: 0.2, changeFrequency: "yearly" },
     { path: "/privacy", priority: 0.2, changeFrequency: "yearly" },

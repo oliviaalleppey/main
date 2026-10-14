@@ -16,7 +16,6 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Trash2, Upload, Loader2, Save, Database, AlertCircle, Palette, RotateCcw } from 'lucide-react';
 import Image from 'next/image';
-import PartyPopupCard from './PartyPopupCard';
 
 // ── Color Picker Row ─────────────────────────────────────────
 type PaletteKey = keyof ColorPalette;
@@ -197,8 +196,6 @@ export default function SettingsPage() {
                     <p className="text-muted-foreground">Manage hero images, brand colors, and visual settings.</p>
                 </div>
             </div>
-
-            <PartyPopupCard />
 
             {/* ── COLOR PALETTE ──────────────────────────────── */}
             <Card>

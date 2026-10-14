@@ -17,6 +17,8 @@ const nextConfig: NextConfig = {
       // crawlers see the permanent move rather than a 200 that bounces.
       { source: '/accommodation', destination: '/rooms', permanent: true },
       { source: '/policies', destination: '/refund-policy', permanent: true },
+      // The 31st Night party was cancelled; send old links and shares to the homepage.
+      { source: '/31st-night/:path*', destination: '/', permanent: false },
       // /experiences was linked from the main nav, the footer and the homepage
       // but never built, so every page carried links to a 404. /discover covers
       // the same ground. Note fragments are client-side, so /experiences#yoga

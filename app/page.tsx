@@ -8,9 +8,6 @@ import ExperiencesStrip from '@/components/home/experiences-strip';
 import BrandMarquee from '@/components/home/brand-marquee';
 import EditorialStory from '@/components/home/editorial-story';
 import { getHeroMedia, getHomeHeroImages } from '@/app/admin/media/actions';
-import NewYearPopup from '@/components/home/new-year-popup';
-import { getPartyPopup } from '@/lib/db/actions/settings-actions';
-import { PARTY_END } from '@/lib/config/party-popup';
 import { altText, pageMetadata } from '@/lib/seo';
 
 export const revalidate = 60;
@@ -23,12 +20,10 @@ export const metadata: Metadata = pageMetadata({
 });
 
 export default async function Home() {
-  const [heroMedia, homeHeroImages, partyPopup] = await Promise.all([
+  const [heroMedia, homeHeroImages] = await Promise.all([
     getHeroMedia(),
     getHomeHeroImages(),
-    getPartyPopup(),
   ]);
-  const showPartyPopup = partyPopup.enabled && Date.now() < new Date(PARTY_END).getTime();
   const heroSlides = homeHeroImages.map(img => ({ url: img.imageUrl, alt: altText(img.title, 'Olivia Alleppey, luxury 5-star hotel on the Alappuzha backwaters') }));
 
   return (
@@ -56,10 +51,6 @@ export default async function Home() {
 
       {/* Editorial Story */}
       <EditorialStory />
-
-      {showPartyPopup && (
-        <NewYearPopup content={partyPopup} />
-      )}
 
     </main>
   );
