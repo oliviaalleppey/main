@@ -22,7 +22,7 @@ import { getBookingProvider } from '@/lib/providers/crs/factory';
 import { mapCrsRoomTypeMatchesInternal } from '@/lib/config/crs';
 import { EasebuzzService } from '@/lib/services/easebuzz';
 import { bookingStateMachine } from '@/lib/services/booking-state-machine';
-import { allocateRooms, totalAvailable, type RoomTypeStock } from '@/lib/masquerade-allocation';
+import { allocateRooms, orderByPriceDescending, totalAvailable, type RoomTypeStock } from '@/lib/masquerade-allocation';
 import {
     PACKAGE_PRICE_PAISE,
     STAY_CHECK_IN,
@@ -30,6 +30,10 @@ import {
     MAX_ROOMS,
     ROOM_ADDONS,
     quoteMasquerade,
+    isTestEmail,
+    TEST_GST_PAISE,
+    TEST_SUBTOTAL_PAISE,
+    TEST_TOTAL_PAISE,
     roomHeadcount,
     normalizeRoom,
     validateGuest,
@@ -135,6 +139,15 @@ async function readStock(executor: Executor): Promise<Stock> {
     return { types: stock, ratePlanByType };
 }
 
+/** Read-only view of the rooms for the night, in the order they would be sold. For checking the setup. */
+export async function previewMasqueradeStock() {
+    const { types, ratePlanByType } = await readStock(db);
+    return {
+        order: orderByPriceDescending(types).map((t) => ({ ...t, hasRatePlan: ratePlanByType.has(t.roomTypeId) })),
+        totalAvailable: totalAvailable(types),
+    };
+}
+
 let statusCache: { at: number; available: number | null } | null = null;
 
 /** What the page needs to know before it shows the form. Cached briefly because it asks the hotel's system. */
@@ -221,9 +234,24 @@ export async function startMasqueradeCheckout(input: MasqueradeCheckoutInput): P
         throw new MasqueradeError('invalid', `Choose between 1 and ${MAX_ROOMS} packages.`);
     }
 
-    const quote = quoteMasquerade(input.rooms, input.extras);
-    if (quote.problem) throw new MasqueradeError('invalid', quote.problem);
-    const rooms = input.rooms.map(normalizeRoom);
+    // A listed test guest pays a few rupees for one room, from the bottom of the price list, so a test never ties
+    // up a top room. Everyone else is priced exactly as quoted.
+    const isTest = isTestEmail(email, process.env.MASQUERADE_TEST_EMAILS);
+    const baseQuote = quoteMasquerade(isTest ? [{}] : input.rooms, isTest ? {} : input.extras);
+    if (baseQuote.problem) throw new MasqueradeError('invalid', baseQuote.problem);
+    const quote = isTest
+        ? {
+            ...baseQuote,
+            lines: [{ ...baseQuote.lines[0], unitPaise: TEST_SUBTOTAL_PAISE, amountPaise: TEST_SUBTOTAL_PAISE }],
+            roomSubtotalPaise: TEST_SUBTOTAL_PAISE,
+            roomTaxPaise: TEST_GST_PAISE,
+            subtotalPaise: TEST_SUBTOTAL_PAISE,
+            gstPaise: TEST_GST_PAISE,
+            totalPaise: TEST_TOTAL_PAISE,
+        }
+        : baseQuote;
+    const rooms = (isTest ? [{}] : input.rooms).map(normalizeRoom);
+    const roomPricePaise = isTest ? TEST_SUBTOTAL_PAISE : PACKAGE_PRICE_PAISE;
 
     const addOnIds = quote.addOnTotals.length
         ? await ensureAddOnRows(quote.addOnTotals.map((t) => ({ name: t.name, unitPaise: t.unitPaise })))
@@ -243,7 +271,10 @@ export async function startMasqueradeCheckout(input: MasqueradeCheckoutInput): P
         await tx.execute(sql`select pg_advisory_xact_lock(hashtext('masquerade-31st-night'))`);
 
         const { types, ratePlanByType } = await readStock(tx as unknown as Executor);
-        const allocation = allocateRooms(types, quote.rooms);
+        const allocation = allocateRooms(
+            isTest ? types.map((t) => ({ ...t, pricePaise: -t.pricePaise })) : types,
+            quote.rooms,
+        );
         if (!allocation.ok) {
             throw new MasqueradeError(
                 'sold_out',
@@ -259,6 +290,7 @@ export async function startMasqueradeCheckout(input: MasqueradeCheckoutInput): P
             .filter((t) => !ROOM_ADDONS.some((r) => r.id === t.id))
             .map((t) => `${t.name} x ${t.qty} (outside the hotel)`);
         const specialRequests = [
+            isTest ? 'TEST BOOKING (Rs 5). Do not honour: cancel this room in Hotsoft and refund the guest.' : '',
             'THE GRAND MASQUERADE, 31 DECEMBER. Package price includes the room.',
             ...roomNotes,
             ...extraNotes,
@@ -298,9 +330,9 @@ export async function startMasqueradeCheckout(input: MasqueradeCheckoutInput): P
                 roomTypeId,
                 ratePlanId: ratePlanByType.get(roomTypeId),
                 quantity,
-                pricePerNight: PACKAGE_PRICE_PAISE,
+                pricePerNight: roomPricePaise,
                 nights: 1,
-                subtotal: PACKAGE_PRICE_PAISE * quantity,
+                subtotal: roomPricePaise * quantity,
             })),
         );
 

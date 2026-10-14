@@ -108,3 +108,23 @@ test('guest details are validated', () => {
     const bad = validateGuest({ name: 'A', email: 'nope', phone: '12' });
     assert.ok(bad.name && bad.email && bad.phone);
 });
+
+test('test mode: ₹5 in total, made of a taxable part and 18% GST that add up exactly', async () => {
+    const { TEST_SUBTOTAL_PAISE, TEST_GST_PAISE, TEST_TOTAL_PAISE } = await import('@/lib/masquerade-offer');
+    assert.equal(TEST_SUBTOTAL_PAISE + TEST_GST_PAISE, TEST_TOTAL_PAISE);
+    assert.equal(TEST_TOTAL_PAISE, 500);
+    assert.equal(TEST_GST_PAISE, Math.round(TEST_SUBTOTAL_PAISE * 0.18));
+});
+
+test('test mode only applies to listed emails, and an empty list means nobody', async () => {
+    const { isTestEmail } = await import('@/lib/masquerade-offer');
+    assert.equal(isTestEmail('owner@example.com', ''), false);
+    assert.equal(isTestEmail('owner@example.com', undefined), false);
+    assert.equal(isTestEmail('', 'owner@example.com'), false);
+    assert.equal(isTestEmail('owner@example.com', 'owner@example.com'), true);
+    assert.equal(isTestEmail(' Owner@Example.com ', 'a@x.com, OWNER@example.com ,b@y.com'), true);
+    assert.equal(isTestEmail('guest@example.com', 'owner@example.com'), false);
+    // a substring or a look-alike must not match
+    assert.equal(isTestEmail('owner@example.co', 'owner@example.com'), false);
+    assert.equal(isTestEmail('wner@example.com', 'owner@example.com'), false);
+});

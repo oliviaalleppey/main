@@ -193,3 +193,25 @@ export function validateGuest(input: { name: string; email: string; phone: strin
     if (digits.length < 10 || digits.length > 15) errors.phone = 'Please enter a valid phone number';
     return errors;
 }
+
+// ---------------------------------------------------------------------------------------------------------------
+// Test booking: lets the hotel try the whole payment and Hotsoft path for a few rupees.
+//
+// It only applies to email addresses listed in MASQUERADE_TEST_EMAILS, so with that setting empty (the normal
+// state) nothing here ever runs. A test is always one room, no add-ons, and a fixed total.
+// ---------------------------------------------------------------------------------------------------------------
+
+export const TEST_SUBTOTAL_PAISE = 424;
+export const TEST_GST_PAISE = Math.round(TEST_SUBTOTAL_PAISE * (GST_RATE / 100)); // 76
+export const TEST_TOTAL_PAISE = TEST_SUBTOTAL_PAISE + TEST_GST_PAISE; // 500, which is ₹5
+
+/** Whether this guest's email is on the comma-separated test list. An empty list means nobody. */
+export function isTestEmail(email: string, list: string | undefined | null): boolean {
+    const wanted = email.trim().toLowerCase();
+    if (!wanted || !list) return false;
+    return list
+        .split(',')
+        .map((e) => e.trim().toLowerCase())
+        .filter(Boolean)
+        .includes(wanted);
+}
