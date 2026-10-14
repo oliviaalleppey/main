@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import MasqueradeHero from '@/components/home/masquerade-hero';
 import MasqueradeIntro from '@/components/home/masquerade-intro';
+import MasqueradeBooking from '@/components/home/masquerade-booking';
 import MasqueradeHeaderToggle from '@/components/home/masquerade-header-toggle';
 import HeroSection from '@/components/home/hero-section';
 import CompactIntro from '@/components/home/compact-intro';
@@ -39,6 +40,9 @@ export default async function Home() {
 
       {/* The Grand Masquerade, 31 December: full-screen event opener */}
       <MasqueradeHero />
+
+      {/* Curtain booking form, opened by the Book Now button */}
+      <MasqueradeBooking />
 
       {/* Cinematic Hero with Floating Search */}
       <HeroSection initialMedia={heroMedia} heroSlides={heroSlides} />

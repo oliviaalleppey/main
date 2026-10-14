@@ -3,13 +3,9 @@
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { CONTACT } from '@/lib/seo';
 import { JEWELS } from './masquerade-jewels';
 import { MOBILE_JEWELS } from './masquerade-jewels-mobile';
-
-const BOOK_MESSAGE = encodeURIComponent(
-    "Hello Olivia Alleppey, I would like to book The Grand Masquerade, 31st Night (₹49,999)."
-);
+import { MASQUERADE_BOOK_EVENT } from './masquerade-booking';
 
 function scrollPastHero(section: HTMLElement | null) {
     if (!section) return;
@@ -54,7 +50,7 @@ function useMasqueradeMusic(sectionRef: React.RefObject<HTMLElement | null>) {
     }, [on]);
 
     useEffect(() => {
-        const audio = new Audio('/audio/masquerade.mp3');
+        const audio = new Audio('/audio/masquerade-new.mp3');
         audio.loop = true;
         audio.preload = 'auto';
         audio.volume = 0;
@@ -255,19 +251,19 @@ export default function MasqueradeHero() {
                             December &middot; Thursday
                         </span>
                     </div>
-                    <a
-                        href={`https://wa.me/${CONTACT.phone.replace(/[^0-9]/g, '')}?text=${BOOK_MESSAGE}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label="Book the 31st Night, 31 December, for ₹49,999"
+                    <button
+                        type="button"
+                        onClick={() => window.dispatchEvent(new Event(MASQUERADE_BOOK_EVENT))}
+                        aria-label="Book the 31st Night, 31 December, for ₹49,999 plus GST"
                         className="masq-btn flex items-center justify-center gap-3 px-6 h-14 text-[#1a0d06] w-full md:w-auto"
                     >
                         <span className="font-serif font-bold text-2xl md:text-3xl tabular-nums leading-none">&#8377;49,999</span>
+                        <span className="text-[10px] font-semibold uppercase tracking-wider -ml-1.5 self-end pb-1">+ GST</span>
                         <span className="h-6 w-px bg-[#1a0d06]/35" />
                         <span className="text-[11px] uppercase tracking-[0.25em] font-semibold">
                             Book Now <span aria-hidden>&rarr;</span>
                         </span>
-                    </a>
+                    </button>
                 </div>
             </motion.div>
 

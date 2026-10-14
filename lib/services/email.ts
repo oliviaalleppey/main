@@ -667,6 +667,146 @@ export async function sendEventInquiryToReservations(params: {
 }
 
 /**
+ * The Grand Masquerade (31st Night) booking request: details for the reservations team.
+ * Every value passed in must already be HTML-escaped.
+ */
+export async function sendMasqueradeRequestToReservations(params: {
+  name: string;
+  email: string;
+  phone: string;
+  packages: number;
+  lines: { label: string; qty: number; unit: string; amount: string }[];
+  total: string;
+  notes?: string;
+}) {
+  try {
+    const resend = getResendClient();
+    if (!resend) {
+      return { skipped: true };
+    }
+
+    const { name, email, phone, packages, lines, total, notes } = params;
+    const rows = lines
+      .map(
+        (l) =>
+          `<tr><td style="padding:6px 0;border-bottom:1px solid #F2EDE4;">${l.label}</td><td style="padding:6px 8px;border-bottom:1px solid #F2EDE4;text-align:center;">${l.qty}</td><td style="padding:6px 8px;border-bottom:1px solid #F2EDE4;text-align:right;">${l.unit}</td><td style="padding:6px 0;border-bottom:1px solid #F2EDE4;text-align:right;font-weight:600;">${l.amount}</td></tr>`,
+      )
+      .join('');
+
+    const { data, error } = await resend.emails.send({
+      from: `${HOTEL_NAME} <${FROM_EMAIL}>`,
+      to: [RESERVATION_TEAM_EMAIL, FNB_EMAIL],
+      replyTo: [email],
+      subject: `31st Night booking request - ${name} (${total})`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head><meta charset="utf-8"></head>
+          <body style="font-family: Arial, sans-serif; line-height:1.6; color:#1A1A1A;">
+            <div style="max-width:640px;margin:0 auto;padding:20px;">
+              <div style="background:#991E29;color:#FFFEF9;padding:22px 26px;">
+                <h2 style="margin:0;">The Grand Masquerade: 31st Night</h2>
+                <p style="margin:6px 0 0 0;opacity:.9;">New booking request from the website. Please contact the guest to confirm and take payment.</p>
+              </div>
+              <div style="background:#F8F6F4;padding:22px 26px;">
+                <p style="margin:0 0 4px 0;"><strong>Name:</strong> ${name}</p>
+                <p style="margin:0 0 4px 0;"><strong>Email:</strong> ${email}</p>
+                <p style="margin:0 0 4px 0;"><strong>Phone:</strong> ${phone}</p>
+                <p style="margin:0 0 14px 0;"><strong>Packages:</strong> ${packages}</p>
+                <table style="width:100%;border-collapse:collapse;font-size:14px;">
+                  <tr style="color:#5F5A4F;text-align:left;"><th style="padding:6px 0;">Item</th><th style="padding:6px 8px;">Qty</th><th style="padding:6px 8px;text-align:right;">Price</th><th style="padding:6px 0;text-align:right;">Amount</th></tr>
+                  ${rows}
+                  <tr><td colspan="3" style="padding:10px 0;text-align:right;font-weight:700;">Total</td><td style="padding:10px 0;text-align:right;font-weight:700;">${total}</td></tr>
+                </table>
+                <p style="margin:16px 0 0 0;padding:12px;background:#FAF8F2;border:1px solid #ECE5D8;white-space:pre-wrap;"><strong>Special requests:</strong><br/>${notes || '—'}</p>
+              </div>
+            </div>
+          </body>
+        </html>
+      `,
+    });
+
+    if (error) {
+      console.error('Error sending masquerade request email:', error);
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Failed to send masquerade request email:', error);
+    throw new Error('Failed to send masquerade request');
+  }
+}
+
+/**
+ * The Grand Masquerade (31st Night): acknowledgment to the guest. Every value passed in must already be HTML-escaped.
+ */
+export async function sendMasqueradeAcknowledgment(params: {
+  to: string;
+  name: string;
+  lines: { label: string; qty: number; amount: string }[];
+  total: string;
+}) {
+  try {
+    const resend = getResendClient();
+    if (!resend) {
+      return { skipped: true };
+    }
+
+    const { to, name, lines, total } = params;
+    const rows = lines
+      .map(
+        (l) =>
+          `<tr><td style="padding:6px 0;border-bottom:1px solid #ECE5D8;">${l.label}${l.qty > 1 ? ` × ${l.qty}` : ''}</td><td style="padding:6px 0;border-bottom:1px solid #ECE5D8;text-align:right;">${l.amount}</td></tr>`,
+      )
+      .join('');
+
+    const { data, error } = await resend.emails.send({
+      from: `${HOTEL_NAME} <${FROM_EMAIL}>`,
+      to: [to],
+      subject: 'We have received your Grand Masquerade request',
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head><meta charset="utf-8"></head>
+          <body style="font-family: Arial, sans-serif; line-height:1.6; color:#1A1A1A;">
+            <div style="max-width:600px;margin:0 auto;padding:20px;">
+              <div style="background:#991E29;color:#FFFEF9;padding:28px;text-align:center;">
+                <h1 style="margin:0;">${HOTEL_NAME}</h1>
+                <p style="margin:6px 0 0 0;letter-spacing:2px;">THE GRAND MASQUERADE · 31 DECEMBER</p>
+              </div>
+              <div style="background:#F8F6F4;padding:28px;">
+                <p>Dear ${name},</p>
+                <p>Thank you for choosing The Grand Masquerade. We have received your request and our reservations team will contact you shortly to confirm your booking and arrange payment.</p>
+                <table style="width:100%;border-collapse:collapse;font-size:14px;margin:16px 0;">
+                  ${rows}
+                  <tr><td style="padding:10px 0;font-weight:700;">Total</td><td style="padding:10px 0;text-align:right;font-weight:700;">${total}</td></tr>
+                </table>
+                <p style="font-size:13px;color:#5F5A4F;">Your booking is not confirmed until our team contacts you.</p>
+              </div>
+              <div style="text-align:center;padding:20px;color:#B8AFA4;font-size:14px;">
+                <p>${HOTEL_NAME}<br>Alappuzha, Kerala, India</p>
+                <p>Email: <a href="mailto:${FROM_EMAIL}" style="color:#C9A84C;">${FROM_EMAIL}</a> &nbsp;|&nbsp; Phone: <a href="tel:${HOTEL_PHONE_TEL}" style="color:#C9A84C;">${HOTEL_PHONE}</a></p>
+              </div>
+            </div>
+          </body>
+        </html>
+      `,
+    });
+
+    if (error) {
+      console.error('Error sending masquerade acknowledgment:', error);
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Failed to send masquerade acknowledgment:', error);
+    throw new Error('Failed to send acknowledgment email');
+  }
+}
+
+/**
  * Send membership application acknowledgment email to applicant
  */
 export async function sendMembershipApplicationAcknowledgment(params: {
