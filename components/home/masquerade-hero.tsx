@@ -4,34 +4,11 @@ import { useCallback, useRef, useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { CONTACT } from '@/lib/seo';
+import { JEWELS } from './masquerade-jewels';
 
 const BOOK_MESSAGE = encodeURIComponent(
     "Hello Olivia Alleppey, I would like to book The Grand Masquerade, 31st Night (₹49,999)."
 );
-
-// Positions are percentages of the picture itself (the scene box below keeps the
-// picture's 16:9 shape), so every glint stays on its jewel at any screen size.
-const GLINTS: { x: number; y: number; s: number; d: number }[] = [
-    // THE + finial
-    { x: 50.0, y: 21.5, s: 22, d: 0.0 }, { x: 48.2, y: 27.5, s: 14, d: 1.1 }, { x: 52.0, y: 28.0, s: 16, d: 2.0 },
-    // GRAND
-    { x: 41.2, y: 33.0, s: 20, d: 0.6 }, { x: 45.0, y: 35.5, s: 14, d: 1.7 }, { x: 49.0, y: 32.5, s: 18, d: 2.6 },
-    { x: 53.5, y: 35.0, s: 14, d: 0.3 }, { x: 58.0, y: 32.0, s: 20, d: 1.4 }, { x: 61.0, y: 36.0, s: 14, d: 2.3 },
-    // flourishes
-    { x: 37.5, y: 37.5, s: 16, d: 0.9 }, { x: 63.8, y: 37.5, s: 16, d: 1.9 },
-    // MASQUERADE
-    { x: 29.5, y: 43.5, s: 18, d: 2.8 }, { x: 33.5, y: 45.5, s: 14, d: 0.2 }, { x: 37.5, y: 42.5, s: 18, d: 1.3 },
-    { x: 41.5, y: 46.0, s: 14, d: 2.2 }, { x: 45.5, y: 43.0, s: 20, d: 0.8 }, { x: 49.5, y: 46.5, s: 14, d: 1.8 },
-    { x: 53.5, y: 43.0, s: 18, d: 2.7 }, { x: 57.5, y: 45.5, s: 14, d: 0.5 }, { x: 61.5, y: 42.5, s: 18, d: 1.6 },
-    { x: 65.5, y: 45.5, s: 14, d: 2.5 }, { x: 69.5, y: 43.0, s: 20, d: 1.0 }, { x: 72.0, y: 47.0, s: 14, d: 2.0 },
-    // bottom ornament
-    { x: 50.0, y: 53.5, s: 18, d: 1.5 },
-    // mask: brooch, filigree and rim
-    { x: 47.2, y: 75.5, s: 26, d: 0.4 }, { x: 55.5, y: 67.5, s: 18, d: 1.2 }, { x: 52.0, y: 78.5, s: 14, d: 2.1 },
-    { x: 61.0, y: 72.0, s: 14, d: 2.9 }, { x: 57.0, y: 82.0, s: 12, d: 0.7 },
-    // chandelier
-    { x: 49.6, y: 9.0, s: 20, d: 1.0 }, { x: 46.5, y: 14.0, s: 12, d: 2.2 }, { x: 53.0, y: 13.5, s: 12, d: 0.1 },
-];
 
 // Fixed values so server and client render the same markup.
 const SPARKS = Array.from({ length: 22 }, (_, i) => ({
@@ -125,7 +102,7 @@ export default function MasqueradeHero() {
             ref={sectionRef}
             onPointerMove={onMove}
             aria-label="The Grand Masquerade, New Year's Eve at Olivia Alleppey"
-            className="masq relative w-full overflow-hidden bg-[#0b0507] flex flex-col lg:block min-h-[calc(100vh-var(--site-header-height))] supports-[height:100dvh]:min-h-[calc(100dvh-var(--site-header-height))] lg:h-[calc(100vh-var(--site-header-height))] lg:supports-[height:100dvh]:h-[calc(100dvh-var(--site-header-height))]"
+            className="masq relative w-full overflow-hidden bg-[#0b0507] flex flex-col md:block min-h-[calc(100vh-var(--site-header-height))] supports-[height:100dvh]:min-h-[calc(100dvh-var(--site-header-height))] md:h-[calc(100vh-var(--site-header-height))] md:supports-[height:100dvh]:h-[calc(100dvh-var(--site-header-height))]"
         >
             {/* Phones: blurred fill behind the picture and the panel below it */}
             <Image
@@ -134,11 +111,11 @@ export default function MasqueradeHero() {
                 fill
                 sizes="100vw"
                 aria-hidden
-                className="lg:hidden object-cover scale-125 blur-xl brightness-50"
+                className="md:hidden object-cover scale-125 blur-xl brightness-50"
             />
 
             {/* Phone: the picture at its own shape. Desktop: it fills the screen. */}
-            <div className="relative z-10 w-full aspect-[16/9] lg:absolute lg:inset-0 lg:aspect-auto overflow-hidden">
+            <div className="relative z-10 w-full aspect-[16/9] md:absolute md:inset-0 md:aspect-auto overflow-hidden">
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -148,7 +125,7 @@ export default function MasqueradeHero() {
                     {/* Scene box: always 16:9 and always covering, so glints sit on the jewels */}
                     <div
                         ref={sceneRef}
-                        className="masq-scene absolute left-1/2 top-1/2 aspect-[16/9] w-full lg:w-[max(100vw,calc((100vh-var(--site-header-height))*1.7778))]"
+                        className="masq-scene [container-type:inline-size] absolute left-1/2 top-1/2 aspect-[16/9] w-full md:w-[max(100vw,calc((100vh-var(--site-header-height))*1.7778))]"
                         style={{ transform: 'translate(-50%, -50%) scale(1.04)' }}
                     >
                         <Image
@@ -159,26 +136,28 @@ export default function MasqueradeHero() {
                             sizes="100vw"
                             className="object-cover"
                         />
-                        {/* Light sweeping across the diamond title */}
-                        <div className="masq-sheen pointer-events-none absolute left-[27%] top-[19%] w-[46%] h-[36%]" />
-                        {/* Every jewel twinkles */}
-                        {GLINTS.map((g, i) => (
-                            <span
-                                key={i}
-                                className="masq-glint"
-                                style={{
-                                    left: `${g.x}%`,
-                                    top: `${g.y}%`,
-                                    width: g.s,
-                                    height: g.s,
-                                    animationDelay: `${g.d}s`,
-                                    animationDuration: `${2.4 + (i % 4) * 0.5}s`,
-                                }}
-                            />
-                        ))}
+                        {/* Each diamond has its own glint: some twinkle on their own beat,
+                            the rest catch a light that travels across the title */}
+                        {JEWELS.map(([x, y, size], i) => {
+                            const sweep = i % 2 === 0;
+                            return (
+                                <span
+                                    key={i}
+                                    className="masq-glint"
+                                    style={{
+                                        left: `${x}%`,
+                                        top: `${y}%`,
+                                        width: `max(${(size * 0.9) / 16.71}cqw, 7px)`,
+                                        height: `max(${(size * 0.9) / 16.71}cqw, 7px)`,
+                                        animationDuration: sweep ? '6s' : `${2.6 + ((i * 7) % 5) * 0.6}s`,
+                                        animationDelay: sweep ? `${(x / 100) * 3.2}s` : `${((i * 13) % 40) / 10}s`,
+                                    }}
+                                />
+                            );
+                        })}
                     </div>
                 </motion.div>
-                <div className="hidden lg:block absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_55%,rgba(5,2,3,0.65)_100%)] pointer-events-none" />
+                <div className="hidden md:block absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_55%,rgba(5,2,3,0.65)_100%)] pointer-events-none" />
             </div>
 
             {/* Gold dust following the cursor */}
@@ -191,7 +170,7 @@ export default function MasqueradeHero() {
                 initial={{ opacity: 0, x: -24 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.8, duration: 1 }}
-                className="hidden lg:flex absolute z-20 left-8 xl:left-14 top-1/2 -translate-y-1/2"
+                className="hidden md:flex absolute z-20 left-6 xl:left-14 bottom-10"
             >
                 <CoinButton onFlipped={() => scrollPastHero(sectionRef.current)} className="px-9 py-4 text-xs uppercase tracking-[0.3em] font-medium text-[#1a0d06]">
                     Other Dates
@@ -203,13 +182,13 @@ export default function MasqueradeHero() {
                 initial={{ opacity: 0, x: 24 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.8, duration: 1 }}
-                className="hidden lg:flex absolute z-20 right-8 xl:right-14 top-1/2 -translate-y-1/2 flex-col items-center gap-3 px-8 py-6 bg-black/55 backdrop-blur-md border border-[#d9b668]/30"
+                className="hidden md:flex absolute z-20 right-6 xl:right-14 bottom-10 flex-col items-center gap-3 px-8 py-6 bg-black/55 backdrop-blur-md border border-[#d9b668]/30"
             >
                 <NightOffer />
             </motion.div>
 
             {/* Below the picture (mobile / tablet) */}
-            <div className="relative z-10 lg:hidden flex flex-col items-center gap-6 px-4 pb-8 pt-6 w-full">
+            <div className="relative z-10 md:hidden flex flex-col items-center gap-6 px-4 pb-8 pt-6 w-full">
                 <div className="flex flex-col items-center gap-3 px-8 py-6 bg-black/55 border border-[#d9b668]/30 w-full max-w-xs">
                     <NightOffer />
                 </div>
@@ -234,16 +213,6 @@ export default function MasqueradeHero() {
                     />
                 ))}
             </div>
-
-            {/* Scroll cue */}
-            <button
-                type="button"
-                onClick={() => scrollPastHero(sectionRef.current)}
-                className="hidden lg:flex absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex-col items-center gap-1 text-[9px] uppercase tracking-[0.35em] text-[#d9b668]/80 hover:text-[#d9b668] transition-colors"
-            >
-                Discover Olivia
-                <span className="masq-chevron block w-2 h-2 border-b border-r border-current rotate-45" />
-            </button>
 
             <style>{`
                 .masq-gold {
@@ -279,16 +248,6 @@ export default function MasqueradeHero() {
                     100% { transform: rotateY(720deg) scale(1); }
                 }
                 .masq-scene { transition: transform 0.35s ease-out; will-change: transform; }
-                .masq-sheen {
-                    background: linear-gradient(105deg, transparent 38%, rgba(255,247,220,0.55) 50%, transparent 62%);
-                    background-size: 260% 100%;
-                    mix-blend-mode: plus-lighter;
-                    animation: masq-sheen 5s ease-in-out infinite;
-                }
-                @keyframes masq-sheen {
-                    0%, 45% { background-position: 160% 0; }
-                    100% { background-position: -60% 0; }
-                }
                 .masq-glint {
                     position: absolute;
                     transform: translate(-50%, -50%) scale(0) rotate(0deg);
@@ -302,9 +261,9 @@ export default function MasqueradeHero() {
                     animation: masq-twinkle ease-in-out infinite;
                 }
                 @keyframes masq-twinkle {
-                    0%, 55%, 100% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; }
-                    70% { transform: translate(-50%, -50%) scale(1) rotate(45deg); opacity: 1; }
-                    85% { transform: translate(-50%, -50%) scale(0.45) rotate(90deg); opacity: .8; }
+                    0%, 78%, 100% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; }
+                    86% { transform: translate(-50%, -50%) scale(1) rotate(45deg); opacity: 1; }
+                    94% { transform: translate(-50%, -50%) scale(0.4) rotate(90deg); opacity: .7; }
                 }
                 .masq-trail {
                     position: absolute;
@@ -342,7 +301,7 @@ export default function MasqueradeHero() {
                 .masq-chevron { animation: masq-bob 1.8s ease-in-out infinite; }
                 @keyframes masq-bob { 50% { transform: translateY(5px) rotate(45deg); } }
                 @media (prefers-reduced-motion: reduce) {
-                    .masq-sheen, .masq-spark, .masq-chevron, .masq-btn::after, .masq-flip { animation: none; }
+                    .masq-spark, .masq-chevron, .masq-btn::after, .masq-flip { animation: none; }
                     .masq-spark, .masq-trail { display: none; }
                     .masq-glint { animation: none; transform: translate(-50%, -50%) scale(.5); opacity: .7; }
                 }
