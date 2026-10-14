@@ -2,11 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 import { CONTACT } from '@/lib/seo';
-
-// Midnight, 31 December 2026 in IST.
-const EVENT_TIME = new Date('2026-12-31T00:00:00+05:30').getTime();
 
 const WHATSAPP_MESSAGE = encodeURIComponent(
     "Hello Olivia Alleppey, I would like to reserve for The Grand Masquerade on 31st December."
@@ -20,41 +19,53 @@ const SPARKS = Array.from({ length: 22 }, (_, i) => ({
     duration: `${9 + (i % 6) * 2}s`,
 }));
 
-function useCountdown() {
-    const [left, setLeft] = useState<number | null>(null);
-    useEffect(() => {
-        const tick = () => setLeft(Math.max(0, EVENT_TIME - Date.now()));
-        tick();
-        const id = setInterval(tick, 1000);
-        return () => clearInterval(id);
-    }, []);
-    return left;
-}
+function StayForm({ className = '' }: { className?: string }) {
+    const router = useRouter();
+    const today = format(new Date(), 'yyyy-MM-dd');
+    const [checkIn, setCheckIn] = useState('');
+    const [checkOut, setCheckOut] = useState('');
+    const [adults, setAdults] = useState(2);
+    const [error, setError] = useState<string | null>(null);
 
-function Countdown({ className = '' }: { className?: string }) {
-    const left = useCountdown();
-    const parts =
-        left === null
-            ? ([['Days', 0], ['Hours', 0], ['Minutes', 0], ['Seconds', 0]] as const)
-            : ([
-                  ['Days', Math.floor(left / 86400000)],
-                  ['Hours', Math.floor(left / 3600000) % 24],
-                  ['Minutes', Math.floor(left / 60000) % 60],
-                  ['Seconds', Math.floor(left / 1000) % 60],
-              ] as const);
+    const submit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!checkIn || !checkOut || checkOut <= checkIn) {
+            setError('Choose check-in and a later check-out date');
+            return;
+        }
+        const params = new URLSearchParams({ checkIn, checkOut, adults: String(adults), children: '0' });
+        router.push(`/book/search?${params.toString()}`);
+    };
+
+    const field =
+        'w-full bg-black/40 border border-[#d9b668]/40 text-[#f3e3b5] text-sm px-3 py-2.5 [color-scheme:dark] focus:outline-none focus:border-[#d9b668]';
+    const label = 'block mb-1.5 text-[9px] uppercase tracking-[0.25em] text-[#d9b668]/70';
+
     return (
-        <div className={className} aria-label="Time until the event">
-            {parts.map(([label, value]) => (
-                <div key={label} className="text-center min-w-[3rem]">
-                    <div className="masq-gold font-serif text-3xl lg:text-5xl tabular-nums leading-none">
-                        {left === null ? '--' : String(value).padStart(2, '0')}
-                    </div>
-                    <div className="mt-2 text-[9px] lg:text-[10px] uppercase tracking-[0.25em] text-[#d9b668]/70">
-                        {label}
-                    </div>
-                </div>
-            ))}
-        </div>
+        <form onSubmit={submit} className={className}>
+            <div>
+                <label className={label} htmlFor="masq-in">Check-in</label>
+                <input id="masq-in" type="date" min={today} value={checkIn} className={field}
+                    onChange={(e) => { setCheckIn(e.target.value); setError(null); if (checkOut && e.target.value >= checkOut) setCheckOut(''); }} />
+            </div>
+            <div>
+                <label className={label} htmlFor="masq-out">Check-out</label>
+                <input id="masq-out" type="date" min={checkIn || today} value={checkOut} className={field}
+                    onChange={(e) => { setCheckOut(e.target.value); setError(null); }} />
+            </div>
+            <div>
+                <label className={label} htmlFor="masq-guests">Guests</label>
+                <select id="masq-guests" value={adults} onChange={(e) => setAdults(Number(e.target.value))} className={field}>
+                    {[1, 2, 3, 4, 5, 6].map((n) => (
+                        <option key={n} value={n}>{n} {n === 1 ? 'adult' : 'adults'}</option>
+                    ))}
+                </select>
+            </div>
+            <button type="submit" className="masq-btn px-7 py-3.5 text-[11px] uppercase tracking-[0.3em] font-medium text-[#1a0d06]">
+                Check Availability
+            </button>
+            {error && <p role="alert" className="text-xs text-[#f0a0a0] text-center">{error}</p>}
+        </form>
     );
 }
 
@@ -103,8 +114,8 @@ export default function MasqueradeHero() {
                 transition={{ delay: 0.8, duration: 1 }}
                 className="relative z-10 hidden lg:flex flex-1 flex-col items-center gap-8"
             >
-                <span className="text-[10px] uppercase tracking-[0.4em] text-[#d9b668]/80">The doors open in</span>
-                <Countdown className="grid grid-cols-2 gap-x-12 gap-y-8" />
+                <span className="text-[10px] uppercase tracking-[0.4em] text-[#d9b668]/80">Stay with us on other dates</span>
+                <StayForm className="flex flex-col gap-4 w-64" />
             </motion.div>
 
             {/* The invitation */}
@@ -140,8 +151,10 @@ export default function MasqueradeHero() {
 
             {/* Below the invitation (mobile / tablet) */}
             <div className="relative z-10 lg:hidden flex flex-col items-center gap-5 px-4 py-6 w-full">
-                <Countdown className="flex gap-5" />
                 <Actions className="flex flex-col gap-3 w-full max-w-xs" />
+                <span className="mt-2 text-[10px] uppercase tracking-[0.4em] text-[#d9b668]/80">Stay with us on other dates</span>
+                <StayForm className="flex flex-col gap-4 w-full max-w-xs" />
+                <p className="mt-2 text-[9px] uppercase tracking-[0.35em] text-[#d9b668]/60">Scroll to explore Olivia</p>
             </div>
 
             {/* Floating gold dust */}
