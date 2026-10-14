@@ -1,8 +1,8 @@
 /**
  * The Grand Masquerade, 31st Night: pay-and-book.
  *
- * A guest buys one package per room. The most expensive free room type goes first, then the next, down the list,
- * so each paying guest takes the best room still available. The booking is written into the same tables the
+ * A guest buys one package per room. Rooms are given out in the order the hotel chose (see MASQUERADE_SELL_ORDER),
+ * so each paying guest takes the next room type still available. The booking is written into the same tables the
  * normal booking flow uses (bookings, booking_items, booking_add_ons, payments), so the existing Easebuzz return
  * route confirms it and finalizeFromWebhook sends the reservation to Hotsoft, the confirmation emails and the
  * WhatsApp message. Nothing about payment or the CRS is re-implemented here.
@@ -22,7 +22,7 @@ import { getBookingProvider } from '@/lib/providers/crs/factory';
 import { mapCrsRoomTypeMatchesInternal } from '@/lib/config/crs';
 import { EasebuzzService } from '@/lib/services/easebuzz';
 import { bookingStateMachine } from '@/lib/services/booking-state-machine';
-import { allocateRooms, orderByPriceDescending, totalAvailable, type RoomTypeStock } from '@/lib/masquerade-allocation';
+import { allocateRooms, orderForSale, sellRankForSlug, totalAvailable, type RoomTypeStock } from '@/lib/masquerade-allocation';
 import {
     PACKAGE_PRICE_PAISE,
     STAY_CHECK_IN,
@@ -132,6 +132,7 @@ async function readStock(executor: Executor): Promise<Stock> {
         stock.push({
             roomTypeId: type.id,
             name: type.name,
+            sellRank: sellRankForSlug(type.slug),
             pricePaise: crs.price || type.basePrice,
             available: Math.max(0, crs.availableCount - (held.get(type.id) ?? 0)),
         });
@@ -143,7 +144,7 @@ async function readStock(executor: Executor): Promise<Stock> {
 export async function previewMasqueradeStock() {
     const { types, ratePlanByType } = await readStock(db);
     return {
-        order: orderByPriceDescending(types).map((t) => ({ ...t, hasRatePlan: ratePlanByType.has(t.roomTypeId) })),
+        order: orderForSale(types).map((t) => ({ ...t, hasRatePlan: ratePlanByType.has(t.roomTypeId) })),
         totalAvailable: totalAvailable(types),
     };
 }
@@ -234,7 +235,7 @@ export async function startMasqueradeCheckout(input: MasqueradeCheckoutInput): P
         throw new MasqueradeError('invalid', `Choose between 1 and ${MAX_ROOMS} packages.`);
     }
 
-    // A listed test guest pays a few rupees for one room, from the bottom of the price list, so a test never ties
+    // A listed test guest pays a few rupees for one room, from the bottom of the selling order, so a test never ties
     // up a top room. Everyone else is priced exactly as quoted.
     const isTest = isTestEmail(email, process.env.MASQUERADE_TEST_EMAILS);
     const baseQuote = quoteMasquerade(isTest ? [{}] : input.rooms, isTest ? {} : input.extras);
@@ -271,10 +272,7 @@ export async function startMasqueradeCheckout(input: MasqueradeCheckoutInput): P
         await tx.execute(sql`select pg_advisory_xact_lock(hashtext('masquerade-31st-night'))`);
 
         const { types, ratePlanByType } = await readStock(tx as unknown as Executor);
-        const allocation = allocateRooms(
-            isTest ? types.map((t) => ({ ...t, pricePaise: -t.pricePaise })) : types,
-            quote.rooms,
-        );
+        const allocation = allocateRooms(types, quote.rooms, { lastFirst: isTest });
         if (!allocation.ok) {
             throw new MasqueradeError(
                 'sold_out',
