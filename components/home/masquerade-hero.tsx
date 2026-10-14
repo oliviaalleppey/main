@@ -94,7 +94,7 @@ export default function MasqueradeHero() {
                 className="relative border-t border-[#d9b668]/50 bg-[#0a0608] px-5 md:px-10 xl:px-16 py-6 md:py-0 md:h-[var(--bar)]"
             >
                 <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#f3dc9c] to-transparent" />
-                <div className="mx-auto max-w-7xl h-full grid gap-6 md:gap-0 grid-cols-2 md:grid-cols-[1fr_1fr_1fr_auto] items-center">
+                <div className="mx-auto max-w-7xl h-full grid gap-6 md:gap-0 grid-cols-2 md:grid-cols-[1fr_1fr_1fr_auto] items-start md:items-center">
                     <div className="md:pr-8"><Detail label="Date">Thursday, 31 December</Detail></div>
                     <div className="md:px-8 md:border-l border-[#d9b668]/25"><Detail label="Check-in">2:00 PM</Detail></div>
                     <div className="col-span-2 md:col-span-1 md:px-8 md:border-l border-[#d9b668]/25">
