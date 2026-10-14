@@ -6,13 +6,6 @@ import { eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { type ColorPalette, DEFAULT_PALETTE } from '@/lib/config/palette';
 import { requireAdminAction } from '@/lib/admin/guard';
-import {
-    DEFAULT_PARTY_POPUP,
-    PARTY_PATH,
-    PARTY_POPUP_KEY,
-    normalisePartyPopup,
-    type PartyPopupSettings,
-} from '@/lib/config/party-popup';
 
 // The two getters below are deliberately left open: getColorPalette is called
 // from the site's root layout on every public page, and the hero images are on
@@ -100,44 +93,4 @@ export async function updateColorPalette(palette: ColorPalette): Promise<void> {
 
     revalidatePath('/', 'layout');
     revalidatePath('/admin/settings');
-}
-
-
-// ============================================================
-// 31ST NIGHT PARTY POP-UP
-// ============================================================
-
-// Read by the public homepage, so the getter is open; only the writer is guarded.
-export async function getPartyPopup(): Promise<PartyPopupSettings> {
-    try {
-        const setting = await db.query.siteSettings.findFirst({
-            where: eq(siteSettings.key, PARTY_POPUP_KEY),
-        });
-        return normalisePartyPopup(setting?.value);
-    } catch {
-        return DEFAULT_PARTY_POPUP;
-    }
-}
-
-export async function updatePartyPopup(input: PartyPopupSettings): Promise<PartyPopupSettings> {
-    await requireAdminAction();
-
-    const value = normalisePartyPopup(input);
-    const existing = await db.query.siteSettings.findFirst({
-        where: eq(siteSettings.key, PARTY_POPUP_KEY),
-    });
-
-    if (existing) {
-        await db
-            .update(siteSettings)
-            .set({ value, updatedAt: new Date() })
-            .where(eq(siteSettings.key, PARTY_POPUP_KEY));
-    } else {
-        await db.insert(siteSettings).values({ key: PARTY_POPUP_KEY, value });
-    }
-
-    revalidatePath('/');
-    revalidatePath(PARTY_PATH);
-    revalidatePath('/admin/settings');
-    return value;
 }
