@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import MasqueradeHero from '@/components/home/masquerade-hero';
+import MasqueradeIntro from '@/components/home/masquerade-intro';
+import MasqueradeHeaderToggle from '@/components/home/masquerade-header-toggle';
 import HeroSection from '@/components/home/hero-section';
 import CompactIntro from '@/components/home/compact-intro';
 import AmenitiesGallery from '@/components/home/amenities-gallery';
@@ -29,6 +31,12 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen bg-[var(--surface-cream)] font-sans">
+      {/* Curtain-raiser, plays once per visit */}
+      <MasqueradeIntro />
+
+      {/* Header hidden while the opener is on screen */}
+      <MasqueradeHeaderToggle />
+
       {/* The Grand Masquerade, 31 December: full-screen event opener */}
       <MasqueradeHero />
 
