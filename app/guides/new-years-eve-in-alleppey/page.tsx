@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { pageMetadata, absoluteUrl, BRAND } from '@/lib/seo';
 import { getGuide } from '@/lib/guides';
-import { PACKAGE_PRICE_PAISE, GST_RATE, formatINR } from '@/lib/masquerade-offer';
+import { PACKAGE_PRICE_PAISE, GST_RATE, ROOM_ADDONS, EXTRAS, formatINR } from '@/lib/masquerade-offer';
 import JsonLd from '@/components/seo/json-ld';
 import { breadcrumbSchema, faqSchema, HOTEL_ID } from '@/lib/structured-data';
 
@@ -15,19 +15,37 @@ export const metadata = pageMetadata({
     image: absoluteUrl('/images/masquerade/ballroom.webp'),
 });
 
-const serif = { fontFamily: 'var(--font-cinzel), serif' };
-
-const MOMENTS = [
-    { title: 'The Masked Gala', text: 'Arrive masked and dressed for the evening. A candlelit ballroom, gold and velvet, built for one night.' },
-    { title: 'Dinner & Spirits', text: 'A gala evening of fine dining and spirits as the year turns.' },
-    { title: 'Midnight', text: 'Welcome the new year with the backwaters of Alleppey in the dark beyond the glass.' },
+const glance = [
+    ['Date', '31 December'],
+    ['Place', 'Olivia Alleppey, Alappuzha, Kerala'],
+    ['Theme', 'The Grand Masquerade: masks, gold and candlelight'],
+    ['Room package', `From ${formatINR(PACKAGE_PRICE_PAISE)} + ${GST_RATE}% GST per room`],
+    ['Booking', 'Online, on oliviaalleppey.com'],
 ];
+
+const rooms = [
+    ['Lake View Twin', '/rooms/lake-view-twin'],
+    ['Canal View King', '/rooms/canal-view-king'],
+    ['Lake View Balcony', '/rooms/lake-view-balcony'],
+    ['Canal View Superior Family', '/rooms/canal-view-superior-family'],
+    ['Boat Race Suite', '/rooms/boat-race-suite'],
+    ['Lake View Balcony Suite', '/rooms/lake-view-balcony-suite'],
+];
+
+const days = [
+    ['29 and 30 December', 'Arrive, settle in and take a backwater cruise through the village canals. Book a spa treatment for the afternoon.'],
+    ['31 December', 'A slow morning, a late lunch and an afternoon by the pool. Dress for the evening and join the Grand Masquerade at night.'],
+    ['1 January', 'Breakfast without hurry, then Alappuzha Beach or a drive through the paddy fields of Kuttanad before you check out.'],
+];
+
+const h2 = 'text-2xl md:text-4xl font-serif text-[var(--text-dark)] mb-5 tracking-wide';
+const p = 'text-lg text-[#403A35] leading-relaxed';
 
 export default function NewYearsEvePage() {
     const price = formatINR(PACKAGE_PRICE_PAISE);
 
     return (
-        <main className="min-h-screen bg-[#0a0608] text-[#efe6d3] font-sans">
+        <main className="min-h-screen bg-[var(--surface-cream)] font-sans">
             <JsonLd
                 data={[
                     {
@@ -49,125 +67,148 @@ export default function NewYearsEvePage() {
                 ]}
             />
 
-            {/* Hero: the artwork already carries the title, so the heading sits below it */}
-            <section className="relative isolate overflow-hidden">
-                <div className="relative w-full aspect-[4/5] md:aspect-[16/9] max-h-[88vh]">
-                    <Image
-                        src="/images/masquerade/mobile-poster.webp"
-                        alt="The Grand Masquerade, New Year's Eve in Alleppey: a gold diamond-set title, a feathered mask and candlelit velvet."
-                        fill
-                        priority
-                        sizes="100vw"
-                        className="object-cover md:hidden"
-                    />
-                    <Image
-                        src="/images/masquerade/ballroom.webp"
-                        alt="The Grand Masquerade, New Year's Eve in Alleppey: a candlelit ballroom and a gold feathered mask on red velvet."
-                        fill
-                        priority
-                        sizes="100vw"
-                        className="object-cover hidden md:block"
-                    />
-                    <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#0a0608] to-transparent" />
-                </div>
-                <div className="px-6 pb-20 pt-4 md:pt-0 -mt-10 relative text-center max-w-4xl mx-auto">
-                    <p className="text-[11px] md:text-xs uppercase tracking-[0.5em] text-[#d9b668] mb-6" style={serif}>
-                        Olivia Alleppey &middot; 31 December
-                    </p>
-                    <h1 className="masq-gold text-4xl sm:text-5xl md:text-6xl font-bold leading-[1.1] tracking-tight" style={serif}>
+            {/* Hero picture */}
+            <section className="relative w-full aspect-[4/5] md:aspect-[21/9] max-h-[80vh] overflow-hidden bg-[#0a0608]">
+                <Image
+                    src="/images/masquerade/mobile-poster.webp"
+                    alt="The Grand Masquerade, New Year's Eve in Alleppey: a gold diamond-set title, a feathered mask and candlelit velvet."
+                    fill
+                    priority
+                    sizes="100vw"
+                    className="object-cover md:hidden"
+                />
+                <Image
+                    src="/images/masquerade/ballroom.webp"
+                    alt="The Grand Masquerade, New Year's Eve at Olivia Alleppey: a candlelit ballroom and a gold feathered mask on red velvet."
+                    fill
+                    priority
+                    sizes="100vw"
+                    className="object-cover hidden md:block"
+                />
+            </section>
+
+            <article className="px-6 md:px-12 py-16 md:py-24">
+                <div className="max-w-3xl mx-auto">
+                    <nav className="text-xs tracking-[0.2em] uppercase text-[#6B645C] mb-6">
+                        <Link href="/guides" className="hover:text-[var(--text-dark)]">Guides</Link>
+                    </nav>
+                    <h1 className="text-4xl md:text-6xl font-serif text-[var(--text-dark)] tracking-wide leading-tight mb-8">
                         New Year&rsquo;s Eve in Alleppey
                     </h1>
-                    <div className="mx-auto my-8 h-px w-24 bg-gradient-to-r from-transparent via-[#d9b668] to-transparent" />
-                    <p className="text-lg md:text-2xl font-serif italic text-[#f3dc9c]">
-                        The Grand Masquerade &middot; A night of masks, gold and candlelight
-                    </p>
-                    <p className="mt-6 max-w-2xl mx-auto text-base md:text-lg text-[#efe6d3]/80 leading-relaxed">{guide.intro}</p>
-                    <Link href="/" className="masq-btn mt-10 inline-flex items-center gap-3 px-8 h-14 text-[#1a0d06] text-[11px] uppercase tracking-[0.25em] font-semibold">
-                        Book the 31st Night <span aria-hidden>&rarr;</span>
+                    <p className="text-xl text-[#403A35] leading-relaxed mb-10">{guide.intro}</p>
+                    <Link href="/" className="inline-block bg-[var(--btn-dark)] text-white px-8 py-3 text-[11px] tracking-[0.22em] uppercase">
+                        Book the 31st Night
                     </Link>
-                </div>
-            </section>
 
-            {/* The evening */}
-            <section className="px-6 md:px-12 py-20 md:py-28">
-                <div className="max-w-5xl mx-auto">
-                    <h2 className="text-center masq-gold text-3xl md:text-5xl font-bold mb-4" style={serif}>The Evening</h2>
-                    <div className="mx-auto mb-14 h-px w-16 bg-[#d9b668]/70" />
-                    <div className="grid gap-px md:grid-cols-3 bg-[#d9b668]/25 border border-[#d9b668]/25">
-                        {MOMENTS.map((m) => (
-                            <div key={m.title} className="bg-[#120a0d] p-8 md:p-10 text-center">
-                                <h3 className="text-sm uppercase tracking-[0.3em] text-[#d9b668] mb-4" style={serif}>{m.title}</h3>
-                                <p className="text-[#efe6d3]/80 leading-relaxed">{m.text}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Stay */}
-            <section className="relative px-6 md:px-12 py-20 md:py-28 bg-[#120a0d] border-y border-[#d9b668]/20">
-                <div className="max-w-3xl mx-auto text-center">
-                    <h2 className="masq-gold text-3xl md:text-5xl font-bold mb-4" style={serif}>Stay the Night</h2>
-                    <div className="mx-auto mb-10 h-px w-16 bg-[#d9b668]/70" />
-                    <p className="text-[#efe6d3]/80 text-lg leading-relaxed mb-8">
-                        One room for the night of 31 December, room price included. Add-ons are available for additional guests and children, and visiting guests can book a gala pass for the evening.
-                    </p>
-                    <p className="font-serif text-5xl md:text-6xl text-[#f3dc9c] tabular-nums">{price}</p>
-                    <p className="mt-2 text-xs uppercase tracking-[0.35em] text-[#d9b668]" style={serif}>
-                        Per room &middot; plus {GST_RATE}% GST
-                    </p>
-                    <Link href="/" className="masq-btn mt-10 inline-flex items-center gap-3 px-8 h-14 text-[#1a0d06] text-[11px] uppercase tracking-[0.25em] font-semibold">
-                        Reserve Your Room <span aria-hidden>&rarr;</span>
-                    </Link>
-                    <p className="mt-6 text-sm text-[#efe6d3]/60">Rooms are limited and sold online on a first-come basis.</p>
-                </div>
-            </section>
-
-            {/* Plan */}
-            <section className="px-6 md:px-12 py-20 md:py-28">
-                <div className="max-w-3xl mx-auto space-y-6 text-[#efe6d3]/85 text-lg leading-relaxed">
-                    {guide.sections.slice(2).flatMap((section) => section.paragraphs).map((paragraph) => (
-                        <p key={paragraph}>{paragraph}</p>
-                    ))}
-                </div>
-            </section>
-
-            {/* FAQ */}
-            <section className="px-6 md:px-12 pb-24">
-                <div className="max-w-3xl mx-auto">
-                    <h2 className="text-center masq-gold text-3xl md:text-4xl font-bold mb-12" style={serif}>Questions</h2>
-                    <dl className="space-y-8">
-                        {guide.faqs.map((faq) => (
-                            <div key={faq.question} className="border-t border-[#d9b668]/25 pt-6">
-                                <dt className="font-serif text-xl text-[#f3dc9c] mb-2">{faq.question}</dt>
-                                <dd className="text-[#efe6d3]/80 leading-relaxed">{faq.answer}</dd>
+                    {/* At a glance */}
+                    <dl className="my-14 bg-white border border-[#DED6CB] divide-y divide-[#DED6CB]">
+                        {glance.map(([k, v]) => (
+                            <div key={k} className="grid grid-cols-3 gap-4 px-6 py-4">
+                                <dt className="text-[11px] uppercase tracking-[0.25em] text-[#6B645C]">{k}</dt>
+                                <dd className="col-span-2 text-[#2D3933]">{v}</dd>
                             </div>
                         ))}
                     </dl>
-                    <p className="mt-14 text-center text-sm text-[#efe6d3]/60">
-                        More to plan?{' '}
-                        <Link href="/guides" className="underline hover:text-[#f3dc9c]">Alleppey travel guides</Link>
-                        {' '}&middot;{' '}
-                        <Link href="/rooms" className="underline hover:text-[#f3dc9c]">Rooms &amp; suites</Link>
-                    </p>
-                </div>
-            </section>
 
-            <style>{`
-                .masq-gold {
-                    background: linear-gradient(180deg, #fff6d8 0%, #f0cf7a 40%, #b8883f 100%);
-                    -webkit-background-clip: text;
-                    background-clip: text;
-                    color: transparent;
-                    filter: drop-shadow(0 2px 14px rgba(0,0,0,.7)) drop-shadow(0 0 22px rgba(240,200,110,.3));
-                }
-                .masq-btn {
-                    background: linear-gradient(135deg, #f3dc9c 0%, #d9b668 45%, #b68845 100%);
-                    box-shadow: 0 0 26px rgba(217,182,104,0.35);
-                    transition: box-shadow .3s, filter .3s;
-                }
-                .masq-btn:hover { filter: brightness(1.08); box-shadow: 0 0 40px rgba(217,182,104,0.65); }
-            `}</style>
+                    <h2 className={h2}>Why spend New Year&rsquo;s Eve in Alleppey</h2>
+                    <div className={`${p} space-y-4 mb-12`}>
+                        <p>Late December is the best time of year on the Kerala backwaters. The monsoon has gone, the days are dry and warm, the evenings are cool, and the lagoons and canals are calm enough for long boat rides.</p>
+                        <p>It is also Alleppey&rsquo;s busiest season. If you want a New Year&rsquo;s Eve that combines a proper celebration with a rest by the water, booking early matters, because rooms across Alappuzha fill in the last week of the year.</p>
+                    </div>
+
+                    <h2 className={h2}>The Grand Masquerade, 31 December</h2>
+                    <div className={`${p} space-y-4 mb-12`}>
+                        <p>The Grand Masquerade is Olivia Alleppey&rsquo;s New Year&rsquo;s Eve gala, built around masks, gold and candlelight. It is a themed evening, so guests are invited to arrive masked and dressed for the night, and to leave the ordinary New Year party behind.</p>
+                        <p>Staying guests book a room package that includes the gala. Visiting guests who are not staying can book an evening pass for a couple or a single guest. Programme details are shared with guests when they book.</p>
+                    </div>
+
+                    <h2 className={h2}>What to wear: a masquerade dress guide</h2>
+                    <div className={`${p} space-y-4 mb-12`}>
+                        <p>Think evening wear with a mask. For women, a gown, saree or cocktail dress works well, with a mask in gold, black or deep red. For men, a dark suit, tuxedo or bandhgala with a simple half mask suits the theme.</p>
+                        <p>Masks are easiest to buy before you travel. Keep it comfortable enough to wear through dinner, and carry a light wrap, since evenings by the water can be cool.</p>
+                    </div>
+
+                    <h2 className={h2}>Stay the night</h2>
+                    <div className={`${p} space-y-4 mb-6`}>
+                        <p>The room package covers one room for the night of 31 December, with the room price included. It starts at {price} plus {GST_RATE}% GST per room.</p>
+                        <p>Add-ons for your room:</p>
+                    </div>
+                    <ul className="mb-6 space-y-2 text-[#403A35]">
+                        {ROOM_ADDONS.map((item) => (
+                            <li key={item.id}><strong>{item.name}</strong>, {formatINR(item.pricePaise)}: {item.note}</li>
+                        ))}
+                    </ul>
+                    <p className={`${p} mb-12`}>Prices exclude {GST_RATE}% GST. Rooms are limited, so check availability on the booking form.</p>
+
+                    <h2 className={h2}>Visiting for the evening only</h2>
+                    <p className={`${p} mb-6`}>You do not need a room to attend. Gala passes for visiting guests:</p>
+                    <ul className="mb-12 space-y-2 text-[#403A35]">
+                        {EXTRAS.map((item) => (
+                            <li key={item.id}><strong>{item.name}</strong>, {formatINR(item.pricePaise)}: {item.note}</li>
+                        ))}
+                    </ul>
+
+                    <h2 className={h2}>Choose your room</h2>
+                    <p className={`${p} mb-6`}>Rooms are sold on a first-come basis. Browse them before you book:</p>
+                    <ul className="mb-12 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {rooms.map(([name, href]) => (
+                            <li key={href}><Link href={href} className="underline text-[#403A35] hover:text-[var(--text-dark)]">{name}</Link></li>
+                        ))}
+                    </ul>
+
+                    <h2 className={h2}>Make a long weekend of it</h2>
+                    <div className="mb-12 space-y-5">
+                        {days.map(([day, text]) => (
+                            <div key={day}>
+                                <h3 className="font-serif text-xl text-[var(--text-dark)] mb-1">{day}</h3>
+                                <p className="text-[#403A35] leading-relaxed">{text}</p>
+                            </div>
+                        ))}
+                        <p className="text-[#403A35] leading-relaxed">
+                            More ideas in our guide to <Link href="/guides/things-to-do-in-alleppey" className="underline">things to do in Alleppey</Link>, and our spa and <Link href="/wellness" className="underline">wellness</Link> and <Link href="/dining" className="underline">dining</Link> pages.
+                        </p>
+                    </div>
+
+                    <h2 className={h2}>Getting here</h2>
+                    <p className={`${p} mb-12`}>Cochin International Airport is roughly 80 to 90 km away, about two to two and a half hours by car. Alappuzha also has a railway station. Read our <Link href="/guides/kochi-airport-to-alleppey" className="underline">Kochi airport to Alleppey guide</Link>. Allow extra time for the roads on the 31st.</p>
+
+                    <h2 className={h2}>Planning tips</h2>
+                    <ul className="mb-12 space-y-2 text-[#403A35] list-disc pl-6 text-lg">
+                        <li>Book early. New Year week is peak season in Kerala.</li>
+                        <li>Arrive on the 30th if you can, to avoid road delays.</li>
+                        <li>Bring or buy your mask before you travel.</li>
+                        <li>Add a night either side of the 31st to enjoy the backwaters.</li>
+                        <li>Check the booking form for what is still available for your group.</li>
+                    </ul>
+
+                    <section className="mt-14 mb-12">
+                        <h2 className={h2}>Frequently asked questions</h2>
+                        <dl className="space-y-6">
+                            {guide.faqs.map((faq) => (
+                                <div key={faq.question}>
+                                    <dt className="font-serif text-xl text-[var(--text-dark)] mb-2">{faq.question}</dt>
+                                    <dd className="text-[#403A35] leading-relaxed">{faq.answer}</dd>
+                                </div>
+                            ))}
+                        </dl>
+                    </section>
+
+                    <div className="bg-white border border-[#DED6CB] p-8 text-center mb-14">
+                        <p className="font-serif text-2xl text-[var(--text-dark)] mb-4">Spend the 31st at Olivia Alleppey</p>
+                        <Link href="/" className="inline-block bg-[var(--btn-dark)] text-white px-8 py-3 text-[11px] tracking-[0.22em] uppercase">
+                            Book the 31st Night
+                        </Link>
+                    </div>
+
+                    <h2 className="text-xl font-serif text-[var(--text-dark)] mb-4">More guides</h2>
+                    <ul className="space-y-2">
+                        <li><Link href="/guides/best-time-to-visit-alleppey" className="underline text-[#403A35]">Best time to visit Alleppey</Link></li>
+                        <li><Link href="/guides/alleppey-honeymoon-guide" className="underline text-[#403A35]">A honeymoon in Alleppey</Link></li>
+                        <li><Link href="/guides/alleppey-family-stay" className="underline text-[#403A35]">Alleppey with family and kids</Link></li>
+                        <li><Link href="/guides/alleppey-houseboat-vs-resort" className="underline text-[#403A35]">Houseboat vs backwater resort</Link></li>
+                    </ul>
+                </div>
+            </article>
         </main>
     );
 }

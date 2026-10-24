@@ -274,7 +274,7 @@ export const GUIDES: Guide[] = [
             {
                 question: "Where can I celebrate New Year's Eve in Alleppey?",
                 answer:
-                    "Olivia Alleppey hosts the Grand Masquerade gala on 31 December in Alappuzha, Kerala.",
+                    "Olivia Alleppey hosts the Grand Masquerade gala on 31 December in Alappuzha, Kerala, with room packages for staying guests and gala passes for visiting guests.",
             },
             {
                 question: "How do I book the Grand Masquerade?",
@@ -285,6 +285,36 @@ export const GUIDES: Guide[] = [
                 question: "What does the room package cost?",
                 answer:
                     "The package starts at \u20b949,999 plus 18% GST per room for the night of 31 December, room price included.",
+            },
+            {
+                question: "Is there a dress code?",
+                answer:
+                    "Guests are invited to come masked and in evening wear. A mask is part of the theme, so bring your own or pick one up before you travel.",
+            },
+            {
+                question: "Can children attend?",
+                answer:
+                    "Yes. There are add-ons for children aged 6 to 11 and for little ones under 6, and a young guest gala pass for visiting children aged 6 to 11.",
+            },
+            {
+                question: "Can I attend the gala without staying at the hotel?",
+                answer:
+                    "Yes. Visiting guests can book a gala evening pass for a couple or a single guest.",
+            },
+            {
+                question: "Is Alleppey a good place to spend New Year's Eve?",
+                answer:
+                    "Yes. December has cool, dry weather and calm backwaters, and a stay combines a gala night with cruises, beaches and spa time.",
+            },
+            {
+                question: "How far is Alleppey from Kochi airport?",
+                answer:
+                    "Roughly 80 to 90 km by road, about two to two and a half hours by car. See our Kochi airport to Alleppey guide.",
+            },
+            {
+                question: "What if I want to stay more than one night?",
+                answer:
+                    "You can book additional nights around the 31st through the normal booking page, subject to availability.",
             },
         ],
         updated: "2026-10-24",
