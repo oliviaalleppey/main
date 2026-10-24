@@ -246,12 +246,12 @@ export const GUIDES: Guide[] = [
         description:
             "Celebrate New Year's Eve in Alleppey at the Grand Masquerade, Olivia Alleppey, 31 December. Gala evening, room packages and how to book.",
         intro:
-            "Alleppey is at its best at the turn of the year: cool, dry weather and the backwaters at their calmest. On 31 December, Olivia Alleppey hosts the Grand Masquerade, a gala New Year's Eve on the Punnamada lakeshore.",
+            "Alleppey is at its best at the turn of the year: cool, dry weather and the backwaters at their calmest. On 31 December, Olivia Alleppey hosts the Grand Masquerade, a gala New Year's Eve on the Alleppey backwaters.",
         sections: [
             {
                 heading: "The Grand Masquerade, 31 December",
                 paragraphs: [
-                    "The Grand Masquerade is a themed New Year's Eve gala at Olivia Alleppey, Finishing Point, Punnamada. Guests are invited to come masked and dressed for the evening.",
+                    "The Grand Masquerade is a themed New Year's Eve gala at Olivia Alleppey, Alappuzha. Guests are invited to come masked and dressed for the evening.",
                     "Visiting guests who are not staying can book a gala pass for the evening. Staying guests book a room package that includes the gala.",
                 ],
             },
@@ -274,7 +274,7 @@ export const GUIDES: Guide[] = [
             {
                 question: "Where can I celebrate New Year's Eve in Alleppey?",
                 answer:
-                    "Olivia Alleppey hosts the Grand Masquerade gala on 31 December at Finishing Point, Punnamada, Alappuzha.",
+                    "Olivia Alleppey hosts the Grand Masquerade gala on 31 December in Alappuzha, Kerala.",
             },
             {
                 question: "How do I book the Grand Masquerade?",
