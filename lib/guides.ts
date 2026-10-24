@@ -239,6 +239,188 @@ export const GUIDES: Guide[] = [
         updated: "2026-10-24",
         cta: { label: "See rooms and suites", href: "/rooms" },
     },
+    {
+        slug: "new-years-eve-in-alleppey",
+        title: "New Year's Eve in Alleppey: The Grand Masquerade, 31 December",
+        h1: "New Year's Eve in Alleppey",
+        description:
+            "Celebrate New Year's Eve in Alleppey at the Grand Masquerade, Olivia Alleppey, 31 December. Gala evening, room packages and how to book.",
+        intro:
+            "Alleppey is at its best at the turn of the year: cool, dry weather and the backwaters at their calmest. On 31 December, Olivia Alleppey hosts the Grand Masquerade, a gala New Year's Eve on the Punnamada lakeshore.",
+        sections: [
+            {
+                heading: "The Grand Masquerade, 31 December",
+                paragraphs: [
+                    "The Grand Masquerade is a themed New Year's Eve gala at Olivia Alleppey, Finishing Point, Punnamada. Guests are invited to come masked and dressed for the evening.",
+                    "Visiting guests who are not staying can book a gala pass for the evening. Staying guests book a room package that includes the gala.",
+                ],
+            },
+            {
+                heading: "Staying for the night",
+                paragraphs: [
+                    "The room package covers one room for the night of 31 December, with the room price included. The package starts at \u20b949,999 plus 18% GST per room, and add-ons are available for additional guests and children.",
+                    "Rooms are limited and are sold online. Book directly on this site to see what is still available for your party.",
+                ],
+            },
+            {
+                heading: "Planning your trip",
+                paragraphs: [
+                    "New Year week is peak season in Kerala. Book your room early, and allow extra travel time on the roads into Alappuzha on the 31st.",
+                    "If you are staying more nights, the days around the 31st are good for a backwater cruise or a spa treatment.",
+                ],
+            },
+        ],
+        faqs: [
+            {
+                question: "Where can I celebrate New Year's Eve in Alleppey?",
+                answer:
+                    "Olivia Alleppey hosts the Grand Masquerade gala on 31 December at Finishing Point, Punnamada, Alappuzha.",
+            },
+            {
+                question: "How do I book the Grand Masquerade?",
+                answer:
+                    "Book online on oliviaalleppey.com. Staying guests choose a room package; visiting guests can book a gala pass.",
+            },
+            {
+                question: "What does the room package cost?",
+                answer:
+                    "The package starts at \u20b949,999 plus 18% GST per room for the night of 31 December, room price included.",
+            },
+        ],
+        updated: "2026-10-24",
+        cta: { label: "Book the 31st Night", href: "/" },
+    },
+    {
+        slug: "kochi-airport-to-alleppey",
+        title: "Kochi Airport to Alleppey: How to Get There",
+        h1: "Getting from Kochi Airport to Alleppey",
+        description:
+            "How to travel from Cochin International Airport to Alleppey (Alappuzha): taxi, train and bus options, journey time and tips for reaching Punnamada.",
+        intro:
+            "Cochin International Airport (COK) is the nearest major airport to Alleppey, roughly 80 to 90 km away. Most guests arrive by road or rail.",
+        sections: [
+            {
+                heading: "By taxi",
+                paragraphs: [
+                    "A pre-booked taxi is the simplest option and takes about two to two and a half hours depending on traffic. Our reservations team can help arrange a pick-up if you tell us your flight details.",
+                ],
+            },
+            {
+                heading: "By train",
+                paragraphs: [
+                    "Alappuzha has its own railway station, on the line between Ernakulam and Thiruvananthapuram. From Kochi, take a train to Alappuzha, then a short taxi or auto-rickshaw ride to Punnamada.",
+                    "Check schedules on the Indian Railways site before you travel, as timings change.",
+                ],
+            },
+            {
+                heading: "By bus",
+                paragraphs: [
+                    "State and private buses run between Ernakulam and Alappuzha. They are cheap but slower and less comfortable with luggage.",
+                ],
+            },
+        ],
+        faqs: [
+            {
+                question: "How far is Alleppey from Kochi airport?",
+                answer: "Roughly 80 to 90 km by road, about two to two and a half hours by car.",
+            },
+            {
+                question: "Does Olivia Alleppey arrange airport transfers?",
+                answer:
+                    "Contact our reservations team with your flight details and we can help arrange a transfer.",
+            },
+        ],
+        updated: "2026-10-24",
+        cta: { label: "Plan your stay", href: "/contact" },
+    },
+    {
+        slug: "alleppey-honeymoon-guide",
+        title: "Alleppey for Honeymooners: Where to Stay and What to Do",
+        h1: "A Honeymoon in Alleppey",
+        description:
+            "Plan an Alleppey honeymoon: lake-view suites, a private backwater cruise, spa couples treatments and candlelit dining on the Punnamada lakeshore.",
+        intro:
+            "Quiet water, long evenings and very little to organise: the Alleppey backwaters suit a honeymoon well, especially as one stop on a longer Kerala trip.",
+        sections: [
+            {
+                heading: "Where to stay",
+                paragraphs: [
+                    "Choose a room with a view of the water. Our lake-view rooms and suites at Punnamada look over the backwaters, and the suites give you extra space and a private balcony.",
+                    "Tell reservations it is a honeymoon when you book, and we can note it for your stay.",
+                ],
+            },
+            {
+                heading: "What to do",
+                paragraphs: [
+                    "Spend a morning on a small boat through village canals, and an evening watching the light on Vembanad Lake.",
+                    "A spa treatment for two is a good way to slow down after a few days of travel.",
+                ],
+            },
+            {
+                heading: "How long to stay",
+                paragraphs: [
+                    "Two or three nights is enough for the cruise, the spa and time to do nothing. Pair it with Munnar or Thekkady for a fuller Kerala itinerary.",
+                ],
+            },
+        ],
+        faqs: [
+            {
+                question: "How many nights should we spend in Alleppey on a honeymoon?",
+                answer: "Two or three nights is ideal, combined with hill stations such as Munnar.",
+            },
+            {
+                question: "Which rooms suit couples best?",
+                answer:
+                    "Rooms and suites with a lake view. See the rooms page for balcony and suite options.",
+            },
+        ],
+        updated: "2026-10-24",
+        cta: { label: "See suites", href: "/rooms" },
+    },
+    {
+        slug: "alleppey-family-stay",
+        title: "Alleppey with Family and Kids: A Stay Guide",
+        h1: "Alleppey with Family and Kids",
+        description:
+            "Visiting Alleppey with children? Family rooms, pool time, gentle backwater cruises and kid-friendly dining at Olivia Alleppey, Punnamada.",
+        intro:
+            "Alleppey works well for families: short boat rides, open space and a relaxed pace. A hotel base with a pool and family rooms keeps the days easy.",
+        sections: [
+            {
+                heading: "Room and space",
+                paragraphs: [
+                    "Our Canal View Superior Family room is designed for families. Check the rooms page for sizes and how many guests each room sleeps.",
+                ],
+            },
+            {
+                heading: "Things children enjoy",
+                paragraphs: [
+                    "A short canoe or boat ride through the canals, time in the pool and a walk on Alappuzha Beach at sunset are usually the highlights.",
+                    "Houseboat cruises can be long for small children, so a half-day cruise is a good starting point.",
+                ],
+            },
+            {
+                heading: "Practical tips",
+                paragraphs: [
+                    "Carry sun protection and insect repellent, especially in the evening near water.",
+                    "Ask reservations about extra beds and children's meals when you book.",
+                ],
+            },
+        ],
+        faqs: [
+            {
+                question: "Is Alleppey suitable for young children?",
+                answer:
+                    "Yes, with shorter boat trips and a hotel base with a pool. Keep days light and avoid midday heat.",
+            },
+            {
+                question: "Does Olivia Alleppey have family rooms?",
+                answer: "Yes. See the Canal View Superior Family room on the rooms page.",
+            },
+        ],
+        updated: "2026-10-24",
+        cta: { label: "View family rooms", href: "/rooms" },
+    },
 ];
 
 export function getGuide(slug: string): Guide | undefined {
