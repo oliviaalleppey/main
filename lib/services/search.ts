@@ -121,6 +121,8 @@ export async function getAvailableRoomsForSearch(
     // Create a quick lookup map: "roomTypeId_date" -> price
     const overrideMap = new Map<string, number>();
     for (const inv of inventoryOverrides) {
+        // Block Dates creates rows with price 0, meaning "no override".
+        if (!(inv.price > 0)) continue;
         overrideMap.set(`${inv.roomTypeId}_${inv.date}`, inv.price);
     }
 

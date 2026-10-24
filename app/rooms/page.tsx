@@ -31,7 +31,9 @@ export default async function RoomsPage() {
                 inArray(roomInventory.roomTypeId, roomTypeIds),
             ))
         : [];
-    const overrideMap = new Map(todayOverrides.map((o) => [o.roomTypeId, o.price]));
+    const overrideMap = new Map(
+        todayOverrides.filter((o) => o.price > 0).map((o) => [o.roomTypeId, o.price]),
+    );
 
     // Serialize dates to strings to avoid passing Date objects to client component
     const serializedRooms = rooms.map(room => ({

@@ -1,6 +1,7 @@
 import { BOOKING_PROVIDER } from '@/lib/config/booking-provider';
 import type { BookingProvider } from './types';
 import { MockCrsProvider } from './mock-crs-provider';
+import { BlockAwareProvider } from './block-aware-provider';
 import { HotsoftCrsProvider } from './hotsoft-crs-provider';
 import { HOTSOFT_CONFIG } from '@/lib/config/hotsoft';
 
@@ -76,5 +77,6 @@ export function getBookingProvider(): BookingProvider {
         providerInstance = new MockCrsProvider();
     }
 
+    providerInstance = new BlockAwareProvider(providerInstance);
     return providerInstance;
 }

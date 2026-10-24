@@ -1,8 +1,8 @@
 import { auth } from '@/auth';
 import { db } from '@/lib/db';
-import { roomInventory } from '@/lib/db/schema';
+import { roomInventory, rooms } from '@/lib/db/schema';
 import { NextResponse } from 'next/server';
-import { eq, and, gte, lte } from 'drizzle-orm';
+import { eq, and, gte, lte, sql } from 'drizzle-orm';
 
 // GET blocked dates
 export async function GET(request: Request) {
@@ -63,12 +63,19 @@ export async function POST(request: Request) {
             );
         }
 
+        if (!Number.isInteger(roomsToBlock) || roomsToBlock < 1) {
+            return NextResponse.json(
+                { error: 'roomsToBlock must be a whole number of at least 1' },
+                { status: 400 }
+            );
+        }
+
         // Get total rooms for this type
-        const totalRoomsResult = await db.execute(`
-            SELECT count(*) as count FROM rooms 
-            WHERE room_type_id = '${roomTypeId}' AND status = 'active'
-        `);
-        const totalRooms = Number(totalRoomsResult.rows[0]?.count || 0);
+        const [{ count: activeRooms }] = await db
+            .select({ count: sql<number>`count(*)` })
+            .from(rooms)
+            .where(and(eq(rooms.roomTypeId, roomTypeId), eq(rooms.status, 'active')));
+        const totalRooms = Number(activeRooms || 0);
 
         // Create blocks for each date in range
         const start = new Date(startDate);
@@ -153,6 +160,7 @@ export async function DELETE(request: Request) {
             .update(roomInventory)
             .set({
                 blockedRooms: 0,
+                availableRooms: sql`${roomInventory.totalRooms}`,
                 updatedAt: new Date(),
             })
             .where(eq(roomInventory.id, id));
