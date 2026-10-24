@@ -4,6 +4,44 @@ import Link from 'next/link';
 import Image from 'next/image';
 import NewsletterForm from './newsletter-form';
 
+/** Flower, then where it lands around the name (px from its centre). */
+const FLOWERS: [string, number, number][] = [
+    ['🌸', -58, -24], ['🌼', -18, -32], ['🌺', 26, -28], ['🌷', 66, -18],
+    ['🌻', -44, 20], ['🌹', 0, 28], ['🌸', 42, 22], ['🏵️', 84, 6], ['🌼', -80, 0],
+];
+
+/** Studio credit: hovering bursts flowers around the name, clicking opens an email to the studio. */
+function FristelCredit() {
+    return (
+        <a href="mailto:fristelstudios@gmail.com" className="fristel-credit relative inline-block hover:text-[var(--text-dark)] transition-colors">
+            Fristel Studios
+            <span aria-hidden className="pointer-events-none absolute left-1/2 top-1/2">
+                {FLOWERS.map(([flower, dx, dy], i) => (
+                    <span
+                        key={i}
+                        className="fristel-flower absolute -ml-2.5 -mt-3 text-xl leading-none opacity-0"
+                        style={{ '--dx': `${dx}px`, '--dy': `${dy}px`, animationDelay: `${i * 70}ms` } as React.CSSProperties}
+                    >
+                        {flower}
+                    </span>
+                ))}
+            </span>
+            <style>{`
+                .fristel-credit:hover .fristel-flower { animation: fristel-bloom 1.5s ease-out infinite; }
+                @keyframes fristel-bloom {
+                    0% { opacity: 0; transform: translate(0, 0) scale(0.3) rotate(0deg); }
+                    30% { opacity: 1; }
+                    70% { opacity: 1; }
+                    100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1.1) rotate(35deg); }
+                }
+                @media (prefers-reduced-motion: reduce) {
+                    .fristel-credit:hover .fristel-flower { animation: none; opacity: 1; transform: translate(var(--dx), var(--dy)); }
+                }
+            `}</style>
+        </a>
+    );
+}
+
 export default function RosewoodFooter() {
     return (
         <footer className="bg-[var(--surface-soft)] text-[var(--text-dark)] pt-10 pb-6">
@@ -162,7 +200,7 @@ export default function RosewoodFooter() {
                             CIN: U55101KL2007PTC020204&nbsp;&nbsp;·&nbsp;&nbsp;GSTIN: 32AABCO1416E1Z6
                         </p>
                         <p className="mt-3 text-[10px] text-[#5E5851] text-center">
-                            Developed by Fristel Studio
+                            Developed by <FristelCredit />
                         </p>
                     </div>
                 </div>
