@@ -92,6 +92,7 @@ export default function RosewoodFooter() {
                                 <li><Link href="/rooms" className="hover:text-[var(--text-dark)] transition-colors">Accommodation</Link></li>
                                 <li><Link href="mailto:hr@oliviaalleppey.com" className="hover:text-[var(--text-dark)] transition-colors">Careers</Link></li>
                                 <li><Link href="/gallery" className="hover:text-[var(--text-dark)] transition-colors">Gallery</Link></li>
+                                <li><Link href="/guides" className="hover:text-[var(--text-dark)] transition-colors">Travel Guides</Link></li>
                             </ul>
                         </div>
 

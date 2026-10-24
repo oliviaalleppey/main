@@ -4,6 +4,7 @@ import { diningOutlets, roomTypes, venues } from "@/lib/db/schema";
 import { and, eq, ne } from "drizzle-orm";
 import { absoluteUrl } from "@/lib/seo";
 import { findParentVenue } from "@/lib/venue-sections";
+import { GUIDES } from "@/lib/guides";
 
 // Regenerate at most once a day; room and outlet slugs change rarely.
 export const revalidate = 86400;
@@ -25,6 +26,7 @@ const staticRoutes: { path: string; priority: number; changeFrequency: Entry["ch
     { path: "/privacy", priority: 0.2, changeFrequency: "yearly" },
     { path: "/refund-policy", priority: 0.2, changeFrequency: "yearly" },
     { path: "/about", priority: 0.5, changeFrequency: "yearly" },
+    { path: "/guides", priority: 0.7, changeFrequency: "monthly" },
 ];
 
 /**
@@ -100,5 +102,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             priority: 0.7,
         }));
 
-    return [...staticEntries, ...roomEntries, ...diningEntries, ...venueEntries];
+    const guideEntries: MetadataRoute.Sitemap = GUIDES.map((guide) => ({
+        url: absoluteUrl(`/guides/${guide.slug}`),
+        lastModified: new Date(guide.updated),
+        changeFrequency: "monthly",
+        priority: 0.7,
+    }));
+
+    return [...staticEntries, ...roomEntries, ...diningEntries, ...venueEntries, ...guideEntries];
 }

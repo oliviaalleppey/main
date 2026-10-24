@@ -48,7 +48,11 @@ export const MAP_URL = "https://maps.app.goo.gl/yZ4xyGBqp8i8uo1Z9";
  * The hotel's own profiles elsewhere. Listed as `sameAs` so Google can tie the
  * site to the same business. Add Facebook here once the footer link is real.
  */
-export const SAME_AS = ["https://www.instagram.com/oliviaalleppey"] as const;
+export const SAME_AS = [
+    "https://www.instagram.com/oliviaalleppey",
+    "https://www.hotels.com/ho4116255136/olivia-alleppey/",
+    "https://www.expedia.com/Ambalapuzha-Hotels-Olivia-International.h121228794.Hotel-Information",
+] as const;
 
 /** The generated social card served by app/opengraph-image.tsx. */
 export const OG_IMAGE_URL = `${SITE_URL}/opengraph-image`;
