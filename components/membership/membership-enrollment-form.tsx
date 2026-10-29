@@ -147,7 +147,7 @@ export function MembershipEnrollmentForm({ isOpen, onClose }: MembershipEnrollme
                                             type="tel"
                                             value={mobileNumber}
                                             onChange={(e) => setMobileNumber(e.target.value)}
-                                            placeholder="+91 98765 43210"
+                                            placeholder="xxxxxxxxxx"
                                             className="w-full h-11 px-3 bg-white border border-[#E4D9C8] text-[#1C1C1C] text-sm focus:outline-none focus:border-[#BCA06F] transition-colors"
                                         />
                                     </div>

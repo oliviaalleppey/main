@@ -1753,7 +1753,7 @@ export function GuestForm({
                                 id="phoneLocal"
                                 type="tel"
                                 inputMode="numeric"
-                                placeholder={selectedCountry.code === 'IN' ? '98765 43210' : '151 23456789'}
+                                placeholder={selectedCountry.code === 'IN' ? 'xxxxxxxxxx' : '151 23456789'}
                                 value={localNumber}
                                 onChange={e => setLocalNumber(e.target.value.replace(/[^\d\s\-]/g, ''))}
                                 className="flex-1 min-w-0 px-2.5 text-sm bg-white focus:outline-none focus:ring-0 rounded-r-lg"

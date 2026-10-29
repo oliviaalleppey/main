@@ -349,7 +349,7 @@ export default function MasqueradeBooking() {
                                                     value={phone}
                                                     onChange={(e) => setPhone(e.target.value)}
                                                     autoComplete="tel"
-                                                    placeholder="+91 98765 43210"
+                                                    placeholder="xxxxxxxxxx"
                                                     aria-invalid={!!errors.phone}
                                                 />
                                                 {errors.phone && <p role="alert" className="mt-1.5 text-sm text-[#ffb3b3]">{errors.phone}</p>}
