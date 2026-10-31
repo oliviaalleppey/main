@@ -5,7 +5,7 @@ import { pageMetadata } from '@/lib/seo';
 export const metadata: Metadata = pageMetadata({
     title: 'Spa & Wellness in Alappuzha',
     description:
-        'Spa and wellness at Olivia Alleppey, Alappuzha. Ayurvedic therapies, spa treatments, a fitness centre and a pool overlooking the Kerala backwaters.',
+        'Spa and wellness at Olivia Alleppey, Alappuzha. Ayurvedic therapies, spa treatments, a fitness centre and an indoor atrium pool.',
     path: '/wellness',
 });
 

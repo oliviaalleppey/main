@@ -14,7 +14,7 @@ interface AmenityImages {
 const AMENITIES = [
     {
         title: "Atrium Pool",
-        description: "A seamless merge of azure waters and the horizon.",
+        description: "An indoor atrium pool for slow, leisurely swims.",
         key: "pool",
         link: "/wellness#pool",
         colSpan: "md:col-span-2",

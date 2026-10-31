@@ -39,7 +39,7 @@ const DINING_OUTLETS = [
         type: 'Poolside',
         hours: '7:00 – 19:00',
         capacity: '24 Guests',
-        description: 'Refreshing beverages and poolside snacks beside the Atrium infinity pool on the 3rd floor.',
+        description: 'Refreshing beverages and poolside snacks beside the indoor Atrium Pool.',
         status: 'open',
     },
     {
@@ -101,8 +101,8 @@ const WELLNESS_HIGHLIGHTS = [
     },
     {
         name: 'Atrium Pool',
-        subtitle: 'Swim with a View',
-        detail: 'Temperature-controlled infinity pool with poolside cabanas and sunset swimming hours.',
+        subtitle: 'Swim Indoors',
+        detail: 'Our indoor atrium pool with poolside cabanas, a calm place for leisurely relaxation.',
         href: '/wellness#pool',
     },
     {

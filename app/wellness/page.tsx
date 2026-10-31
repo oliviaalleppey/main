@@ -109,9 +109,9 @@ const featureServices = [
         key: 'pool',
         name: 'Atrium Pool',
         tag: 'Swim & Relax',
-        subtitle: 'Swim with a View',
-        description: 'Our stunning pool appears to merge with the horizon, offering breathtaking views of the Kerala landscape. Surrounded by lush tropical gardens, the Atrium Pool is the perfect place to drift, unwind, and let the warmth of the sun restore you.',
-        features: ['Temperature-controlled Water', 'Poolside Cabanas', 'Refreshing Poolside Beverages', 'Sunset Swimming Hours', 'Lap Swimming Sessions', 'Private Pool Party Hire'],
+        subtitle: 'Swim Indoors',
+        description: 'Our indoor atrium pool is a serene, light-filled space for leisurely swims and slow afternoons. Poolside cabanas and refreshments make it an easy place to unwind and let the day drift by.',
+        features: ['Indoor Atrium Setting', 'Poolside Cabanas', 'Refreshing Poolside Beverages'],
     },
     {
         key: 'gym',
