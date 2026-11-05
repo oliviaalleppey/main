@@ -1,7 +1,7 @@
 'use server';
 
 import { BookingService } from '@/lib/services/booking-service';
-import { EasebuzzService } from '@/lib/services/easebuzz';
+import { activeGateway, initiateGatewayPayment, newOrderId } from '@/lib/services/payment-gateway';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { cookies, headers } from 'next/headers';
@@ -991,9 +991,10 @@ export async function initiateEasebuzzPaymentAction(): Promise<{
         }
 
         // Create the pending booking record in DB
-        const txnId = `OL-${Date.now()}`;
+        const gateway = activeGateway();
+        const txnId = gateway === 'hdfc' ? newOrderId(gateway) : `OL-${Date.now()}`;
         const booking = await bookingService.finalizeSession(sessionId, {
-            method: 'easebuzz',
+            method: gateway,
             amount: expectedAmount,
             orderId: txnId,
         });
@@ -1006,23 +1007,16 @@ export async function initiateEasebuzzPaymentAction(): Promise<{
         await captureWhatsAppAttribution(booking.id);
 
         const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://oliviaalleppey.com';
-        const returnUrl = `${baseUrl}/api/payment/easebuzz`;
 
-        // Easebuzz requires a 10-digit numeric-only phone (no country code, no +, no spaces).
-        // The phone stored in session may include a dial code prefix e.g. "+91 9876543210".
-        // Strip all non-digit characters and keep the last 10 digits.
-        const rawPhone = guestDetails.phone || '';
-        const digitsOnly = rawPhone.replace(/\D/g, '');
-        const easebuzzPhone = digitsOnly.slice(-10);
-
-        // Call Easebuzz server-side to get access_key, then redirect user to pay URL
-        const { payUrl } = await EasebuzzService.initiatePayment({
+        // The phone stored in session may include a dial code prefix e.g. "+91 9876543210";
+        // the gateway layer reduces it to the last 10 digits.
+        const { payUrl } = await initiateGatewayPayment({
             orderId: txnId,
             amount: expectedAmount,
             name: `${guestDetails.firstName} ${guestDetails.lastName || ''}`.trim(),
             email: guestDetails.email,
-            phone: easebuzzPhone,
-            returnUrl,
+            phone: guestDetails.phone || '',
+            baseUrl,
         });
 
         // Clean up session cookie

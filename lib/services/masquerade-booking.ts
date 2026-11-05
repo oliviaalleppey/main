@@ -20,7 +20,7 @@ import { db } from '@/lib/db';
 import { addOns, bookingAddOns, bookingGuests, bookingItems, bookings, payments, ratePlans, roomTypes } from '@/lib/db/schema';
 import { getBookingProvider } from '@/lib/providers/crs/factory';
 import { mapCrsRoomTypeMatchesInternal } from '@/lib/config/crs';
-import { EasebuzzService } from '@/lib/services/easebuzz';
+import { activeGateway, initiateGatewayPayment, isGatewayConfigured, newOrderId } from '@/lib/services/payment-gateway';
 import { bookingStateMachine } from '@/lib/services/booking-state-machine';
 import { allocateRooms, orderForSale, sellRankForSlug, totalAvailable, type RoomTypeStock } from '@/lib/masquerade-allocation';
 import {
@@ -221,7 +221,7 @@ function describeRoom(index: number, room: ReturnType<typeof normalizeRoom>, roo
  */
 export async function startMasqueradeCheckout(input: MasqueradeCheckoutInput): Promise<{ payUrl: string; bookingNumber: string; totalPaise: number }> {
     if (!isMasqueradePaymentsEnabled()) throw new MasqueradeError('disabled', 'Online booking for the 31st Night is not open yet.');
-    if (!EasebuzzService.isConfigured) throw new MasqueradeError('unavailable', 'Online payment is not available right now. Please call us.');
+    if (!isGatewayConfigured()) throw new MasqueradeError('unavailable', 'Online payment is not available right now. Please call us.');
 
     const name = input.name.trim().slice(0, 120);
     const email = input.email.trim().slice(0, 160);
@@ -261,7 +261,8 @@ export async function startMasqueradeCheckout(input: MasqueradeCheckoutInput): P
     const rand = () => Math.random().toString(36).substring(2, 6).toUpperCase();
     const now = new Date();
     const bookingNumber = `OL-${String(now.getDate()).padStart(2, '0')}${String(now.getMonth() + 1).padStart(2, '0')}-${rand()}`;
-    const txnId = `OL-${Date.now()}-${crypto.randomBytes(2).toString('hex').toUpperCase()}`;
+    const gateway = activeGateway();
+    const txnId = newOrderId(gateway);
     const headcount = rooms.map(roomHeadcount);
     const adults = headcount.reduce((s, h) => s + h.adults, 0);
     const children = headcount.reduce((s, h) => s + h.children, 0);
@@ -353,7 +354,7 @@ export async function startMasqueradeCheckout(input: MasqueradeCheckoutInput): P
             bookingId: booking.id,
             amount: quote.totalPaise,
             status: 'pending',
-            paymentMethod: 'easebuzz',
+            paymentMethod: gateway,
             easebuzzOrderId: txnId,
         });
 
@@ -368,14 +369,13 @@ export async function startMasqueradeCheckout(input: MasqueradeCheckoutInput): P
         });
 
         const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://oliviaalleppey.com';
-        const { payUrl } = await EasebuzzService.initiatePayment({
+        const { payUrl } = await initiateGatewayPayment({
             orderId: txnId,
             amount: quote.totalPaise,
             name,
             email,
-            // Easebuzz wants ten digits, no country code.
-            phone: phone.replace(/\D/g, '').slice(-10),
-            returnUrl: `${baseUrl}/api/payment/easebuzz`,
+            phone,
+            baseUrl,
         });
         return { payUrl, bookingNumber, totalPaise: quote.totalPaise };
     } catch (error) {

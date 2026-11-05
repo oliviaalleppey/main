@@ -1,8 +1,8 @@
 import { getAdminAccess } from '@/lib/admin/guard';
 import { db } from '@/lib/db';
 import { payments, bookings, bookingLogs } from '@/lib/db/schema';
-import { EasebuzzService } from '@/lib/services/easebuzz';
-import { applyGatewayOutcome, normaliseGatewayStatus } from '@/lib/services/easebuzz/apply-outcome';
+import { applyGatewayOutcome } from '@/lib/services/easebuzz/apply-outcome';
+import { isGatewayConfigured, lookupGatewayStatus } from '@/lib/services/payment-gateway';
 import { and, eq, gt, lt, isNotNull, asc } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { trackCronRun } from '@/lib/services/cron-runs';
@@ -47,8 +47,8 @@ async function handleGet(request: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        if (!EasebuzzService.isConfigured) {
-            return NextResponse.json({ error: 'Easebuzz is not configured' }, { status: 503 });
+        if (!isGatewayConfigured('easebuzz') && !isGatewayConfigured('hdfc')) {
+            return NextResponse.json({ error: 'No payment gateway is configured' }, { status: 503 });
         }
 
         const url = new URL(request.url);
@@ -70,6 +70,7 @@ async function handleGet(request: Request) {
         const stuck = await db.select({
             id: payments.id,
             txnid: payments.easebuzzOrderId,
+            paymentMethod: payments.paymentMethod,
             amount: payments.amount,
             createdAt: payments.createdAt,
             bookingId: payments.bookingId,
@@ -94,7 +95,7 @@ async function handleGet(request: Request) {
             const txnid = row.txnid as string;
 
             try {
-                const lookup = await EasebuzzService.fetchTransactionStatus(txnid);
+                const lookup = await lookupGatewayStatus(row.paymentMethod, txnid);
 
                 if (!lookup.found) {
                     // Easebuzz has no transaction for this txnid: the guest was
@@ -110,7 +111,7 @@ async function handleGet(request: Request) {
                     continue;
                 }
 
-                const outcome = normaliseGatewayStatus(lookup.status);
+                const outcome = lookup.outcome;
                 bump(`gateway_${lookup.status}`);
 
                 if (dryRun) {
