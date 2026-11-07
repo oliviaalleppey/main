@@ -25,7 +25,7 @@ export function CheckoutForm({ amount }: { amount: number }) {
                 return;
             }
 
-            // Redirect to Easebuzz payment page
+            // Redirect to the payment page
             window.location.href = result.payUrl;
         });
     };
@@ -46,7 +46,7 @@ export function CheckoutForm({ amount }: { amount: number }) {
                 <div className="flex items-center justify-between gap-3 mb-2 md:mb-3">
                     <div className="flex items-center gap-3">
                         <CreditCard className="w-5 h-5 text-[var(--text-dark)]" />
-                        <span className="text-sm md:text-base font-medium">Secure Payment via Easebuzz</span>
+                        <span className="text-sm md:text-base font-medium">Secure Online Payment</span>
                     </div>
                     <span className="rounded-full bg-white border border-gray-200 px-2.5 py-1 text-[11px] uppercase tracking-wider text-gray-600">
                         INR
@@ -58,7 +58,7 @@ export function CheckoutForm({ amount }: { amount: number }) {
                         <BadgeCheck className="w-4 h-4 text-blue-600" />
                         <div>
                             <p className="text-xs md:text-sm font-semibold text-gray-900">Credit / Debit Card, UPI, Net Banking</p>
-                            <p className="text-xs text-gray-500 mt-0.5">You will be securely redirected to Easebuzz to complete payment</p>
+                            <p className="text-xs text-gray-500 mt-0.5">You will be securely redirected to our payment partner to complete payment</p>
                         </div>
                     </div>
                 </div>
@@ -92,7 +92,7 @@ export function CheckoutForm({ amount }: { amount: number }) {
                 className="w-full rounded-xl bg-[var(--brand-primary)] text-white py-3 md:py-4 text-sm font-semibold hover:bg-[var(--brand-primary-dark)] transition-colors shadow-lg shadow-[var(--brand-primary)]/20"
             >
                 {isPending ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
-                {!isPending ? `Pay ${payLabel} via Easebuzz` : 'Redirecting to Payment...'}
+                {!isPending ? `Pay ${payLabel}` : 'Redirecting to Payment...'}
             </Button>
 
         </div>

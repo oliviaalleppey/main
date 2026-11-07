@@ -239,7 +239,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ bookin
                 <div className="grid grid-cols-2 text-xs border-b border-gray-400">
                     <div className="p-2 border-r border-gray-400">
                         <span className="font-bold text-blue-900">Settlement:</span>
-                        <div className="mt-1">Easebuzz / Online Transfer</div>
+                        <div className="mt-1">Online Payment</div>
                     </div>
                     <div className="p-2 text-right">
                         <span className="font-bold text-blue-900">Company:</span>
