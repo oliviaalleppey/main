@@ -7,11 +7,13 @@ import { AlertCircle, PhoneCall, Mail, RotateCcw } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
+// To the paisa, so it matches the amount the bank's payment page showed.
 const formatCurrency = (amount: number) =>
     new Intl.NumberFormat('en-IN', {
         style: 'currency',
         currency: 'INR',
-        maximumFractionDigits: 0,
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
     }).format(amount / 100);
 
 /**

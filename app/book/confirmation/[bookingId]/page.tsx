@@ -18,6 +18,16 @@ const formatCurrency = (amount: number) => {
     }).format(amount / 100);
 };
 
+// The amount the guest paid, to the paisa, so it reads exactly as it did on the
+// bank's payment page (the bank requires the two to match).
+const formatExact = (amount: number) =>
+    new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    }).format(amount / 100);
+
 export const dynamic = 'force-dynamic';
 
 export default async function ConfirmationPage({ params }: { params: Promise<{ bookingId: string }> }) {
@@ -213,7 +223,7 @@ export default async function ConfirmationPage({ params }: { params: Promise<{ b
                     )}
                     <div className="grid grid-cols-2 gap-4">
                         <span className="text-gray-500">Total Paid</span>
-                        <span className="font-medium text-right font-serif text-lg">{formatCurrency(paidAmountPaise)}</span>
+                        <span className="font-medium text-right font-serif text-lg">{formatExact(paidAmountPaise)}</span>
                     </div>
                     {paymentOrderId && (
                         <div className="grid grid-cols-2 gap-4 pt-4">
