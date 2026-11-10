@@ -35,6 +35,28 @@ async function handle(req: NextRequest, params: Record<string, string>) {
         const order = await HdfcService.fetchOrderStatus(orderId);
         if (!order.found) return new NextResponse('Payment not found', { status: 404 });
 
+        // Keep the Order Status API response for audit (the bank asks for these
+        // logs). Card details and contact info are dropped; nothing else is.
+        const { card: _card, customer_email: _e, customer_phone: _p, ...auditSafe } = (order.raw ?? {}) as Record<string, unknown>;
+        await db.insert(bookingLogs).values({
+            action: 'hdfc_order_status',
+            requestPayload: { requestedOrderId: orderId, response: auditSafe },
+            level: 'info',
+        });
+
+        // Response tampering check: the status we got back must be for the very
+        // order we asked about.
+        const returnedOrderId = (order.raw as Record<string, unknown> | null)?.order_id;
+        if (returnedOrderId && String(returnedOrderId) !== orderId) {
+            await db.insert(bookingLogs).values({
+                action: 'hdfc_order_id_mismatch',
+                requestPayload: { requestedOrderId: orderId, returnedOrderId },
+                level: 'error',
+                errorMessage: 'Order Status API answered for a different order id',
+            });
+            return new NextResponse('Order mismatch', { status: 400 });
+        }
+
         const result = await applyGatewayOutcome({
             txnid: orderId,
             outcome: normaliseHdfcStatus(order.status),

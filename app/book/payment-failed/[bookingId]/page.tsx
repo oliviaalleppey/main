@@ -115,6 +115,12 @@ export default async function PaymentFailedPage({
                             <span className="text-gray-500">Reference</span>
                             <span className="font-mono font-medium text-right">{booking.bookingNumber}</span>
                         </div>
+                        {payment?.easebuzzOrderId && (
+                            <div className="grid grid-cols-2 gap-4 pb-4 border-b border-gray-100">
+                                <span className="text-gray-500">Payment Order ID</span>
+                                <span className="font-mono font-medium text-right">{payment.easebuzzOrderId}</span>
+                            </div>
+                        )}
                         <div className="grid grid-cols-2 gap-4 pb-4 border-b border-gray-100">
                             <span className="text-gray-500">Guest</span>
                             <span className="font-medium text-right">{booking.guestName}</span>

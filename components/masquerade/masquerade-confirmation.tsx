@@ -24,6 +24,9 @@ export interface MasqueradeConfirmationProps {
     gstPaise: number;
     totalPaise: number;
     paid: boolean;
+    /** The gateway's order id, as printed on the bank's payment page. */
+    paymentOrderId?: string | null;
+    paidAmountPaise?: number;
 }
 
 const dateLong = (iso: string) =>
@@ -171,8 +174,20 @@ export default function MasqueradeConfirmation(p: MasqueradeConfirmationProps) {
                         </div>
                         <div className="flex justify-between gap-4 border-t border-[#d9b668]/30 pt-3 text-xl font-semibold text-[#f6dc9a]">
                             <dt>{p.paid ? 'Total paid' : 'Total'}</dt>
-                            <dd className="tabular-nums">{formatINR(p.totalPaise)}</dd>
+                            <dd className="tabular-nums">{formatINR(p.paidAmountPaise ?? p.totalPaise)}</dd>
                         </div>
+                        {p.paid && p.paymentOrderId && (
+                            <>
+                                <div className="flex justify-between gap-4 text-sm text-[#e8dab0]">
+                                    <dt>Payment order ID</dt>
+                                    <dd className="font-mono">{p.paymentOrderId}</dd>
+                                </div>
+                                <div className="flex justify-between gap-4 text-sm text-[#e8dab0]">
+                                    <dt>Payment status</dt>
+                                    <dd>Payment successful</dd>
+                                </div>
+                            </>
+                        )}
                     </dl>
                 </section>
 

@@ -1,5 +1,5 @@
 import { db } from '@/lib/db';
-import { bookings, bookingConfirmations, roomTypes, bookingItems, bookingAddOns, addOns } from '@/lib/db/schema';
+import { bookings, bookingConfirmations, roomTypes, bookingItems, bookingAddOns, addOns, payments } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -33,6 +33,15 @@ export default async function ConfirmationPage({ params }: { params: Promise<{ b
     const confirmation = await db.query.bookingConfirmations.findFirst({
         where: eq(bookingConfirmations.bookingId, booking.id)
     });
+
+    // The gateway's own order id and the amount it charged, shown to the guest
+    // exactly as they appeared on the bank's payment page (the bank requires the
+    // response page to display order number, amount and a success message).
+    const payment = await db.query.payments.findFirst({
+        where: eq(payments.bookingId, booking.id),
+    });
+    const paymentOrderId = payment?.status === 'success' ? payment.easebuzzOrderId : null;
+    const paidAmountPaise = payment?.status === 'success' ? payment.amount : booking.totalAmount;
 
     // Fetch Booking Items and Room Type
     const bookingItemsData = await db.query.bookingItems.findMany({
@@ -142,6 +151,8 @@ export default async function ConfirmationPage({ params }: { params: Promise<{ b
                 gstPaise={booking.taxAmount || 0}
                 totalPaise={booking.totalAmount}
                 paid={booking.paymentStatus === 'success'}
+                paymentOrderId={paymentOrderId}
+                paidAmountPaise={paidAmountPaise}
             />
         );
     }
@@ -194,10 +205,22 @@ export default async function ConfirmationPage({ params }: { params: Promise<{ b
                             {new Date(booking.checkOut).toLocaleDateString('en-IN', { timeZone: 'UTC' })}
                         </span>
                     </div>
+                    {paymentOrderId && (
+                        <div className="grid grid-cols-2 gap-4 pb-4 border-b border-gray-100">
+                            <span className="text-gray-500">Payment Order ID</span>
+                            <span className="font-mono font-medium text-right">{paymentOrderId}</span>
+                        </div>
+                    )}
                     <div className="grid grid-cols-2 gap-4">
                         <span className="text-gray-500">Total Paid</span>
-                        <span className="font-medium text-right font-serif text-lg">{formatCurrency(booking.totalAmount)}</span>
+                        <span className="font-medium text-right font-serif text-lg">{formatCurrency(paidAmountPaise)}</span>
                     </div>
+                    {paymentOrderId && (
+                        <div className="grid grid-cols-2 gap-4 pt-4">
+                            <span className="text-gray-500">Payment</span>
+                            <span className="font-medium text-right text-green-700">Payment successful</span>
+                        </div>
+                    )}
                     <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-100">
                         <span className="text-gray-500">Status</span>
                         <span className="font-medium text-right capitalize">{booking.status === 'failed' && booking.paymentStatus === 'success'
