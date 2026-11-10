@@ -21,7 +21,7 @@ async function handle(req: NextRequest, params: Record<string, string>) {
     const origin = req.nextUrl.origin;
 
     try {
-        const orderId = params.order_id;
+        const orderId = params.order_id || req.cookies.get('hdfc_last_order')?.value;
         const signatureValid = HdfcService.verifyReturnSignature(params);
 
         await db.insert(bookingLogs).values({
