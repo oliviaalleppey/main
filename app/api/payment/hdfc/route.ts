@@ -101,6 +101,26 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-    const form = new URLSearchParams(await req.text());
-    return handle(req, Object.fromEntries(form.entries()));
+    // Query string first (our order_id rides on the return URL), then whatever
+    // the bank posted: urlencoded, multipart or JSON.
+    const params: Record<string, string> = Object.fromEntries(req.nextUrl.searchParams.entries());
+    const raw = await req.text();
+    const type = req.headers.get('content-type') || '';
+    try {
+        if (type.includes('application/json')) {
+            for (const [k, v] of Object.entries(JSON.parse(raw) as Record<string, unknown>)) {
+                if (v != null && typeof v !== 'object') params[k] = String(v);
+            }
+        } else if (type.includes('multipart/form-data')) {
+            const form = await new Request(req.url, { method: 'POST', headers: { 'content-type': type }, body: raw }).formData();
+            form.forEach((v, k) => {
+                if (typeof v === 'string') params[k] = v;
+            });
+        } else {
+            for (const [k, v] of new URLSearchParams(raw)) params[k] = v;
+        }
+    } catch {
+        // Unreadable body: fall back to what the query string gave us.
+    }
+    return handle(req, params);
 }

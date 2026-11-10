@@ -46,7 +46,13 @@ export async function initiateGatewayPayment(params: {
     baseUrl: string;
 }): Promise<{ payUrl: string }> {
     const gateway = activeGateway();
-    const returnUrl = `${params.baseUrl}${returnPath(gateway)}`;
+    // HDFC's browser return can arrive without any params we can read, so the
+    // order id rides on the return URL itself. It only names the order; the
+    // result still comes from the Order Status API.
+    const returnUrl =
+        gateway === 'hdfc'
+            ? `${params.baseUrl}${returnPath(gateway)}?order_id=${encodeURIComponent(params.orderId)}`
+            : `${params.baseUrl}${returnPath(gateway)}`;
     // Both gateways want ten digits, no country code.
     const phone = params.phone.replace(/\D/g, '').slice(-10);
 
