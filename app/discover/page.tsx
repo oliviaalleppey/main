@@ -3,6 +3,7 @@ import { getPageHeaders, getDiscoverExperienceImages } from '@/app/admin/media/a
 import { db } from '@/lib/db';
 import { roomTypes } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+import { GUIDES } from '@/lib/guides';
 import DiscoverClient from './DiscoverClient';
 
 export const metadata = pageMetadata({
@@ -29,5 +30,7 @@ export default async function DiscoverPage() {
     ]);
     const discoverHeader = pageHeaders.discover;
 
-    return <DiscoverClient headerImage={discoverHeader?.url} rooms={rooms} experienceImages={experienceImages} />;
+    const guides = GUIDES.map((guide) => ({ slug: guide.slug, title: guide.h1 }));
+
+    return <DiscoverClient headerImage={discoverHeader?.url} rooms={rooms} experienceImages={experienceImages} guides={guides} />;
 }

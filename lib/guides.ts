@@ -30,7 +30,7 @@ export type Guide = {
 export const GUIDES: Guide[] = [
     {
         slug: "nehru-trophy-boat-race-stay",
-        title: "Where to Stay for the Nehru Trophy Boat Race, Alleppey",
+        title: "Nehru Trophy Boat Race: Where to Stay",
         h1: "Where to Stay for the Nehru Trophy Boat Race",
         description:
             "Stay beside the Nehru Trophy Boat Race finishing point in Alappuzha. Lake-view rooms at Olivia Alleppey, Punnamada, with tips on booking and getting there.",
@@ -82,7 +82,7 @@ export const GUIDES: Guide[] = [
     },
     {
         slug: "things-to-do-in-alleppey",
-        title: "Things to Do in Alleppey (Alappuzha): A Local Guide",
+        title: "Things to Do in Alleppey: A Local Guide",
         h1: "Things to Do in Alleppey",
         description:
             "The best things to do in Alleppey: backwater cruises, Alappuzha and Marari beaches, Kuttanad, Pathiramanal and more, from a hotel on Punnamada Lake.",
@@ -140,7 +140,7 @@ export const GUIDES: Guide[] = [
     },
     {
         slug: "best-time-to-visit-alleppey",
-        title: "Best Time to Visit Alleppey: Season-by-Season Guide",
+        title: "Best Time to Visit Alleppey: Season Guide",
         h1: "Best Time to Visit Alleppey",
         description:
             "When to visit Alleppey (Alappuzha): November to February for cool weather, the monsoon for lower rates, and August for the Nehru Trophy Boat Race.",
@@ -241,7 +241,7 @@ export const GUIDES: Guide[] = [
     },
     {
         slug: "new-years-eve-in-alleppey",
-        title: "New Year's Eve in Alleppey: The Grand Masquerade, 31 December",
+        title: "New Year's Eve in Alleppey: Masquerade",
         h1: "New Year's Eve in Alleppey",
         description:
             "Celebrate New Year's Eve in Alleppey at the Grand Masquerade, Olivia Alleppey, 31 December. Gala evening, room packages and how to book.",
@@ -365,7 +365,7 @@ export const GUIDES: Guide[] = [
     },
     {
         slug: "alleppey-honeymoon-guide",
-        title: "Alleppey for Honeymooners: Where to Stay and What to Do",
+        title: "Alleppey Honeymoon Guide: Where to Stay",
         h1: "A Honeymoon in Alleppey",
         description:
             "Plan an Alleppey honeymoon: lake-view suites, a private backwater cruise, spa couples treatments and candlelit dining on the Punnamada lakeshore.",

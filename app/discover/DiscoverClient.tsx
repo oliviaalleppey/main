@@ -231,9 +231,10 @@ interface DiscoverClientProps {
     headerImage?: string;
     rooms?: RoomType[];
     experienceImages?: Record<string, string>;
+    guides?: { slug: string; title: string }[];
 }
 
-export default function DiscoverClient({ headerImage, rooms = [], experienceImages = {} }: DiscoverClientProps) {
+export default function DiscoverClient({ headerImage, rooms = [], experienceImages = {}, guides = [] }: DiscoverClientProps) {
     return (
         <main className="min-h-screen bg-[#FAF7F0] text-[var(--text-dark)] overflow-hidden">
 
@@ -628,6 +629,32 @@ export default function DiscoverClient({ headerImage, rooms = [], experienceImag
                     </div>
                 </div>
             </section>
+
+            {/* ── Travel guides: plain links so each guide is reachable from here ── */}
+            {guides.length > 0 && (
+                <section className="py-16 md:py-20 px-6 md:px-12 bg-[#FAF7F0] border-t border-[#E8E0D2]">
+                    <div className="max-w-5xl mx-auto">
+                        <p className="text-[10px] tracking-[0.45em] uppercase text-[var(--gold-accent-dark)] mb-4 text-center">
+                            Plan Your Visit
+                        </p>
+                        <h2 className="font-serif text-[1.75rem] md:text-[2.5rem] text-[var(--text-dark)] mb-10 text-center">
+                            Alleppey Travel Guides
+                        </h2>
+                        <ul className="grid sm:grid-cols-2 gap-x-10 gap-y-3">
+                            {guides.map((guide) => (
+                                <li key={guide.slug}>
+                                    <Link
+                                        href={`/guides/${guide.slug}`}
+                                        className="block py-2 border-b border-[#E8E0D2] text-[var(--text-dark)] hover:text-[var(--gold-accent-dark)] transition-colors"
+                                    >
+                                        {guide.title}
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </section>
+            )}
 
             {/* ── Footer CTA ───────────────────────────────────────────── */}
             <section className="py-16 md:py-24 px-6 md:px-12 bg-[#FAF7F0] text-center">
