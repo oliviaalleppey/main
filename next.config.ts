@@ -24,6 +24,15 @@ const nextConfig: NextConfig = {
       // the same ground. Note fragments are client-side, so /experiences#yoga
       // lands on /discover#yoga — those anchors do not exist there yet.
       { source: '/experiences', destination: '/discover', permanent: true },
+      // Pages from the previous version of the site are still in Google's index
+      // and now 404. Send each to its closest page so their search history
+      // carries over to the new URL.
+      { source: '/about.html', destination: '/about', permanent: true },
+      { source: '/deluxe-room.html', destination: '/rooms', permanent: true },
+      { source: '/superior-deluxe.html', destination: '/rooms', permanent: true },
+      { source: '/premium-lake-view-suite.html', destination: '/rooms', permanent: true },
+      { source: '/banquet-hall.html', destination: '/conference-events', permanent: true },
+      { source: '/experiences-and-activities.html', destination: '/discover', permanent: true },
       { source: '/book', destination: '/book/search', permanent: false },
       // The printed menu is handed out as oliviaalleppey.com/menu (QR codes,
       // WhatsApp replies), but only /menu.pdf existed, so the short form 404'd.
