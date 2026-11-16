@@ -21,7 +21,21 @@ async function handle(req: NextRequest, params: Record<string, string>) {
     const origin = req.nextUrl.origin;
 
     try {
-        const orderId = params.order_id || req.cookies.get('hdfc_last_order')?.value;
+        // Our return URL already carries ?order_id=, and HDFC adds its own
+        // order_id on the way back, so the two can arrive joined as "ID,ID".
+        // Collapse that to one id; two different ids is a tampered request.
+        const rawOrderId = params.order_id || req.cookies.get('hdfc_last_order')?.value || '';
+        const ids = [...new Set(String(rawOrderId).split(',').map((s) => s.trim()).filter(Boolean))];
+        if (ids.length > 1 || (ids[0] && !/^[A-Za-z0-9_-]{1,64}$/.test(ids[0]))) {
+            await db.insert(bookingLogs).values({
+                action: 'hdfc_return_bad_order_id',
+                requestPayload: { order_id: rawOrderId },
+                level: 'warning',
+            });
+            return new NextResponse('Invalid order_id', { status: 400 });
+        }
+        const orderId = ids[0];
+        if (orderId) params = { ...params, order_id: orderId };
         const signatureValid = HdfcService.verifyReturnSignature(params);
 
         await db.insert(bookingLogs).values({
