@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
     EXTRAS,
+    GALA_PACKAGE,
     GST_RATE,
     MAX_EXTRA_QTY,
     MAX_ROOMS,
@@ -11,6 +12,7 @@ import {
     ROOM_ADDONS,
     emptyRoom,
     formatINR,
+    quoteGala,
     quoteMasquerade,
     roomGuestsText,
     roomProblem,
@@ -23,6 +25,11 @@ import {
 
 /** Anything on the page can open the booking curtains with `window.dispatchEvent(new Event(MASQUERADE_BOOK_EVENT))`. */
 export const MASQUERADE_BOOK_EVENT = 'masq:book';
+
+/** What the page asked for: the full package with the stay, or the gala evening on its own. */
+export type MasqueradeMode = 'full' | 'gala';
+export const bookMasquerade = (mode: MasqueradeMode) =>
+    window.dispatchEvent(new CustomEvent<{ mode: MasqueradeMode }>(MASQUERADE_BOOK_EVENT, { detail: { mode } }));
 
 type Phase = 'closed' | 'closing' | 'open' | 'opening';
 type Step = 1 | 2 | 3;
@@ -47,6 +54,9 @@ export default function MasqueradeBooking() {
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
     const [errors, setErrors] = useState<Record<string, string>>({});
+
+    const [mode, setMode] = useState<MasqueradeMode>('full');
+    const [galaQty, setGalaQty] = useState(1);
 
     const [rooms, setRooms] = useState<RoomConfig[]>([emptyRoom()]);
     const [extras, setExtras] = useState<ExtrasSelection>({});
@@ -99,7 +109,12 @@ export default function MasqueradeBooking() {
     }, []);
 
     useEffect(() => {
-        const handler = () => openCurtains();
+        const handler = (e: Event) => {
+            const detail = (e as CustomEvent<{ mode?: MasqueradeMode }>).detail;
+            setMode(detail?.mode === 'gala' ? 'gala' : 'full');
+            setStep(1);
+            openCurtains();
+        };
         window.addEventListener(MASQUERADE_BOOK_EVENT, handler);
         const pending = timers.current;
         return () => {
@@ -129,8 +144,11 @@ export default function MasqueradeBooking() {
     }, [formShown, step]);
 
     const quote = quoteMasquerade(rooms, extras);
-    const payOnline = status?.paymentsEnabled === true;
-    const soldOut = status?.soldOut === true;
+    const galaQuote = quoteGala(galaQty);
+    const galaOnly = mode === 'gala';
+    // The gala has no room, so it never pays online and is never blocked by rooms selling out.
+    const payOnline = status?.paymentsEnabled === true && !galaOnly;
+    const soldOut = status?.soldOut === true && !galaOnly;
     const roomCap = Math.min(MAX_ROOMS, status?.available != null && status.available > 0 ? status.available : MAX_ROOMS);
 
     const setPackages = (count: number) => {
@@ -168,7 +186,7 @@ export default function MasqueradeBooking() {
     };
 
     const submit = async () => {
-        if (quote.problem) {
+        if (!galaOnly && quote.problem) {
             setServerError(quote.problem);
             return;
         }
@@ -182,7 +200,7 @@ export default function MasqueradeBooking() {
             const res = await fetch(payOnline ? '/api/masquerade/checkout' : '/api/inquiries/masquerade', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, phone, rooms, extras, notes, acceptedTerms: terms }),
+                body: JSON.stringify(galaOnly ? { name, email, phone, mode: 'gala', gala: galaQty, notes } : { name, email, phone, rooms, extras, notes, acceptedTerms: terms }),
             });
             const data = (await res.json().catch(() => ({}))) as { success?: boolean; message?: string; total?: number; payUrl?: string; code?: string };
             if (!res.ok || !data.success) {
@@ -195,7 +213,7 @@ export default function MasqueradeBooking() {
                 window.location.href = data.payUrl;
                 return;
             }
-            setSentTotal(data.total ?? quote.totalPaise);
+            setSentTotal(data.total ?? (galaOnly ? galaQuote.totalPaise : quote.totalPaise));
             setStep(3);
         } catch {
             setServerError('We could not reach the server. Please check your connection and try again.');
@@ -266,7 +284,7 @@ export default function MasqueradeBooking() {
                         <div className="flex min-h-full items-center justify-center px-4 py-14 md:py-10">
                             <div
                                 className={`relative w-full border border-[#d9b668]/40 bg-black/55 backdrop-blur-[3px] px-5 py-8 md:px-10 md:py-10 ${
-                                    step === 2 ? 'max-w-7xl' : 'max-w-md'
+                                    step === 2 && !galaOnly ? 'max-w-7xl' : 'max-w-md'
                                 } transition-[max-width] duration-500`}
                             >
                                 <button
@@ -284,7 +302,7 @@ export default function MasqueradeBooking() {
                                 <header className="mb-7 text-center">
                                     <p className="text-xs md:text-sm font-medium uppercase tracking-[0.2em] text-[#f0d58c]">The Grand Masquerade · 31 December</p>
                                     <h2 className="mt-2 font-sans text-2xl md:text-3xl font-semibold uppercase tracking-[0.08em] text-[#f6dc9a]">
-                                        {step === 3 ? 'Request Received' : step === 1 ? 'Reserve Your Evening' : 'Make It Yours'}
+                                        {step === 3 ? 'Request Received' : step === 1 ? (galaOnly ? 'Gala Evening for Two' : 'Reserve Your Evening') : galaOnly ? 'Your Gala Evening' : 'Make It Yours'}
                                     </h2>
                                     {step !== 3 && (
                                         <div className="mt-4 flex items-center justify-center gap-2" aria-label={`Step ${step} of 2`}>
@@ -364,7 +382,77 @@ export default function MasqueradeBooking() {
                                         </motion.form>
                                     )}
 
-                                    {step === 2 && (
+                                    {step === 2 && galaOnly && (
+                                        <motion.div
+                                            key="s2g"
+                                            initial={{ opacity: 0, x: 24 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: 24 }}
+                                            transition={{ duration: 0.3 }}
+                                            className="space-y-5"
+                                        >
+                                            <div className="border-2 border-[#f0d58c]/70 bg-gradient-to-r from-[#d9b668]/20 via-[#d9b668]/8 to-transparent px-5 py-5">
+                                                <p className="text-xl font-semibold text-[#fff8e6]">{GALA_PACKAGE.name}</p>
+                                                <p className="mt-0.5 text-base text-[#f0e2b8]">{formatINR(GALA_PACKAGE.pricePaise)} + GST per couple</p>
+                                                <p className="mt-2 text-sm font-semibold uppercase tracking-[0.1em] text-[#f6dc9a]">The evening only. Stay not included.</p>
+                                                <div className="mt-4 flex items-center justify-between gap-3">
+                                                    <span className="text-sm text-[#e8dab0]">Couples</span>
+                                                    <Stepper value={galaQty} min={1} max={GALA_PACKAGE.max} onChange={setGalaQty} label="couples" large />
+                                                </div>
+                                            </div>
+
+                                            <dl className="space-y-2 text-sm text-[#f3e7c6]">
+                                                <div className="flex justify-between gap-3">
+                                                    <dt>{GALA_PACKAGE.name}{galaQty > 1 ? ` × ${galaQty}` : ''}</dt>
+                                                    <dd className="tabular-nums">{formatINR(galaQuote.subtotalPaise)}</dd>
+                                                </div>
+                                                <div className="flex justify-between gap-3">
+                                                    <dt>GST ({GST_RATE}%)</dt>
+                                                    <dd className="tabular-nums">{formatINR(galaQuote.gstPaise)}</dd>
+                                                </div>
+                                            </dl>
+                                            <div className="border-t border-[#d9b668]/40 pt-4">
+                                                <p className="text-xs font-medium uppercase tracking-[0.14em] text-[#f0d58c]">Total, including GST</p>
+                                                <p className="text-3xl font-semibold tabular-nums text-[#f6dc9a]">{formatINR(galaQuote.totalPaise)}</p>
+                                            </div>
+
+                                            <div>
+                                                <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.12em] text-[#bfae82]" htmlFor="bk-notes-g">Special requests (optional)</label>
+                                                <textarea
+                                                    id="bk-notes-g"
+                                                    rows={2}
+                                                    maxLength={1000}
+                                                    className="w-full bg-black/25 border border-[#d9b668]/25 px-3 py-2.5 text-sm text-[#efe3c0] placeholder:text-[#a69870] outline-none transition-colors focus:border-[#d9b668]/70"
+                                                    value={notes}
+                                                    onChange={(e) => setNotes(e.target.value)}
+                                                    placeholder="Dietary needs, celebrations, anything we should know"
+                                                />
+                                            </div>
+
+                                            {serverError && (
+                                                <p role="alert" className="border border-[#f5a3a3]/50 bg-[#4a0f14]/60 px-4 py-3 text-sm text-[#f5c4c4]">{serverError}</p>
+                                            )}
+                                            <button
+                                                type="button"
+                                                onClick={submit}
+                                                disabled={sending}
+                                                className="masq-btn w-full px-6 py-4 text-sm uppercase tracking-[0.16em] font-semibold text-[#1a0d06] disabled:opacity-60"
+                                            >
+                                                {sending ? 'Sending…' : 'Send Booking Request'}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setStep(1)}
+                                                disabled={sending}
+                                                className="w-full border border-[#d9b668]/60 px-6 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-[#f6dc9a] transition-colors hover:bg-[#d9b668]/15 disabled:opacity-40"
+                                            >
+                                                Back
+                                            </button>
+                                            <p className="text-center text-xs text-[#d9c9a0]">Our reservations team will confirm and send you the payment details. Not confirmed until they contact you.</p>
+                                        </motion.div>
+                                    )}
+
+                                    {step === 2 && !galaOnly && (
                                         <motion.div
                                             key="s2"
                                             initial={{ opacity: 0, x: 24 }}

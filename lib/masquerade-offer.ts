@@ -42,6 +42,9 @@ export const EXTRAS: OfferItem<ExtraId>[] = [
     { id: 'chauffeur', name: "Chauffeur's Stay & Dining", note: 'Outside the hotel, meals in the cafeteria', pricePaise: 1_499 * 100, max: MAX_EXTRA_QTY },
 ];
 
+/** The gala-only package: the evening for a couple, no room. It is the 'gala-for-two' extra sold by itself. */
+export const GALA_PACKAGE = EXTRAS.find((e) => e.id === 'gala-for-two')!;
+
 export type RoomConfig = Record<RoomAddonId, number>;
 export type ExtrasSelection = Partial<Record<ExtraId, number>>;
 
@@ -223,4 +226,20 @@ export function isTestEmail(email: string, list: string | undefined | null): boo
         .map((e) => e.trim().toLowerCase())
         .filter(Boolean)
         .includes(wanted);
+}
+
+export interface GalaQuote {
+    qty: number;
+    unitPaise: number;
+    subtotalPaise: number;
+    gstPaise: number;
+    totalPaise: number;
+}
+
+/** Prices the gala-only package (Gala Evening for Two, stay not included). GST is rounded per line, as for any add-on. */
+export function quoteGala(qtyInput: unknown): GalaQuote {
+    const qty = Math.min(Math.max(toInt(qtyInput), 1), GALA_PACKAGE.max);
+    const subtotalPaise = GALA_PACKAGE.pricePaise * qty;
+    const gstPaise = Math.round(subtotalPaise * (GST_RATE / 100));
+    return { qty, unitPaise: GALA_PACKAGE.pricePaise, subtotalPaise, gstPaise, totalPaise: subtotalPaise + gstPaise };
 }

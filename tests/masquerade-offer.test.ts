@@ -8,6 +8,7 @@ import {
     PACKAGE_PRICE_PAISE,
     emptyRoom,
     formatINR,
+    quoteGala,
     quoteMasquerade,
     roomHeadcount,
     roomProblem,
@@ -127,4 +128,19 @@ test('test mode only applies to listed emails, and an empty list means nobody', 
     // a substring or a look-alike must not match
     assert.equal(isTestEmail('owner@example.co', 'owner@example.com'), false);
     assert.equal(isTestEmail('wner@example.com', 'owner@example.com'), false);
+});
+
+test('gala only: Gala Evening for Two is ₹19,999 + 18% GST with no room in it', () => {
+    const one = quoteGala(1);
+    assert.equal(one.subtotalPaise, 1_999_900);
+    assert.equal(one.gstPaise, 359_982);
+    assert.equal(one.totalPaise, 2_359_882);
+    assert.equal(quoteGala(3).totalPaise, 2_359_882 * 3);
+});
+
+test('gala only: the quantity is clamped, so a tampered request cannot go below one or past the limit', () => {
+    assert.equal(quoteGala(0).qty, 1);
+    assert.equal(quoteGala(-4).qty, 1);
+    assert.equal(quoteGala('x').qty, 1);
+    assert.equal(quoteGala(500).qty, 9);
 });

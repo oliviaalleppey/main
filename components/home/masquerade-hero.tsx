@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { JEWELS } from './masquerade-jewels';
 import { MOBILE_JEWELS } from './masquerade-jewels-mobile';
-import { MASQUERADE_BOOK_EVENT } from './masquerade-booking';
+import { bookMasquerade } from './masquerade-booking';
 
 function scrollPastHero(section: HTMLElement | null) {
     if (!section) return;
@@ -253,15 +253,26 @@ export default function MasqueradeHero() {
                     </div>
                     <button
                         type="button"
-                        onClick={() => window.dispatchEvent(new Event(MASQUERADE_BOOK_EVENT))}
-                        aria-label="Book the 31st Night, 31 December, for ₹19,999"
-                        className="masq-btn flex items-center justify-center gap-3 px-6 h-14 text-[#1a0d06] w-full md:w-auto"
+                        onClick={() => bookMasquerade('gala')}
+                        aria-label="Book the Gala Evening for Two on 31 December, ₹19,999, stay not included"
+                        className="masq-btn flex flex-col items-center justify-center px-6 py-2.5 text-[#1a0d06] w-full md:w-auto"
                     >
-                        <span className="font-serif font-bold text-2xl md:text-3xl tabular-nums leading-none">&#8377;19,999</span>
-                        <span className="h-6 w-px bg-[#1a0d06]/35" />
-                        <span className="text-[11px] uppercase tracking-[0.25em] font-semibold">
-                            Book Now <span aria-hidden>&rarr;</span>
+                        <span className="flex items-center justify-center gap-3">
+                            <span className="font-serif font-bold text-2xl md:text-3xl tabular-nums leading-none">&#8377;19,999</span>
+                            <span className="h-6 w-px bg-[#1a0d06]/35" />
+                            <span className="text-[11px] uppercase tracking-[0.25em] font-semibold">
+                                Book Now <span aria-hidden>&rarr;</span>
+                            </span>
                         </span>
+                        <span className="mt-1 text-[9px] uppercase tracking-[0.2em] font-semibold opacity-80">Gala evening for two &middot; stay not included</span>
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => bookMasquerade('full')}
+                        aria-label="Book the full party with stay on 31 December, ₹49,999"
+                        className="text-[11px] uppercase tracking-[0.22em] text-[#f3dc9c] underline underline-offset-4 hover:text-white"
+                    >
+                        Full party with stay &middot; &#8377;49,999
                     </button>
                 </div>
             </motion.div>

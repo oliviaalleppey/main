@@ -712,7 +712,7 @@ export async function sendMasqueradeRequestToReservations(params: {
                 <p style="margin:0 0 4px 0;"><strong>Name:</strong> ${name}</p>
                 <p style="margin:0 0 4px 0;"><strong>Email:</strong> ${email}</p>
                 <p style="margin:0 0 4px 0;"><strong>Phone:</strong> ${phone}</p>
-                <p style="margin:0 0 14px 0;"><strong>Packages:</strong> ${packages}</p>
+                <p style="margin:0 0 14px 0;"><strong>Packages:</strong> ${packages > 0 ? packages : 'None. Gala evening only, no stay.'}</p>
                 <table style="width:100%;border-collapse:collapse;font-size:14px;">
                   <tr style="color:#5F5A4F;text-align:left;"><th style="padding:6px 0;">Item</th><th style="padding:6px 8px;">Qty</th><th style="padding:6px 8px;text-align:right;">Price</th><th style="padding:6px 0;text-align:right;">Amount</th></tr>
                   ${rows}

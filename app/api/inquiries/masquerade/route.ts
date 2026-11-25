@@ -3,7 +3,7 @@ import { db } from '@/lib/db';
 import { inquiries } from '@/lib/db/schema';
 import { RateLimiter } from '@/lib/rate-limit';
 import { sendMasqueradeAcknowledgment, sendMasqueradeRequestToReservations } from '@/lib/services/email';
-import { formatINR, quoteMasquerade, validateGuest } from '@/lib/masquerade-offer';
+import { GALA_PACKAGE, formatINR, quoteGala, quoteMasquerade, validateGuest } from '@/lib/masquerade-offer';
 
 type Payload = {
     name?: unknown;
@@ -12,6 +12,8 @@ type Payload = {
     rooms?: unknown;
     extras?: unknown;
     notes?: unknown;
+    mode?: unknown;
+    gala?: unknown;
 };
 
 function clean(value: unknown, maxLength: number): string {
@@ -59,21 +61,29 @@ export async function POST(request: Request) {
             );
         }
 
-        if (rooms.length < 1) {
+        // Gala only: the evening for a couple with no stay. It is a request, so the hotel confirms and takes payment.
+        const galaOnly = body.mode === 'gala';
+
+        if (!galaOnly && rooms.length < 1) {
             return NextResponse.json({ success: false, message: 'Choose at least one package.' }, { status: 400 });
         }
 
         // The total always comes from the server's price list, never from the browser.
-        const quote = quoteMasquerade(rooms, extras);
-        if (quote.problem) {
+        const quote = galaOnly ? null : quoteMasquerade(rooms, extras);
+        if (quote?.problem) {
             return NextResponse.json({ success: false, message: quote.problem }, { status: 400 });
         }
-        const { lines, totalPaise } = quote;
-        const pk = quote.rooms;
+        const gala = galaOnly ? quoteGala(body.gala) : null;
+        const lines = gala
+            ? [{ label: `${GALA_PACKAGE.name} (stay not included)`, qty: gala.qty, unitPaise: gala.unitPaise, amountPaise: gala.subtotalPaise }]
+            : quote!.lines;
+        const gstPaise = gala ? gala.gstPaise : quote!.gstPaise;
+        const totalPaise = gala ? gala.totalPaise : quote!.totalPaise;
+        const pk = gala ? 0 : quote!.rooms;
         const summary = [
-            `The Grand Masquerade, 31 December. Packages: ${pk}`,
+            gala ? 'The Grand Masquerade, 31 December. Gala evening only, stay not included.' : `The Grand Masquerade, 31 December. Packages: ${pk}`,
             ...lines.map((l) => `${l.label} x ${l.qty} @ ${formatINR(l.unitPaise)} = ${formatINR(l.amountPaise)}`),
-            `GST (18%): ${formatINR(quote.gstPaise)}`,
+            `GST (18%): ${formatINR(gstPaise)}`,
             `Total: ${formatINR(totalPaise)}`,
             notes ? `Special requests: ${notes}` : '',
         ]
@@ -88,7 +98,7 @@ export async function POST(request: Request) {
                 email,
                 phone,
                 eventDate: '2026-12-31',
-                guestCount: pk,
+                guestCount: gala ? gala.qty * 2 : pk,
                 message: summary,
             });
             saved = true;
@@ -110,7 +120,7 @@ export async function POST(request: Request) {
                         unit: formatINR(l.unitPaise),
                         amount: formatINR(l.amountPaise),
                     })),
-                    { label: 'GST (18%)', qty: 1, unit: formatINR(quote.gstPaise), amount: formatINR(quote.gstPaise) },
+                    { label: 'GST (18%)', qty: 1, unit: formatINR(gstPaise), amount: formatINR(gstPaise) },
                 ],
                 total: formatINR(totalPaise),
                 notes: escapeHtml(notes),
@@ -133,7 +143,7 @@ export async function POST(request: Request) {
             name: escapeHtml(name),
             lines: [
                 ...lines.map((l) => ({ label: escapeHtml(l.label), qty: l.qty, amount: formatINR(l.amountPaise) })),
-                { label: 'GST (18%)', qty: 1, amount: formatINR(quote.gstPaise) },
+                { label: 'GST (18%)', qty: 1, amount: formatINR(gstPaise) },
             ],
             total: formatINR(totalPaise),
         }).catch((error) => console.error('[masquerade] guest acknowledgment failed', error));
