@@ -258,7 +258,7 @@ export const GUIDES: Guide[] = [
             {
                 heading: "Staying for the night",
                 paragraphs: [
-                    "The room package covers one room for the night of 31 December, with the room price included. The package starts at \u20b919,999 plus 18% GST per room, and add-ons are available for additional guests and children.",
+                    "The room package covers one room for the night of 31 December, with the room price included. The package starts at \u20b949,999 plus 18% GST per room, and add-ons are available for additional guests and children.",
                     "Rooms are limited and are sold online. Book directly on this site to see what is still available for your party.",
                 ],
             },
@@ -284,7 +284,7 @@ export const GUIDES: Guide[] = [
             {
                 question: "What does the room package cost?",
                 answer:
-                    "The package starts at \u20b919,999 plus 18% GST per room for the night of 31 December, room price included.",
+                    "The package starts at \u20b949,999 plus 18% GST per room for the night of 31 December, room price included.",
             },
             {
                 question: "Is there a dress code?",

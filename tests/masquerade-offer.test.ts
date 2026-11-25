@@ -17,12 +17,12 @@ import { calculateAddOnTax, calculateRoomTax } from '@/lib/services/tax';
 
 const room = (over: Partial<ReturnType<typeof emptyRoom>> = {}) => ({ ...emptyRoom(), ...over });
 
-test('one package is ₹19,999 plus 18% GST', () => {
+test('one package is ₹49,999 plus 18% GST', () => {
     const q = quoteMasquerade([room()]);
-    assert.equal(q.subtotalPaise, 1_999_900);
-    assert.equal(q.gstPaise, 359_982);
-    assert.equal(q.totalPaise, 2_359_882);
-    assert.equal(formatINR(q.totalPaise), '₹23,598.82');
+    assert.equal(q.subtotalPaise, 4_999_900);
+    assert.equal(q.gstPaise, 899_982);
+    assert.equal(q.totalPaise, 5_899_882);
+    assert.equal(formatINR(q.totalPaise), '₹58,998.82');
     assert.equal(q.problem, null);
 });
 
@@ -30,7 +30,7 @@ test('each package is its own room', () => {
     const q = quoteMasquerade([room(), room(), room()]);
     assert.equal(q.rooms, 3);
     assert.equal(q.roomSubtotalPaise, PACKAGE_PRICE_PAISE * 3);
-    assert.equal(q.totalPaise, 2_359_882 * 3);
+    assert.equal(q.totalPaise, 5_899_882 * 3);
 });
 
 test('add-ons carry 18% GST too, and prices follow the latest list', () => {

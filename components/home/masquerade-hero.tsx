@@ -254,10 +254,10 @@ export default function MasqueradeHero() {
                     <button
                         type="button"
                         onClick={() => window.dispatchEvent(new Event(MASQUERADE_BOOK_EVENT))}
-                        aria-label="Book the 31st Night, 31 December, for ₹19,999"
+                        aria-label="Book the 31st Night, 31 December, for ₹49,999"
                         className="masq-btn flex items-center justify-center gap-3 px-6 h-14 text-[#1a0d06] w-full md:w-auto"
                     >
-                        <span className="font-serif font-bold text-2xl md:text-3xl tabular-nums leading-none">&#8377;19,999</span>
+                        <span className="font-serif font-bold text-2xl md:text-3xl tabular-nums leading-none">&#8377;49,999</span>
                         <span className="h-6 w-px bg-[#1a0d06]/35" />
                         <span className="text-[11px] uppercase tracking-[0.25em] font-semibold">
                             Book Now <span aria-hidden>&rarr;</span>
