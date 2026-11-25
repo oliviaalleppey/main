@@ -7,7 +7,7 @@ export const STAY_CHECK_IN = '2026-12-31';
 export const STAY_CHECK_OUT = '2027-01-01';
 
 /** One package = one room for the night, room price included. Excludes GST. */
-export const PACKAGE_PRICE_PAISE = 49_999 * 100;
+export const PACKAGE_PRICE_PAISE = 19_999 * 100;
 /** GST on the package and on every add-on. */
 export const GST_RATE = 18;
 
@@ -184,7 +184,7 @@ export function quoteMasquerade(roomsInput: Partial<Record<RoomAddonId, unknown>
     };
 }
 
-/** Paise to a rupee string with Indian digit grouping, e.g. 4999900 -> ₹49,999 and 589988 -> ₹5,899.88. */
+/** Paise to a rupee string with Indian digit grouping, e.g. 1999900 -> ₹19,999 and 589988 -> ₹5,899.88. */
 export function formatINR(paise: number): string {
     const rupees = paise / 100;
     const whole = Number.isInteger(rupees);
