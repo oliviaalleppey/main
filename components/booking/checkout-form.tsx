@@ -4,14 +4,13 @@ import { Button } from '@/components/ui/button';
 import { initiateEasebuzzPaymentAction } from '@/app/book/actions';
 import { useState, useTransition } from 'react';
 import { Loader2, CreditCard, Lock, ShieldCheck, CircleCheck, BadgeCheck } from 'lucide-react';
-import { formatCurrency } from '@/lib/services/payment';
 
-export function CheckoutForm({ amount }: { amount: number }) {
+// The amount is shown in the order summary; the button just says Pay Now.
+export function CheckoutForm(_props: { amount: number }) {
     const [isPending, startTransition] = useTransition();
     const [acceptedTerms, setAcceptedTerms] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const payLabel = formatCurrency(amount);
 
     const handlePayment = () => {
         if (!acceptedTerms) return;
@@ -92,7 +91,7 @@ export function CheckoutForm({ amount }: { amount: number }) {
                 className="w-full rounded-xl bg-[var(--brand-primary)] text-white py-3 md:py-4 text-sm font-semibold hover:bg-[var(--brand-primary-dark)] transition-colors shadow-lg shadow-[var(--brand-primary)]/20"
             >
                 {isPending ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
-                {!isPending ? `Pay ${payLabel}` : 'Redirecting to Payment...'}
+                {!isPending ? 'Pay Now' : 'Redirecting to Payment...'}
             </Button>
 
         </div>

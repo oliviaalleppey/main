@@ -177,7 +177,15 @@ export class HdfcService {
             throw new Error(`HDFC order status returned non-JSON (${response.status}): ${text.slice(0, 300)}`);
         }
 
-        if (response.status === 404) return { found: false, status: null, fields: {}, raw: json };
+        // HDFC answers an unknown order id with HTTP 400 and status NOT_FOUND
+        // (code RESOURCE_NOT_FOUND), not a 404. All of them mean "no such order",
+        // which must not be treated as an error: the return route turns it into a
+        // clean 404 instead of an Internal Error.
+        const notFound =
+            response.status === 404 ||
+            String(json?.status || '').toUpperCase() === 'NOT_FOUND' ||
+            String(json?.error_info?.code || '').toUpperCase() === 'RESOURCE_NOT_FOUND';
+        if (notFound) return { found: false, status: null, fields: {}, raw: json };
         if (!response.ok || typeof json?.status === 'undefined') {
             throw new Error(`HDFC order status error (${response.status}): ${json?.error_message || json?.error_code || JSON.stringify(json).slice(0, 300)}`);
         }

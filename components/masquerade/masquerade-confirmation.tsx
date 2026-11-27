@@ -174,7 +174,9 @@ export default function MasqueradeConfirmation(p: MasqueradeConfirmationProps) {
                         </div>
                         <div className="flex justify-between gap-4 border-t border-[#d9b668]/30 pt-3 text-xl font-semibold text-[#f6dc9a]">
                             <dt>{p.paid ? 'Total paid' : 'Total'}</dt>
-                            <dd className="tabular-nums">{formatINR(p.paidAmountPaise ?? p.totalPaise)}</dd>
+                            <dd className="tabular-nums">
+                                {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format((p.paidAmountPaise ?? p.totalPaise) / 100)}
+                            </dd>
                         </div>
                         {p.paid && p.paymentOrderId && (
                             <>

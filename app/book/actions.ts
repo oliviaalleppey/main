@@ -1022,6 +1022,20 @@ export async function initiateEasebuzzPaymentAction(): Promise<{
         // Clean up session cookie
         (await cookies()).delete('booking_session');
 
+        // HDFC can send the browser back with nothing on the request that names
+        // the order (its UAT simulator does). Remember which order this browser
+        // just started so the return route can still find it. It only names the
+        // order; the outcome always comes from the Order Status API.
+        if (activeGateway() === 'hdfc') {
+            (await cookies()).set('hdfc_last_order', txnId, {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'none',
+                maxAge: 60 * 60,
+                path: '/api/payment/hdfc',
+            });
+        }
+
         return { success: true, payUrl };
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Payment initiation failed.';
